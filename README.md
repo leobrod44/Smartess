@@ -19,7 +19,7 @@
 |Renaud Senécal|40208309|||
 |Ryan Li|40214839|||
 |Abdullah Amir|40215286|||
-|Leo Brodeur|40216409|||
+|Leo Brodeur|40216409|[leobrod44](https://github.com/leobrod44)||
 
 
 ## Developer getting started guide
