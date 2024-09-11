@@ -10,6 +10,7 @@
   
 | Name | Student ID | Github ID | Email Address|
 |------|------------|-----------|--------------|
+|**Leo Brodeur**|40216409|[leobrod44](https://github.com/leobrod44)||
 |Lauren Rigante| 40188593| [laurenrigante](https://github.com/laurenrigante)| lrigante@hotmail.com|
 |Layana Muhdi Al Tounsi| 40125569| | |
 |Charles Eimer|26747310|||
@@ -19,7 +20,7 @@
 |Renaud Senécal|40208309|||
 |Ryan Li|40214839|||
 |Abdullah Amir|40215286|||
-|Leo Brodeur|40216409|[leobrod44](https://github.com/leobrod44)||
+
 
 
 ## Developer getting started guide
