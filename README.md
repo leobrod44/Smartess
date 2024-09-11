@@ -7,7 +7,7 @@
 
 ## Team Members
 * THE GITHUB ID MUST BE A CLICKABLE LINK TO YOUR PROFILE
-* 
+  
 | Name | Student ID | Github ID | Email Address|
 |------|------------|-----------|--------------|
 |Lauren Rigante| 40188593| [laurenrigante](https://github.com/laurenrigante)| lrigante@hotmail.com|
