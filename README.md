@@ -12,7 +12,7 @@
 |------|------------|-----------|--------------|
 |**Leo Brodeur**|40216409|[leobrod44](https://github.com/leobrod44)||
 |Lauren Rigante| 40188593| [laurenrigante](https://github.com/laurenrigante)| lrigante@hotmail.com|
-|Layana Muhdi Al Tounsi| 40125569| | |
+|Layana Muhdi Al Tounsi| 40125569| [layanat](https://github.com/layanat)| tounsilayana@gmail.com |
 |Charles Eimer|26747310|||
 |Antoine Cantin|40211205|||
 |Tuan Anh Pham|40213926|||
