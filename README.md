@@ -16,7 +16,7 @@
 |Charles Eimer|26747310|[eimcharles](https://github.com/eimcharles)|c.eimer@me.com|
 |Antoine Cantin|40211205|||
 |Tuan Anh Pham|40213926|[TuanAnh-P](https://github.com/TuanAnh-P)|1tuananhp@gmail.com|
-|Matthew Flaherty|40228462|||
+|Matthew Flaherty|40228462|[mattflahertyy](https://github.com/mattflahertyy) | matthewflaherty77@hotmail.com |
 |Renaud Senécal|40208309|||
 |Ryan Li|40214839|||
 |Abdullah Amir|40215286|||
