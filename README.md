@@ -19,7 +19,7 @@
 |Matthew Flaherty|40228462|[mattflahertyy](https://github.com/mattflahertyy) | matthewflaherty77@hotmail.com |
 |Renaud Senécal|40208309|[SenecalRenaud](https://github.com/SenecalRenaud)|senecalrenaud@gmail.com|
 |Ryan Li|40214839|[Ryan2Li](https://github.com/Ryan2Li)|ryanlijune@gmail.com|
-|Abdullah Amir|40215286|[https://github.com/AA789-ai]|sonubhaii883@gmail.com|
+|Abdullah Amir|40215286|[AA789-ai](https://github.com/AA789-ai)|sonubhaii883@gmail.com|
 
 
 
