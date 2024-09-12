@@ -17,7 +17,7 @@
 |Antoine Cantin|40211205|[ChiefsBestPal](https://github.com/ChiefsBestPal)|antoine.cantin@icloud.com|
 |Tuan Anh Pham|40213926|[TuanAnh-P](https://github.com/TuanAnh-P)|1tuananhp@gmail.com|
 |Matthew Flaherty|40228462|[mattflahertyy](https://github.com/mattflahertyy) | matthewflaherty77@hotmail.com |
-|Renaud Senécal|40208309|||
+|Renaud Senécal|40208309|[SenecalRenaud](https://github.com/SenecalRenaud)|senecalrenaud@gmail.com|
 |Ryan Li|40214839|[Ryan2Li](https://github.com/Ryan2Li)|ryanlijune@gmail.com|
 |Abdullah Amir|40215286|||
 
