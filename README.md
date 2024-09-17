@@ -11,7 +11,7 @@
 | Name | Student ID | Github ID | Email Address|
 |------|------------|-----------|--------------|
 |**Lauren Rigante**| 40188593| [laurenrigante](https://github.com/laurenrigante)| lrigante@hotmail.com|
-|Leo Brodeur|40216409|[leobrod44](https://github.com/leobrod44)|| leobrod44@gmail.com
+|Leo Brodeur|40216409|[leobrod44](https://github.com/leobrod44)| leobrod44@gmail.com|
 |Layana Muhdi Al Tounsi| 40125569| [layanat](https://github.com/layanat)| tounsilayana@gmail.com |
 |Charles Eimer|26747310|[eimcharles](https://github.com/eimcharles)|c.eimer@me.com|
 |Antoine Cantin|40211205|[ChiefsBestPal](https://github.com/ChiefsBestPal)|antoine.cantin@icloud.com|
