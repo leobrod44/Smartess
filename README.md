@@ -6,7 +6,6 @@
 - elevator pich description at a high level
 
 ## Team Members
-* THE GITHUB ID MUST BE A CLICKABLE LINK TO YOUR PROFILE
   
 | Name | Student ID | Github ID | Email Address|
 |------|------------|-----------|--------------|
