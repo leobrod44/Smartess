@@ -2,7 +2,7 @@
 
 ## CI information
 
-In this project, we use a Continuous Integration (CI) pipeline to automate the development and testing of our application. The main tools involved are GitHub Actions for automation, Docker for containerization, Jest for testing, and ESLint for checking code quality. This combination of tools ensures that code is consistently tested and validated as soon as changes are made. This setup catches issues early in the development process, reducing the cost and effort required to fix them if they were discovered later.
+In this project, we use a Continuous Integration (CI) pipeline to automate the development and testing of our application. The main tools involved are GitHub Actions for automation, Docker for containerization, Jest for testing, and ESLint for checking code quality. This combination of tools ensures that code is consistently tested and validated as soon as changes are made. This setup catches issues early in the development process, reducing the cost and effort required to fix them if they were discovered later in the development lifecycle.
 
 
 ## Project Summary 
