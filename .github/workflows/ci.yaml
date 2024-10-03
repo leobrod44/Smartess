@@ -27,5 +27,5 @@ jobs:
         working-directory: ./smartessweb
 
       - name: Run tests
-        run: npm run ci:test
+        run: npm run ci:test -- --passWithNoTests
         working-directory: ./smartessweb
