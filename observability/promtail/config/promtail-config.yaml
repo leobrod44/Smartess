@@ -12,21 +12,7 @@ scrape_configs:
   - job_name: server-logs
     static_configs:
       - targets:
-          - localhost
+          - localhost  # This can be a placeholder
         labels:
           job: server
-          __path__: /app/logs/server.log
-  - job_name: hub-logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: hub
-          __path__: /app/logs/hub.log
-  - job_name: website-logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: website
-          __path__: /app/logs/website.log 
+          __path__: /app/logs/*.log

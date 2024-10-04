@@ -11,16 +11,6 @@ services:
       - loki
       - grafana
 
-  # website:
-  #   build: .
-  #   ports:
-  #     - "8081:8081"
-  #   volumes:
-  #     - ./website/logs:/app/logs  # Ensure logs are mounted
-  #   depends_on:
-  #     - loki
-  #     - grafana
-
   loki:
     image: grafana/loki:latest
     ports:
@@ -34,8 +24,8 @@ services:
   promtail:
     image: grafana/promtail:latest
     volumes:
+      - ./server/logs:/app/logs
       - ./observability/promtail/config:/etc/promtail
-      - ./observability/logs:/app/logs
     command: -config.file=/etc/promtail/promtail-config.yaml
 
   grafana:
