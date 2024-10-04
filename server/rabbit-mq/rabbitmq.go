@@ -42,7 +42,7 @@ func StartProducer(wg *sync.WaitGroup) {
 		if err != nil {
 			log.Fatalf("Failed to publish a message: %v", err)
 		}
-		logToLoki(fmt.Sprintf("[x] Sent %s", body)) // Log to Loki
+
 		time.Sleep(1 * time.Second)
 	}
 }
@@ -84,8 +84,7 @@ func StartConsumer(wg *sync.WaitGroup) {
 	go func() {
 		for d := range msgs {
 			message := fmt.Sprintf("Received a message: %s", d.Body)
-			logToLoki(message) // Log to Loki
-			log.Printf(message)
+			log.Print(message)
 		}
 	}()
 
