@@ -6,46 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/grafana/loki-client-go/loki/api"
-	"github.com/grafana/loki-client-go/loki/client"
-	"github.com/grafana/loki-client-go/loki/entry"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/streadway/amqp"
 )
-
-var lokiClient *client.Client
-
-// Initialize the Loki clientP
-func InitLokiClient() {
-	cfg := client.Config{
-		URL:       "http://localhost:3100/api/prom/push", // Replace with your Loki instance URL
-		BatchWait: 1 * time.Second,
-		BatchSize: 1024,
-		Timeout:   10 * time.Second,
-	}
-
-	var err error
-	lokiClient, err = client.New(cfg)
-	if err != nil {
-		log.Fatalf("Failed to create Loki client: %v", err)
-	}
-}
-
-func logToLoki(message string) {
-	labels := api.LabelSet{
-		"app": "rabbitmq",
-	}
-
-	logEntry := entry.Entry{
-		Timestamp: time.Now(),
-		Line:      message,
-		Labels:    labels,
-	}
-
-	err := lokiClient.Handle(logEntry)
-	if err != nil {
-		log.Printf("Error sending log to Loki: %v", err)
-	}
-}
 
 func StartProducer(wg *sync.WaitGroup) {
 	defer wg.Done()
