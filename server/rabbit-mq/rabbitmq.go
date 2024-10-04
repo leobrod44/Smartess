@@ -9,6 +9,10 @@ import (
 	"github.com/streadway/amqp"
 )
 
+func StartServer() {
+
+}
+
 func StartProducer(wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -47,9 +51,7 @@ func StartProducer(wg *sync.WaitGroup) {
 	}
 }
 
-func StartConsumer(wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func StartConsumer() {
 	conn, ch := ConnectToRabbitMQ("amqp://guest:guest@localhost:5672/")
 	defer ch.Close()
 	defer conn.Close()

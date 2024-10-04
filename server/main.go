@@ -1,35 +1,30 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
-	"github.com/streadway/amqp"
+	rabbitmq "Smartess/server/rabbit-mq"
+	"log"
+	"os"
+	"sync"
+	"time"
 )
 
 func main() {
-	// Create a Gin router
-	router := gin.Default()
-
-	_, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	// Open log file
+	f, err := os.OpenFile("/app/logs/server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	// Define a simple GET route
-	router.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Welcome to Gin Gonic!",
-		})
-	})
+	defer f.Close()
+	log.SetOutput(f)
 
-	// Define a route for handling POST requests
-	router.POST("/submit", func(c *gin.Context) {
-		name := c.PostForm("name")
-		c.JSON(http.StatusOK, gin.H{
-			"message": "Hello " + name,
-		})
-	})
+	// Logging message
+	log.Println("This is a log message!")
 
-	// Start the server on port 8080
-	router.Run(":8080")
+	var wg sync.WaitGroup
+	rabbitmq.StartConsumer(&wg)
+	// Run indefinitely with a sleep
+	for {
+		time.Sleep(10 * time.Second) // Sleep for 1 second
+		log.Println("Still running...")
+	}
 }
