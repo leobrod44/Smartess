@@ -1,3 +1,43 @@
+## IMPORTANT: How to use Docker
+
+Everything is done for setting up docker for the next.js app (frontend). From here, it is better to install and learn to use docker. However it is possible to use npm commands to run for awhile BUT it is NOT RECOMMENDED.
+
+Here are the steps to follow:
+
+1. Install Docker: You can follow a video tutorial on how to install docker. We don't need to create anything just a tutorial that explains how to install it will be sufficient.
+
+2. Open your project in your favorite code editor. This guide will be on VSCode.
+
+3. Go to the correct directory or open the frontend folder. It should be something like 
+
+    ```bash
+    .../Smartess/smartessweb.
+    ``` 
+
+    Here is mine for example:
+    ```bash
+        PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess\smartessweb>
+    ```
+
+    For development run the following code:
+    ```bash
+        docker-compose -f docker-compose-dev.yml up -d --build
+    ```
+
+    For production (you will not need it):
+    ```bash
+        docker-compose -f docker-compose-prod.yml up -d --build
+    ```
+
+    NOTE: It can take 3-8 mins when using the command the first time. Please contact Abdullah if you face any issues. 
+
+4. On your web browser go to: http://localhost:3000/ (development) or http://localhost:8080/ (Production, Unlikely to use it)
+
+5.  You are ready to code!
+
+Ignore the guide below. It is created by Next.js by default and it will be removed later in the project.
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
