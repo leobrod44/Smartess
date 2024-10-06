@@ -1,4 +1,6 @@
 import Image from 'next/image';
+import desktop from '../public/images/desktop.png';
+import hub from '../public/images/hub.png';
 
 
 export default function Home() {
@@ -25,7 +27,7 @@ export default function Home() {
         </div>
         <div className="md:w-1/2">
           <Image
-            src="/images/hub.png" 
+            src={hub}
             alt="Resident Mobile App"
             width={400}
             height={600}
@@ -38,7 +40,7 @@ export default function Home() {
       <section className="flex flex-col md:flex-row items-center mt-16">
         <div className="md:w-1/2 p-4">
           <Image
-            src="/images/desktop.png" 
+            src={desktop}
             alt="Owner Web App"
             width={600}
             height={400}
