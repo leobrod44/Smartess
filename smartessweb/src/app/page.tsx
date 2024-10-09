@@ -68,8 +68,8 @@ export default function Home() {
         </div>
 
         <section
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center w-full px-4 md:px-8"
-          style={{ marginTop: "200px", marginBottom: "100px" }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10"
+          style={{ marginTop: "150px", marginBottom: "50px" }}
         >
           {/* Text section: On the left for larger screens, stacked on smaller screens */}
           <div className="order-2 md:order-1">
