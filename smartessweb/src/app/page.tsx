@@ -23,9 +23,11 @@ export default function Home() {
           <p className="mt-4 text-base md:text-lg">
             First all-in-one smart home platform for residential communities
           </p>
-          <button className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full">
-            Start Your Project
-          </button>
+          <Link href="/start-project">
+            <button className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full">
+              Start Your Project
+            </button>
+          </Link>
         </section>
 
         <div className="relative w-full">
