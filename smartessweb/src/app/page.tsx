@@ -3,13 +3,16 @@ import desktop from "../public/images/desktop.png";
 import hub from "../public/images/hub.png";
 import building from "../public/images/building.png";
 import logo from "../public/images/logo.png";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <>
       {/* Temporary Header with just the logo - replace it with actual */}
       <header className="w-full py-4 bg-[#FFF] flex justify-left md:justify-left items-center px-4 md:px-8">
-        <Image src={logo} alt="Logo" width={100} height={40} />
+        <Link href="/">
+          <Image src={logo} alt="Smartess Logo" width={100} height={40} />
+        </Link>
       </header>
 
       <main className="flex-col items-left justify-left space-y-16 pt-10">
