@@ -45,8 +45,8 @@ export default function Home() {
             </div>
 
             <div className="relative z-20 text-center md:text-left flex-1 px-4 mt-10 text-white pt-20 ">
+              <h2>Resident Mobile App</h2>
               <p className="mt-5 text-sm md:text-lg z-40 ">
-                <h2>Resident Mobile App</h2>
                 Control your smart devices as soon as you <br />
                 move in and from anywhere in the world.
                 <br />
