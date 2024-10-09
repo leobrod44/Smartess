@@ -1,20 +1,23 @@
 package main
 
 import (
+	"Smartess/server/rabbitmq"
 	"log"
-	"os"
 	"time"
+
+	"rabbitmq/rabbitmq"
 )
 
 func main() {
 
-	// Open log file
-	f, err := os.OpenFile("/app/logs/server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Initialize Zap logger
+	logger, err := rabbitmq.Init()
 	if err != nil {
-		log.Fatal(err)
+		panic("Failed to initialize logger: " + err.Error())
 	}
-	defer f.Close()
-	log.SetOutput(f)
+	defer logger.Sync() // Flush logger buffer before exiting
+
+	logger.Info("Logger initialized and started")
 
 	for {
 		time.Sleep(10 * time.Second) // Sleep for 1 second
