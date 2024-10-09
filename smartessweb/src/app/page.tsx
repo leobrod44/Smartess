@@ -79,7 +79,7 @@ export default function Home() {
         </div>
 
         <section
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10"
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10 "
           style={{ marginTop: "150px", marginBottom: "50px" }}
         >
           {/* Text section: On the left for larger screens, stacked on smaller screens */}
@@ -96,7 +96,7 @@ export default function Home() {
           </div>
 
           {/* Laptop mockup  */}
-          <div className="px-0">
+          <div className="flex justify-center md:justify-end order-1 md:order-2">
             <div className="relative w-[300px] h-[200px] md:w-[280px] md:h-[180px] bg-[#E2E8F0] rounded-[10px] p-3  flex justify-center items-center z-20 order-1 md:order-2">
               <Image
                 src={desktop}
