@@ -12,8 +12,13 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        sans: ['var(--font-sequel-sans)']
+      }
     },
   },
   plugins: [],
 };
 export default config;
+
+
