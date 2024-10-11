@@ -2,7 +2,7 @@ import Image from 'next/image';
 import desktop from '../public/images/desktop.png';
 import hub from '../public/images/hub.png';
 import building from '../public/images/building.png';
-import logo from '../public/images/logo.png';
+// import logo from '../public/images/logo.png';
 import Link from 'next/link';
 import Head from 'next/head';
 import LandingNavbar from '@/components/LandingNavbar';
