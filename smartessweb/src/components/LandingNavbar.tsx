@@ -26,31 +26,29 @@ const LandingNavbar = () => {
                     height={40}
                   />
                 </Link>
-                <div className='hidden sm:flex sm:space-x-8 ml-10'>
-                  <Link
-                    href='/'
-                    className='text-[#266472] hover:text-gray-700 px-3 py-2 text-sm font-medium'
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href='/about'
-                    className='text-[#266472] hover:text-gray-700 px-3 py-2 text-sm font-medium'
-                  >
-                    About Us
-                  </Link>
-                  <Link
-                    href='/start-project'
-                    className='text-[#266472] hover:text-gray-700 px-3 py-2 text-sm font-medium'
-                  >
-                    Start a Project
-                  </Link>
-                </div>
               </div>
-              <div className='hidden sm:flex sm:items-center'>
+              <div className='hidden sm:flex sm:items-center sm:ml-auto sm:space-x-6 md:space-x-8'>
+                <Link
+                  href='/'
+                  className='text-[#266472] hover:text-gray-700 px-2 md:px-3 py-2 text-sm font-medium'
+                >
+                  Home
+                </Link>
+                <Link
+                  href='/about'
+                  className='text-[#266472] hover:text-gray-700 px-2 md:px-3 py-2 text-sm font-medium'
+                >
+                  About Us
+                </Link>
+                <Link
+                  href='/start-project'
+                  className='text-[#266472] hover:text-gray-700 px-2 md:px-3 py-2 text-sm font-medium'
+                >
+                  Start a Project
+                </Link>
                 <Link
                   href='/sign-in'
-                  className='text-[#266472] border border-black hover:bg-[#266472] hover:text-white px-4 py-2 rounded-md text-sm font-medium'
+                  className='button text-[#266472] border border-black rounded-full hover:bg-[#266472] hover:text-white px-3 py-2 text-sm font-medium'
                 >
                   Sign In
                 </Link>
@@ -100,7 +98,7 @@ const LandingNavbar = () => {
               <Disclosure.Button
                 as={Link}
                 href='/sign-in'
-                className='block border border-black text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-md text-base font-medium mt-2'
+                className='button block border border-black text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-full text-base font-medium mt-2'
               >
                 Sign In
               </Disclosure.Button>
