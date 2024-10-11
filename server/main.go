@@ -1,26 +1,26 @@
 package main
 
 import (
-	"Smartess/server/rabbitmq"
 	"log"
+	"smartess/server/rabbitmq"
 	"time"
-
-	"rabbitmq/rabbitmq"
 )
 
 func main() {
 
-	// Initialize Zap logger
-	logger, err := rabbitmq.Init()
+	srv, err := rabbitmq.Init()
+
 	if err != nil {
 		panic("Failed to initialize logger: " + err.Error())
 	}
-	defer logger.Sync() // Flush logger buffer before exiting
+	defer srv.Logger.Sync() // Flushes logger before exit to not have any logs lost kinda cool
 
-	logger.Info("Logger initialized and started")
+	srv.Logger.Info("Logger initialized and started")
 
 	for {
-		time.Sleep(10 * time.Second) // Sleep for 1 second
+		go srv.Start()               // Start the RabbitMQ server on a separate goroutine
+		time.Sleep(10 * time.Second) // Sleep for activity monitoring, not this dosen't mean the server stops since we used a goroutine!
+		//TODO print still running for starting purposes, but removing this useless clutter down the line
 		log.Println("Server still running...")
 	}
 }

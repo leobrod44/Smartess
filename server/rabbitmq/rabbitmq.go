@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"errors"
 	"os"
 
 	"github.com/streadway/amqp"
@@ -8,92 +9,89 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// RabbitMQServer represents a RabbitMQ server instance.
 type RabbitMQServer struct {
-	queues     []amqp.Queue
-	logger     *zap.Logger
-	channel    *amqp.Channel
-	connection *amqp.Connection
+	smartessQueues []SmartessQueue  // List of queues to be processed
+	Logger         *zap.Logger      // Logger instance for logging
+	channel        *amqp.Channel    // AMQP channel for communication with RabbitMQ
+	connection     *amqp.Connection // AMQP connection to RabbitMQ
 }
 
-func Init() RabbitMQServer {
+// Init initializes a RabbitMQServer instance.
+func Init() (RabbitMQServer, error) {
 	logger, err := InitializeLogger()
 	if err != nil {
-		panic("Failed to initialize logger: " + err.Error())
+		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
-	uri := os.Getenv("RABBITMQ_URI")
 
-	conn, err := amqp.Dial(uri)
+	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URI"))
 	if err != nil {
-		logger.Fatal("ERROR: Failed to connect to RabbitMQ", zap.Error(err))
+		return RabbitMQServer{}, errors.New("Failed to connect to RabbitMQ: " + err.Error())
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		logger.Fatal("ERROR: Failed to open a channel", zap.Error(err))
+		return RabbitMQServer{}, errors.New("Failed to open a channel: " + err.Error())
 	}
-	sampleQueue, err := ch.QueueDeclare(
+
+	//TODO add all necessary queues based on configuration, ex is all true for sake of example
+	sampleQueue, err := Declare(ch, QueueConfig{
 		"test-queue", // Queue name
 		true,         // Durable
-		false,        // Auto-delete
-		false,        // Exclusive
-		false,        // No-wait
+		true,         // Auto-delete
+		true,         // Exclusive
+		true,         // No-wait
+		true,         // Passive
 		nil,          // Arguments
-	)
+	})
+
 	if err != nil {
 		logger.Fatal("ERROR: Failed to declare queue", zap.Error(err))
 	}
 	srv := RabbitMQServer{
-		queues:     []amqp.Queue{sampleQueue},
-		logger:     logger,
-		channel:    ch,
-		connection: conn,
+		smartessQueues: []SmartessQueue{sampleQueue},
+		Logger:         logger,
+		channel:        ch,
+		connection:     conn,
 	}
-	return srv
+	return srv, nil
 }
 
+// Start starts the RabbitMQ server and begins processing messages from the queues.
 func (r *RabbitMQServer) Start() {
 
 	defer r.connection.Close()
 	defer r.channel.Close()
 
-	for _, queue := range r.queues {
-		r.logger.Info("Declared queue", zap.String("queueName", queue.Name))
-
+	//Start consuming messages from each queue
+	//TODO: Add neccessary consumption configs for each queue (if we have multiple queues
+	//		we could have an array of different consumption configs and listen for each)
+	for _, smartessQueue := range r.smartessQueues {
+		go func(queue SmartessQueue) {
+			msgs, err := r.channel.Consume(
+				queue.rabbitmqQueue.Name, // Queue name
+				"",                       // Consumer
+				true,                     // Auto-acknowledge
+				true,                     // Exclusive
+				true,                     // No-local
+				true,                     // No-wait
+				nil,                      // Arguments
+			)
+			if err != nil {
+				r.Logger.Error("Failed to consume messages", zap.Error(err))
+			}
+			for msg := range msgs {
+				queue.messageHandler.Handle(msg)
+			}
+		}(smartessQueue)
 	}
 
-	// Consume messages from each queue
-	for queueName, queueType := range r.queues {
-		go r.consume(ch, queueName, queueType)
-	}
-
-	// Wait indefinitely
-	r.logger.Println("INFO: RabbitMQ server started. Waiting for messages...")
+	// Wait indefinitely (this will run after the goroutines above since go funcs are async (they start a thread and run concurrently))
+	r.Logger.Info("RabbitMQ server started. Waiting for messages...")
 	select {}
 }
 
-// consumeMessages processes messages from the specified queue
-func (r *RabbitMQServer) consume(queue) {
-	msgs, err := r.channel.Consume(
-		queue.Name, // Queue name
-		"",         // Consumer
-		true,       // Auto-acknowledge
-		false,      // Exclusive
-		false,      // No-local
-		false,      // No-wait
-		nil,        // Arguments
-	)
-	if err != nil {
-		r.logger.Fatal("ERROR: Failed to consume messages from %s queue: %v", queueType, err)
-	}
-
-	// Process each message
-	for msg := range msgs {
-		queue.Handle(msg)
-	}
-}
-
-var logger *zap.Logger
-
+// InitializeLogger initializes the logger instance. Used for our grafana, loki, and promtail system.
 func InitializeLogger() (*zap.Logger, error) {
 
 	logFile, err := os.OpenFile("/app/logs/server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
