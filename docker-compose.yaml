@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./server/logs:/app/logs  # Ensure logs are mounted
+      - ./server/logs:/app/logs
     depends_on:
       - loki
       - grafana
@@ -18,7 +18,7 @@ services:
     volumes:
       - ./observability/loki/config:/etc/loki
       - ./observability/loki/data:/loki
-      - ./observability/loki/wal:/wal   # Ensure this directory is writable
+      - ./observability/loki/wal:/wal
     command: -config.file=/etc/loki/loki-config.yaml
 
   promtail:
@@ -31,7 +31,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"  # Change to avoid conflict
+      - "3001:3000"
     volumes:
       - ./observability/grafana/data:/var/lib/grafana
     environment:
@@ -39,3 +39,15 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - loki
+
+  rabbitmq:
+    image: rabbitmq:latest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./rabbitmq/data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+      - RABBITMQ_URIuri=amqp://guest:guest@localhost:5672/
