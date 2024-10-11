@@ -48,7 +48,7 @@ const LandingNavbar = () => {
                 </Link>
                 <Link
                   href='/sign-in'
-                  className='button text-[#266472] border border-black rounded-full hover:bg-[#266472] hover:text-white px-3 py-2 text-sm font-medium'
+                  className='button text-[#266472] border border-[#266472] rounded-full hover:bg-[#266472] hover:text-white px-3 py-2 text-sm font-medium'
                 >
                   Sign In
                 </Link>
@@ -98,7 +98,7 @@ const LandingNavbar = () => {
               <Disclosure.Button
                 as={Link}
                 href='/sign-in'
-                className='button block border border-black text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-full text-base font-medium mt-2'
+                className='button block border border-[#266472] text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-full text-base font-medium mt-2'
               >
                 Sign In
               </Disclosure.Button>
