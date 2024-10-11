@@ -22,8 +22,8 @@ const LandingNavbar = () => {
                     className='h-8 w-auto'
                     src={logo}
                     alt='Logo'
-                    width={32}
-                    height={32}
+                    width={100}
+                    height={40}
                   />
                 </Link>
                 <div className='hidden sm:flex sm:space-x-8 ml-10'>
