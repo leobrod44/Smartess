@@ -81,7 +81,7 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				queue.messageHandler.Handle(msg)
+				r.messageHandler.MessageHandler(msg)
 			}
 		}(smartessQueue)
 	}
