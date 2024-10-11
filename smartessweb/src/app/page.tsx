@@ -2,7 +2,6 @@ import Image from 'next/image';
 import desktop from '../public/images/desktop.png';
 import hub from '../public/images/hub.png';
 import building from '../public/images/building.png';
-// import logo from '../public/images/logo.png';
 import Link from 'next/link';
 import Head from 'next/head';
 import LandingNavbar from '@/components/LandingNavbar';
@@ -16,15 +15,7 @@ export default function Home() {
           content='width=device-width, initial-scale=1.0'
         />
       </Head>
-      {/* Temporary Header with just the logo - replace it with actual
-      <header className="w-full py-4 bg-[#FFF] flex justify-left md:justify-left items-center px-4 md:px-8">
-        <Link href="/">
-          <Image src={logo} alt="Smartess Logo" width={100} height={40} />
-        </Link>
-      </header> */}
-
       <LandingNavbar />
-
       <main className='flex-col items-left justify-left space-y-16 pt-10'>
         <section className='text-center p-4 md:p-8'>
           <h1 className='text-3xl md:text-4xl font-bold'>
