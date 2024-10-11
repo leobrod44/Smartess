@@ -13,7 +13,12 @@ const config: Config = {
         foreground: "var(--foreground)",
       },
       fontFamily: {
-        sans: ['var(--font-sequel-sans)']
+        sans: ['var(--font-sequel-sans)'],
+        'sequel-sans-light': ['var(--font-sequel-sans-light-disp)'],
+        'sequel-sans-regular': ['var(--font-sequel-sans-roman)'],
+        'sequel-sans-medium': ['var(--font-sequel-sans-medium)'],
+        'sequel-sans-bold': ['var(--font-sequel-sans-bold)'],
+        'sequel-sans-black': ['var(--font-sequel-sans-black-disp)'],
       }
     },
   },
