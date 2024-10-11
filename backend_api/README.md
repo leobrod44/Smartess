@@ -25,7 +25,9 @@ There is a security aspect which requires setting a .env file. This needs to be 
 
 4. DM Abdullah. He will provide you with the URL and key.
 
-5. Replace the URL and KEY accordingly. 
+5. Replace the URL and KEY accordingly.
+
+For any question DM Abdullah.
 
 ### Running Instructions:
 
@@ -54,21 +56,27 @@ These instructions will be updated once contained.
      http://localhost:3001/test1
    ```
 
-   You should see the following result:
-    ![image](https://github.com/user-attachments/assets/091ed530-08cb-4559-8815-15b308ecc48b)
+   You should see something like the following result:
+   
+    ![image](https://github.com/user-attachments/assets/6b0bb83e-ada9-40bd-a232-2a4a5b1a2e0f)
 
-5. Test 2: Open your broswer and type :
+
+6. Test 2: Open your broswer and type :
 
    ```bash
      http://localhost:3001/test2/test2
    ```
 
-   You should see the following result:
-    ![image](https://github.com/user-attachments/assets/091ed530-08cb-4559-8815-15b308ecc48b)
+   You should see something like the following result:
+   
+    ![image](https://github.com/user-attachments/assets/8b605570-3166-4a72-bf0e-9a58da256ce2)
+
+
+For any question DM Abdullah.
 
 ### Guide on how to create code:
 
 Coming soon.
 
-   
+For any question DM Abdullah.
    
