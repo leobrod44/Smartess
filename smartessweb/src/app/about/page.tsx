@@ -1,12 +1,12 @@
 import LandingNavbar from '@/components/LandingNavbar';
 
-const StartProjectPage = () => {
+const AboutPage = () => {
   return (
     <div>
       <LandingNavbar />
-      <h1>Start Project</h1>
+      <h1>About</h1>
     </div>
   );
 };
 
-export default StartProjectPage;
+export default AboutPage;
