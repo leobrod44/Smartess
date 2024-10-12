@@ -25,3 +25,9 @@ body {
     text-wrap: balance;
   }
 }
+.custom-transition-length-1s{
+  transition:  1s; 
+}
+.custom-transition-length-2s{
+  transition:  2s; 
+}

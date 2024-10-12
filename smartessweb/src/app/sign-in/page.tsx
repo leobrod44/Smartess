@@ -40,14 +40,14 @@ const SignInPage = () => {
 
       {/* Forgot password link */}
       <div className="pl-[266px] justify-end items-center inline-flex pt-10 ">
-        <div className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline">
+        <div className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s">
           Forgot your password?
         </div>
       </div>
 
       {/* Login button */}
-      <div className='h-[102px] w-full max-w-lg py-5 opacity-40 flex flex-col justify-center items-center gap-2.5 flex '>
-        <div className="self-stretch px-[149px] py-[13px] bg-[#30525e] rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex">
+      <div className='h-[102px] w-full max-w-lg py-5 flex flex-col justify-center items-center gap-2.5 flex '>
+        <div className="self-stretch px-[149px] py-[13px] bg-[#30525e] opacity-40 rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex transition-opacity hover:opacity-100 custom-transition-length-1s ">
           <div className="text-center text-white text-lg font-sequel-sans-regular">Login</div>
         </div>
       </div>
