@@ -11,6 +11,8 @@
     "ci:test": "jest --ci --coverage"
   },
   "dependencies": {
+    "@headlessui/react": "^2.1.9",
+    "@heroicons/react": "^2.1.5",
     "@next/font": "^14.2.14",
     "next": "^14.2.14",
     "react": "^18.3.1",
