@@ -80,10 +80,10 @@ const SignInPage = () => {
       </div>
 
       {/* Forgot password link */}
-      <div className="pl-[266px] justify-end items-center inline-flex pt-10 ">
+      <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-10 w-full">
         <a 
         href="/forgot-password/path"
-        className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s">
+        className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap">
           Forgot your password?
         </a>
       </div>
