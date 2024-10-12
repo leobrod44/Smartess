@@ -13,6 +13,7 @@ services:
     depends_on:
       - loki
       - grafana
+      - rabbitmq # OK ?
 
   loki:
     image: grafana/loki:latest
@@ -50,7 +51,13 @@ services:
       - "15672:15672"
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
+      #TODO - ./rabbitmq/logs:/var/log/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
-      - RABBITMQ_URIuri=amqp://guest:guest@localhost:5672/
+      - RABBITMQ_URI=amqp://guest:guest@localhost:5672/
+#    healthcheck:
+#      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
