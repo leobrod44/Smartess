@@ -5,6 +5,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --toastify-color-success: #729987;
+  --toastify-color-error: #FF5449;
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-error: var(--toastify-color-error);
 }
 
 @media (prefers-color-scheme: dark) {
