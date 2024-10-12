@@ -14,7 +14,7 @@ const LandingNavbar = () => {
     >
       {({ open }) => (
         <>
-          <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+          <div className='w-full px-4 sm:px-6 lg:px-8'>
             <div className='flex h-16 justify-between items-center'>
               <div className='flex'>
                 <Link href='/'>
@@ -27,7 +27,7 @@ const LandingNavbar = () => {
                   />
                 </Link>
               </div>
-              <div className='hidden sm:flex sm:items-center sm:ml-auto sm:space-x-6 md:space-x-8'>
+              <div className='hidden sm:flex sm:items-center sm:space-x-6 md:space-x-8 ml-auto'>
                 <Link
                   href='/'
                   className='text-[#266472] hover:text-gray-700 px-2 md:px-3 py-2 text-sm font-medium'
@@ -77,28 +77,28 @@ const LandingNavbar = () => {
               <Disclosure.Button
                 as={Link}
                 href='/'
-                className='block text-[#266472] hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium'
+                className='block text-[#266472] hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium'
               >
                 Home
               </Disclosure.Button>
               <Disclosure.Button
                 as={Link}
                 href='/about'
-                className='block text-[#266472] hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium'
+                className='block text-[#266472] hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium'
               >
                 About Us
               </Disclosure.Button>
               <Disclosure.Button
                 as={Link}
                 href='/start-project'
-                className='block text-[#266472] hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium'
+                className='block text-[#266472] hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium'
               >
                 Start a Project
               </Disclosure.Button>
               <Disclosure.Button
                 as={Link}
                 href='/sign-in'
-                className='button block border border-[#266472] text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-full text-base font-medium mt-2'
+                className='button inline-block border border-[#266472] text-[#266472] hover:bg-[#266472] hover:text-white px-3 py-2 rounded-full text-base font-medium mt-2'
               >
                 Sign In
               </Disclosure.Button>
