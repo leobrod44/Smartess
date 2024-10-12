@@ -5,6 +5,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
   --toastify-color-success: #729987;
   --toastify-color-error: #FF5449;
   --toastify-icon-color-success: var(--toastify-color-success);
@@ -29,9 +30,11 @@ body {
     text-wrap: balance;
   }
 }
+
 .custom-transition-length-1s{
   transition:  1s; 
 }
 .custom-transition-length-2s{
   transition:  2s; 
 }
+

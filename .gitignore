@@ -38,3 +38,8 @@ wal/
 
 # Ignore logs
 logs/
+
+# go configs
+go.sum
+
+/workflows/

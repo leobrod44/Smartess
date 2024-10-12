@@ -54,6 +54,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <html lang='en'>
       <body className={`${sequelSansMediumBody.variable} ${sequelSansBold.variable} ${sequelSansRomanBody.variable} ${sequelSansLightDisp.variable} ${sequelSansLightBody.variable} ${sequelSansBlackDisp.variable}`}>
+
         <main>{children}</main>
       </body>
     </html>

@@ -110,7 +110,6 @@ const SignInPage = () => {
       />
     </div>
   </div>
-    
   );
 };
 
