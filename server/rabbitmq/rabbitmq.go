@@ -2,11 +2,11 @@ package rabbitmq
 
 import (
 	"errors"
-	"os"
-
+	"fmt"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 )
 
 // RabbitMQServer represents a RabbitMQ server instance.
@@ -24,7 +24,23 @@ func Init() (RabbitMQServer, error) {
 		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
 
-	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URI"))
+	uri := os.Getenv("RABBITMQ_URI") //"amqp://????:????@localhost:5672/"
+	fmt.Println("URI: ", uri)
+	//
+	//// Parse the URI
+	//u, err := url.Parse(uri)
+	//if err != nil {
+	//	return RabbitMQServer{}, errors.New("Invalid RabbitMQ URI: " + err.Error())
+	//}
+	//
+	//// Check if the scheme is valid
+	//if u.Scheme != "amqp" && u.Scheme != "amqps" {
+	//	return RabbitMQServer{}, errors.New("AMQP scheme must be either 'amqp://' or 'amqps://'")
+	//}
+
+	// Log the connection attempt
+	fmt.Println("Connecting to RabbitMQ at", uri)
+	conn, err := amqp.Dial(uri)
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to connect to RabbitMQ: " + err.Error())
 	}
@@ -62,7 +78,6 @@ func (r *RabbitMQServer) Start() {
 
 	defer r.connection.Close()
 	defer r.channel.Close()
-
 	//Start consuming messages from each queue
 	//TODO: Add neccessary consumption configs for each queue (if we have multiple queues
 	//		we could have an array of different consumption configs and listen for each)
@@ -81,7 +96,9 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				r.messageHandler.MessageHandler(msg)
+				//r.messageHandler.MessageHandler(msg)
+				//_ = msg
+				fmt.Printf("Received a message: %s\n", msg.Body)
 			}
 		}(smartessQueue)
 	}
