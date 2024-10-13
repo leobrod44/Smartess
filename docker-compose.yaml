@@ -11,9 +11,12 @@ services:
     volumes:
       - ./server/logs:/app/logs
     depends_on:
-      - loki
-      - grafana
-      - rabbitmq # OK ?
+      rabbitmq:
+        condition: service_healthy  # Correct placement of health condition
+      loki:
+        condition: service_started  # Optional if you want a basic condition
+      grafana:
+        condition: service_started  # Optional if you want a basic condition
 
   loki:
     image: grafana/loki:latest
@@ -45,19 +48,24 @@ services:
       - loki
 
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:management #TODO: Development only. For Production, use: rabbitmq:latest
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - ./rabbitmq/data:/var/lib/rabbitmq
-      #TODO - ./rabbitmq/logs:/var/log/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
-      - RABBITMQ_URI=amqp://guest:guest@localhost:5672/
-#    healthcheck:
-#      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 5
+#      - RABBITMQ_URI=amqp://guest:guest@localhost:5672/
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status || exit 1"]  # Check RabbitMQ status only
+      interval: 10s      # Check every 10 seconds
+      timeout: 5s        # Time allowed for RabbitMQ to respond
+      retries: 3         # Retry up to 3 times before marking the service as unhealthy
+      start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
+  #    healthcheck:
+  #      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+  #      interval: 30s
+  #      timeout: 10s
+  #      retries: 5
