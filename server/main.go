@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"smartess/server/rabbitmq"
 	"time"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func main() {
-
+	fmt.Println("main(): Starting RabbitMQ server...")
 	srv, err := rabbitmq.Init()
 
 	if err != nil {
@@ -31,11 +32,13 @@ func main() {
 		//TODO print still running for starting purposes, but removing this useless clutter down the line
 		log.Println("Server still running...")
 	}
+
+	//todo defer srv.Close()
 }
 
 func StartProducer() {
 	// Connect to RabbitMQ
-	conn, ch := ConnectToRabbitMQ("amqp://guest:guest@localhost:5672/")
+	conn, ch := ConnectToRabbitMQ(os.Getenv("RABBITMQ_URI")) //"amqp://guest:guest@localhost:5672/")
 	defer ch.Close()
 	defer conn.Close()
 	q, err := ch.QueueDeclare(
@@ -52,7 +55,7 @@ func StartProducer() {
 	// Send a message every second
 	for {
 		body := fmt.Sprintf("Current time: %s", time.Now().Format(time.RFC3339))
-		err = ch.Publish(
+		err = ch.Publish( //NB: For work queues, the routing key is queue name and exchange is empty and usually PublishContext is used
 			"",     // exchange
 			q.Name, // routing key
 			false,  // mandatory
@@ -74,9 +77,10 @@ func ConnectToRabbitMQ(uri string) (*amqp.Connection, *amqp.Channel) {
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
-	defer conn.Close()
+	//defer conn.Close()
 	ch, err := conn.Channel()
 	if err != nil {
+		conn.Close()
 		log.Fatalf("Failed to open a channel: %v", err)
 	}
 	return conn, ch
