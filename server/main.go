@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"smartess/server/rabbitmq"
 	"time"
 
@@ -37,7 +38,7 @@ func main() {
 
 func StartProducer() {
 	// Connect to RabbitMQ
-	conn, ch := ConnectToRabbitMQ("amqp://admin:admin@rabbitmq:5672/") //"amqp://guest:guest@localhost:5672/")
+	conn, ch := ConnectToRabbitMQ(os.Getenv("RABBITMQ_URI")) //"amqp://guest:guest@localhost:5672/")
 	defer ch.Close()
 	defer conn.Close()
 	q, err := ch.QueueDeclare(
@@ -54,7 +55,7 @@ func StartProducer() {
 	// Send a message every second
 	for {
 		body := fmt.Sprintf("Current time: %s", time.Now().Format(time.RFC3339))
-		err = ch.Publish( //TODO For work queues, the routing key is queue name and exchange is empty and usually PublishContext is used
+		err = ch.Publish( //NB: For work queues, the routing key is queue name and exchange is empty and usually PublishContext is used
 			"",     // exchange
 			q.Name, // routing key
 			false,  // mandatory

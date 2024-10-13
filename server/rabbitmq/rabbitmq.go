@@ -23,8 +23,8 @@ func Init() (RabbitMQServer, error) {
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
-	//TODO eventually os.Getenv("RABBITMQ_URI")
-	uri := "amqp://admin:admin@rabbitmq:5672/" //"amqp://guest:guest@localhost:5672/"
+
+	uri := os.Getenv("RABBITMQ_URI") //"amqp://????:????@localhost:5672/"
 	fmt.Println("URI: ", uri)
 	//
 	//// Parse the URI

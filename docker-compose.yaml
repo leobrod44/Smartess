@@ -57,7 +57,7 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
-#      - RABBITMQ_URI=amqp://guest:guest@localhost:5672/
+      - RABBITMQ_URI=amqp://admin:admin@localhost:5672/ # amqp://guest:guest@localhost:5672/
     healthcheck:
       test: ["CMD-SHELL", "rabbitmqctl status || exit 1"]  # Check RabbitMQ status only
       interval: 10s      # Check every 10 seconds
