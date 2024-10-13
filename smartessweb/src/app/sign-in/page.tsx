@@ -44,7 +44,7 @@ const SignInPage = () => {
         } else {
           showToastError(data.error || 'Login failed. Please try again.');
         }
-      } catch (error) {
+      } catch {
         showToastError('Server error. Please try again later.');
       }
     }
