@@ -17,7 +17,8 @@ services:
         condition: service_started  # Optional if you want a basic condition
       grafana:
         condition: service_started  # Optional if you want a basic condition
-
+    environment:
+      RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
   loki:
     image: grafana/loki:latest
     ports:
