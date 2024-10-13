@@ -66,6 +66,14 @@ services:
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
   #    healthcheck:
   #      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-  #      interval: 30s
-  #      timeout: 10s
-  #      retries: 5
+
+#  prometheus:
+#    image: prom/prometheus:latest
+#    ports:
+#      - "9090:9090"
+#    volumes:
+#      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+#    command:
+#      - "--config.file=/etc/prometheus/prometheus.yml"
+#    depends_on:
+#      - rabbitmq
