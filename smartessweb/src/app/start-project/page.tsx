@@ -121,12 +121,14 @@ const StartProjectPage = () => {
 
           {/* Start your project button */}
           <section>
-            <button
-              className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]"
-              onClick={handleStartProject}
-            >
-              Start your Project
-            </button>
+            <div className="pb-10">
+              <button
+                className="px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]"
+                onClick={handleStartProject}
+              >
+                Start your Project
+              </button>
+            </div>
           </section>
         </form>
       </main>
