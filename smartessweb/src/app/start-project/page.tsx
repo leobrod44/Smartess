@@ -1,6 +1,15 @@
+"use client";
 import LandingNavbar from "@/components/LandingNavbar";
+import { useState } from "react";
 
 const StartProjectPage = () => {
+  const [businessName, setBusinessName] = useState("");
+  const [name, setName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [telephoneNumber, setTelephoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [aditionalInfo, setAditionalInfo] = useState("");
+
   return (
     <>
       <LandingNavbar />
@@ -28,12 +37,16 @@ const StartProjectPage = () => {
                 type="businessName"
                 className="border border-gray-400 rounded-lg  px-3 py-1 w-80"
                 placeholder=""
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
               />
               <label className="pb-2 pt-2">Name</label>
               <input
                 type="name"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
                 placeholder=""
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
 
               <label className="pb-2 pt-2">Lastname</label>
@@ -41,6 +54,8 @@ const StartProjectPage = () => {
                 type="lastName"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
                 placeholder=""
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
               />
 
               <label className="pb-2 pt-2">Telephone Number</label>
@@ -48,6 +63,8 @@ const StartProjectPage = () => {
                 type="phoneNumber"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
                 placeholder=""
+                value={telephoneNumber}
+                onChange={(e) => setTelephoneNumber(e.target.value)}
               />
             </div>
 
@@ -58,6 +75,8 @@ const StartProjectPage = () => {
                 type="email"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
                 placeholder=""
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <label className="pb-2 pt-2">Aditionnal information</label>
               <textarea
@@ -66,6 +85,8 @@ const StartProjectPage = () => {
                 name="AditionalInfo"
                 rows={10}
                 cols={20}
+                value={aditionalInfo}
+                onChange={(e) => setAditionalInfo(e.target.value)}
               />
             </div>
           </section>
