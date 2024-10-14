@@ -57,9 +57,9 @@ const StartProjectPage = () => {
         </section>
 
         <form className="flex flex-col items-center justify-center">
-          <section className="flex flex-col justify-center sm:flex-row mb-10 font-sequel-sans-regular">
+          <section className="flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular">
             {/* Left hand side card for user input */}
-            <div className="flex flex-col text-sm text-[#52525C] pl-5 pr-5">
+            <div className="flex flex-col text-sm text-[#52525C] pr-2 pl-2">
               <label className="pb-2 pt-2">Business name</label>
               <input
                 type="businessName"
@@ -97,7 +97,7 @@ const StartProjectPage = () => {
             </div>
 
             {/* Right hand side card for user input */}
-            <div className="flex flex-col font-light text-sm text-[#52525C]  pl-5 pr-5">
+            <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2">
               <label className="pb-2 pt-2">Email</label>
               <input
                 type="email"
