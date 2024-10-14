@@ -12,9 +12,11 @@ logger.info('Server is initializing...');
 //Add routes here
 const testRoutes = require('./routes/testRoutes');
 const authRoutes = require('./routes/authRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
 //Add path here
 app.use('/api/auth', authRoutes);
+app.use('/api', emailRoutes);
 app.use('/test1', testRoutes);
 app.use('/test2', testRoutes);
 
