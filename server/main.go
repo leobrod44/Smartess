@@ -42,7 +42,7 @@ func StartProducer() {
 	defer ch.Close()
 	defer conn.Close()
 	q, err := ch.QueueDeclare(
-		"test_queue", // name
+		"test-queue", // name
 		true,         // durable (will persist through restarts)
 		false,        // delete when unused
 		false,        // exclusive

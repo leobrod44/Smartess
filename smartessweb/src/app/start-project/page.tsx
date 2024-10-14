@@ -19,16 +19,18 @@ const StartProjectPage = () => {
     return emailPattern.test(email);
   };
 
-  const handleSubmit = async () => {
-    if (
-      !businessName ||
-      !firstName ||
-      !lastName ||
-      !telephoneNumber ||
-      !email ||
-      !description
-    ) {
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const phoneRegex = /^\d{10}$/; // Simple 10-digit phone number validation
+    return phoneRegex.test(phoneNumber);
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!firstName || !lastName || !telephoneNumber) {
       showToastError('Please fill in all required fields');
+      return;
+    } else if (!validatePhoneNumber(telephoneNumber)) {
+      showToastError('Please enter a valid 10-digit phone number');
       return;
     } else if (!validateEmail(email)) {
       showToastError('Please enter a valid email address');
@@ -70,67 +72,100 @@ const StartProjectPage = () => {
     <>
       <LandingNavbar />
       <Toast />
-      <div className='flex h-screen items-center justify-center bg-grey'>
-        <div className='w-full max-w-md space-y-6'>
-          <h2 className='text-center text-xl font-semibold text-gray-800'>
-            Start Project
-          </h2>
+      <main>
+        <section className='flex flex-col items-center justify-center'>
+          <div>
+            <h1 className='text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold'>
+              Start Your Project
+            </h1>
+          </div>
 
-          <input
-            type='text'
-            placeholder='Business Name'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={businessName}
-            onChange={(e) => setBusinessName(e.target.value)}
-          />
+          <div>
+            <h3 className='text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular'>
+              Please fill in required information
+            </h3>
+          </div>
+        </section>
 
-          <input
-            type='text'
-            placeholder='First Name'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
+        <form
+          className='flex flex-col items-center justify-center'
+          onSubmit={handleSubmit}
+        >
+          <section className='flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular'>
+            {/* Left hand side card for user input */}
+            <div className='flex flex-col text-sm text-[#52525C] pr-2 pl-2'>
+              <label className='pb-2 pt-2'>Business name</label>
+              <input
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1 w-80'
+                placeholder='Required'
+                value={businessName}
+                onChange={(e) => setBusinessName(e.target.value)}
+              />
+              <label className='pb-2 pt-2'>Name</label>
+              <input
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
 
-          <input
-            type='text'
-            placeholder='Last Name'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
+              <label className='pb-2 pt-2'>Last name</label>
+              <input
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
 
-          <input
-            type='text'
-            placeholder='Telephone Number'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={telephoneNumber}
-            onChange={(e) => setTelephoneNumber(e.target.value)}
-          />
+              <label className='pb-2 pt-2'>Telephone Number</label>
+              <input
+                type='tel'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
+                value={telephoneNumber}
+                onChange={(e) => setTelephoneNumber(e.target.value)}
+              />
+            </div>
 
-          <input
-            type='email'
-            placeholder='Your Email'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+            {/* Right hand side card for user input */}
+            <div className='flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2'>
+              <label className='pb-2 pt-2'>Email</label>
+              <input
+                type='email'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <label className='pb-2 pt-2'>Additional information</label>
+              <textarea
+                placeholder=''
+                className='border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-40  w-80'
+                name='Description'
+                rows={10}
+                cols={20}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+          </section>
 
-          <textarea
-            placeholder='Description'
-            className='w-full px-3 py-2 border rounded focus:outline-none focus:ring-1 focus:ring-gray-400'
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-
-          <button
-            className='w-full px-3 py-2 bg-black text-white rounded hover:bg-gray-900 focus:outline-none'
-            onClick={handleSubmit}
-          >
-            Send Email
-          </button>
-        </div>
-      </div>
+          {/* Start your project button */}
+          <section>
+            <div className='pb-10'>
+              <button
+                type='submit'
+                className='px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]'
+              >
+                Start your Project
+              </button>
+            </div>
+          </section>
+        </form>
+      </main>
     </>
   );
 };
