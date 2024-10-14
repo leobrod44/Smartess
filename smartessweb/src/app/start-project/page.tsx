@@ -1,5 +1,5 @@
 "use client";
-import LandingNavbar from "@/components/LandingNavbar";
+import LandingNavbar from "@/app/components/LandingNavbar";
 import { useState } from "react";
 import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 
