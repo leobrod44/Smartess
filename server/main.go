@@ -27,13 +27,13 @@ func main() {
 
 	//Start the mock message producer
 
-	//go StartProducer()
-	go StartMongoProducer()
+	go StartProducer()
+	//go StartMongoProducer()
 
 	// Start the RabbitMQ server (consumer)
 	for {
-		//go srv.Start()               // Start the RabbitMQ server on a separate goroutine
-		go srv.StartMongoConsumer()
+		go srv.Start() // Start the RabbitMQ server on a separate goroutine
+		//go srv.StartMongoConsumer()
 		time.Sleep(10 * time.Second) // Sleep for activity monitoring, not this dosen't mean the server stops since we used a goroutine!
 		//TODO print still running for starting purposes, but removing this useless clutter down the line
 		log.Println("Server still running...")
