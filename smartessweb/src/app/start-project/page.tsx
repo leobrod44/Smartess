@@ -1,18 +1,21 @@
-"use client";
-import LandingNavbar from "@/components/LandingNavbar";
-import { useState } from "react";
-import Toast, { showToastError, showToastSuccess } from "../components/Toast";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Toast, { showToastError, showToastSuccess } from '../components/Toast';
+import LandingNavbar from '@/components/LandingNavbar';
 
 const StartProjectPage = () => {
-  const [businessName, setBusinessName] = useState("");
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [telephoneNumber, setTelephoneNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [aditionalInfo, setAditionalInfo] = useState("");
+  const router = useRouter();
+
+  const [businessName, setBusinessName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [telephoneNumber, setTelephoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [description, setDescription] = useState('');
 
   const validateEmail = (email: string) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
 
@@ -21,20 +24,48 @@ const StartProjectPage = () => {
     return phoneRegex.test(phoneNumber);
   };
 
-  const handleStartProject = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!name || !lastName || !telephoneNumber) {
-      showToastError("Please fill in all required fields");
+    if (!firstName || !lastName || !telephoneNumber) {
+      showToastError('Please fill in all required fields');
       return;
     } else if (!validatePhoneNumber(telephoneNumber)) {
-      showToastError("Please enter a valid 10-digit phone number");
+      showToastError('Please enter a valid 10-digit phone number');
       return;
     } else if (!validateEmail(email)) {
-      showToastError("Please enter an valid email address");
+      showToastError('Please enter a valid email address');
       return;
+    } else {
+      try {
+        const response = await fetch('http://localhost:3000/api/send-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            businessName,
+            firstName,
+            lastName,
+            telephoneNumber,
+            email,
+            description,
+          }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          showToastSuccess('Email sent successfully!');
+          setTimeout(() => {
+            router.push('/');
+          }, 1000);
+        } else {
+          showToastError(
+            data.error || 'Failed to send email. Please try again.'
+          );
+        }
+      } catch {
+        showToastError('Server error. Please try again later.');
+      }
     }
-    showToastSuccess("Submission successful!");
   };
 
   return (
@@ -42,89 +73,92 @@ const StartProjectPage = () => {
       <LandingNavbar />
       <Toast />
       <main>
-        <section className="flex flex-col items-center justify-center">
+        <section className='flex flex-col items-center justify-center'>
           <div>
-            <h1 className="text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold">
+            <h1 className='text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold'>
               Start Your Project
             </h1>
           </div>
 
           <div>
-            <h3 className="text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular">
+            <h3 className='text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular'>
               Please fill in required information
             </h3>
           </div>
         </section>
 
-        <form className="flex flex-col items-center justify-center">
-          <section className="flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular">
+        <form
+          className='flex flex-col items-center justify-center'
+          onSubmit={handleSubmit}
+        >
+          <section className='flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular'>
             {/* Left hand side card for user input */}
-            <div className="flex flex-col text-sm text-[#52525C] pr-2 pl-2">
-              <label className="pb-2 pt-2">Business name</label>
+            <div className='flex flex-col text-sm text-[#52525C] pr-2 pl-2'>
+              <label className='pb-2 pt-2'>Business name</label>
               <input
-                type="businessName"
-                className="border border-gray-400 rounded-lg  px-3 py-1 w-80"
-                placeholder=""
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1 w-80'
+                placeholder='Required'
                 value={businessName}
                 onChange={(e) => setBusinessName(e.target.value)}
               />
-              <label className="pb-2 pt-2">Name</label>
+              <label className='pb-2 pt-2'>Name</label>
               <input
-                type="name"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
               />
 
-              <label className="pb-2 pt-2">Last name</label>
+              <label className='pb-2 pt-2'>Last name</label>
               <input
-                type="lastName"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
+                type='text'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
 
-              <label className="pb-2 pt-2">Telephone Number</label>
+              <label className='pb-2 pt-2'>Telephone Number</label>
               <input
-                type="phoneNumber"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
+                type='tel'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
                 value={telephoneNumber}
                 onChange={(e) => setTelephoneNumber(e.target.value)}
               />
             </div>
 
             {/* Right hand side card for user input */}
-            <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2">
-              <label className="pb-2 pt-2">Email</label>
+            <div className='flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2'>
+              <label className='pb-2 pt-2'>Email</label>
               <input
-                type="email"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
+                type='email'
+                className='border border-gray-400 rounded-lg  px-3 py-1  w-80'
+                placeholder='Required'
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <label className="pb-2 pt-2">Additional information</label>
+              <label className='pb-2 pt-2'>Additional information</label>
               <textarea
-                placeholder=""
-                className="border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-40  w-80"
-                name="AditionalInfo"
+                placeholder=''
+                className='border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-40  w-80'
+                name='Description'
                 rows={10}
                 cols={20}
-                value={aditionalInfo}
-                onChange={(e) => setAditionalInfo(e.target.value)}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
               />
             </div>
           </section>
 
           {/* Start your project button */}
           <section>
-            <div className="pb-10">
+            <div className='pb-10'>
               <button
-                className="px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]"
-                onClick={handleStartProject}
+                type='submit'
+                className='px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]'
               >
                 Start your Project
               </button>
