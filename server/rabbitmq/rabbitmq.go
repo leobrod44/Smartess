@@ -53,11 +53,11 @@ func Init() (RabbitMQServer, error) {
 	//TODO add all necessary queues based on configuration, ex is all true for sake of example
 	sampleQueue, err := Declare(ch, QueueConfig{
 		"test-queue", // Queue name
-		true,         // Durable
+		false,        // Durable
 		true,         // Auto-delete
-		true,         // Exclusive
-		true,         // No-wait
-		true,         // Passive
+		false,        // Exclusive
+		false,        // No-wait
+		false,        // Passive
 		nil,          // Arguments
 	})
 
@@ -87,9 +87,9 @@ func (r *RabbitMQServer) Start() {
 				queue.rabbitmqQueue.Name, // Queue name
 				"",                       // Consumer
 				true,                     // Auto-acknowledge
-				true,                     // Exclusive
-				true,                     // No-local
-				true,                     // No-wait
+				false,                    // Exclusive
+				false,                    // No-local
+				false,                    // No-wait
 				nil,                      // Arguments
 			)
 			if err != nil {
