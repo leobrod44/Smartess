@@ -106,7 +106,7 @@ const StartProjectPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <label className="pb-2 pt-2">Aditional information</label>
+              <label className="pb-2 pt-2">Additional information</label>
               <textarea
                 placeholder=""
                 className="border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-40  w-80"
