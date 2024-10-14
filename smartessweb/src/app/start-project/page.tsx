@@ -77,7 +77,7 @@ const StartProjectPage = () => {
                 onChange={(e) => setName(e.target.value)}
               />
 
-              <label className="pb-2 pt-2">Lastname</label>
+              <label className="pb-2 pt-2">Last name</label>
               <input
                 type="lastName"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
