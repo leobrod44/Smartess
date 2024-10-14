@@ -1,6 +1,7 @@
 "use client";
 import LandingNavbar from "@/components/LandingNavbar";
 import { useState } from "react";
+import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 
 const StartProjectPage = () => {
   const [businessName, setBusinessName] = useState("");
@@ -10,9 +11,36 @@ const StartProjectPage = () => {
   const [email, setEmail] = useState("");
   const [aditionalInfo, setAditionalInfo] = useState("");
 
+  const validateEmail = (email: string) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+    return emailPattern.test(email);
+  };
+
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const phoneRegex = /^\d{10}$/; // Simple 10-digit phone number validation
+    return phoneRegex.test(phoneNumber);
+  };
+
+  const handleStartProject = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name || !lastName || !telephoneNumber) {
+      showToastError("Please fill in all required fields");
+      return;
+    } else if (!validatePhoneNumber(telephoneNumber)) {
+      showToastError("Please enter a valid 10-digit phone number");
+      return;
+    } else if (!validateEmail(email)) {
+      showToastError("Please enter an valid email address");
+      return;
+    }
+    showToastSuccess("Submission successful!");
+  };
+
   return (
     <>
       <LandingNavbar />
+      <Toast />
       <main>
         <section className="flex flex-col items-center justify-center">
           <div>
@@ -44,7 +72,7 @@ const StartProjectPage = () => {
               <input
                 type="name"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder=""
+                placeholder="Required"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -53,7 +81,7 @@ const StartProjectPage = () => {
               <input
                 type="lastName"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder=""
+                placeholder="Required"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
@@ -62,7 +90,7 @@ const StartProjectPage = () => {
               <input
                 type="phoneNumber"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder=""
+                placeholder="Required"
                 value={telephoneNumber}
                 onChange={(e) => setTelephoneNumber(e.target.value)}
               />
@@ -74,7 +102,7 @@ const StartProjectPage = () => {
               <input
                 type="email"
                 className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder=""
+                placeholder="Required"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -93,7 +121,10 @@ const StartProjectPage = () => {
 
           {/* Start your project button */}
           <section>
-            <button className="font-sequel-sans text-sm text-white bg-[#254752] px-6 py-2.5 rounded-[20px] border-none text-base hover:bg-[#266472] hover:text-whit">
+            <button
+              className="font-sequel-sans text-sm text-white bg-[#254752] px-6 py-2.5 rounded-[20px] border-none text-base hover:bg-[#266472] hover:text-whit"
+              onClick={handleStartProject}
+            >
               Start your Project
             </button>
           </section>
