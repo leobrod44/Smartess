@@ -1,4 +1,5 @@
 const { sendEmail } = require('../services/emailService');
+require('dotenv').config();
 
 exports.sendEmailController = async (req, res) => {
   const {
@@ -23,8 +24,8 @@ exports.sendEmailController = async (req, res) => {
 
   try {
     const result = await sendEmail(
-      'Smartess <onboarding@resend.dev>',
-      '1tuananhp@gmail.com',
+      `Smartess <support@${process.env.RESEND_DOMAIN}>`,
+      `${process.env.RESEND_EMAIL_TO}`,
       `Inquiry from ${firstName} ${lastName}`,
       `
         <h2>New Inquiry from ${businessName}</h2>
