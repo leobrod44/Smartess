@@ -158,9 +158,9 @@ const StartProjectPage = () => {
             <div className="pb-10">
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#266472]"
+                className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300"
               >
-                Start your Project
+                Start Your Project
               </button>
             </div>
           </section>

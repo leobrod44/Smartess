@@ -22,7 +22,7 @@ export default function Home() {
             First all-in-one smart home platform for residential communities
           </p>
           <Link href="/start-project">
-            <button className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full">
+            <button className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300">
               Start Your Project
             </button>
           </Link>
