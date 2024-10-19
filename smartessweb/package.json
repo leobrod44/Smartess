@@ -20,5 +20,10 @@
     "nodemon": "^3.1.7",
     "resend": "^4.0.0",
     "winston": "^3.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.15",
+    "eslint-plugin-node": "^11.1.0"
   }
 }
