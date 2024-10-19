@@ -1,34 +1,31 @@
 {
   "name": "smartess",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "test": "jest --watch",
-    "ci:test": "jest --ci --coverage"
+    "client": "npm run dev --prefix frontend",
+    "server": "nodemon backend/server.js",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "lint": "npm run lint --prefix frontend"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "@headlessui/react": "^2.1.9",
-    "@heroicons/react": "^2.1.5",
-    "@next/font": "^14.2.14",
-    "next": "^14.2.14",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-toastify": "^10.0.5",
-    "smartess": "file:"
+    "@supabase/supabase-js": "^2.45.4",
+    "concurrently": "^9.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "nodemon": "^3.1.7",
+    "resend": "^4.0.0",
+    "winston": "^3.15.0",
+    "next": "^14.2.14"
   },
   "devDependencies": {
-    "@types/node": "^20",
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.13",
-    "jest": "^29.7.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.15",
+    "eslint-plugin-node": "^11.1.0"
   }
 }
