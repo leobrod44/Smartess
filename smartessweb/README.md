@@ -1,4 +1,4 @@
-### NOTE 
+### NOTE
 
 - This README file will be updated once again when the backend API will be contained.
 - There are 3 section. The first section will explain how to setup your environment. The second section will tell you about how to run the API. The third will explain how to organize and write code.
@@ -7,21 +7,21 @@
 
 There is a security aspect which requires setting a .env file. This needs to be done only once initially. For running instructions just head over to the next section below.
 
-1. Locate the backend_api folder:
-   
+1. Locate the smartessweb folder:
+
    ![image](https://github.com/user-attachments/assets/f36ec39d-bfee-478f-ba7d-17a96dc8f5fb)
 
 2. Install create a .env file like the following:
-   
+
    ![image](https://github.com/user-attachments/assets/695a3320-51a1-4c83-8834-fc79ae283e75)
 
 3. Paste the following code:
 
-  ```bash
-    PORT=3000
-    SUPABASE_URL="URL"
-    SUPABASE_ANON_KEY="KEY"
-  ```
+```bash
+  PORT=3000
+  SUPABASE_URL="URL"
+  SUPABASE_ANON_KEY="KEY"
+```
 
 4. DM Abdullah. He will provide you with the URL and key.
 
@@ -33,10 +33,10 @@ For any question DM Abdullah.
 
 These instructions will be updated once contained.
 
-1. In your code editor terminal go to the correct folder/directory (it is "backend_api"). For reference, here is how mine looks:
+1. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
 
    ```bash
-     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess\backend_api> 
+     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess\smartessweb>
    ```
 
 2. Type the following command and press enter:
@@ -47,9 +47,10 @@ These instructions will be updated once contained.
 
 3. Now to start the server type the following and press enter:
 
-    ```bash
-     npm start
+   ```bash
+    npm start
    ```
+
 4. Test 1: Open your broswer and type :
 
    ```bash
@@ -57,20 +58,18 @@ These instructions will be updated once contained.
    ```
 
    You should see something like the following result:
-   
-    ![image](https://github.com/user-attachments/assets/6b0bb83e-ada9-40bd-a232-2a4a5b1a2e0f)
 
+   ![image](https://github.com/user-attachments/assets/6b0bb83e-ada9-40bd-a232-2a4a5b1a2e0f)
 
-6. Test 2: Open your broswer and type :
+5. Test 2: Open your broswer and type :
 
    ```bash
      http://localhost:3001/test2/test2
    ```
 
    You should see something like the following result:
-   
-    ![image](https://github.com/user-attachments/assets/8b605570-3166-4a72-bf0e-9a58da256ce2)
 
+   ![image](https://github.com/user-attachments/assets/8b605570-3166-4a72-bf0e-9a58da256ce2)
 
 For any question DM Abdullah.
 
@@ -79,4 +78,3 @@ For any question DM Abdullah.
 Coming soon.
 
 For any question DM Abdullah.
-   
