@@ -1,11 +1,10 @@
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../../src/public/styles/globals.css'
-
+import '../../public/styles/globals.css';
 
 export const showToastError = (message: string) => {
   toast.error(message, {
-    position: "top-right",
+    position: 'top-right',
     autoClose: 4000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -16,7 +15,7 @@ export const showToastError = (message: string) => {
 
 export const showToastSuccess = (message: string) => {
   toast.success(message, {
-    position: "top-right",
+    position: 'top-right',
     autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: true,
