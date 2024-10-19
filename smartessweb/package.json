@@ -6,7 +6,8 @@
   "scripts": {
     "client": "npm run dev --prefix frontend",
     "server": "nodemon backend/server.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "lint": "npm run lint --prefix frontend"
   },
   "keywords": [],
   "author": "",
