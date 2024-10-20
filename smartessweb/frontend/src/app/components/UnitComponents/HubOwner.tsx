@@ -1,14 +1,18 @@
-const HubOwner = ({ owner }: { owner: { firstName: string; lastName: string; email: string } }) => {
-    
-    //Formatting method to ensure the names have first letter capitalization only
-    const formatName = (name: string) => {
-        return name
-          .toLowerCase() 
-          .split(' ') 
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1)) 
-          .join(' '); 
-      };
-      return(
+const HubOwner = ({
+  owner,
+}: {
+  owner: { firstName: string; lastName: string; email: string };
+}) => {
+  //Formatting method to ensure the names have first letter capitalization only
+  const formatName = (name: string) => {
+    return name
+      .toLowerCase()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  return (
     <div className="w-[246px] h-[173px] px-[15px] py-2.5 bg-white flex-col justify-start items-center gap-2.5 inline-flex">
       <div className="w-[162px] h-[47px] relative bg-transparent">
         <div className="w-[132px] h-[33px] left-[9px] top-0 absolute text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
@@ -27,6 +31,5 @@ const HubOwner = ({ owner }: { owner: { firstName: string; lastName: string; ema
       </button>
     </div>
   );
-}
-  export default HubOwner;
-  
+};
+export default HubOwner;
