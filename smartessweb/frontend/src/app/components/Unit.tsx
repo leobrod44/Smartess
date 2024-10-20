@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import HubOwner from '../components/UnitComponents/Alerts';
+import HubOwner from '../components/UnitComponents/HubOwner';
 import HubUsers from '../components/UnitComponents/HubUsers';
 import Tickets from '../components/UnitComponents/Tickets';
 import Alerts from '../components/UnitComponents/Alerts';
@@ -50,7 +50,7 @@ const Unit = () => {
             <HubUsers users={hubData.users.slice(0, 3)} />
             <Tickets tickets={hubData.tickets} />
            <Alerts alerts={hubData.alerts} /> */}
-            <HubOwner  owner={{ name: "Larry Johnson", email: "larryJ@hotmail.com" }}/>
+            <HubOwner  owner={{ firstName: "LARRY", lastName:'JOHNSON', email: "larryJ@hotmail.com" }}/>
             <div className="divider bg-[#a0bfca] w-[1px]"></div>
             <HubUsers users={users}/>
             <div className="divider bg-[#a0bfca] w-[1px]"></div>
