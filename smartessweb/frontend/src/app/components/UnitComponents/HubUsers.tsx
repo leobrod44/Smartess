@@ -22,19 +22,19 @@ const HubUsers = ({ users }: HubUsersProps) => {
   };
 
   return (
-    <div className="w-[229px] h-[173px] relative bg-white">
-      <div className="h-[47px] px-[9px] pb-3.5 left-[42px] top-[6px] absolute bg-white/0 flex-col justify-start items-start inline-flex">
-        <div className="w-[132px] h-[33px] text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
+    <div className="max-w-xs p-4 flex flex-col items-center gap-2.5 shadow-md">
+      <div className="w-full relative pb-2.5">
+        <div className="text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
           Hub users
         </div>
-        <div className="w-36 h-px bg-[#4b7d8d]" />
+        <div className="w-full h-px absolute bg-[#4b7d8d]" />
       </div>
-      <div className="w-[213px] px-[3px] left-[16px] top-[45px] absolute bg-white/0 justify-center items-center gap-[5px] inline-flex">
-        <div className="w-[120px] h-[122px] px-[5px] py-[7px] bg-[#bbbbbb]/0 flex-col justify-center items-center gap-1 inline-flex">
+      <div className="flex flex-col w-full gap-1">
+        <div className="flex-col justify-center items-center gap-1 inline-flex">
           {displayedUsers.map((user, index) => (
             <div
               key={index}
-              className="self-stretch h-7 text-black text-sm font-['Sequel Sans'] leading-tight tracking-tight"
+              className="text-black text-sm font-['Sequel Sans'] leading-tight tracking-tight text-center pb-2"
             >
               {formatUserName(user.firstName, user.lastName)}
             </div>
