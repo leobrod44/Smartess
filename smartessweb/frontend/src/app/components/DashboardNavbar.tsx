@@ -16,7 +16,7 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/20/solid';
-import logo from '@/public/images/logo.png';
+import dashboardLogo from '@/public/images/dashboardLogo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -192,7 +192,7 @@ const DashboardNavbar = () => {
                     <div className='flex h-16 shrink-0 items-center'>
                       <Image
                         className='h-8 w-auto'
-                        src={logo}
+                        src={dashboardLogo}
                         alt='Logo'
                         width={100}
                         height={40}
@@ -205,7 +205,7 @@ const DashboardNavbar = () => {
                         className='flex flex-1 flex-col gap-y-7'
                       >
                         <li>
-                          <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                          <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                             HOME
                           </div>
                           <ul
@@ -218,18 +218,13 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-[#254752] text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                      ? 'bg-[#254752]'
+                                      : 'hover:bg-[#14323B]',
+                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? 'text-white'
-                                        : 'text-indigo-200 group-hover:text-white',
-                                      'h-6 w-6 shrink-0'
-                                    )}
+                                    className='text-white'
                                     aria-hidden='true'
                                   />
                                   {item.name}
@@ -239,7 +234,7 @@ const DashboardNavbar = () => {
                           </ul>
                         </li>
                         <li>
-                          <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                          <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                             GENERAL
                           </div>
                           <ul
@@ -252,18 +247,13 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-[#254752] text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                      ? 'bg-[#254752]'
+                                      : 'hover:bg-[#14323B]',
+                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? 'text-white'
-                                        : 'text-indigo-200 group-hover:text-white',
-                                      'h-6 w-6 shrink-0'
-                                    )}
+                                    className='text-white'
                                     aria-hidden='true'
                                   />
                                   {item.name}
@@ -273,7 +263,7 @@ const DashboardNavbar = () => {
                           </ul>
                         </li>
                         <li>
-                          <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                          <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                             SECURITY
                           </div>
                           <ul
@@ -286,18 +276,13 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-[#254752] text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                      ? 'bg-[#254752]'
+                                      : 'hover:bg-[#14323B]',
+                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? 'text-white'
-                                        : 'text-indigo-200 group-hover:text-white',
-                                      'h-6 w-6 shrink-0'
-                                    )}
+                                    className='text-white'
                                     aria-hidden='true'
                                   />
                                   {item.name}
@@ -307,7 +292,7 @@ const DashboardNavbar = () => {
                           </ul>
                         </li>
                         <li>
-                          <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                          <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                             COMMUNITY
                           </div>
                           <ul
@@ -320,18 +305,13 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-[#254752] text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                      ? 'bg-[#254752]'
+                                      : 'hover:bg-[#14323B]',
+                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? 'text-white'
-                                        : 'text-indigo-200 group-hover:text-white',
-                                      'h-6 w-6 shrink-0'
-                                    )}
+                                    className='text-white'
                                     aria-hidden='true'
                                   />
                                   {item.name}
@@ -341,7 +321,7 @@ const DashboardNavbar = () => {
                           </ul>
                         </li>
                         <li>
-                          <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                          <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                             INFORMATION
                           </div>
                           <ul
@@ -354,18 +334,13 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-[#254752] text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                                    'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                      ? 'bg-[#254752]'
+                                      : 'hover:bg-[#14323B]',
+                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
                                   <item.icon
-                                    className={classNames(
-                                      item.current
-                                        ? 'text-white'
-                                        : 'text-indigo-200 group-hover:text-white',
-                                      'h-6 w-6 shrink-0'
-                                    )}
+                                    className='text-white'
                                     aria-hidden='true'
                                   />
                                   {item.name}
@@ -390,7 +365,7 @@ const DashboardNavbar = () => {
             <div className='flex h-16 shrink-0 items-center'>
               <Image
                 className='h-8 w-auto'
-                src={logo}
+                src={dashboardLogo}
                 alt='Logo'
                 width={100}
                 height={40}
@@ -402,7 +377,7 @@ const DashboardNavbar = () => {
                 className='flex flex-1 flex-col gap-y-7'
               >
                 <li>
-                  <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                  <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                     HOME
                   </div>
                   <ul
@@ -415,18 +390,13 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-[#254752] text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                            'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                              ? 'bg-[#254752]'
+                              : 'hover:bg-[#14323B]',
+                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? 'text-white'
-                                : 'text-indigo-200 group-hover:text-white',
-                              'h-6 w-6 shrink-0'
-                            )}
+                            className='text-white'
                             aria-hidden='true'
                           />
                           {item.name}
@@ -436,7 +406,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                  <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                     GENERAL
                   </div>
                   <ul
@@ -449,18 +419,13 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-[#254752] text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                            'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                              ? 'bg-[#254752]'
+                              : 'hover:bg-[#14323B]',
+                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? 'text-white'
-                                : 'text-indigo-200 group-hover:text-white',
-                              'h-6 w-6 shrink-0'
-                            )}
+                            className='text-white'
                             aria-hidden='true'
                           />
                           {item.name}
@@ -470,7 +435,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                  <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                     SECURITY
                   </div>
                   <ul
@@ -483,18 +448,13 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-[#254752] text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                            'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                              ? 'bg-[#254752]'
+                              : 'hover:bg-[#14323B]',
+                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? 'text-white'
-                                : 'text-indigo-200 group-hover:text-white',
-                              'h-6 w-6 shrink-0'
-                            )}
+                            className='text-white'
                             aria-hidden='true'
                           />
                           {item.name}
@@ -504,7 +464,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                  <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                     COMMUNITY
                   </div>
                   <ul
@@ -517,18 +477,13 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-[#254752] text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                            'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                              ? 'bg-[#254752]'
+                              : 'hover:bg-[#14323B]',
+                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? 'text-white'
-                                : 'text-indigo-200 group-hover:text-white',
-                              'h-6 w-6 shrink-0'
-                            )}
+                            className='text-white'
                             aria-hidden='true'
                           />
                           {item.name}
@@ -538,7 +493,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className='text-xs font-semibold leading-6 text-indigo-200'>
+                  <div className='text-xs font-semibold leading-6 text-[#7A8C92]'>
                     INFORMATION
                   </div>
                   <ul
@@ -551,18 +506,13 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-[#254752] text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
-                            'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                              ? 'bg-[#254752]'
+                              : 'hover:bg-[#14323B]',
+                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
                           <item.icon
-                            className={classNames(
-                              item.current
-                                ? 'text-white'
-                                : 'text-indigo-200 group-hover:text-white',
-                              'h-6 w-6 shrink-0'
-                            )}
+                            className='text-white'
                             aria-hidden='true'
                           />
                           {item.name}
