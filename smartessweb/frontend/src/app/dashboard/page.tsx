@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardNavbar from '../components/DashboardNavbar';
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -16,8 +15,7 @@ const DashboardPage = () => {
 
   return (
     <div>
-      <DashboardNavbar />
-      <h1>Dashboard</h1>
+      <h1>Dashboard Page</h1>
     </div>
   );
 };

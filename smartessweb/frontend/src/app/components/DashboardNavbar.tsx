@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -11,18 +11,7 @@ import {
   Transition,
   TransitionChild,
 } from '@headlessui/react';
-import {
-  Bars3Icon,
-  BellIcon,
-  CalendarIcon,
-  ChartPieIcon,
-  Cog6ToothIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -57,13 +46,13 @@ const home = [
 const general = [
   {
     name: 'Units',
-    href: '/dashboard/units',
+    href: '/dashboard/unit',
     icon: DoorBackOutlinedIcon,
     current: false,
   },
   {
     name: 'Tickets',
-    href: '/dashboard/tickets',
+    href: '/dashboard/ticket',
     icon: ConfirmationNumberOutlinedIcon,
     current: false,
   },
@@ -84,7 +73,7 @@ const security = [
   },
   {
     name: 'Locks',
-    href: '/dashboard/locks',
+    href: '/dashboard/lock',
     icon: LockOutlinedIcon,
     current: false,
   },
@@ -93,7 +82,7 @@ const security = [
 const community = [
   {
     name: 'Annoucements',
-    href: '/dashboard/annoucements',
+    href: '/dashboard/announcement',
     icon: AnnouncementOutlinedIcon,
     current: false,
   },
@@ -114,22 +103,22 @@ const community = [
 const information = [
   {
     name: 'Logs',
-    href: '/dashboard/logs',
+    href: '/dashboard/log',
     icon: ConfirmationNumberOutlinedIcon,
     current: false,
   },
   {
     name: 'Documentation',
-    href: '/dashboard/document',
+    href: '/dashboard/documentation',
     icon: MenuBookOutlinedIcon,
     current: false,
   },
 ];
 
 const userNavigation = [
-  { name: 'My Dashboard', href: '#', icon: DashboardOutlinedIcon },
-  { name: 'My Profile', href: '#', icon: Person2OutlinedIcon },
-  { name: 'Sign Out', href: '#', icon: LogoutOutlinedIcon },
+  { name: 'My Dashboard', href: '/dashboard', icon: DashboardOutlinedIcon },
+  { name: 'My Profile', href: '/dashboard/profile', icon: Person2OutlinedIcon },
+  { name: 'Sign Out', href: '/', icon: LogoutOutlinedIcon },
 ];
 
 function classNames(...classes: (string | undefined | false | null)[]): string {
@@ -199,7 +188,7 @@ const DashboardNavbar = () => {
                     </div>
                   </TransitionChild>
                   {/* Sidebar component, swap this element with another sidebar if you like */}
-                  <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4'>
+                  <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-[#254752] px-6 pb-4'>
                     <div className='flex h-16 shrink-0 items-center'>
                       <Image
                         className='h-8 w-auto'
@@ -209,6 +198,7 @@ const DashboardNavbar = () => {
                         height={40}
                       />
                     </div>
+
                     <nav className='flex flex-1 flex-col'>
                       <ul
                         role='list'
@@ -228,8 +218,8 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-indigo-700 text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                                      ? 'bg-[#254752] text-white'
+                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
@@ -262,8 +252,8 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-indigo-700 text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                                      ? 'bg-[#254752] text-white'
+                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
@@ -296,8 +286,8 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-indigo-700 text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                                      ? 'bg-[#254752] text-white'
+                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
@@ -330,8 +320,8 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-indigo-700 text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                                      ? 'bg-[#254752] text-white'
+                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
@@ -364,8 +354,8 @@ const DashboardNavbar = () => {
                                   href={item.href}
                                   className={classNames(
                                     item.current
-                                      ? 'bg-indigo-700 text-white'
-                                      : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                                      ? 'bg-[#254752] text-white'
+                                      : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                                     'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                                   )}
                                 >
@@ -396,7 +386,7 @@ const DashboardNavbar = () => {
         {/* Static sidebar for desktop */}
         <div className='hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col'>
           {/* Sidebar component, swap this element with another sidebar if you like */}
-          <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4'>
+          <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-[#254752] px-6 pb-4'>
             <div className='flex h-16 shrink-0 items-center'>
               <Image
                 className='h-8 w-auto'
@@ -425,8 +415,8 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-indigo-700 text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                              ? 'bg-[#254752] text-white'
+                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                             'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
@@ -459,8 +449,8 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-indigo-700 text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                              ? 'bg-[#254752] text-white'
+                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                             'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
@@ -493,8 +483,8 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-indigo-700 text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                              ? 'bg-[#254752] text-white'
+                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                             'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
@@ -527,8 +517,8 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-indigo-700 text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                              ? 'bg-[#254752] text-white'
+                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                             'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
@@ -561,8 +551,8 @@ const DashboardNavbar = () => {
                           href={item.href}
                           className={classNames(
                             item.current
-                              ? 'bg-indigo-700 text-white'
-                              : 'text-indigo-200 hover:text-white hover:bg-indigo-700',
+                              ? 'bg-[#254752] text-white'
+                              : 'text-indigo-200 hover:text-white hover:bg-[#14323B]',
                             'group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
                           )}
                         >
@@ -631,17 +621,6 @@ const DashboardNavbar = () => {
                 />
               </form>
               <div className='flex items-center gap-x-4 lg:gap-x-6'>
-                <button
-                  type='button'
-                  className='-m-2.5 p-2.5 text-gray-400 hover:text-gray-500'
-                >
-                  <span className='sr-only'>View notifications</span>
-                  <BellIcon
-                    className='h-6 w-6'
-                    aria-hidden='true'
-                  />
-                </button>
-
                 {/* Separator */}
                 <div
                   className='hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10'
@@ -665,7 +644,7 @@ const DashboardNavbar = () => {
                         className='ml-4 text-sm font-semibold leading-6 text-gray-900'
                         aria-hidden='true'
                       >
-                        Tom Cook
+                        John Doe
                       </span>
                       <ChevronDownIcon
                         className='ml-2 h-5 w-5 text-gray-400'
@@ -681,8 +660,11 @@ const DashboardNavbar = () => {
                     leaveFrom='transform opacity-100 scale-100'
                     leaveTo='transform opacity-0 scale-95'
                   >
-                    <MenuItems className='absolute right-0 z-10 mt-2.5 w-48 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
-                      <div className='text-xs font-semibold'>Hello Name!</div>
+                    <MenuItems className='absolute right-0 z-10 mt-2.5 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
+                      <div className='flex items-center justify-center text-xs font-semibold py-2'>
+                        Hello Name!
+                      </div>
+                      <div className='border-b border-gray-300'></div>
                       {userNavigation.map((item) => (
                         <MenuItem key={item.name}>
                           {({ focus }) => (
@@ -690,7 +672,7 @@ const DashboardNavbar = () => {
                               href={item.href}
                               className={classNames(
                                 focus ? 'bg-gray-50' : '',
-                                'block px-3 py-1 text-sm leading-6 text-gray-900'
+                                'flex items-center px-3 py-1 text-sm leading-6 text-gray-900'
                               )}
                             >
                               <span className='mr-2'>
@@ -708,7 +690,7 @@ const DashboardNavbar = () => {
             </div>
           </div>
 
-          <main className='py-10'>
+          <main>
             <div className='px-4 sm:px-6 lg:px-8'>{/* Your content */}</div>
           </main>
         </div>
