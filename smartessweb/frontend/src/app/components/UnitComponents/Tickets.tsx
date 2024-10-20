@@ -3,7 +3,7 @@ const Tickets = ({
 }: {
   tickets: { total: number; pending: number; open: number; closed: number };
 }) => (
-  <div className="max-w-xs p-4 bg-white flex flex-col justify-start items-center shadow-md">
+  <div className="max-w-xs p-4 bg-white flex flex-col justify-start items-center">
     <div className="w-full relative pb-2.5">
       <div className="text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
         Tickets

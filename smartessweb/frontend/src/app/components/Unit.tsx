@@ -41,11 +41,11 @@ const Unit = () => {
       if (!hubData) return <div>Loading...</div>; */
 
   return (
-    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px]">
-      <div className="unit-title text-white text-xl px-3 flex justify-center">
+    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-md">
+      <div className="unit-title text-white text-xl flex justify-center">
         Unit 103
       </div>
-      <div className="unit-info-sections bg-white rounded-[7px] flex justify-between gap-10 p-5">
+      <div className="unit-info-sections bg-white rounded-[7px] flex justify-between gap-5 p-3">
         {/*  <HubOwner owner={hubData.owner} />
             <HubUsers users={hubData.users.slice(0, 3)} />
             <Tickets tickets={hubData.tickets} />
