@@ -45,7 +45,7 @@ const Unit = () => {
       <div className="unit-title text-white text-xl flex justify-center">
         Unit 103
       </div>
-      <div className="unit-info-sections bg-white rounded-[7px] flex justify-between gap-5 p-3">
+      <div className="unit-info-sections bg-white rounded-[7px] flex justify-between p-2">
         {/*  <HubOwner owner={hubData.owner} />
             <HubUsers users={hubData.users.slice(0, 3)} />
             <Tickets tickets={hubData.tickets} />
