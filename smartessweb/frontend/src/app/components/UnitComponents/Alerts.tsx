@@ -9,7 +9,7 @@ const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
   return (
     <div className="max-w-xs p-4 bg-white flex-col justify-start items-center">
       <div className="w-full relative pb-2.5">
-        <h3 className="text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
+        <h3 className="text-center text-[#4b7d8d] text-l font-bold font-['Sequel Sans'] leading-tight tracking-tight">
           Alerts
         </h3>
         <div className="w-full h-px absolute bg-[#4b7d8d]" />
@@ -27,7 +27,7 @@ const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
           </div>
         ))}
 
-        <button className="mt-3 w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#ff5449] transition duration-300">
+        <button className=" w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#ff5449] transition duration-300">
           See All
         </button>
       </div>

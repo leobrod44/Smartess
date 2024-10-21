@@ -24,7 +24,7 @@ const HubUsers = ({ users }: HubUsersProps) => {
   return (
     <div className="max-w-xs p-4 flex flex-col items-center gap-2.5">
       <div className="w-full relative pb-2.5">
-        <div className="text-center text-[#4b7d8d] text-xl font-['Sequel Sans'] leading-tight tracking-tight">
+        <div className="text-center text-[#4b7d8d] text-l font-bold font-['Sequel Sans'] leading-tight tracking-tight">
           Hub users
         </div>
         <div className="w-full h-px absolute bg-[#4b7d8d]" />
@@ -34,7 +34,7 @@ const HubUsers = ({ users }: HubUsersProps) => {
           {displayedUsers.map((user, index) => (
             <div
               key={index}
-              className="text-black text-sm font-['Sequel Sans'] leading-tight tracking-tight text-center pb-2"
+              className="text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight text-center pb-1"
             >
               {formatUserName(user.firstName, user.lastName)}
             </div>
