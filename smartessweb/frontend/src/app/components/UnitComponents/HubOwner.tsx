@@ -1,10 +1,8 @@
-
 const HubOwner = ({
   owner,
 }: {
-  owner: { firstName: string; lastName: string; email: string };
+  owner: { firstName: string; lastName: string; email: string } | null;
 }) => {
-  
   //Formatting method to ensure the names have first letter capitalization only
   const formatName = (name: string) => {
     return name
@@ -14,6 +12,9 @@ const HubOwner = ({
       .join(" ");
   };
 
+  // Check if the owner exists and has valid properties
+  const hasOwner = owner && owner.firstName && owner.lastName && owner.email;
+
   return (
     <div className="max-w-xs p-4 flex flex-col items-center gap-2.5 pr-1">
       <div className="w-full relative pb-2.5">
@@ -22,16 +23,26 @@ const HubOwner = ({
         </div>
         <div className="w-full h-px absolute bg-[#4b7d8d]"></div>
       </div>
-      <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
-        {formatName(owner.firstName)} {formatName(owner.lastName)}
-      </div>
-      <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
-        {owner.email}
-      </div>
-      <button className="w-[80px] h-[22px] bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
-        Contact
-      </button>
+
+      {hasOwner ? (
+        <>
+          <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+            {formatName(owner.firstName)} {formatName(owner.lastName)}
+          </div>
+          <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+            {owner.email}
+          </div>
+          <button className="w-[80px] h-[22px] bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+            Contact
+          </button>
+        </>
+      ) : (
+        <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+          No hub owner found
+        </div>
+      )}
     </div>
   );
 };
+
 export default HubOwner;
