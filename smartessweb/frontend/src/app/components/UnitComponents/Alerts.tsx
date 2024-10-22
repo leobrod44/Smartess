@@ -27,7 +27,7 @@ const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
           </div>
         ))}
 
-        <button className=" w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#ff5449] transition duration-300">
+        <button className=" w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300">
           See All
         </button>
       </div>
