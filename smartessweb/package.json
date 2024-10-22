@@ -11,15 +11,19 @@
     "ci:test": "jest --ci --coverage"
   },
   "dependencies": {
-    "next": "14.2.13",
-    "react": "^18",
-    "react-dom": "^18",
+    "@headlessui/react": "^2.1.9",
+    "@heroicons/react": "^2.1.5",
+    "@next/font": "^14.2.14",
+    "next": "^14.2.14",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-toastify": "^10.0.5",
     "smartess": "file:"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
     "jest": "^29.7.0",
