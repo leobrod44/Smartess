@@ -1,5 +1,3 @@
-import React, { useState } from "react";
-
 // Define the interface for user data
 interface User {
   firstName: string;
