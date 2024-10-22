@@ -15,7 +15,7 @@ const HubOwner = ({
   };
 
   return (
-    <div className="max-w-xs p-4 flex flex-col items-center gap-2.5">
+    <div className="max-w-xs p-4 flex flex-col items-center gap-2.5 pr-1">
       <div className="w-full relative pb-2.5">
         <div className="text-center text-[#4b7d8d] text-l font-bold font-['Sequel Sans'] leading-tight tracking-tight">
           Hub owner

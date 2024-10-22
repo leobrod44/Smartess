@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from "react";
 import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
@@ -13,62 +12,42 @@ const Unit = () => {
   ];
 
   const tickets = {
-    total: 22, // Total tickets
-    open: 3, // Open tickets
-    pending: 4, // Pending tickets
-    closed: 12, // Closed tickets
+    total: 22, 
+    open: 3, 
+    pending: 4, 
+    closed: 12, 
   };
 
-  /*   const [hubData, setHubData] = useState<{
-        unitNumber: string;
-        owner: { name: string; email: string };
-        users: string[];
-        tickets: { total: number; pending: number; open: number; closed: number };
-        alerts: { message: string; type: string }[];
-      } | null>(null);
-    
-      useEffect(() => {
-        const fetchData = async () => {
-          // Replace with actual data fetching
-          const response = await fetch('/api/getHubData');
-          const data = await response.json();
-          setHubData(data);
-        };
-    
-        fetchData();
-      }, []);
-    
-      if (!hubData) return <div>Loading...</div>; */
-
   return (
-    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-md">
-      <div className="unit-title text-white text-xl flex justify-center">
+    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-md max-w-fit sm:max-w-full mx-auto">
+      <div className="unit-title text-white text-l flex justify-center">
         Unit 103
       </div>
-      <div className="unit-info-sections bg-white rounded-[7px] flex justify-between p-2">
-        {/*  <HubOwner owner={hubData.owner} />
-            <HubUsers users={hubData.users.slice(0, 3)} />
-            <Tickets tickets={hubData.tickets} />
-           <Alerts alerts={hubData.alerts} /> */}
-        <HubOwner
-          owner={{
-            firstName: "LARRY",
-            lastName: "JOHNSON",
-            email: "larryJ@hotmail.com",
-          }}
-        />
+      <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row justify-between px-4">
+          <HubOwner
+            owner={{
+              firstName: "LARRY",
+              lastName: "JOHNSON",
+              email: "larryJ@hotmail.com",
+            }}
+          />
+
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
-        <HubUsers users={users} />
+        <div className="flex-grow-0 flex-shrink-0">
+          <HubUsers users={users} />
+        </div>
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
-        <Tickets tickets={tickets} />
-        <div className="divider bg-[#a0bfca] w-[1px]"></div>
-        <Alerts
-          alerts={[
-            { message: "SMOKE ALARM ACTIVATED" },
-            { message: "WATER leak DETECTED" },
-            { message: "WATER LEAKSSS DETECTED" },
-          ]}
-        />
+        <div className="flex-grow-0 flex-shrink-0">
+          <Tickets tickets={tickets} />
+        </div>
+        <div className="divider bg-[#a0bfca] w-[1px] "></div>
+          <Alerts
+            alerts={[
+              { message: "SMOKE ALARM ACTIVATED" },
+              { message: "WATER leak DETECTED" },
+              { message: "WATER LEAKSSS DETECTED" },
+            ]}
+          />
       </div>
     </div>
   );

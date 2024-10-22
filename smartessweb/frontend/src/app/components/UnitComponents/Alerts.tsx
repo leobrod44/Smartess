@@ -7,7 +7,7 @@ const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
   };
 
   return (
-    <div className="max-w-xs p-4 bg-white flex-col justify-start items-center">
+    <div className="max-w-xs p-4 flex-col justify-start items-center">
       <div className="w-full relative pb-2.5">
         <h3 className="text-center text-[#4b7d8d] text-l font-bold font-['Sequel Sans'] leading-tight tracking-tight">
           Alerts
