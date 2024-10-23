@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -33,6 +33,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { usePathname } from 'next/navigation';
 
 const home = [
   {
@@ -126,6 +127,7 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 }
 
 const DashboardNavbar = () => {
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -190,13 +192,15 @@ const DashboardNavbar = () => {
                   {/* Sidebar component, swap this element with another sidebar if you like */}
                   <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-[#254752] px-6 pb-4'>
                     <div className='flex h-16 shrink-0 items-center'>
-                      <Image
-                        className='h-8 w-auto'
-                        src={dashboardLogo}
-                        alt='Logo'
-                        width={100}
-                        height={40}
-                      />
+                      <Link href='/'>
+                        <Image
+                          className='h-8 w-auto'
+                          src={dashboardLogo}
+                          alt='Logo'
+                          width={100}
+                          height={40}
+                        />
+                      </Link>
                     </div>
 
                     <nav className='flex flex-1 flex-col'>
@@ -217,10 +221,10 @@ const DashboardNavbar = () => {
                                 <Link
                                   href={item.href}
                                   className={classNames(
-                                    item.current
-                                      ? 'bg-[#254752]'
+                                    pathname === item.href
+                                      ? 'bg-[#14323B]'
                                       : 'hover:bg-[#14323B]',
-                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                    'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                                   )}
                                 >
                                   <item.icon
@@ -246,10 +250,10 @@ const DashboardNavbar = () => {
                                 <Link
                                   href={item.href}
                                   className={classNames(
-                                    item.current
-                                      ? 'bg-[#254752]'
+                                    pathname === item.href
+                                      ? 'bg-[#14323B]'
                                       : 'hover:bg-[#14323B]',
-                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                    'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                                   )}
                                 >
                                   <item.icon
@@ -275,10 +279,10 @@ const DashboardNavbar = () => {
                                 <Link
                                   href={item.href}
                                   className={classNames(
-                                    item.current
-                                      ? 'bg-[#254752]'
+                                    pathname === item.href
+                                      ? 'bg-[#14323B]'
                                       : 'hover:bg-[#14323B]',
-                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                    'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                                   )}
                                 >
                                   <item.icon
@@ -304,10 +308,10 @@ const DashboardNavbar = () => {
                                 <Link
                                   href={item.href}
                                   className={classNames(
-                                    item.current
-                                      ? 'bg-[#254752]'
+                                    pathname === item.href
+                                      ? 'bg-[#14323B]'
                                       : 'hover:bg-[#14323B]',
-                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                    'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                                   )}
                                 >
                                   <item.icon
@@ -333,10 +337,10 @@ const DashboardNavbar = () => {
                                 <Link
                                   href={item.href}
                                   className={classNames(
-                                    item.current
-                                      ? 'bg-[#254752]'
+                                    pathname === item.href
+                                      ? 'bg-[#14323B]'
                                       : 'hover:bg-[#14323B]',
-                                    'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                                    'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                                   )}
                                 >
                                   <item.icon
@@ -363,13 +367,15 @@ const DashboardNavbar = () => {
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className='flex grow flex-col gap-y-5 overflow-y-auto bg-[#254752] px-6 pb-4'>
             <div className='flex h-16 shrink-0 items-center'>
-              <Image
-                className='h-8 w-auto'
-                src={dashboardLogo}
-                alt='Logo'
-                width={100}
-                height={40}
-              />
+              <Link href='/'>
+                <Image
+                  className='h-8 w-auto'
+                  src={dashboardLogo}
+                  alt='Logo'
+                  width={100}
+                  height={40}
+                />
+              </Link>
             </div>
             <nav className='flex flex-1 flex-col'>
               <ul
@@ -389,10 +395,10 @@ const DashboardNavbar = () => {
                         <Link
                           href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'bg-[#254752]'
+                            pathname === item.href
+                              ? 'bg-[#14323B]'
                               : 'hover:bg-[#14323B]',
-                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                            'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                           )}
                         >
                           <item.icon
@@ -418,10 +424,10 @@ const DashboardNavbar = () => {
                         <Link
                           href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'bg-[#254752]'
+                            pathname === item.href
+                              ? 'bg-[#14323B]'
                               : 'hover:bg-[#14323B]',
-                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                            'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                           )}
                         >
                           <item.icon
@@ -447,10 +453,10 @@ const DashboardNavbar = () => {
                         <Link
                           href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'bg-[#254752]'
+                            pathname === item.href
+                              ? 'bg-[#14323B]'
                               : 'hover:bg-[#14323B]',
-                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                            'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                           )}
                         >
                           <item.icon
@@ -476,10 +482,10 @@ const DashboardNavbar = () => {
                         <Link
                           href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'bg-[#254752]'
+                            pathname === item.href
+                              ? 'bg-[#14323B]'
                               : 'hover:bg-[#14323B]',
-                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                            'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                           )}
                         >
                           <item.icon
@@ -505,10 +511,10 @@ const DashboardNavbar = () => {
                         <Link
                           href={item.href}
                           className={classNames(
-                            item.current
-                              ? 'bg-[#254752]'
+                            pathname === item.href
+                              ? 'bg-[#14323B]'
                               : 'hover:bg-[#14323B]',
-                            'text-white group flex gap-x-3 rounded-md p-2 text-xs leading-6 font-semibold'
+                            'text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6'
                           )}
                         >
                           <item.icon
@@ -611,7 +617,7 @@ const DashboardNavbar = () => {
                     leaveTo='transform opacity-0 scale-95'
                   >
                     <MenuItems className='absolute right-0 z-10 mt-2.5 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
-                      <div className='flex items-center justify-center text-xs font-semibold py-2'>
+                      <div className='flex items-center justify-center text-xs py-2'>
                         Hello Name!
                       </div>
                       <div className='border-b border-gray-300'></div>
@@ -622,7 +628,7 @@ const DashboardNavbar = () => {
                               href={item.href}
                               className={classNames(
                                 focus ? 'bg-gray-50' : '',
-                                'flex items-center px-3 py-1 text-sm leading-6 text-gray-900'
+                                'flex items-center px-3 py-1 text-sm leading-6 text-[#325A67]'
                               )}
                             >
                               <span className='mr-2'>
