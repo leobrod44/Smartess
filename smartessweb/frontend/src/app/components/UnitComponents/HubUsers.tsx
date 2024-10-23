@@ -22,7 +22,7 @@ const HubUsers = ({ users }: HubUsersProps) => {
   return (
     <div className="max-w-xs p-4 flex flex-col items-center gap-2.5">
       <div className="w-full relative pb-2.5">
-        <div className="text-center text-[#4b7d8d] text-l font-bold font-['Sequel Sans'] leading-tight tracking-tight">
+        <div className="text-center text-[#4b7d8d] text-l font-sequel-sans-black leading-tight tracking-tight">
           Hub users
         </div>
         <div className="w-full h-px absolute bg-[#4b7d8d]" />
