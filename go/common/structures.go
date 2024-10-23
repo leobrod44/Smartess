@@ -1,4 +1,4 @@
-package smartess
+package structures
 
 import "time"
 

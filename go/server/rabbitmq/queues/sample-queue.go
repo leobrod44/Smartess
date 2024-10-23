@@ -1,8 +1,8 @@
 package rabbitmq
 
 import (
+	"Smartess/go/server/rabbitmq"
 	"log"
-	"smartess/server/rabbitmq"
 )
 
 type AlertQueueHandler struct {

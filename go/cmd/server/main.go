@@ -1,10 +1,10 @@
 package main
 
 import (
+	"Smartess/go/server/rabbitmq"
 	"fmt"
 	"log"
 	"os"
-	"smartess/server/rabbitmq"
 	"time"
 
 	"github.com/streadway/amqp"

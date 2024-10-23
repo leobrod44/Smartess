@@ -1,6 +1,6 @@
 package rabbitmq
 
-import "github.com/streadway/amqp"
+import amqp "github.com/rabbitmq/amqp091-go"
 
 type Message interface {
 	Parse(string) error
