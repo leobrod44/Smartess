@@ -1,14 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid"; // Import icons for the arrow
-
-// Mock Unit Component
-const Unit = () => {
-  return (
-    <div className="bg-gray-100 p-4 mt-2 rounded-lg shadow-inner">
-      <p>This is the Unit component content!</p>
-    </div>
-  );
-};
+import Unit from "../components/Unit";
 
 // TypeScript Interface
 export interface Project {
@@ -52,7 +44,7 @@ export default function ProjectInfo() {
   };
 
   return (
-    <div>
+    <div className="w-full">
       {/* Loop through each project in MOCK_PROJECTS */}
       {MOCK_PROJECTS.map((project, index) => (
         <div
@@ -60,41 +52,41 @@ export default function ProjectInfo() {
           className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30"
         >
           {/* Labels as a grid with border under it */}
-          <div className="grid grid-cols-6 gap-4 w-full border-b border-gray-300 pb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full border-b border-gray-300 pb-2">
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Address
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Units
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Admin Users
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Hub Users
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Pending Tickets
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[#14323B] text-xl font-sequel-sans-medium leading-tight tracking-tight">
+              <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
                 Action
               </p>
             </div>
           </div>
 
           {/* Project data as a grid without a border */}
-          <div className="grid grid-cols-6 gap-4 w-full pt-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full pt-2">
             <div className="text-center">
               <p className="mt-1">{project.address}</p>
             </div>
@@ -140,7 +132,11 @@ export default function ProjectInfo() {
           </div>
 
           {/* Render the Unit component when "More" is clicked */}
-          {showUnit === index && <Unit />}
+          {showUnit === index && (
+            <div className="pt-4">
+              <Unit unitNumber="103" />
+            </div>
+          )}
         </div>
       ))}
     </div>
