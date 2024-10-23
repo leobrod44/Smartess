@@ -9,19 +9,19 @@ export const metadata = {
 };
 
 // Define each font style separately
- const sequelSansMediumBody = localFont({ 
+const sequelSansMediumBody = localFont({
   src: '../public/fonts/Sequel-Sans-Medium-Body.ttf',
   weight: '500',
   variable: '--font-sequel-sans-medium',
 });
 
- const sequelSansBold = localFont({ 
+const sequelSansBold = localFont({
   src: '../public/fonts/Sequel-Sans-Medium-Body.ttf',
   weight: '700',
   variable: '--font-sequel-sans-bold',
 });
 
- const sequelSansRomanBody = localFont({
+const sequelSansRomanBody = localFont({
   src: '../public/fonts/Sequel-Sans-Roman-Body.ttf',
   weight: '400',
   variable: '--font-sequel-sans-roman',
@@ -39,22 +39,33 @@ const sequelSansLightBody = localFont({
   variable: '--font-sequel-sans-light-body',
 });
 
- const sequelSansBlackDisp = localFont({
+const sequelSansBlackDisp = localFont({
   src: '../public/fonts/Sequel-Sans-Black-Disp.ttf',
   weight: '900',
   variable: '--font-sequel-sans-black-disp',
 });
 
-export {sequelSansBlackDisp,sequelSansBold,sequelSansLightBody,sequelSansLightDisp,sequelSansMediumBody,sequelSansRomanBody}
+export {
+  sequelSansBlackDisp,
+  sequelSansBold,
+  sequelSansLightBody,
+  sequelSansLightDisp,
+  sequelSansMediumBody,
+  sequelSansRomanBody,
+};
 interface MainLayoutProps {
   children: ReactNode;
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <html lang='en'>
-      <body className={`${sequelSansMediumBody.variable} ${sequelSansBold.variable} ${sequelSansRomanBody.variable} ${sequelSansLightDisp.variable} ${sequelSansLightBody.variable} ${sequelSansBlackDisp.variable}`}>
-
+    <html
+      lang='en'
+      className='h-full bg-white'
+    >
+      <body
+        className={`${sequelSansMediumBody.variable} ${sequelSansBold.variable} ${sequelSansRomanBody.variable} ${sequelSansLightDisp.variable} ${sequelSansLightBody.variable} ${sequelSansBlackDisp.variable}`}
+      >
         <main>{children}</main>
       </body>
     </html>
