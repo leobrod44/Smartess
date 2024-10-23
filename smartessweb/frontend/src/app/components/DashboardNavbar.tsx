@@ -150,7 +150,7 @@ const DashboardNavbar = () => {
         const errorData = await response.json();
         showToastError(errorData.error || 'Logout failed');
       }
-    } catch (error) {
+    } catch {
       showToastError('An error occurred during logout');
     }
   };
