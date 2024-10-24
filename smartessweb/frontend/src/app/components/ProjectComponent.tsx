@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid"; // Import icons for the arrow
 import Unit from "../components/Unit";
-
 //  Interface
 export interface UnitData {
   unitNumber: string;
@@ -147,12 +146,13 @@ export default function ProjectInfo() {
           </div>
 
           {showUnits === index && (
-            <div className="pt-4 space-y-4">
+            <div className="pt-4 space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-4">
+              {" "}
               {project.units.map((unit) => (
                 <Unit
-                  key={`${project.projectId}-${unit.unitNumber}`} // Unique key using projectId and unitNumber
+                  key={`${project.projectId}-${unit.unitNumber}`}
                   unitNumber={unit.unitNumber}
-                  projectId={project.projectId} // Pass projectId as a prop for differentiation
+                  projectId={project.projectId}
                 />
               ))}
             </div>
