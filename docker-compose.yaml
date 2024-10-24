@@ -1,5 +1,6 @@
 services:
   loki:
+    container_name: loki
     image: grafana/loki:latest
     ports:
       - "3100:3100"
@@ -10,6 +11,7 @@ services:
     command: -config.file=/etc/loki/loki-config.yaml
 
   promtail:
+    container_name: promtail
     image: grafana/promtail:latest
     volumes:
       - ./observability/promtail/config:/etc/promtail
@@ -17,6 +19,7 @@ services:
     command: -config.file=/etc/promtail/promtail-config.yaml
 
   grafana:
+    container_name: grafana
     image: grafana/grafana:latest
     ports:
       - "3001:3000"
@@ -28,6 +31,7 @@ services:
     depends_on:
       - loki
   server:
+    container_name: server
     build:
       context: ./go  # Set the build context to the go directory
       dockerfile: cmd/server/Dockerfile  # Specify the Dockerfile path relative to the build context
@@ -40,8 +44,11 @@ services:
         condition: service_healthy  # Correct placement of health condition
     environment:
       RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
+    networks:
+      - smartess_network
   
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:management #TODO: Development only. For Production, use: rabbitmq:latest
     ports:
       - "5672:5672"
@@ -58,3 +65,8 @@ services:
       timeout: 5s        # Time allowed for RabbitMQ to respond
       retries: 3         # Retry up to 3 times before marking the service as unhealthy
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
+    networks:
+      - smartess_network
+networks:
+  smartess_network:
+    external: true

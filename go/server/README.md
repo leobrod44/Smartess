@@ -6,3 +6,7 @@ brew services start rabbitmq
 
 http://localhost:15672/#/
 
+
+To get hub id: 
+- docker ps to get port
+- docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 1f4fe65e8fe5

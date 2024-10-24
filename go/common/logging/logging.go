@@ -8,9 +8,9 @@ import (
 )
 
 // InitializeLogger initializes the logger instance. Used for our grafana, loki, and promtail system.
-func InitializeLogger() (*zap.Logger, error) {
+func InitializeLogger(logPath string) (*zap.Logger, error) {
 
-	logFile, err := os.OpenFile("/app/logs/server.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
 	}

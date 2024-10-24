@@ -33,3 +33,9 @@ type Announcement struct {
 	Attachments    []string   `json:"attachments"`     // List of attachment URLs if any
 	Priority       string     `json:"priority"`        // Priority level (e.g., "low", "normal", "high")
 }
+
+type GenericMessage struct {
+	HubID     int       `json:"id"`         // ID of the sender
+	Content   string    `json:"json"`       // The message content
+	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
+}

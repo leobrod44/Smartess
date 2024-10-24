@@ -1,90 +1,69 @@
 package rabbitmq
 
 import (
-	"Smartess/go/server/logging"
+	"Smartess/go/common/logging"
+	"Smartess/go/common/rabbitmq"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 
-// RabbitMQServer represents a RabbitMQ server instance.
 type RabbitMQServer struct {
-	smartessQueues []SmartessQueue  // List of queues to be processed
-	Logger         *zap.Logger      // Logger instance for logging
-	channel        *amqp.Channel    // AMQP channel for communication with RabbitMQ
-	connection     *amqp.Connection // AMQP connection to RabbitMQ
+	instance  *rabbitmq.RabbitMQInstance
+	Logger    *zap.Logger
+	consumers []QueueConsumer
 }
 
-// Init initializes a RabbitMQServer instance.
 func Init() (RabbitMQServer, error) {
-	logger, err := logging.InitializeLogger()
+
+	logger, err := logging.InitializeLogger("/app/logs/server.log")
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
 
-	uri := os.Getenv("RABBITMQ_URI") //"amqp://????:????@localhost:5672/"
-	fmt.Println("URI: ", uri)
-	//
-	//// Parse the URI
-	//u, err := url.Parse(uri)
-	//if err != nil {
-	//	return RabbitMQServer{}, errors.New("Invalid RabbitMQ URI: " + err.Error())
-	//}
-	//
-	//// Check if the scheme is valid
-	//if u.Scheme != "amqp" && u.Scheme != "amqps" {
-	//	return RabbitMQServer{}, errors.New("AMQP scheme must be either 'amqp://' or 'amqps://'")
-	//}
-
-	// Log the connection attempt
-	fmt.Println("Connecting to RabbitMQ at", uri)
-	conn, err := amqp.Dial(uri)
+	instance, err := rabbitmq.Init("/app/config/queues.yaml")
 	if err != nil {
-		return RabbitMQServer{}, errors.New("Failed to connect to RabbitMQ: " + err.Error())
+		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
+	}
+	var consumers []QueueConsumer
+
+	for _, queueConfig := range instance.Config.Queues {
+		queue, err := instance.Channel.QueueDeclare(
+			queueConfig.Queue,      // name of the queue
+			queueConfig.Durable,    // durable
+			queueConfig.AutoDelete, // delete when unused
+			queueConfig.Exclusive,  // exclusive
+			queueConfig.NoWait,     // no-wait
+			queueConfig.Arguments,  // arguments
+		)
+		if err != nil {
+			instance.Channel.Close()
+			instance.Conn.Close() // Close connection if there's an error
+			logger.Fatal("Failed to declare queue", zap.String("queue", queueConfig.Queue), zap.Error(err))
+		}
+		handler, err := setHandler(queue)
+		if err != nil {
+			return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
+		}
+		consumer := QueueConsumer{rabbitmqQueue: queue, messageHandler: handler}
+		consumers = append(consumers, consumer)
 	}
 
-	ch, err := conn.Channel()
-	if err != nil {
-		return RabbitMQServer{}, errors.New("Failed to open a channel: " + err.Error())
-	}
-
-	//TODO add all necessary queues based on configuration, ex is all true for sake of example
-	sampleQueue, err := Declare(ch, QueueConfig{
-		"test-queue", // Queue name
-		false,        // Durable
-		true,         // Auto-delete
-		false,        // Exclusive
-		false,        // No-wait
-		false,        // Passive
-		nil,          // Arguments
-	})
-
-	if err != nil {
-		logger.Fatal("ERROR: Failed to declare queue", zap.Error(err))
-	}
-	srv := RabbitMQServer{
-		smartessQueues: []SmartessQueue{sampleQueue},
-		Logger:         logger,
-		channel:        ch,
-		connection:     conn,
-	}
-	return srv, nil
+	// Return RabbitMQServer with consumers
+	return RabbitMQServer{
+		instance:  instance,
+		Logger:    logger,
+		consumers: consumers,
+	}, nil
 }
 
 // Start starts the RabbitMQ server and begins processing messages from the queues.
 func (r *RabbitMQServer) Start() {
-
-	defer r.connection.Close()
-	defer r.channel.Close()
-	//Start consuming messages from each queue
-	//TODO: Add neccessary consumption configs for each queue (if we have multiple queues
-	//		we could have an array of different consumption configs and listen for each)
-	for _, smartessQueue := range r.smartessQueues {
-		go func(queue SmartessQueue) {
-			msgs, err := r.channel.Consume(
+	for _, smartessQueue := range r.consumers {
+		go func(queue QueueConsumer) {
+			msgs, err := r.instance.Channel.Consume(
 				queue.rabbitmqQueue.Name, // Queue name
 				"",                       // Consumer
 				true,                     // Auto-acknowledge
@@ -97,9 +76,8 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				//r.messageHandler.MessageHandler(msg)
-				//_ = msg
-				fmt.Printf("Received a message: %s\n", msg.Body)
+				r.Logger.Info("Received message", zap.String("message", string(msg.Body)))
+				queue.messageHandler.Handle(msg)
 			}
 		}(smartessQueue)
 	}
@@ -107,4 +85,18 @@ func (r *RabbitMQServer) Start() {
 	// Wait indefinitely (this will run after the goroutines above since go funcs are async (they start a thread and run concurrently))
 	r.Logger.Info("RabbitMQ server started. Waiting for messages...")
 	select {}
+}
+
+func setHandler(queue amqp.Queue) (MessageHandler, error) {
+	switch queue.Name {
+	case "generic-message":
+		return &GenericMessageHandler{}, nil
+	default:
+		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
+	}
+}
+
+func (r *RabbitMQServer) Close() {
+	r.instance.Channel.Close()
+	r.instance.Conn.Close()
 }
