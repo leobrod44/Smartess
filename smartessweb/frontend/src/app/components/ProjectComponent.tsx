@@ -33,7 +33,7 @@ const MOCK_PROJECTS: Project[] = [
   {
     projectId: "b10294",
     address: "750 Peel Street",
-    units: [{ unitNumber: "201" }, { unitNumber: "Unit 202" }],
+    units: [{ unitNumber: "201" }, { unitNumber: "202" }],
     adminUsers: 2,
     hubUsers: 12,
     pendingTickets: 5,
