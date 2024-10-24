@@ -19,6 +19,7 @@ import {
 import dashboardLogo from '@/public/images/dashboardLogo.png';
 import Image from 'next/image';
 import Link from 'next/link';
+import Toast, { showToastError, showToastSuccess } from '../components/Toast';
 
 // Material UI icons
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
@@ -33,7 +34,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const home = [
   {
@@ -127,11 +128,36 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 }
 
 const DashboardNavbar = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (response.ok) {
+        localStorage.removeItem('token');
+        showToastSuccess('Logged out successfully');
+        setTimeout(() => {
+          router.push('/');
+        }, 1000);
+      } else {
+        const errorData = await response.json();
+        showToastError(errorData.error || 'Logout failed');
+      }
+    } catch {
+      showToastError('An error occurred during logout');
+    }
+  };
+
   return (
     <>
+      <Toast />
       {/*
         This example requires updating your template:
 
@@ -621,24 +647,41 @@ const DashboardNavbar = () => {
                         Hello Name!
                       </div>
                       <div className='border-b border-gray-300'></div>
-                      {userNavigation.map((item) => (
-                        <MenuItem key={item.name}>
-                          {({ focus }) => (
-                            <Link
-                              href={item.href}
-                              className={classNames(
-                                focus ? 'bg-gray-50' : '',
-                                'flex items-center px-3 py-1 text-sm leading-6 text-[#325A67]'
-                              )}
-                            >
-                              <span className='mr-2'>
-                                {item.icon && <item.icon />}{' '}
-                              </span>
-                              {item.name}
-                            </Link>
-                          )}
-                        </MenuItem>
-                      ))}
+                      {userNavigation.map((item) =>
+                        item.name === 'Sign Out' ? (
+                          <MenuItem key={item.name}>
+                            {({ focus }) => (
+                              <button
+                                onClick={handleLogout}
+                                className={classNames(
+                                  focus ? 'bg-gray-50' : '',
+                                  'flex w-full items-center px-3 py-1 text-sm leading-6 text-[#325A67]'
+                                )}
+                              >
+                                <item.icon className='mr-2' />
+                                {item.name}
+                              </button>
+                            )}
+                          </MenuItem>
+                        ) : (
+                          <MenuItem key={item.name}>
+                            {({ focus }) => (
+                              <Link
+                                href={item.href}
+                                className={classNames(
+                                  focus ? 'bg-gray-50' : '',
+                                  'flex items-center px-3 py-1 text-sm leading-6 text-[#325A67]'
+                                )}
+                              >
+                                <span className='mr-2'>
+                                  <item.icon />
+                                </span>
+                                {item.name}
+                              </Link>
+                            )}
+                          </MenuItem>
+                        )
+                      )}
                     </MenuItems>
                   </Transition>
                 </Menu>
