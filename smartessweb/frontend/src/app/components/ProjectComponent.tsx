@@ -66,7 +66,7 @@ export default function ProjectInfo() {
       {MOCK_PROJECTS.map((project, index) => (
         <div
           key={index}
-          className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30"
+          className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30 hover:border-[#4b7d8d] transition duration-300"
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full border-b border-gray-300 pb-2">
             <div className="text-center">
@@ -132,7 +132,7 @@ export default function ProjectInfo() {
             <div className="text-center">
               <div className="flex justify-center">
                 <button
-                  className="bg-[#4b7d8d] text-white rounded-full px-4 py-2 flex items-center justify-center"
+                  className="bg-[#4b7d8d] text-white rounded-full px-4 py-2 flex items-center justify-center hover:bg-[#266472] transition duration-300"
                   onClick={() => handleToggle(index)}
                 >
                   More
