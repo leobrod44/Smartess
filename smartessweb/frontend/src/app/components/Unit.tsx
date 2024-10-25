@@ -116,7 +116,7 @@ const Unit = ({
           Unit {unitNumber}
         </button>
       </div>
-      <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row justify-between px-4">
+      <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row justify-around px-4">
         <HubOwner owner={owner} />
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
 
