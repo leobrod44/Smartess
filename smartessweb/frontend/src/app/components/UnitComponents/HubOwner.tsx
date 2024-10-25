@@ -21,7 +21,7 @@ const HubOwner = ({
         <div className="text-center text-[#4b7d8d] text-l font-sequel-sans-black leading-tight tracking-tight">
           Hub owner
         </div>
-        <div className="w-full h-px absolute bg-[#4b7d8d]"></div>
+        <div className="w-[75%] h-px absolute bg-[#4b7d8d] left-1/2 transform -translate-x-1/2 "></div>
       </div>
 
       {hasOwner ? (
