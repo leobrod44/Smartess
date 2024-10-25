@@ -146,7 +146,7 @@ export default function ProjectInfo() {
           </div>
 
           {showUnits === index && (
-            <div className="pt-4 space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-4">
+            <div className="pt-4 space-y-4 max-h-60 overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
               {" "}
               {project.units.map((unit) => (
                 <Unit
