@@ -110,26 +110,34 @@ const Unit = ({
   }, [projectId]);
 
   return (
-    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-md max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
+    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
       <div className=" w-full h-full unit-title text-white text-l flex justify-center">
         <button className="w-full font-sequel-sans-black">
           Unit {unitNumber}
         </button>
       </div>
-      <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row justify-around px-4">
-        <HubOwner owner={owner} />
+
+      <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row">
+        <div className="flex-1">
+          <HubOwner owner={owner} />
+        </div>
+
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
 
-        <div className="flex-grow-0 flex-shrink-0">
+        <div className="flex-1 md:min-w-[108px]">
           <HubUsers users={users} />
         </div>
+
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
 
-        <div className="flex-grow-0 flex-shrink-0">
+        <div className="flex-1 md:min-w-[150px]">
           <Tickets tickets={tickets} />
         </div>
-        <div className="divider bg-[#a0bfca] w-[1px] "></div>
-        <Alerts alerts={alerts} />
+
+        <div className="divider bg-[#a0bfca] w-[1px]"></div>
+        <div className="flex-1">
+          <Alerts alerts={alerts} />
+        </div>
       </div>
     </div>
   );
