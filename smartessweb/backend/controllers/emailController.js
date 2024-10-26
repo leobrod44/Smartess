@@ -1,26 +1,13 @@
-const { sendEmail } = require('../services/emailService');
+const { sendEmail, storeEmail } = require('../services/emailService');
 require('dotenv').config();
 
 exports.sendEmailController = async (req, res) => {
-  const {
-    businessName,
-    firstName,
-    lastName,
-    telephoneNumber,
-    email,
-    description,
-  } = req.body;
+  const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
 
-  if (
-    !businessName ||
-    !firstName ||
-    !lastName ||
-    !telephoneNumber ||
-    !email ||
-    !description
-  ) {
+  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
     return res.status(400).json({ message: 'All fields are required' });
-  }
+
+  console.log(`Sending email to: ${email}...`);
 
   try {
     const result = await sendEmail(
@@ -37,20 +24,54 @@ exports.sendEmailController = async (req, res) => {
     );
 
     if (result.success) {
+      console.log('Email sent successfully');
       return res.status(200).json({
         message: 'Email sent successfully',
         data: result.data,
       });
+    } else {
+      console.log('Failed to send email');
+      return res.status(500).json({
+        message: 'Failed to send email',
+        error: result.error,
+      });
     }
 
-    return res.status(500).json({
-      message: 'Failed to send email',
-      error: result.error,
-    });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Server error',
-      error: error.message,
-    });
+      return res.status(500).json({
+        message: 'Server error',
+        error: error.message,
+      });
+  }
+};
+
+exports.storeEmailController = async (req, res) => {
+  const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
+
+  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
+  return res.status(400).json({ message: 'All fields are required' });
+
+  console.log(`Storing email: ${email} in database...`);
+
+  try {
+    const result = await storeEmail(businessName, firstName, lastName, telephoneNumber, email, description);
+
+    if (result.success) {
+      console.log('Email stored successfully');
+      return res.status(200).json({ 
+        message: 'Email stored successfully' 
+      });
+    } else {
+      console.error('Failed to store data');
+      return res.status(500).json({ 
+        message: 'Failed to store data', 
+        error: result.error 
+      });
+    }
+  } catch (error) {
+      return res.status(500).json({
+        message: 'Server error',
+        error: error.message,
+      });
   }
 };
