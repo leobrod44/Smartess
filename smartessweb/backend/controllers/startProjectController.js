@@ -57,9 +57,9 @@ exports.storeDataController = async (req, res) => {
     const result = await storeData(businessName, firstName, lastName, telephoneNumber, email, description);
 
     if (result.success) {
-      console.log('Email stored successfully');
+      console.log('Data stored successfully');
       return res.status(200).json({ 
-        message: 'Email stored successfully' 
+        message: 'Data stored successfully' 
       });
     } else {
       console.error('Failed to store data');
