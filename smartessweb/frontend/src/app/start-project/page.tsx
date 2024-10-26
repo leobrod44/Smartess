@@ -58,7 +58,7 @@ const StartProjectPage = () => {
           showToastSuccess("Email sent successfully!");
 
           // store user email in database
-          const storeEmailResponse = await fetch("http://localhost:3000/api/store-email", {
+          const storeEmailResponse = await fetch("http://localhost:3000/api/store-start-project-data", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
