@@ -4,6 +4,7 @@ import building_straight from '../../public/images/building_straight.png';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Toast, { showToastError, showToastSuccess } from '../components/Toast';
+import { signInApi } from '@/api/sign-in/sign-in';
 
 const SignInPage = () => {
   const router = useRouter();
@@ -11,42 +12,32 @@ const SignInPage = () => {
   const [password, setPassword] = useState('');
 
   const validateEmail = (email: string) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
 
   const handleLogin = async () => {
+    // Form validation
     if (!email || !password) {
       showToastError('Please fill in all required fields');
       return;
-    } else if (!validateEmail(email)) {
+    }
+    
+    if (!validateEmail(email)) {
       showToastError('Please enter a valid email address');
       return;
-    } else {
-      try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-          }),
-        });
-        const data = await response.json();
-        if (response.ok) {
-          localStorage.setItem('token', data.token);
-          showToastSuccess('Login successful!');
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 1000);
-        } else {
-          showToastError(data.error || 'Login failed. Please try again.');
-        }
-      } catch {
-        showToastError('Server error. Please try again later.');
-      }
+    }
+
+    // API call
+    try {
+      const data = await signInApi.signIn({ email, password });
+      localStorage.setItem('token', data.token);
+      showToastSuccess('Login successful!');
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+    } catch (error) {
+      showToastError(error instanceof Error ? error.message : 'Server error. Please try again later.');
     }
   };
 
@@ -55,7 +46,7 @@ const SignInPage = () => {
       <Toast />
 
       {/* Left side content */}
-      <div className=' w-full md:w-1/2 flex flex-col justify-center items-center p-5'>
+      <div className='w-full md:w-1/2 flex flex-col justify-center items-center p-5'>
         <div className='w-full max-w-lg h-auto mb-10 text-center md:text-left'>
           <span className='font-sequel-sans-black text-[#30525e] text-[32px]'>
             Smart Living at Scale
@@ -68,7 +59,7 @@ const SignInPage = () => {
 
         {/* Email field */}
         <div className='h-[102px] w-full max-w-lg pr-0.5 pt- pb-5 flex-col justify-center items-center gap-2.5 flex'>
-          <div className='self-stretch px-2.5  justify-start items-center gap-2.5 inline-flex'>
+          <div className='self-stretch px-2.5 justify-start items-center gap-2.5 inline-flex'>
             <div className='text-[#266472] text-[20px] font-sequel-sans-regular'>
               Email
             </div>
@@ -85,7 +76,7 @@ const SignInPage = () => {
         </div>
 
         {/* Password field */}
-        <div className='h-[102px]  w-full max-w-lg pr-0.5 pt-10  flex-col justify-center items-center gap-2.5 flex'>
+        <div className='h-[102px] w-full max-w-lg pr-0.5 pt-10 flex-col justify-center items-center gap-2.5 flex'>
           <div className='self-stretch px-2.5 justify-start items-center gap-2.5 inline-flex'>
             <div className='text-[#266472] text-[20px] font-sequel-sans-regular'>
               Password
@@ -95,7 +86,7 @@ const SignInPage = () => {
             <input
               type='password'
               placeholder='Your Password'
-              className=' w-full self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] text-[#266472] text-xl font-sequel-sans-regular focus:outline-none'
+              className='w-full self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] text-[#266472] text-xl font-sequel-sans-regular focus:outline-none'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -115,7 +106,7 @@ const SignInPage = () => {
         {/* Login button */}
         <div className='h-[102px] w-full max-w-lg py-5 flex flex-col justify-center items-center gap-2.5'>
           <button
-            className=' self-stretch px-[149px] py-[13px] bg-[#30525e] opacity-40 rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex transition-opacity hover:opacity-100 custom-transition-length-1s text-center text-white text-lg font-sequel-sans-regular'
+            className='self-stretch px-[149px] py-[13px] bg-[#30525e] opacity-40 rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex transition-opacity hover:opacity-100 custom-transition-length-1s text-center text-white text-lg font-sequel-sans-regular'
             onClick={handleLogin}
           >
             Login
