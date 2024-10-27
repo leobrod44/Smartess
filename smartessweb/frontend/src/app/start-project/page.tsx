@@ -37,7 +37,8 @@ const StartProjectPage = () => {
       return;
     } else {
       try {
-        const response = await fetch("http://localhost:3000/api/send-email", {
+        // send email response to user
+        const sendEmailResponse = await fetch("http://localhost:3000/api/send-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -51,15 +52,38 @@ const StartProjectPage = () => {
             description,
           }),
         });
-        const data = await response.json();
-        if (response.ok) {
+        const sendEmailData = await sendEmailResponse.json();
+
+        if (sendEmailResponse.ok) {
           showToastSuccess("Email sent successfully!");
-          setTimeout(() => {
-            router.push("/");
-          }, 1000);
+
+          // store user email in database
+          const storeEmailResponse = await fetch("http://localhost:3000/api/store-start-project-data", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({      
+              businessName,
+              firstName,
+              lastName,
+              telephoneNumber,
+              email,
+              description,
+            }),
+          });
+          const storeEmailData = await storeEmailResponse.json();
+
+          if (storeEmailResponse.ok) {
+            setTimeout(() => {
+              router.push("/");
+            }, 1000);
+          } else {
+            showToastError(storeEmailData.error || "Failed to store data. Please try again.");
+          }
         } else {
           showToastError(
-            data.error || "Failed to send email. Please try again."
+            sendEmailData.error || "Failed to send email. Please try again."
           );
         }
       } catch {

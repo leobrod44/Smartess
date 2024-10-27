@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogPanel,
@@ -20,6 +20,7 @@ import dashboardLogo from '@/public/images/dashboardLogo.png';
 import Image from 'next/image';
 import Link from 'next/link';
 import Toast, { showToastError, showToastSuccess } from '../components/Toast';
+import { userApi, authApi } from '@/api/components/DashboardNavbar';
 
 // Material UI icons
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
@@ -35,6 +36,11 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usePathname, useRouter } from 'next/navigation';
+
+interface UserInfo {
+  first_name: string;
+  last_name: string;
+}
 
 const home = [
   {
@@ -131,27 +137,34 @@ const DashboardNavbar = () => {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const data = await userApi.getUserInfo(token);
+        setUserInfo(data);
+      } catch (error) {
+        console.error('Error fetching user info:', error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        localStorage.removeItem('token');
-        showToastSuccess('Logged out successfully');
-        setTimeout(() => {
-          router.push('/');
-        }, 1000);
-      } else {
-        const errorData = await response.json();
-        showToastError(errorData.error || 'Logout failed');
-      }
-    } catch {
-      showToastError('An error occurred during logout');
+      await authApi.logout();
+      localStorage.removeItem('token');
+      showToastSuccess('Logged out successfully');
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
+    } catch (error) {
+      showToastError(error instanceof Error ? error.message : 'An error occurred during logout');
     }
   };
 
@@ -626,7 +639,7 @@ const DashboardNavbar = () => {
                         className='ml-4 text-sm font-semibold leading-6 text-gray-900'
                         aria-hidden='true'
                       >
-                        John Doe
+                        {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : 'Loading...'}
                       </span>
                       <ChevronDownIcon
                         className='ml-2 h-5 w-5 text-gray-400'
@@ -644,7 +657,7 @@ const DashboardNavbar = () => {
                   >
                     <MenuItems className='absolute right-0 z-10 mt-2.5 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none'>
                       <div className='flex items-center justify-center text-xs py-2'>
-                        Hello Name!
+                        Hello {userInfo ? userInfo.first_name : 'User'}!
                       </div>
                       <div className='border-b border-gray-300'></div>
                       {userNavigation.map((item) =>
