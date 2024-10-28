@@ -39,6 +39,7 @@ services:
       - "8080:8080"
     volumes:
       - ./observability/server/logs:/app/logs/server
+      - ./go/common/configs:/app/config
     depends_on:
       rabbitmq:
         condition: service_healthy  # Correct placement of health condition

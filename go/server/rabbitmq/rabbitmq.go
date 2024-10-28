@@ -89,8 +89,10 @@ func (r *RabbitMQServer) Start() {
 
 func setHandler(queue amqp.Queue) (MessageHandler, error) {
 	switch queue.Name {
-	case "generic-message":
+	case "generic-messages":
 		return &GenericMessageHandler{}, nil
+	case "mongo-messages":
+		return &MongoMessageHandler{}, nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}

@@ -38,7 +38,8 @@ func Init() (SmartessHub, error) {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
 
-	webhookConn, err := connectWebhook(logger)
+	//webhookConn, err := connectWebhook(logger)
+	webhookConn, err := connectTestMongoWebhook(logger)
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to connect to Home Assistant: " + err.Error())
 	}
@@ -59,12 +60,11 @@ func (r *SmartessHub) Start() {
 		}
 		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s\n", strconv.Itoa(msgType), message))
 
-		err = r.Publish(message)
+		//err = r.Publish(message)
+		err = r.PublishMongo(message)
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to publish message to RabbitMQ: %v", err))
 		}
-
-		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s\n", strconv.Itoa(msgType), message))
 	}
 }
 
@@ -103,7 +103,7 @@ func connectWebhook(logger *zap.Logger) (*websocket.Conn, error) {
 func (client *SmartessHub) Publish(message []byte) error {
 	return client.instance.Channel.Publish(
 		"", // exchange
-		"generic-message",
+		"generic-messages",
 		false, // mandatory
 		false, // immediate
 		amqp.Publishing{
@@ -115,4 +115,39 @@ func (client *SmartessHub) Close() {
 	client.instance.Channel.Close()
 	client.instance.Conn.Close()
 	client.webhookConn.Close()
+}
+
+func connectTestMongoWebhook(logger *zap.Logger) (*websocket.Conn, error) {
+
+	u := url.URL{Scheme: "ws", Host: "mock-mongo-server:9090", Path: "/ws"}
+	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
+
+	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+	if err != nil {
+		logger.Fatal(fmt.Sprintf("Failed to dial WebSocket: %v", err))
+		return nil, fmt.Errorf("Failed to connect to Mock Mongo Server")
+	}
+
+	logger.Info("Connected to Mock Mongo Server")
+
+	subscribeMessage := `{"id": 1, "type": "subscribe_events"}`
+	err = conn.WriteMessage(websocket.TextMessage, []byte(subscribeMessage))
+	if err != nil {
+		logger.Error("Failed to subscribe to events")
+		return nil, fmt.Errorf("failed to subscribe to events")
+	}
+	logger.Info("Subscribed to Mock Mongo events")
+	return conn, nil
+}
+
+func (client *SmartessHub) PublishMongo(message []byte) error {
+	return client.instance.Channel.Publish(
+		"", // exchange
+		"mongo-messages",
+		false, // mandatory
+		false, // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(message),
+		})
 }
