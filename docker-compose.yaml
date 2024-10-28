@@ -67,6 +67,13 @@ services:
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
+  
+  mock_hub:
+    container_name: mockhub
+    build:
+      context: ./go/cmd/mock_hub
+    ports:
+      - "8765:8765"
 networks:
   smartess_network:
     external: true
