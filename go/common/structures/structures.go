@@ -41,7 +41,7 @@ type GenericMessage struct {
 }
 
 // Sample light switch event message:
-type EventMessage struct {
+type LightSwitchEventMessage struct {
 	ID    int    `json:"id"`
 	Type  string `json:"type"`
 	Event Event  `json:"event"`
