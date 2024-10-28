@@ -39,3 +39,60 @@ type GenericMessage struct {
 	Content   string    `json:"json"`       // The message content
 	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
 }
+
+// Sample light switch event message:
+type EventMessage struct {
+	ID    int    `json:"id"`
+	Type  string `json:"type"`
+	Event Event  `json:"event"`
+}
+
+type Event struct {
+	EventType string    `json:"event_type"`
+	Data      Data      `json:"data"`
+	Origin    string    `json:"origin"`
+	TimeFired time.Time `json:"time_fired"`
+	Context   Context   `json:"context"`
+}
+
+type Data struct {
+	EntityID string `json:"entity_id"`
+	OldState State  `json:"old_state"`
+	NewState State  `json:"new_state"`
+}
+
+type State struct {
+	EntityID    string     `json:"entity_id"`
+	State       string     `json:"state"`
+	Attributes  Attributes `json:"attributes"`
+	LastChanged time.Time  `json:"last_changed"`
+	LastUpdated time.Time  `json:"last_updated"`
+	Context     Context    `json:"context"`
+}
+
+type Attributes struct {
+	MinColorTempKelvin  int       `json:"min_color_temp_kelvin"`
+	MaxColorTempKelvin  int       `json:"max_color_temp_kelvin"`
+	MinMireds           int       `json:"min_mireds"`
+	MaxMireds           int       `json:"max_mireds"`
+	EffectList          []string  `json:"effect_list"`
+	SupportedColorModes []string  `json:"supported_color_modes"`
+	ColorMode           string    `json:"color_mode,omitempty"`
+	Brightness          int       `json:"brightness,omitempty"`
+	HsColor             []float64 `json:"hs_color,omitempty"`
+	RgbColor            []int     `json:"rgb_color,omitempty"`
+	XyColor             []float64 `json:"xy_color,omitempty"`
+	Effect              string    `json:"effect,omitempty"`
+	Mode                string    `json:"mode"`
+	Dynamics            string    `json:"dynamics"`
+	FriendlyName        string    `json:"friendly_name"`
+	SupportedFeatures   int       `json:"supported_features"`
+}
+
+type Context struct {
+	ID       string  `json:"id"`
+	ParentID *string `json:"parent_id"`
+	UserID   *string `json:"user_id"`
+}
+
+//End of light switch event message
