@@ -101,10 +101,9 @@ func (r *SmartessHub) Start() {
 // }
 
 func connectMockHubWebhook(logger *zap.Logger) (*websocket.Conn, error) {
-	hub_ip := os.Getenv("HUB_IP")
-	if hub_ip == "" {
-		hub_ip = "localhost:8765" // Default to mock hub
-	}
+
+	hub_ip := "mockhub:8765" // Default to mock hub
+
 	u := url.URL{Scheme: "ws", Host: hub_ip, Path: "/api/websocket"}
 	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
 

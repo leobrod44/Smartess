@@ -14,4 +14,13 @@ COPY . .
 # Build the Go app
 RUN go build -o main ./cmd/mockhub/main.go
 
+# Use a smaller image for the final stage
+FROM alpine:latest
+
+# Install netcat (nc) in the final image
+RUN apk add --no-cache netcat-openbsd
+
+WORKDIR /root/
+COPY --from=builder /app/main .
+
 CMD ["./main"]

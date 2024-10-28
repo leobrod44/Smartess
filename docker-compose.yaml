@@ -39,6 +39,7 @@ services:
       - "8080:8080"
     volumes:
       - ./observability/server/logs:/app/logs/server
+      - ./go/server/rabbitmq/config/queues.yaml:/app/config/queues.yaml
     depends_on:
       rabbitmq:
         condition: service_healthy  # Correct placement of health condition
@@ -68,12 +69,15 @@ services:
     networks:
       - smartess_network
   
-  mock_hub:
+  mockhub:
     container_name: mockhub
     build:
-      context: ./go/cmd/mock_hub
+      context: ./go
+      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path relative to the build context
     ports:
       - "8765:8765"
+    networks:
+    - smartess_network
 networks:
   smartess_network:
     external: true

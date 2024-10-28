@@ -27,6 +27,7 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 	event := GenerateLightSwitchEventMessage()
 
 	for {
+		log.Println("Sending light switch event message")
 		message, _ := json.Marshal(event)
 		err = conn.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
