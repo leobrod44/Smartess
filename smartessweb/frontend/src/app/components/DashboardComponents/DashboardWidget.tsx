@@ -66,11 +66,16 @@ const DashboardWidget = ({ projectId }: { projectId: string }) => {
           unitAddress: "750 Peel Street",
           unitNumber: "Unit 205",
         },
-        // {
-        //   alertType: "Smoke Alarm Activated",
-        //   unitAddress: "1500 Maisonneuve Blvd",
-        //   unitNumber: "Unit 501",
-        // },
+        {
+          alertType: "Smoke Alarm Activated",
+          unitAddress: "1500 Maisonneuve Blvd",
+          unitNumber: "Unit 501",
+        },
+        {
+          alertType: "Smoke Alarm Activated",
+          unitAddress: "1500 Maisonneuve Blvd",
+          unitNumber: "Unit 501",
+        },
       ],
       systemHealth: {
         systemsLive: 20,
