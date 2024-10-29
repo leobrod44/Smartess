@@ -28,7 +28,7 @@ interface MockDashboard {
   systemHealth: SystemHealth;
 }
 
-const DashboardWidget = ({ companyId }: { companyId: string }) => {
+const DashboardWidget = () => {
   const [systemOverview, setSystemOverview] = useState<SystemOverview>({
     projects: 0,
     totalUnits: 0,
@@ -44,11 +44,11 @@ const DashboardWidget = ({ companyId }: { companyId: string }) => {
   const [systemAlerts, setSystemAlerts] = useState<SystemAlerts[]>([]);
 
   // Simulate a backend API call
-  const fetchData = async (companyId: string): Promise<MockDashboard> => {
+  const fetchData = async (): Promise<MockDashboard> => {
     // Mock API response
 
     const response: MockDashboard = {
-      companyId,
+      companyId: "1234",
       systemOverview: {
         projects: 19,
         totalUnits: 3,
@@ -93,14 +93,14 @@ const DashboardWidget = ({ companyId }: { companyId: string }) => {
 
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData(companyId);
+      const data = await fetchData();
       setSystemOverview(data.systemOverview);
       setSystemHealth(data.systemHealth);
       setSystemAlerts(data.alerts);
     };
 
     getData();
-  }, [companyId]);
+  }, []);
 
   return (
     <div className="flex flex-col md:flex-row justify-between bg-[#14323B] p-1.5 rounded-[7px] shadow-md md:max-w-full hover:bg-[#4B7D8D] transition duration-300 text-[#fff] w-full p-2.5 gap-2">
