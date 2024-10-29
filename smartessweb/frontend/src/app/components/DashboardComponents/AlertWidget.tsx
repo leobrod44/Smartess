@@ -1,4 +1,17 @@
-const AlertWidget = () => {
+interface SystemAlerts {
+  alertType: string;
+  unitAddress: string;
+  unitNumber: string;
+}
+
+const AlertWidget = ({
+  systemAlerts,
+}: {
+  systemAlerts: SystemAlerts[] | null;
+}) => {
+  //show only the first two alerts in the list for cleanliness
+  const firstTwoAlerts = systemAlerts?.slice(0, 2);
+
   return (
     <div className="flex-col bg-[#325A67] w-full rounded-[7px] text-center text-sm m-0.5">
       <div className="w-full relative">
@@ -14,15 +27,22 @@ const AlertWidget = () => {
       </div>
 
       <div className="flex justify-center items-center"></div>
-
       <div className="flex flex-col w-full items-center text-xs">
-        <div className="bg-[#A65146] w-2/3 h-1/2 m-1 p-1.5 rounded-[7px]">
-          <div className="flex flex-col text-left">
-            <p className="font-sequel-sans-black">SMOKE ALARM ACTIVATED</p>
-            <p>1000 De La Gauchetiere </p>
-            <p>Unit 103</p>
-          </div>
-        </div>
+        {systemAlerts &&
+          systemAlerts.map((alert, index) => (
+            <div
+              key={index}
+              className="bg-[#A65146] w-2/3 h-1/2 m-1 p-1.5 rounded-[7px]"
+            >
+              <div className="flex flex-col text-left">
+                <h3 className="font-sequel-sans-black">
+                  {alert.alertType.toUpperCase()}
+                </h3>
+                <h3>{alert.unitAddress}</h3>
+                <h3>{alert.unitNumber}</h3>
+              </div>
+            </div>
+          ))}
       </div>
 
       <div className="flex justify-center items-center">

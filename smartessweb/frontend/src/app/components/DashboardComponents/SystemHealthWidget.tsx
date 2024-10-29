@@ -1,4 +1,11 @@
-const SystemHealthWidget = () => {
+const SystemHealthWidget = ({
+  systemHealth,
+}: {
+  systemHealth: {
+    systemsLive: number;
+    systemsDown: number;
+  } | null;
+}) => {
   return (
     <div className="flex-col items-center bg-[#325A67] w-full rounded-[7px] m-0.5">
       <div className="w-full relative pb-0.5">
@@ -9,12 +16,12 @@ const SystemHealthWidget = () => {
       </div>
 
       <div className="flex flex-col items-center text-center s-full text-xs p-1">
-        <div className="bg-[#729987] w-full m-2 rounded-[7px] h-16 place-content-around w-full">
-          <h3 className="text-2xl">10</h3>
+        <div className="bg-[#729987] w-full m-2 rounded-[7px] h-24 place-content-around w-full">
+          <h3 className="text-2xl">{systemHealth?.systemsLive}</h3>
           <h3>Systems Live</h3>
         </div>
-        <div className="bg-[#A65146] w-full rounded-[7px] h-16 place-content-around w-full">
-          <h3 className="text-2xl">1</h3>
+        <div className="bg-[#A65146] w-full rounded-[7px] h-24 place-content-around w-full">
+          <h3 className="text-2xl">{systemHealth?.systemsDown}</h3>
           <h3>Systems Down</h3>
         </div>
       </div>
