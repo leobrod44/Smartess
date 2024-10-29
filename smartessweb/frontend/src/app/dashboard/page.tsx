@@ -20,7 +20,7 @@ const DashboardPage = () => {
       <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
         Welcome to Your Dashboard
       </div>
-      <DashboardWidget />
+      <DashboardWidget companyId="12345" />
       <div className=" pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px]  leading-10 tracking-tight">
         Your Projects
       </div>
