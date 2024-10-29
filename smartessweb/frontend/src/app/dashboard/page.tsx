@@ -21,7 +21,7 @@ const DashboardPage = () => {
         Welcome to Your Dashboard
       </div>
       {/* companyId prop subject to change upon implemeting filtering i.e by userId */}
-      <DashboardWidget companyId="12345" />
+      <DashboardWidget />
       <div className=" pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px]  leading-10 tracking-tight">
         Your Projects
       </div>
