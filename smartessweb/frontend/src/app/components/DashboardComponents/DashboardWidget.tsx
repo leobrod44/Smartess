@@ -22,13 +22,13 @@ interface SystemHealth {
 }
 
 interface MockDashboard {
-  projectId: string;
+  companyId: string;
   systemOverview: SystemOverview;
   alerts: SystemAlerts[];
   systemHealth: SystemHealth;
 }
 
-const DashboardWidget = ({ projectId }: { projectId: string }) => {
+const DashboardWidget = ({ companyId }: { companyId: string }) => {
   const [systemOverview, setSystemOverview] = useState<SystemOverview>({
     projects: 0,
     totalUnits: 0,
@@ -44,11 +44,11 @@ const DashboardWidget = ({ projectId }: { projectId: string }) => {
   const [systemAlerts, setSystemAlerts] = useState<SystemAlerts[]>([]);
 
   // Simulate a backend API call
-  const fetchData = async (projectId: string): Promise<MockDashboard> => {
+  const fetchData = async (companyId: string): Promise<MockDashboard> => {
     // Mock API response
 
     const response: MockDashboard = {
-      projectId,
+      companyId,
       systemOverview: {
         projects: 19,
         totalUnits: 3,
@@ -93,14 +93,14 @@ const DashboardWidget = ({ projectId }: { projectId: string }) => {
 
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData(projectId);
+      const data = await fetchData(companyId);
       setSystemOverview(data.systemOverview);
       setSystemHealth(data.systemHealth);
       setSystemAlerts(data.alerts);
     };
 
     getData();
-  }, [projectId]);
+  }, [companyId]);
 
   return (
     <div className="flex flex-col md:flex-row justify-between bg-[#14323B] p-1.5 rounded-[7px] shadow-md md:max-w-full hover:bg-[#4B7D8D] transition duration-300 text-[#fff] w-full p-2.5 gap-2">
