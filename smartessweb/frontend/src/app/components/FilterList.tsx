@@ -38,9 +38,11 @@ const FilterComponent = ({
         anchorEl={anchorEl}
         open={Boolean(anchorEl)} // Check if the dropdown is open
         onClose={handleClose}
-      >
+       >
         {filterOptions.map((option, index) => (
-          <MenuItem key={index} onClick={() => handleFilterSelection(option)}>
+          <MenuItem className="text-[#14323b] hover:bg-[#14323b]/10 transition duration-300" key={index} onClick={() => handleFilterSelection(option)}
+        
+          >
             {option}
           </MenuItem>
         ))}
