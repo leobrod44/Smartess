@@ -38,7 +38,7 @@ func Init() (SmartessHub, error) {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
 
-	webhookConn, err := connectWebhook(logger)
+	webhookConn, err := connectMockHubWebhook(logger)
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to connect to Home Assistant: " + err.Error())
 	}
@@ -68,27 +68,61 @@ func (r *SmartessHub) Start() {
 	}
 }
 
-func connectWebhook(logger *zap.Logger) (*websocket.Conn, error) {
-	hub_ip := os.Getenv("HUB_IP")
+// func connectWebhook(logger *zap.Logger) (*websocket.Conn, error) {
+// 	hub_ip := os.Getenv("HUB_IP")
+// 	u := url.URL{Scheme: "ws", Host: hub_ip, Path: "/api/websocket"}
+// 	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
+
+// 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
+// 	if err != nil {
+// 		logger.Fatal(fmt.Sprintf("Failed to dial WebSocket: %v", err))
+// 		return nil, fmt.Errorf("Failed to connect to Home Assistant")
+// 	}
+
+// 	logger.Info("Connected to Home Assistant")
+
+// 	token := os.Getenv("WEBHOOK_TOKEN")
+// 	authMessage := fmt.Sprintf(`{"type": "auth", "access_token": "%s"}`, token)
+// 	err = conn.WriteMessage(websocket.TextMessage, []byte(authMessage))
+// 	if err != nil {
+// 		logger.Error("Failed to authenticate with Home Assistant")
+// 		return nil, fmt.Errorf("failed to authenticate with Home Assistant")
+// 	}
+// 	logger.Info("Authenticated with Home Assistant")
+
+// 	subscribeMessage := `{"id": 1, "type": "subscribe_events"}`
+// 	err = conn.WriteMessage(websocket.TextMessage, []byte(subscribeMessage))
+// 	if err != nil {
+// 		logger.Error("Failed to subscribe to events")
+// 		return nil, fmt.Errorf("failed to subscribe to events")
+// 	}
+// 	logger.Info("Subscribed to Home Assistant events")
+// 	return conn, nil
+// }
+
+func connectMockHubWebhook(logger *zap.Logger) (*websocket.Conn, error) {
+
+	hub_ip := "mockhub:8765" // Default to mock hub
+
 	u := url.URL{Scheme: "ws", Host: hub_ip, Path: "/api/websocket"}
 	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
 
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Failed to dial WebSocket: %v", err))
-		return nil, fmt.Errorf("Failed to connect to Home Assistant")
+		return nil, fmt.Errorf("Failed to connect to Mock Hub")
 	}
 
-	logger.Info("Connected to Home Assistant")
+	logger.Info("Connected to Mock Hub")
 
 	token := os.Getenv("WEBHOOK_TOKEN")
 	authMessage := fmt.Sprintf(`{"type": "auth", "access_token": "%s"}`, token)
 	err = conn.WriteMessage(websocket.TextMessage, []byte(authMessage))
 	if err != nil {
-		logger.Error("Failed to authenticate with Home Assistant")
-		return nil, fmt.Errorf("failed to authenticate with Home Assistant")
+		logger.Error("Failed to authenticate with Mock Hub")
+		return nil, fmt.Errorf("failed to authenticate with Mock Hub")
 	}
-	logger.Info("Authenticated with Home Assistant")
+	logger.Info("Authenticated with Mock Hub")
 
 	subscribeMessage := `{"id": 1, "type": "subscribe_events"}`
 	err = conn.WriteMessage(websocket.TextMessage, []byte(subscribeMessage))
@@ -96,7 +130,7 @@ func connectWebhook(logger *zap.Logger) (*websocket.Conn, error) {
 		logger.Error("Failed to subscribe to events")
 		return nil, fmt.Errorf("failed to subscribe to events")
 	}
-	logger.Info("Subscribed to Home Assistant events")
+	logger.Info("Subscribed to Mock Hub events")
 	return conn, nil
 }
 
