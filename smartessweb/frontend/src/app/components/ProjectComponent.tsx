@@ -15,44 +15,12 @@ export interface Project {
   pendingTickets: number;
 }
 
-// Mock Data
-const MOCK_PROJECTS: Project[] = [
-  {
-    projectId: "a10294",
-    address: "1000 De La Gauchetiere",
-    units: [
-      { unitNumber: "101" },
-      { unitNumber: "102" },
-      { unitNumber: "103" },
-    ],
-    adminUsers: 1,
-    hubUsers: 6,
-    pendingTickets: 4,
-  },
-  {
-    projectId: "b10294",
-    address: "750 Peel Street",
-    units: [{ unitNumber: "201" }, { unitNumber: "202" }],
-    adminUsers: 2,
-    hubUsers: 12,
-    pendingTickets: 5,
-  },
-  {
-    projectId: "c10294",
-    address: "1500 Maisonneuve Blvd",
-    units: [
-      { unitNumber: "301" },
-      { unitNumber: "302" },
-      { unitNumber: "303" },
-      { unitNumber: "304" },
-    ],
-    adminUsers: 1,
-    hubUsers: 8,
-    pendingTickets: 3,
-  },
-];
+// Define the props type for ProjectInfo
+interface ProjectInfoProps {
+  projects: Project[];
+}
 
-export default function ProjectInfo() {
+export default function ProjectInfo({ projects }: ProjectInfoProps) {
   const [showUnits, setShowUnits] = useState<number | null>(null); // Track which project is toggled open
 
   const handleToggle = (index: number) => {
@@ -62,7 +30,7 @@ export default function ProjectInfo() {
   return (
     <div className="w-full">
       {/* Loop through each project */}
-      {MOCK_PROJECTS.map((project, index) => (
+      {projects.map((project, index) => (
         <div
           key={index}
           className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30 hover:border-[#4b7d8d] transition duration-300"
