@@ -50,11 +50,13 @@ const DashboardPage = () => {
   const [filteredProjects, setFilteredProjects] = useState(MOCK_PROJECTS);
 
   const filterOptionsPage1 = [
-    "Option 1",
-    "Option 2",
-    "Option 3",
-    "Option 4",
-    "Option 5",
+    "Address A-Z",
+    "Most Units",
+    "Least Units",
+    "Most Hub Users",
+    "Least Hub Users",
+    "Most Pending Tickets",
+    "Least Pending Tickets",
   ];
 
   useEffect(() => {
@@ -73,11 +75,34 @@ const DashboardPage = () => {
   };
 
   const handleFilterChange = (filterValue: string) => {
-    // Update the filtered projects based on the filterValue
-    const newFilteredProjects = projects.filter((project) => {
-      // Example filtering logic (update this according to your actual data structure)
-      return project.address.includes(filterValue); // Adjust this condition as needed
-    });
+    let newFilteredProjects = [...projects]; // Start with all projects
+
+    switch (filterValue) {
+      case "Address A-Z":
+        newFilteredProjects.sort((a, b) => a.address.localeCompare(b.address));
+        break;
+      case "Most Units":
+        newFilteredProjects.sort((a, b) => b.units.length - a.units.length);
+        break;
+      case "Least Units":
+        newFilteredProjects.sort((a, b) => a.units.length - b.units.length);
+        break;
+      case "Most Hub Users":
+        newFilteredProjects.sort((a, b) => b.hubUsers - a.hubUsers);
+        break;
+      case "Least Hub Users":
+        newFilteredProjects.sort((a, b) => a.hubUsers - b.hubUsers);
+        break;
+      case "Most Pending Tickets":
+        newFilteredProjects.sort((a, b) => b.pendingTickets - a.pendingTickets);
+        break;
+      case "Least Pending Tickets":
+        newFilteredProjects.sort((a, b) => a.pendingTickets - b.pendingTickets);
+        break;
+      default:
+        break;
+    }
+
     setFilteredProjects(newFilteredProjects);
   };
 
