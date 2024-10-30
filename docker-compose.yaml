@@ -1,25 +1,6 @@
-version: '3.7'
-
 services:
-  server:
-    #build: ./server
-    build:
-      context: .
-      dockerfile: ./server/Dockerfile
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./server/logs:/app/logs
-    depends_on:
-      rabbitmq:
-        condition: service_healthy  # Correct placement of health condition
-      loki:
-        condition: service_started  # Optional if you want a basic condition
-      grafana:
-        condition: service_started  # Optional if you want a basic condition
-    environment:
-      RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
   loki:
+    container_name: loki
     image: grafana/loki:latest
     ports:
       - "3100:3100"
@@ -30,13 +11,15 @@ services:
     command: -config.file=/etc/loki/loki-config.yaml
 
   promtail:
+    container_name: promtail
     image: grafana/promtail:latest
     volumes:
-      - ./server/logs:/app/logs
       - ./observability/promtail/config:/etc/promtail
+      - /var/log/app:/var/log/app
     command: -config.file=/etc/promtail/promtail-config.yaml
 
   grafana:
+    container_name: grafana
     image: grafana/grafana:latest
     ports:
       - "3001:3000"
@@ -47,34 +30,43 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     depends_on:
       - loki
-
+  server:
+    container_name: server
+    build:
+      context: ./go  # Set the build context to the go directory
+      dockerfile: cmd/server/Dockerfile  # Specify the Dockerfile path relative to the build context
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./observability/server/logs:/app/logs/server
+    depends_on:
+      rabbitmq:
+        condition: service_healthy  # Correct placement of health condition
+    environment:
+      RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
+    networks:
+      - smartess_network
+  
   rabbitmq:
+    container_name: rabbitmq
     image: rabbitmq:management #TODO: Development only. For Production, use: rabbitmq:latest
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
-      - ./rabbitmq/data:/var/lib/rabbitmq
+      - ./data:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=admin
       - RABBITMQ_URI=amqp://admin:admin@localhost:5672/ # amqp://guest:guest@localhost:5672/
     healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl status || exit 1"]  # Check RabbitMQ status only
+      test: ["CMD", "rabbitmqctl", "status"]  # Check RabbitMQ status only
       interval: 10s      # Check every 10 seconds
       timeout: 5s        # Time allowed for RabbitMQ to respond
       retries: 3         # Retry up to 3 times before marking the service as unhealthy
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
-  #    healthcheck:
-  #      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-
-#  prometheus:
-#    image: prom/prometheus:latest
-#    ports:
-#      - "9090:9090"
-#    volumes:
-#      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-#    command:
-#      - "--config.file=/etc/prometheus/prometheus.yml"
-#    depends_on:
-#      - rabbitmq
+    networks:
+      - smartess_network
+networks:
+  smartess_network:
+    external: true

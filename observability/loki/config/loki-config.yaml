@@ -15,31 +15,32 @@ ingester:
     final_sleep: 0s
 
 limits_config:
-  enforce_metric_name: false
   reject_old_samples: true
   reject_old_samples_max_age: 168h
+  allow_structured_metadata: false  # You can keep this if you're temporarily disabling validation
 
 schema_config:
   configs:
-    - from: 2020-10-24
-      store: boltdb-shipper
+    - from: 2024-10-22  # Use the current date
+      store: tsdb
       object_store: filesystem
-      schema: v11
+      schema: v13
       index:
         prefix: index_
         period: 24h
 
 storage_config:
-  boltdb_shipper:
-    active_index_directory: /loki/index
-    cache_location: /loki/cache
-    shared_store: filesystem
+  tsdb_shipper:
+    active_index_directory: /loki/index  # Set the active index directory
+    cache_location: /loki/cache  # Set the cache location
   filesystem:
     directory: /loki/chunks
 
+common:
+  path_prefix: /loki  # Specify a path prefix for tsdb
+
 compactor:
   working_directory: /loki/compactor
-  shared_store: filesystem
 
 table_manager:
   retention_deletes_enabled: true
