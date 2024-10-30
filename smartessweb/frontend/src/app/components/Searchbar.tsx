@@ -1,6 +1,5 @@
-import { Search, FilterList } from "@mui/icons-material";
+import { Search } from "@mui/icons-material";
 import { useState } from "react";
-
 
 interface SearchbarProps {
   onSearch: (query: string) => void;
@@ -18,7 +17,6 @@ export default function Searchbar({ onSearch }: SearchbarProps) {
   return (
     <>
       <div className="flex items-center gap-2 p-2 rounded-md">
-        <FilterList className="h-6 w-6 text-[#14323b]" />
         <div className="relative flex-grow">
           <input
             id="search"

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import ProjectComponent from "../components/ProjectComponent";
 import DashboardWidget from "../components/DashboardComponents/DashboardWidget";
 import Searchbar from "../components/Searchbar";
+import FilterComponent from "../components/FilterList";
 
 // Mock data for projects
 const MOCK_PROJECTS = [
@@ -48,6 +49,14 @@ const DashboardPage = () => {
   const [projects, setProjects] = useState(MOCK_PROJECTS); // replace [...] with actual project data
   const [filteredProjects, setFilteredProjects] = useState(MOCK_PROJECTS);
 
+  const filterOptionsPage1 = [
+    "Option 1",
+    "Option 2",
+    "Option 3",
+    "Option 4",
+    "Option 5",
+  ];
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -63,17 +72,33 @@ const DashboardPage = () => {
     setFilteredProjects(filtered);
   };
 
+  const handleFilterChange = (filterValue: string) => {
+    // Update the filtered projects based on the filterValue
+    const newFilteredProjects = projects.filter((project) => {
+      // Example filtering logic (update this according to your actual data structure)
+      return project.address.includes(filterValue); // Adjust this condition as needed
+    });
+    setFilteredProjects(newFilteredProjects);
+  };
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
         Welcome to Your Dashboard
       </div>
       <DashboardWidget />
-      <div className="flex items-center justify-between pt-4">
+
+      <div className="flex items-center pt-4 justify-between">
         <div className=" pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px]  leading-10 tracking-tight">
           Your Projects
         </div>
-        <Searchbar onSearch={handleSearch} />
+        <div className="flex items-center pt-2">
+          <FilterComponent
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptionsPage1}
+          />
+          <Searchbar onSearch={handleSearch} />
+        </div>
       </div>
       <ProjectComponent projects={filteredProjects} />
     </div>
