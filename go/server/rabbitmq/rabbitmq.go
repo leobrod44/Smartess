@@ -91,6 +91,8 @@ func setHandler(queue amqp.Queue) (MessageHandler, error) {
 	switch queue.Name {
 	case "generic-message":
 		return &GenericMessageHandler{}, nil
+	case "test-queue":
+		return &GenericMessageHandler{}, nil // Add a handler for test-queue
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}

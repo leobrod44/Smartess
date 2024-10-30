@@ -9,6 +9,7 @@ services:
       dockerfile: cmd/hub/Dockerfile  # Path to your Dockerfile
     volumes:
       - ./logs:/app/logs
+      - ../../server/rabbitmq/config/queues.yaml:/app/config/queues.yaml
     environment:
       - HUB_IP=192.168.0.15:8123 
       - WEBHOOK_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZDgxMGJmMTgwYzI0ZjI2Yjc5NmE4YzhhMDNjN2Y5YiIsImlhdCI6MTcyOTYzNDk0OCwiZXhwIjoyMDQ0OTk0OTQ4fQ.CIIseEXFTDVVTX3qv0LJ5Tl9KGEfdabY0NuwTl1XB2I 
