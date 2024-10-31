@@ -3,7 +3,6 @@ package hub
 import (
 	"Smartess/go/common/rabbitmq"
 	"Smartess/go/hub/ha"
-	"Smartess/go/hub/logs"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
+	"go.uber.org/zap"
 )
 
 // RabbitMQ client holds the connection and channel to RabbitMQ
@@ -145,23 +145,6 @@ func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	}
 	logger.Info("Subscribed to Home Assistant events")
 	return conn, nil
-}
-
-func (client *SmartessHub) Publish(message []byte) error {
-	return client.instance.Channel.Publish(
-		"", // exchange
-		"generic-messages",
-		false, // mandatory
-		false, // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		})
-}
-func (client *SmartessHub) Close() {
-	client.instance.Channel.Close()
-	client.instance.Conn.Close()
-	client.webhookConn.Close()
 }
 
 func connectTestMongoWebhook(logger *zap.Logger) (*websocket.Conn, error) {
