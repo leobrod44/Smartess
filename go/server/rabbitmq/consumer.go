@@ -15,7 +15,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v3"
 )
 
 type QueueConsumer struct {
@@ -39,7 +38,8 @@ type HubLogHandler struct {
 
 func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
 	var log structures.HubLog
-	err := yaml.Unmarshal(msg.Body, &log)
+	logger.Info("messsage", zap.String("body", string(msg.Body)))
+	err := json.Unmarshal(msg.Body, &log)
 	if err != nil {
 		return err
 	}

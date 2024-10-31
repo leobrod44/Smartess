@@ -76,7 +76,6 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				r.Logger.Info("Received message", zap.String("message", string(msg.Body)))
 				err := queue.messageHandler.Handle(msg, r.Logger)
 				if err != nil {
 					r.Logger.Error("Failed to handle message", zap.Error(err))
