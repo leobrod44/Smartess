@@ -39,7 +39,7 @@ func Init() (SmartessHub, error) {
 	}
 
 	//webhookConn, err := connectWebhook(logger)
-	webhookConn, err := connectTestMongoWebhook(logger)
+	webhookConn, err := connectTestMongoWebhook(logger) // RYAN
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to connect to Home Assistant: " + err.Error())
 	}
@@ -61,7 +61,7 @@ func (r *SmartessHub) Start() {
 		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s\n", strconv.Itoa(msgType), message))
 
 		//err = r.Publish(message)
-		err = r.PublishMongo(message)
+		err = r.PublishMongo(message) // RYAN
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to publish message to RabbitMQ: %v", err))
 		}
