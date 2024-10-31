@@ -67,7 +67,7 @@ const DashboardPage = () => {
    * @param filterValue
    */
   const handleFilterChange = (filterValue: string) => {
-    let newFilteredProjects = [...projects]; // Start with all projects
+    const newFilteredProjects = [...projects]; // Start with all projects
 
     switch (filterValue) {
       case "Address A-Z":
