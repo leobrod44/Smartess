@@ -10,17 +10,14 @@ import { generateMockProjects, Project } from "../mockData";
 
 const DashboardPage = () => {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>(generateMockProjects()); // replace with actual project data
+  const [projects, setProjects] = useState<Project[]>(generateMockProjects()); 
   const [filteredProjects, setFilteredProjects] = useState<Project[]>(projects);
 
   const filterOptionsPage1 = [
     "Address A-Z",
     "Most Units",
-    "Least Units",
     "Most Hub Users",
-    "Least Hub Users",
     "Most Pending Tickets",
-    "Least Pending Tickets",
   ];
 
   useEffect(() => {
@@ -48,20 +45,11 @@ const DashboardPage = () => {
       case "Most Units":
         newFilteredProjects.sort((a, b) => b.units.length - a.units.length);
         break;
-      case "Least Units":
-        newFilteredProjects.sort((a, b) => a.units.length - b.units.length);
-        break;
       case "Most Hub Users":
         newFilteredProjects.sort((a, b) => b.hubUsers - a.hubUsers);
         break;
-      case "Least Hub Users":
-        newFilteredProjects.sort((a, b) => a.hubUsers - b.hubUsers);
-        break;
       case "Most Pending Tickets":
         newFilteredProjects.sort((a, b) => b.pendingTickets - a.pendingTickets);
-        break;
-      case "Least Pending Tickets":
-        newFilteredProjects.sort((a, b) => a.pendingTickets - b.pendingTickets);
         break;
       default:
         break;

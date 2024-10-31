@@ -1,21 +1,8 @@
 import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid"; // Import icons for the arrow
 import Unit from "../components/Unit";
-//  Interface
-export interface UnitData {
-  unitNumber: string;
-}
+import { Project } from "../mockData"; // Adjust the import path as needed
 
-export interface Project {
-  projectId: string;
-  address: string;
-  units: UnitData[]; // Array of units
-  adminUsers: number;
-  hubUsers: number;
-  pendingTickets: number;
-}
-
-// Define the props type for ProjectInfo
 interface ProjectInfoProps {
   projects: Project[];
 }

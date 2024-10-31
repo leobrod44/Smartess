@@ -3,9 +3,18 @@ import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
-import { User, TicketsType, Owner, Project, generateMockProjects } from "../mockData"; 
+import {
+  User,
+  TicketsType,
+  Owner,
+  Unit,
+  generateMockProjects,
+} from "../mockData";
 
-const Unit = ({ unitNumber, projectId }: {
+const UnitComponent = ({
+  unitNumber,
+  projectId,
+}: {
   unitNumber: string;
   projectId: string;
 }) => {
@@ -25,17 +34,21 @@ const Unit = ({ unitNumber, projectId }: {
   const [alerts, setAlerts] = useState<{ message: string }[]>([]);
 
   // Simulate a backend API call
-  const fetchData = async (projectId: string): Promise<Project> => {
+  const fetchData = async (
+    projectId: string,
+    unitNumber: string
+  ): Promise<Unit | undefined> => {
     // Mock API response
-    const response = generateMockProjects().find(
+    const project = generateMockProjects().find(
       (project) => project.projectId === projectId
     );
-    return response!;
+    // If the project is found, return the specific unit
+    return project?.units.find((unit) => unit.unitNumber === unitNumber);
   };
 
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData(projectId);
+      const data = await fetchData(projectId, unitNumber);
       if (data) {
         setUsers(data.users);
         setTickets(data.tickets);
@@ -45,7 +58,7 @@ const Unit = ({ unitNumber, projectId }: {
     };
 
     getData();
-  }, [projectId]);
+  }, [projectId, unitNumber]);
 
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
@@ -81,4 +94,4 @@ const Unit = ({ unitNumber, projectId }: {
   );
 };
 
-export default Unit;
+export default UnitComponent;
