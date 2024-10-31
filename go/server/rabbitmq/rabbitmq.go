@@ -89,8 +89,10 @@ func (r *RabbitMQServer) Start() {
 
 func setHandler(queue amqp.Queue) (MessageHandler, error) {
 	switch queue.Name {
-	case "generic-message":
+	case "generic-messages":
 		return &GenericMessageHandler{}, nil
+	case "mongo-messages":
+		return &MongoMessageHandler{}, nil
 	case "test-queue":
 		return &GenericMessageHandler{}, nil // Add a handler for test-queue
 	default:
