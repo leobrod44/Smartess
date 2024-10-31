@@ -35,6 +35,14 @@ export interface Unit {
   owner: Owner;
   alerts: { message: string }[];
 }
+export interface Alert {
+  id: string; 
+  unitNumber: string; 
+  message: 'Smoke Alarm'| 'Water Leak'|'Thermostat > 25'|'No Battery'|'Carbon Monoxide Detected'|'Window Opened'|'Door Unlocked'; 
+  timestamp: Date; 
+  resolved: boolean; 
+  icon: string; 
+}
 
 // Function to generate mock projects
 export const generateMockProjects = (): Project[] => {
