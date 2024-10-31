@@ -2,6 +2,7 @@ package main
 
 import (
 	"Smartess/go/hub"
+	"time"
 )
 
 func main() {
@@ -10,5 +11,11 @@ func main() {
 		panic(err)
 	}
 	hub.Start()
+	go func() {
+		for {
+			hub.Logger.Info("Hub is running...")
+			time.Sleep(10 * time.Second)
+		}
+	}()
 	defer hub.Close()
 }
