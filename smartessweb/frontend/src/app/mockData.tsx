@@ -53,7 +53,7 @@ export const generateMockProjects = (): Project[] => {
       adminUsers: 2,
       hubUsers: 3,
       pendingTickets: 10,
-      units: generateMockUnits(),
+      units: generateMockUnits2(),
     },
     {
       projectId: "b10294",
@@ -69,7 +69,7 @@ export const generateMockProjects = (): Project[] => {
       adminUsers: 3,
       hubUsers: 6,
       pendingTickets: 4,
-      units: generateMockUnits(),
+      units: generateMockUnits2(),
     },
     // Add more projects as needed...
   ];
@@ -129,4 +129,47 @@ const generateMockAlerts = () => [
   { message: "SMOKE ALARM ACTIVATED" },
   { message: "WATER leak DETECTED" },
   { message: "WATER LEAKSSS DETECTED" },
+];
+
+
+//extra functions simply tochange the names to test the search bar-----------------------------------
+// Function to generate mock units
+const generateMockUnits2 = (): Unit[] => [
+  {
+    unitNumber: "101",
+    users: generateMockUsers2(),
+    tickets: generateMockTickets(),
+    owner: generateMockOwner2(),
+    alerts: generateMockAlerts(),
+  },
+  {
+    unitNumber: "102",
+    users: generateMockUsers(),
+    tickets: generateMockTickets(),
+    owner: generateMockOwner2(),
+    alerts: generateMockAlerts(),
+  },
+  {
+    unitNumber: "103",
+    users: generateMockUsers2(),
+    tickets: generateMockTickets(),
+    owner: generateMockOwner(),
+    alerts: generateMockAlerts(),
+  },
+  // Add more units as needed...
+];
+
+//second one with different names for testing searchbar
+const generateMockOwner2 = (): Owner => ({
+  tokenId: "10",
+  firstName: "KAREN",
+  lastName: "FIELDS",
+  email: "kfields@gmail.com",
+});
+// Second Function to generate mock users, simply to test searchbar 
+const generateMockUsers2 = (): User[] => [
+  { tokenId: "6", firstName: "BILL", lastName: "Bong", role: "basic" },
+  { tokenId: "7", firstName: "Penny", lastName: "Wise", role: "basic" },
+  { tokenId: "8", firstName: "Michalo", lastName: "Jam", role: "admin" },
+  { tokenId: "9", firstName: "Sierra", lastName: "Mist", role: "basic" },
 ];
