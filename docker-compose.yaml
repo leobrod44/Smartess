@@ -68,7 +68,6 @@ services:
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
-      - 
   mockhub:
     container_name: mockhub
     build:
