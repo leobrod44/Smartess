@@ -10,10 +10,13 @@ import { generateMockProjects, Project } from "../mockData";
 
 const DashboardPage = () => {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>(generateMockProjects()); 
+  const [projects] = useState<Project[]>(generateMockProjects());
   const [filteredProjects, setFilteredProjects] = useState<Project[]>(projects);
 
-  const filterOptionsPage1 = [
+  /**
+   * These filter options will change on every page, based on the data being displayed
+   */
+  const filterOptionsDashboard = [
     "Address A-Z",
     "Most Units",
     "Most Hub Users",
@@ -27,14 +30,42 @@ const DashboardPage = () => {
     }
   }, [router]);
 
+  /**
+   * Function takes a query string and checks if there is a matching address, hub owner, or hub user name.
+   * If so, it filters the PROJECT that contains that matching query and displays it
+   * @param query
+   */
   const handleSearch = (query: string) => {
     // Update filteredProjects based on the search query
-    const filtered = projects.filter((project) =>
-      project.address.toLowerCase().includes(query.toLowerCase())
-    );
+    const filtered = projects.filter((project) => {
+      const addressMatch = project.address
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      const userMatch = project.units.some((unit) =>
+        unit.users.some((user) =>
+          `${user.firstName} ${user.lastName}`
+            .toLowerCase()
+            .includes(query.toLowerCase())
+        )
+      );
+
+      const ownerMatch = project.units.some((unit) =>
+        `${unit.owner.firstName} ${unit.owner.lastName}`
+          .toLowerCase()
+          .includes(query.toLowerCase())
+      );
+      return addressMatch || userMatch || ownerMatch;
+    });
+
     setFilteredProjects(filtered);
   };
 
+  /**
+   * Function to determine which filter value was selected and sort the projects in the correct
+   * order based on that filter.
+   * @param filterValue
+   */
   const handleFilterChange = (filterValue: string) => {
     let newFilteredProjects = [...projects]; // Start with all projects
 
@@ -54,7 +85,6 @@ const DashboardPage = () => {
       default:
         break;
     }
-
     setFilteredProjects(newFilteredProjects);
   };
 
@@ -72,7 +102,7 @@ const DashboardPage = () => {
         <div className="flex items-center pt-2">
           <FilterComponent
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptionsPage1}
+            filterOptions={filterOptionsDashboard}
           />
           <Searchbar onSearch={handleSearch} />
         </div>
