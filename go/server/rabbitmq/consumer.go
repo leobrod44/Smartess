@@ -79,7 +79,7 @@ type MongoMessage struct {
 	Timestamp time.Time          `bson:"timestamp"`
 }
 
-func (h *MongoMessageHandler) Handle(msg amqp.Delivery) error {
+func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
 	ConnectToMongo()
 	// Process the message here
 	var message MongoMessage

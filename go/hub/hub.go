@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"os"
 
+	"Smartess/go/hub/logs"
+
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
