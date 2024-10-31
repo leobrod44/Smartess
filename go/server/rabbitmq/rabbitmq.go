@@ -94,6 +94,8 @@ func setHandler(queue amqp.Queue) (MessageHandler, error) {
 	switch queue.Name {
 	case "generic-messages":
 		return &GenericMessageHandler{}, nil
+	case "mongo-messages":
+		return &MongoMessageHandler{}, nil
 	case "hub-info-logs":
 		return &HubLogHandler{logLevel: 0}, nil
 	case "hub-warn-logs":

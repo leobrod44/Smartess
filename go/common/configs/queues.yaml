@@ -14,7 +14,8 @@ queues:
           id: integer          # ID of the sender (HubID)
           json: string         # The message content (Content)
           time_fired: string   # Timestamp for when the message was created (TimeStamp)
-  - name: hub-info-logs
+
+  - name: mongo-messages
     type: standard
     max_size: 100
     passive: false
@@ -22,12 +23,14 @@ queues:
     auto_delete: false
     exclusive: false
     no_wait: false
-    arguments: {}
+    arguments: { }
     message_format:
       type: json
       schema:
-          message: string
-          time_fired: string
+        id: integer           # ID of the sender
+        json: string          # The message content
+        time_fired: string    # Timestamp of message creation
+
   - name: hub-warn-logs
     type: standard
     max_size: 100
