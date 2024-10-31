@@ -6,48 +6,12 @@ import ProjectComponent from "../components/ProjectComponent";
 import DashboardWidget from "../components/DashboardComponents/DashboardWidget";
 import Searchbar from "../components/Searchbar";
 import FilterComponent from "../components/FilterList";
-
-// Mock data for projects
-const MOCK_PROJECTS = [
-  {
-    projectId: "a10294",
-    address: "1000 De La Gauchetiere",
-    adminUsers: 1,
-    hubUsers: 6,
-    pendingTickets: 4,
-    units: [
-      { unitNumber: "101" },
-      { unitNumber: "102" },
-      { unitNumber: "103" },
-    ],
-  },
-  {
-    projectId: "b10294",
-    address: "750 Peel Street",
-    adminUsers: 2,
-    hubUsers: 12,
-    pendingTickets: 5,
-    units: [{ unitNumber: "201" }, { unitNumber: "202" }],
-  },
-  {
-    projectId: "c10294",
-    address: "1500 Maisonneuve Blvd",
-    adminUsers: 1,
-    hubUsers: 8,
-    pendingTickets: 3,
-    units: [
-      { unitNumber: "301" },
-      { unitNumber: "302" },
-      { unitNumber: "303" },
-      { unitNumber: "304" },
-    ],
-  },
-];
+import { generateMockProjects, Project } from "../mockData";
 
 const DashboardPage = () => {
   const router = useRouter();
-  const [projects, setProjects] = useState(MOCK_PROJECTS); // replace [...] with actual project data
-  const [filteredProjects, setFilteredProjects] = useState(MOCK_PROJECTS);
+  const [projects, setProjects] = useState<Project[]>(generateMockProjects()); // replace with actual project data
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>(projects);
 
   const filterOptionsPage1 = [
     "Address A-Z",
