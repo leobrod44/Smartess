@@ -93,6 +93,8 @@ func setHandler(queue amqp.Queue) (MessageHandler, error) {
 		return &GenericMessageHandler{}, nil
 	case "mongo-messages":
 		return &MongoMessageHandler{}, nil
+	case "test-queue":
+		return &GenericMessageHandler{}, nil // Add a handler for test-queue
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}

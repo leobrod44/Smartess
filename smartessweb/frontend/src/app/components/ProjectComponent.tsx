@@ -131,7 +131,7 @@ export default function ProjectInfo() {
             <div className="text-center">
               <div className="flex justify-center">
                 <button
-                  className="bg-[#4b7d8d] text-white rounded-full px-4 py-2 flex items-center justify-center hover:bg-[#266472] transition duration-300"
+                  className="bg-[#4b7d8d] pl-2 text-white w-[82px] h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
                   onClick={() => handleToggle(index)}
                 >
                   More
@@ -146,7 +146,7 @@ export default function ProjectInfo() {
           </div>
 
           {showUnits === index && (
-            <div className="pt-4 space-y-4 max-h-60 overflow-y-auto custom-scrollbar pr-4">
+            <div className="pt-4 space-y-4 max-h-60 overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
               {" "}
               {project.units.map((unit) => (
                 <Unit

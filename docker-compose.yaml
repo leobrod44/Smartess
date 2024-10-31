@@ -68,6 +68,16 @@ services:
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
+      - 
+  mockhub:
+    container_name: mockhub
+    build:
+      context: ./go
+      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path relative to the build context
+    ports:
+      - "8765:8765"
+    networks:
+      - smartess_network
 networks:
   smartess_network:
     external: true
