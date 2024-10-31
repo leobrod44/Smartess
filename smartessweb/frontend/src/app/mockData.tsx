@@ -37,8 +37,9 @@ export interface Unit {
 }
 export interface Alert {
   id: string; 
+  projectId:string;
   unitNumber: string; 
-  message: 'Smoke Alarm'| 'Water Leak'|'Thermostat > 25'|'No Battery'|'Carbon Monoxide Detected'|'Window Opened'|'Door Unlocked'; 
+  message: 'Smoke Alarm Activated'| 'Water Leak Detected'|'Thermostat > 25°C'|'No Battery In Device'|'Carbon Monoxide Detected'|'Window Opened'|'Door Unlocked'; 
   timestamp: Date; 
   resolved: boolean; 
   icon: string; 
@@ -133,10 +134,44 @@ const generateMockOwner = (): Owner => ({
 });
 
 // Function to generate mock alerts
-const generateMockAlerts = () => [
-  { message: "SMOKE ALARM ACTIVATED" },
-  { message: "WATER leak DETECTED" },
-  { message: "WATER LEAKSSS DETECTED" },
+const generateMockAlerts = (): Alert[] => [
+  {
+    id: "1",
+    projectId:"a10294",
+    unitNumber: "101",
+    message: "Smoke Alarm Activated",
+    timestamp: new Date("2024-10-31T10:15:00"),
+    resolved: false,
+    icon: "smoke-alarm-icon-url", // Replace with actual icon URL or class
+  },
+  {
+    id: "2",
+    projectId:"a10294",
+    unitNumber: "102",
+    message: "Water Leak Detected",
+    timestamp: new Date("2024-10-31T11:00:00"),
+    resolved: false,
+    icon: "water-leak-icon-url", // Replace with actual icon URL or class
+  },
+  {
+    id: "3",
+    projectId: "b10294",
+    unitNumber: "103",
+    message: "Thermostat > 25°C",
+    timestamp: new Date("2024-10-31T12:30:00"),
+    resolved: true,
+    icon: "thermostat-icon-url", // Replace with actual icon URL or class
+  },
+  {
+    id: "4",
+    unitNumber: "101",
+    projectId: "b10294",
+    message: "No Battery In Device",
+    timestamp: new Date("2024-10-31T09:45:00"),
+    resolved: false,
+    icon: "battery-icon-url", // Replace with actual icon URL or class
+  },
+  // Add more alerts as needed...
 ];
 
 
