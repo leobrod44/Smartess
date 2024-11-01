@@ -3,36 +3,15 @@ import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
+import {
+  User,
+  TicketsType,
+  Owner,
+  Unit,
+  generateMockProjects,
+} from "../mockData";
 
-interface User {
-  tokenId: string;
-  firstName: string;
-  lastName: string;
-  role: "admin" | "basic";
-}
-
-interface TicketsType {
-  total: number;
-  open: number;
-  pending: number;
-  closed: number;
-}
-
-interface Owner {
-  tokenId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-interface MockUnit {
-  projectId: string;
-  users: User[];
-  tickets: TicketsType;
-  owner: Owner;
-  alerts: { message: string }[];
-}
-
-const Unit = ({
+const UnitComponent = ({
   unitNumber,
   projectId,
 }: {
@@ -55,59 +34,31 @@ const Unit = ({
   const [alerts, setAlerts] = useState<{ message: string }[]>([]);
 
   // Simulate a backend API call
-  const fetchData = async (projectId: string): Promise<MockUnit> => {
+  const fetchData = async (
+    projectId: string,
+    unitNumber: string
+  ): Promise<Unit | undefined> => {
     // Mock API response
-    const response: MockUnit = {
-      projectId,
-      users: [
-        { tokenId: "2", firstName: "Mary", lastName: "Johnson", role: "basic" },
-        { tokenId: "3", firstName: "Ken", lastName: "Long", role: "basic" },
-        { tokenId: "4", firstName: "Michalo", lastName: "Jam", role: "admin" },
-        {
-          tokenId: "5",
-          firstName: "Sierra",
-          lastName: "McKnight",
-          role: "basic",
-        },
-      ],
-      tickets: {
-        total: 19,
-        open: 3,
-        pending: 4,
-        closed: 12,
-      },
-      owner: {
-        tokenId: "1",
-        firstName: "LARRY",
-        lastName: "JOHNSON",
-        email: "larryJ@hotmail.com",
-      },
-      alerts: [
-        { message: "SMOKE ALARM ACTIVATED" },
-        { message: "WATER leak DETECTED" },
-        { message: "WATER LEAKSSS DETECTED" },
-      ],
-    };
-
-    // Simulate network delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(response);
-      }, 1000);
-    });
+    const project = generateMockProjects().find(
+      (project) => project.projectId === projectId
+    );
+    // If the project is found, return the specific unit
+    return project?.units.find((unit) => unit.unitNumber === unitNumber);
   };
 
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData(projectId);
-      setUsers(data.users);
-      setTickets(data.tickets);
-      setOwner(data.owner);
-      setAlerts(data.alerts);
+      const data = await fetchData(projectId, unitNumber);
+      if (data) {
+        setUsers(data.users);
+        setTickets(data.tickets);
+        setOwner(data.owner);
+        setAlerts(data.alerts);
+      }
     };
 
     getData();
-  }, [projectId]);
+  }, [projectId, unitNumber]);
 
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
@@ -143,4 +94,4 @@ const Unit = ({
   );
 };
 
-export default Unit;
+export default UnitComponent;

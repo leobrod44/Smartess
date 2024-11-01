@@ -1,8 +1,4 @@
-// Define the interface for user data
-interface User {
-  firstName: string;
-  lastName: string;
-}
+import { User } from "../../mockData";
 
 interface HubUsersProps {
   users: User[];
