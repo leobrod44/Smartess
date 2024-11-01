@@ -1,34 +1,61 @@
 "use client";
 
 import ManageAccountsList from "@/app/components/ManageAccountsList";
-import { Project, generateMockProjects, Individual } from "../../mockData";
+import {
+  Project,
+  generateMockProjects,
+  Individual,
+  currentUserId,
+} from "../../mockData"; // Adjust the path as needed
 
 const projects: Project[] = generateMockProjects();
 
-// Function to consolidate users across multiple projects
-const consolidateUsers = (projects: Project[]) => {
+// Function to filter and consolidate users across multiple projects
+const getFilteredAndConsolidatedUsers = (
+  projects: Project[],
+  currentUserId: string
+) => {
   const userMap: {
-    [tokenId: string]: { user: Individual; addresses: string[] };
+    [individualId: string]: { user: Individual; addresses: Set<string> };
   } = {};
+
   projects.forEach((project) => {
-    project.projectUsers.forEach((user) => {
-      if (userMap[user.individualId]) {
-        // If the user already exists, add the new project address
-        userMap[user.individualId].addresses.push(project.address);
-      } else {
-        // If the user is new, add them to the map
-        userMap[user.individualId] = {
-          user,
-          addresses: [project.address],
-        };
-      }
-    });
+    // Check if the current user is part of this project using individualId
+    const isCurrentUserInProject = project.projectUsers.some(
+      (user) => user.individualId === currentUserId
+    );
+
+    if (isCurrentUserInProject) {
+      // If the current user is part of the project, process other users
+      project.projectUsers.forEach((user) => {
+        if (user.individualId !== currentUserId) {
+          if (!userMap[user.individualId]) {
+            // Initialize the user in the map with a set for unique addresses
+            userMap[user.individualId] = {
+              user,
+              addresses: new Set(),
+            };
+          }
+          // Add the current project's address to the user's addresses
+          userMap[user.individualId].addresses.add(project.address);
+        }
+      });
+    }
   });
 
-  return Object.values(userMap);
+  // Convert the addresses from Set to Array and prepare the final list
+  return Object.values(userMap).map(({ user, addresses }) => ({
+    user,
+    addresses: Array.from(addresses),
+  }));
 };
+
 const ManageUsersPage = () => {
-  const consolidatedUsers = consolidateUsers(projects);
+  // Use the currentUserId from mockData
+  const consolidatedUsers = getFilteredAndConsolidatedUsers(
+    projects,
+    currentUserId
+  );
 
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
@@ -45,7 +72,7 @@ const ManageUsersPage = () => {
         </p>
       </div>
 
-      {/* Loop through consolidated users and render each one */}
+      {/* Loop through filtered and consolidated users and render each one */}
       {consolidatedUsers.map(({ user, addresses }) => {
         // Create the address string with "(+1 more)" if necessary
         const addressString =
