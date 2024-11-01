@@ -49,7 +49,7 @@ export interface Individual {
   individualId: string; // Unique ID for project-specific users
   firstName: string;
   lastName: string;
-  role: "admin" | "basic";
+  role: "admin" | "basic" | "master";
 }
 
 export interface Unit {
@@ -417,7 +417,7 @@ const generateMockProjectUsers3 = (): Individual[] => [
     individualId: "ind-5",
     firstName: "Sara",
     lastName: "Johnson",
-    role: "basic",
+    role: "master",
   },
   {
     individualId: "ind-6",
