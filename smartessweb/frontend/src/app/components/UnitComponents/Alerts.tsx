@@ -1,7 +1,11 @@
-const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
-  
-  //show only the first two alerts in the list for cleanliness
-  const firstTwoAlerts = alerts.slice(0, 2);
+import { Alert } from "@/app/mockData";
+
+const Alerts = ({ alerts }: { alerts: Alert[] }) => {
+  //show the 2 most recent alerts in the list by their date
+  const recentAlerts = [...alerts]
+    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+    .slice(0, 2);
+
 
   const capitalizeMessage = (message: string) => {
     return message.toUpperCase();
@@ -17,9 +21,9 @@ const Alerts = ({ alerts }: { alerts: { message: string }[] }) => {
       </div>
 
       <div className="flex flex-col justify-center items-center gap-2.5">
-        {firstTwoAlerts.length > 0 ? (
+        {recentAlerts.length > 0 ? (
           <>
-            {firstTwoAlerts.map((alert, index) => (
+            {recentAlerts.map((alert, index) => (
               <div
                 key={index}
                 className="w-[130px] h-[22px] bg-[#a65146] rounded-md flex justify-center items-center overflow-hidden"
