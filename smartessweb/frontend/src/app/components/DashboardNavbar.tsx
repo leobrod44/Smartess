@@ -36,11 +36,61 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usePathname, useRouter } from 'next/navigation';
+import AddressDropdown from './DashboardComponents/AddressDropdown';
 
 interface UserInfo {
   first_name: string;
   last_name: string;
 }
+
+interface UnitData {
+  unitNumber: string;
+}
+
+interface Project {
+  projectId: string;
+  address: string;
+  units: UnitData[];
+  adminUsers: number;
+  hubUsers: number;
+  pendingTickets: number;
+}
+
+const MOCK_PROJECTS: Project[] = [
+  {
+    projectId: 'a10294',
+    address: '1000 De La Gauchetiere',
+    units: [
+      { unitNumber: '101' },
+      { unitNumber: '102' },
+      { unitNumber: '103' },
+    ],
+    adminUsers: 1,
+    hubUsers: 6,
+    pendingTickets: 4,
+  },
+  {
+    projectId: 'b10294',
+    address: '750 Peel Street',
+    units: [{ unitNumber: '201' }, { unitNumber: '202' }],
+    adminUsers: 2,
+    hubUsers: 12,
+    pendingTickets: 5,
+  },
+  {
+    projectId: 'c10294',
+    address: '1500 Maisonneuve Blvd',
+    units: [
+      { unitNumber: '301' },
+      { unitNumber: '302' },
+      { unitNumber: '303' },
+      { unitNumber: '304' },
+    ],
+    adminUsers: 1,
+    hubUsers: 8,
+    pendingTickets: 3,
+  },
+];
 
 const home = [
   {
@@ -139,10 +189,12 @@ const DashboardNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (!token) return;
 
         const data = await userApi.getUserInfo(token);
@@ -164,7 +216,11 @@ const DashboardNavbar = () => {
         router.push('/');
       }, 1000);
     } catch (error) {
-      showToastError(error instanceof Error ? error.message : 'An error occurred during logout');
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred during logout'
+      );
     }
   };
 
@@ -241,6 +297,15 @@ const DashboardNavbar = () => {
                         />
                       </Link>
                     </div>
+
+                    {/* Address Dropdown */}
+                    <AddressDropdown
+                      projects={MOCK_PROJECTS}
+                      selectedProjectId={selectedProjectId}
+                      onProjectChange={(projectId) => {
+                        setSelectedProjectId(projectId);
+                      }}
+                    />
 
                     <nav className='flex flex-1 flex-col'>
                       <ul
@@ -416,6 +481,16 @@ const DashboardNavbar = () => {
                 />
               </Link>
             </div>
+
+            {/* Address Dropdown */}
+            <AddressDropdown
+              projects={MOCK_PROJECTS}
+              selectedProjectId={selectedProjectId}
+              onProjectChange={(projectId) => {
+                setSelectedProjectId(projectId);
+              }}
+            />
+
             <nav className='flex flex-1 flex-col'>
               <ul
                 role='list'
@@ -639,7 +714,9 @@ const DashboardNavbar = () => {
                         className='ml-4 text-sm font-semibold leading-6 text-gray-900'
                         aria-hidden='true'
                       >
-                        {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : 'Loading...'}
+                        {userInfo
+                          ? `${userInfo.first_name} ${userInfo.last_name}`
+                          : 'Loading...'}
                       </span>
                       <ChevronDownIcon
                         className='ml-2 h-5 w-5 text-gray-400'
