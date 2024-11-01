@@ -58,7 +58,7 @@ describe("UnitComponent", () => {
     render(<UnitComponent unitNumber={unitNumber} projectId={projectId} />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Smoke Alarm Activated/i)).toBeInTheDocument();
+      expect(screen.getByText(/water leak detected/i)).toBeInTheDocument();
     });
   });
 });
