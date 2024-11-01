@@ -376,27 +376,69 @@ const generateMockUsers2 = (): User[] => [
 ];
 
 const generateMockProjectUsers = (): Individual[] => [
-  { individualId: "1", firstName: "Alice", lastName: "Smith", role: "admin" },
-  { individualId: "2", firstName: "Bob", lastName: "Johnson", role: "basic" },
+  {
+    individualId: "ind-1",
+    firstName: "Alice",
+    lastName: "Smith",
+    role: "admin",
+  },
+  {
+    individualId: "ind-2",
+    firstName: "Bob",
+    lastName: "Johnson",
+    role: "basic",
+  },
 ];
 
 // Function to generate mock project users for the second project
 const generateMockProjectUsers2 = (): Individual[] => [
-  { individualId: "3", firstName: "Charlie", lastName: "Brown", role: "basic" },
-  { individualId: "4", firstName: "Diana", lastName: "Prince", role: "admin" },
+  {
+    individualId: "ind-3",
+    firstName: "Charlie",
+    lastName: "Brown",
+    role: "basic",
+  },
+  {
+    individualId: "ind-4",
+    firstName: "Diana",
+    lastName: "Prince",
+    role: "admin",
+  },
+  {
+    individualId: "ind-5",
+    firstName: "Sara",
+    lastName: "Johnson",
+    role: "basic",
+  },
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
-  { individualId: "5", firstName: "Sara", lastName: "Johnson", role: "basic" },
-  { individualId: "6", firstName: "Billie", lastName: "Eilish", role: "admin" },
+  {
+    individualId: "ind-5",
+    firstName: "Sara",
+    lastName: "Johnson",
+    role: "basic",
+  },
+  {
+    individualId: "ind-6",
+    firstName: "Billie",
+    lastName: "Eilish",
+    role: "admin",
+  },
 ];
 
 const generateMockProjectUsers4 = (): Individual[] => [
   {
-    individualId: "7",
+    individualId: "ind-7",
     firstName: "Finneas",
     lastName: "O'connel",
     role: "basic",
   },
-  { individualId: "8", firstName: "Zach", lastName: "Donald", role: "admin" },
+  {
+    individualId: "ind-8",
+    firstName: "Zach",
+    lastName: "Donald",
+    role: "admin",
+  },
 ];
+export const currentUserId = "ind-5";
