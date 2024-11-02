@@ -44,7 +44,7 @@ const ManageAccountsList: React.FunctionComponent<ManageAccountsListProps> = ({
         </div>
       </div>
       {/* Render the edit icon only if the current user has the "master" role */}
-      {currentUserRole === "master" && (
+      {(currentUserRole === "master" || currentUserRole === "admin") && (
         <div className="ml-4">
           <EditIcon className="text-[#30525E] cursor-pointer" />
         </div>
