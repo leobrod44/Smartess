@@ -420,18 +420,3 @@ const generateMockProjectUsers3 = (): Individual[] => [
     role: "admin",
   },
 ];
-
-const generateMockProjectUsers4 = (): Individual[] => [
-  {
-    individualId: "ind-7",
-    firstName: "Finneas",
-    lastName: "O'connel",
-    role: "basic",
-  },
-  {
-    individualId: "ind-8",
-    firstName: "Zach",
-    lastName: "Donald",
-    role: "admin",
-  },
-];
