@@ -3,6 +3,8 @@
 import ManageAccountsList from "@/app/components/ManageAccountsList";
 import { Project, generateMockProjects, Individual } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
+import Searchbar from "@/app/components/Searchbar";
+import { useState } from "react";
 
 const projects: Project[] = generateMockProjects();
 
@@ -51,14 +53,30 @@ const consolidateUsers = (
 };
 
 const ManageUsersPage = () => {
-  // Filter users to only those linked to the current user's addresses
+  const [searchQuery, setSearchQuery] = useState("");
+  //only those linked to the current user's addresses
   const consolidatedUsers = consolidateUsers(projects, currentUser.address);
+  const filteredUsers = consolidatedUsers.filter(({ user, addresses }) => {
+    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+    const addressString = addresses.join(" ").toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    return fullName.includes(query) || addressString.includes(query);
+  });
+
+  // Function to handle search input change
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
   const handleAddUserClick = () => {
     // Implement the functionality to add a user
     console.log("Add user clicked!");
   };
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+      <div className="flex justify-end mb-4">
+        <Searchbar onSearch={handleSearch} />
+      </div>
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Project
@@ -82,7 +100,7 @@ const ManageUsersPage = () => {
       </div>
 
       {/* Loop through consolidated users and render each one */}
-      {consolidatedUsers.map(({ user, addresses }) => {
+      {filteredUsers.map(({ user, addresses }) => {
         // Create the address string with "(+1 more)" only if there are multiple addresses
         const addressString =
           addresses.length > 1
