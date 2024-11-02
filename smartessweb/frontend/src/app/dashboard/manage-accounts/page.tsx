@@ -94,10 +94,12 @@ const ManageUsersPage = () => {
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="flex justify-end mb-4">
         <Searchbar onSearch={handleSearch} />
-        <FilterComponent
-          onFilterChange={handleFilterChange}
-          filterOptions={filterOptionsManageUsers}
-        />
+        <div className="pt-2">
+          <FilterComponent
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptionsManageUsers}
+          />
+        </div>
       </div>
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
