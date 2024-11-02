@@ -45,3 +45,20 @@ body {
 .custom-scrollbar::-webkit-scrollbar-track {
   background-color: transparent; 
 }
+
+
+.custom-pagination .MuiPaginationItem-root {
+  border-radius: 8px; 
+  border: 1px solid #30525E; 
+  color: #30525E; 
+}
+
+.custom-pagination .MuiPaginationItem-root.Mui-selected {
+  background-color: #30525E; 
+  color: #ffffff; 
+}
+
+.custom-pagination .MuiPaginationItem-root:hover {
+  background-color: #f0f0f0; 
+  color:#171717
+}
