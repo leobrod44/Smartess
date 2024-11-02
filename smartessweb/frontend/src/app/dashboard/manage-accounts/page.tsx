@@ -5,8 +5,10 @@ import { Project, generateMockProjects, Individual } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
+import Pagination from "@mui/material/Pagination";
 import { useState } from "react";
 
+const itemsPerPage = 6;
 const projects: Project[] = generateMockProjects();
 
 // Mock current user with a "master" role
@@ -56,6 +58,7 @@ const consolidateUsers = (
 const ManageUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const filterOptionsManageUsers = ["Address A-Z", "User A-Z"];
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
@@ -81,6 +84,18 @@ const ManageUsersPage = () => {
       }
       return 0; // No sorting if no sort filter is selected
     });
+  //pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentItems = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
 
   // Function to handle search input change
   const handleSearch = (query: string) => {
@@ -90,6 +105,7 @@ const ManageUsersPage = () => {
     // Implement the functionality to add a user
     console.log("Add user clicked!");
   };
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="flex justify-end mb-4">
@@ -114,7 +130,7 @@ const ManageUsersPage = () => {
 
         {currentUser.role === "master" && (
           <div
-            onClick={handleAddUserClick}
+            onClick={handleAddUserClick} //function yet to be implemented
             className="cursor-pointer  flex items-center"
             style={{ fontSize: "2rem" }}
           >
@@ -122,25 +138,33 @@ const ManageUsersPage = () => {
           </div>
         )}
       </div>
+      <div className="flex-grow">
+        {currentItems.map(({ user, addresses }) => {
+          const addressString =
+            addresses.length > 1
+              ? `${addresses[0]} (+${addresses.length - 1} more)`
+              : addresses[0];
 
-      {/* Loop through consolidated users and render each one */}
-      {filteredUsers.map(({ user, addresses }) => {
-        // Create the address string with "(+1 more)" only if there are multiple addresses
-        const addressString =
-          addresses.length > 1
-            ? `${addresses[0]} (+${addresses.length - 1} more)`
-            : addresses[0];
-
-        return (
-          <ManageAccountsList
-            key={user.individualId} // Use a unique key for project-level users
-            address={addressString}
-            userName={`${user.firstName} ${user.lastName}`}
-            permission={user.role}
-            currentUserRole={currentUser.role}
-          />
-        );
-      })}
+          return (
+            <ManageAccountsList
+              key={user.individualId} // Use a unique key for project-level users
+              address={addressString}
+              userName={`${user.firstName} ${user.lastName}`}
+              permission={user.role}
+              currentUserRole={currentUser.role}
+            />
+          );
+        })}
+      </div>
+      <div className="mt-4 flex justify-center">
+        <Pagination
+          className="custom-pagination"
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
     </div>
   );
 };
