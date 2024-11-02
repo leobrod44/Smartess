@@ -18,6 +18,13 @@ const SignInPage = () => {
     return emailPattern.test(email);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter") {
+      handleLogin(); // Trigger login on Enter key press
+    }
+  };
+
+
   useEffect(() => {
     const handleResize = () => {
       setIsSmallScreen(window.innerWidth < 576);
@@ -106,6 +113,7 @@ const SignInPage = () => {
               className="w-full text-[#266472] text-xl font-sequel-sans-regular self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] items-center gap-2.5 inline-flex focus:outline-none"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
         </div>
@@ -124,6 +132,7 @@ const SignInPage = () => {
               className="w-full self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] text-[#266472] text-xl font-sequel-sans-regular focus:outline-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
           </div>
         </div>
