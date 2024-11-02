@@ -8,7 +8,7 @@ import FilterComponent from "@/app/components/FilterList";
 import Pagination from "@mui/material/Pagination";
 import { useState } from "react";
 
-const itemsPerPage = 6;
+const itemsPerPage = 8;
 const projects: Project[] = generateMockProjects();
 
 // Mock current user with a "master" role
