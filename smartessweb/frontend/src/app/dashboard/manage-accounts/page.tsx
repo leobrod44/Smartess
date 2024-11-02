@@ -63,10 +63,10 @@ const ManageUsersPage = () => {
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Address
         </p>
-        <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
+        <p className="flex-1 pl-2  text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           User
         </p>
-        <p className="flex-1 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
+        <p className="flex-1 pr-6 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Permission
         </p>
 
