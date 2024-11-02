@@ -6,12 +6,16 @@ import { useRouter } from "next/navigation";
 import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 import { signInApi } from "@/api/sign-in/sign-in";
 import Logo from "../../public/images/logo.png";
+import { IconButton } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const SignInPage = () => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,7 +27,6 @@ const SignInPage = () => {
       handleLogin(); // Trigger login on Enter key press
     }
   };
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -127,13 +130,20 @@ const SignInPage = () => {
           </div>
           <div className="relative self-stretch">
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Your Password"
               className="w-full self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] text-[#266472] text-xl font-sequel-sans-regular focus:outline-none"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
             />
+            <IconButton
+              type="button"
+              onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472]"
+            >
+              {showPassword ? <VisibilityOff /> : <Visibility />}
+            </IconButton>
           </div>
         </div>
 
