@@ -4,6 +4,7 @@ import ManageAccountsList from "@/app/components/ManageAccountsList";
 import { Project, generateMockProjects, Individual } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";
+import FilterComponent from "@/app/components/FilterList";
 import { useState } from "react";
 
 const projects: Project[] = generateMockProjects();
@@ -54,15 +55,32 @@ const consolidateUsers = (
 
 const ManageUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  //only those linked to the current user's addresses
+  const [filter, setFilter] = useState("");
+  const filterOptionsManageUsers = ["Address A-Z", "User A-Z"];
+  const handleFilterChange = (filterValue: string) => {
+    setFilter(filterValue);
+  };
   const consolidatedUsers = consolidateUsers(projects, currentUser.address);
-  const filteredUsers = consolidatedUsers.filter(({ user, addresses }) => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    const addressString = addresses.join(" ").toLowerCase();
-    const query = searchQuery.toLowerCase();
+  const filteredUsers = consolidatedUsers
+    .filter(({ user, addresses }) => {
+      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+      const addressString = addresses.join(" ").toLowerCase();
+      const query = searchQuery.toLowerCase();
 
-    return fullName.includes(query) || addressString.includes(query);
-  });
+      return fullName.includes(query) || addressString.includes(query);
+    })
+    .sort((a, b) => {
+      if (filter === "Address A-Z") {
+        // Sort by address alphabetically
+        return a.addresses[0].localeCompare(b.addresses[0]);
+      } else if (filter === "User A-Z") {
+        // Sort by user name alphabetically
+        const nameA = `${a.user.firstName} ${a.user.lastName}`;
+        const nameB = `${b.user.firstName} ${b.user.lastName}`;
+        return nameA.localeCompare(nameB);
+      }
+      return 0; // No sorting if no sort filter is selected
+    });
 
   // Function to handle search input change
   const handleSearch = (query: string) => {
@@ -76,6 +94,10 @@ const ManageUsersPage = () => {
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="flex justify-end mb-4">
         <Searchbar onSearch={handleSearch} />
+        <FilterComponent
+          onFilterChange={handleFilterChange}
+          filterOptions={filterOptionsManageUsers}
+        />
       </div>
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">

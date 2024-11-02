@@ -394,13 +394,13 @@ const generateMockProjectUsers = (): Individual[] => [
 const generateMockProjectUsers2 = (): Individual[] => [
   {
     individualId: "ind-3",
-    firstName: "Charlie",
+    firstName: "Zach",
     lastName: "Brown",
     role: "basic",
   },
   {
     individualId: "ind-4",
-    firstName: "Diana",
+    firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
   },
