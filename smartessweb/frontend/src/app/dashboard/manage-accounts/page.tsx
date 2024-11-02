@@ -152,6 +152,7 @@ const ManageUsersPage = () => {
               userName={`${user.firstName} ${user.lastName}`}
               permission={user.role}
               currentUserRole={currentUser.role}
+              addresses={addresses || []}
             />
           );
         })}
