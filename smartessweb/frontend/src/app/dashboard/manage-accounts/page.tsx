@@ -2,12 +2,17 @@
 
 import ManageAccountsList from "@/app/components/ManageAccountsList";
 import { Project, generateMockProjects, Individual } from "../../mockData";
-import AddIcon from "@mui/icons-material/Add"; // Import MUI Add Icon
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 
 const projects: Project[] = generateMockProjects();
 
 // Mock current user with a "master" role
-const currentUser = {
+const currentUser: {
+  individualId: string;
+  role: "master" | "admin" | "basic";
+  address: string[];
+} = {
   individualId: "10",
   role: "master",
   address: ["1000 De La Gauchetiere", "750 Rue Peel"],
@@ -65,7 +70,7 @@ const ManageUsersPage = () => {
         {currentUser.role === "master" && (
           <div
             onClick={handleAddUserClick}
-            className="cursor-pointer pl-2 flex items-center"
+            className="cursor-pointer  flex items-center"
             style={{ fontSize: "2rem" }}
           >
             <AddIcon className="text-[#30525E]" fontSize="inherit" />
@@ -87,6 +92,7 @@ const ManageUsersPage = () => {
             address={addressString}
             userName={`${user.firstName} ${user.lastName}`}
             permission={user.role}
+            currentUserRole={currentUser.role}
           />
         );
       })}
