@@ -37,147 +37,26 @@ import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usePathname, useRouter } from 'next/navigation';
 import AddressDropdown from './DashboardComponents/AddressDropdown';
+import { generateMockProjects } from '../mockData';
 
+// TypeScript Interface
 interface UserInfo {
   first_name: string;
   last_name: string;
 }
 
-interface UnitData {
-  unitNumber: string;
+interface SidebarItem {
+  name: string;
+  href: string;
+  icon: React.ElementType;
 }
 
-interface Project {
-  projectId: string;
-  address: string;
-  units: UnitData[];
-  adminUsers: number;
-  hubUsers: number;
-  pendingTickets: number;
-}
-
-const MOCK_PROJECTS: Project[] = [
-  {
-    projectId: 'a10294',
-    address: '1000 De La Gauchetiere',
-    units: [
-      { unitNumber: '101' },
-      { unitNumber: '102' },
-      { unitNumber: '103' },
-    ],
-    adminUsers: 1,
-    hubUsers: 6,
-    pendingTickets: 4,
-  },
-  {
-    projectId: 'b10294',
-    address: '750 Peel Street',
-    units: [{ unitNumber: '201' }, { unitNumber: '202' }],
-    adminUsers: 2,
-    hubUsers: 12,
-    pendingTickets: 5,
-  },
-  {
-    projectId: 'c10294',
-    address: '1500 Maisonneuve Blvd',
-    units: [
-      { unitNumber: '301' },
-      { unitNumber: '302' },
-      { unitNumber: '303' },
-      { unitNumber: '304' },
-    ],
-    adminUsers: 1,
-    hubUsers: 8,
-    pendingTickets: 3,
-  },
-  {
-    projectId: 'd10294',
-    address: '200 Rene-Levesque Blvd',
-    units: [{ unitNumber: '401' }, { unitNumber: '402' }],
-    adminUsers: 1,
-    hubUsers: 5,
-    pendingTickets: 2,
-  },
-  {
-    projectId: 'e10294',
-    address: '500 Saint-Jacques Street',
-    units: [
-      { unitNumber: '501' },
-      { unitNumber: '502' },
-      { unitNumber: '503' },
-    ],
-    adminUsers: 3,
-    hubUsers: 15,
-    pendingTickets: 8,
-  },
-  {
-    projectId: 'f10294',
-    address: '3000 Jean-Talon Street',
-    units: [
-      { unitNumber: '601' },
-      { unitNumber: '602' },
-      { unitNumber: '603' },
-      { unitNumber: '604' },
-      { unitNumber: '605' },
-    ],
-    adminUsers: 2,
-    hubUsers: 10,
-    pendingTickets: 6,
-  },
-  {
-    projectId: 'g10294',
-    address: '400 Berri Street',
-    units: [{ unitNumber: '701' }, { unitNumber: '702' }],
-    adminUsers: 1,
-    hubUsers: 4,
-    pendingTickets: 1,
-  },
-  {
-    projectId: 'h10294',
-    address: '600 Dorchester Square',
-    units: [
-      { unitNumber: '801' },
-      { unitNumber: '802' },
-      { unitNumber: '803' },
-      { unitNumber: '804' },
-    ],
-    adminUsers: 2,
-    hubUsers: 9,
-    pendingTickets: 7,
-  },
-  {
-    projectId: 'i10294',
-    address: '1250 University Street',
-    units: [
-      { unitNumber: '901' },
-      { unitNumber: '902' },
-      { unitNumber: '903' },
-    ],
-    adminUsers: 1,
-    hubUsers: 7,
-    pendingTickets: 2,
-  },
-  {
-    projectId: 'j10294',
-    address: '2100 Crescent Street',
-    units: [
-      { unitNumber: '1001' },
-      { unitNumber: '1002' },
-      { unitNumber: '1003' },
-      { unitNumber: '1004' },
-    ],
-    adminUsers: 3,
-    hubUsers: 11,
-    pendingTickets: 4,
-  },
-];
-
+// Sidebar Elements
 const home = [
   {
     name: 'Dashboard',
     href: '/dashboard',
     icon: DashboardOutlinedIcon,
-    current: false,
   },
 ];
 
@@ -186,19 +65,16 @@ const general = [
     name: 'Units',
     href: '/dashboard/unit',
     icon: DoorBackOutlinedIcon,
-    current: false,
   },
   {
     name: 'Tickets',
     href: '/dashboard/ticket',
     icon: ConfirmationNumberOutlinedIcon,
-    current: false,
   },
   {
     name: 'Consumption',
     href: '/dashboard/consumption',
     icon: ElectricBoltOutlinedIcon,
-    current: false,
   },
 ];
 
@@ -207,13 +83,11 @@ const security = [
     name: 'Surveillance',
     href: '/dashboard/surveillance',
     icon: VideocamOutlinedIcon,
-    current: false,
   },
   {
     name: 'Locks',
     href: '/dashboard/lock',
     icon: LockOutlinedIcon,
-    current: false,
   },
 ];
 
@@ -222,19 +96,16 @@ const community = [
     name: 'Annoucements',
     href: '/dashboard/announcement',
     icon: AnnouncementOutlinedIcon,
-    current: false,
   },
   {
     name: 'Chat',
     href: '/dashboard/chat',
     icon: ChatBubbleOutlineOutlinedIcon,
-    current: false,
   },
   {
     name: 'Manage Accounts',
     href: '/dashboard/manage-accounts',
     icon: PeopleAltOutlinedIcon,
-    current: false,
   },
 ];
 
@@ -243,13 +114,11 @@ const information = [
     name: 'Logs',
     href: '/dashboard/log',
     icon: ConfirmationNumberOutlinedIcon,
-    current: false,
   },
   {
     name: 'Documentation',
     href: '/dashboard/documentation',
     icon: MenuBookOutlinedIcon,
-    current: false,
   },
 ];
 
@@ -266,10 +135,39 @@ function classNames(...classes: (string | undefined | false | null)[]): string {
 const DashboardNavbar = () => {
   const router = useRouter();
   const pathname = usePathname();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
+
+  const sidebarItems = [
+    ...home,
+    ...general,
+    ...security,
+    ...community,
+    ...information,
+  ];
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    if (query) {
+      const matches = sidebarItems.filter((item) =>
+        item.name.toLowerCase().startsWith(query.toLowerCase())
+      );
+      setSuggestions(matches);
+    } else {
+      setSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (href: string) => {
+    router.push(href);
+    setSuggestions([]);
+    setSearchQuery('');
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -380,7 +278,7 @@ const DashboardNavbar = () => {
 
                     {/* Address Dropdown */}
                     <AddressDropdown
-                      projects={MOCK_PROJECTS}
+                      projects={generateMockProjects()}
                       selectedProjectId={selectedProjectId}
                       onProjectChange={(projectId) => {
                         setSelectedProjectId(projectId);
@@ -564,7 +462,7 @@ const DashboardNavbar = () => {
 
             {/* Address Dropdown */}
             <AddressDropdown
-              projects={MOCK_PROJECTS}
+              projects={generateMockProjects()}
               selectedProjectId={selectedProjectId}
               onProjectChange={(projectId) => {
                 setSelectedProjectId(projectId);
@@ -749,8 +647,7 @@ const DashboardNavbar = () => {
             <div className='flex flex-1 gap-x-4 self-stretch lg:gap-x-6'>
               <form
                 className='relative flex flex-1'
-                action='#'
-                method='GET'
+                onSubmit={(e) => e.preventDefault()}
               >
                 <label
                   htmlFor='search-field'
@@ -768,7 +665,23 @@ const DashboardNavbar = () => {
                   placeholder='Search...'
                   type='search'
                   name='search'
+                  value={searchQuery}
+                  onChange={handleSearchChange}
                 />
+                {/* Suggestions list */}
+                {suggestions.length > 0 && (
+                  <div className='absolute z-10 top-full mt-1 w-full bg-white shadow-lg ring-1 ring-black ring-opacity-5 rounded-md focus:outline-none'>
+                    {suggestions.map((item) => (
+                      <div
+                        key={item.name}
+                        onClick={() => handleSuggestionClick(item.href)}
+                        className='cursor-pointer px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
+                      >
+                        {item.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </form>
               <div className='flex items-center gap-x-4 lg:gap-x-6'>
                 {/* Separator */}
@@ -784,9 +697,9 @@ const DashboardNavbar = () => {
                 >
                   <MenuButton className='-m-1.5 flex items-center p-1.5'>
                     <span className='sr-only'>Open user menu</span>
-                    <img
+                    <Image
                       className='h-8 w-8 rounded-full bg-gray-50'
-                      src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+                      src={dashboardLogo}
                       alt=''
                     />
                     <span className='hidden lg:flex lg:items-center'>
