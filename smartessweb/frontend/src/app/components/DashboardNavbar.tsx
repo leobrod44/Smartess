@@ -36,11 +36,141 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usePathname, useRouter } from 'next/navigation';
+import AddressDropdown from './DashboardComponents/AddressDropdown';
 
 interface UserInfo {
   first_name: string;
   last_name: string;
 }
+
+interface UnitData {
+  unitNumber: string;
+}
+
+interface Project {
+  projectId: string;
+  address: string;
+  units: UnitData[];
+  adminUsers: number;
+  hubUsers: number;
+  pendingTickets: number;
+}
+
+const MOCK_PROJECTS: Project[] = [
+  {
+    projectId: 'a10294',
+    address: '1000 De La Gauchetiere',
+    units: [
+      { unitNumber: '101' },
+      { unitNumber: '102' },
+      { unitNumber: '103' },
+    ],
+    adminUsers: 1,
+    hubUsers: 6,
+    pendingTickets: 4,
+  },
+  {
+    projectId: 'b10294',
+    address: '750 Peel Street',
+    units: [{ unitNumber: '201' }, { unitNumber: '202' }],
+    adminUsers: 2,
+    hubUsers: 12,
+    pendingTickets: 5,
+  },
+  {
+    projectId: 'c10294',
+    address: '1500 Maisonneuve Blvd',
+    units: [
+      { unitNumber: '301' },
+      { unitNumber: '302' },
+      { unitNumber: '303' },
+      { unitNumber: '304' },
+    ],
+    adminUsers: 1,
+    hubUsers: 8,
+    pendingTickets: 3,
+  },
+  {
+    projectId: 'd10294',
+    address: '200 Rene-Levesque Blvd',
+    units: [{ unitNumber: '401' }, { unitNumber: '402' }],
+    adminUsers: 1,
+    hubUsers: 5,
+    pendingTickets: 2,
+  },
+  {
+    projectId: 'e10294',
+    address: '500 Saint-Jacques Street',
+    units: [
+      { unitNumber: '501' },
+      { unitNumber: '502' },
+      { unitNumber: '503' },
+    ],
+    adminUsers: 3,
+    hubUsers: 15,
+    pendingTickets: 8,
+  },
+  {
+    projectId: 'f10294',
+    address: '3000 Jean-Talon Street',
+    units: [
+      { unitNumber: '601' },
+      { unitNumber: '602' },
+      { unitNumber: '603' },
+      { unitNumber: '604' },
+      { unitNumber: '605' },
+    ],
+    adminUsers: 2,
+    hubUsers: 10,
+    pendingTickets: 6,
+  },
+  {
+    projectId: 'g10294',
+    address: '400 Berri Street',
+    units: [{ unitNumber: '701' }, { unitNumber: '702' }],
+    adminUsers: 1,
+    hubUsers: 4,
+    pendingTickets: 1,
+  },
+  {
+    projectId: 'h10294',
+    address: '600 Dorchester Square',
+    units: [
+      { unitNumber: '801' },
+      { unitNumber: '802' },
+      { unitNumber: '803' },
+      { unitNumber: '804' },
+    ],
+    adminUsers: 2,
+    hubUsers: 9,
+    pendingTickets: 7,
+  },
+  {
+    projectId: 'i10294',
+    address: '1250 University Street',
+    units: [
+      { unitNumber: '901' },
+      { unitNumber: '902' },
+      { unitNumber: '903' },
+    ],
+    adminUsers: 1,
+    hubUsers: 7,
+    pendingTickets: 2,
+  },
+  {
+    projectId: 'j10294',
+    address: '2100 Crescent Street',
+    units: [
+      { unitNumber: '1001' },
+      { unitNumber: '1002' },
+      { unitNumber: '1003' },
+      { unitNumber: '1004' },
+    ],
+    adminUsers: 3,
+    hubUsers: 11,
+    pendingTickets: 4,
+  },
+];
 
 const home = [
   {
@@ -139,10 +269,12 @@ const DashboardNavbar = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (!token) return;
 
         const data = await userApi.getUserInfo(token);
@@ -164,7 +296,11 @@ const DashboardNavbar = () => {
         router.push('/');
       }, 1000);
     } catch (error) {
-      showToastError(error instanceof Error ? error.message : 'An error occurred during logout');
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : 'An error occurred during logout'
+      );
     }
   };
 
@@ -241,6 +377,15 @@ const DashboardNavbar = () => {
                         />
                       </Link>
                     </div>
+
+                    {/* Address Dropdown */}
+                    <AddressDropdown
+                      projects={MOCK_PROJECTS}
+                      selectedProjectId={selectedProjectId}
+                      onProjectChange={(projectId) => {
+                        setSelectedProjectId(projectId);
+                      }}
+                    />
 
                     <nav className='flex flex-1 flex-col'>
                       <ul
@@ -416,6 +561,16 @@ const DashboardNavbar = () => {
                 />
               </Link>
             </div>
+
+            {/* Address Dropdown */}
+            <AddressDropdown
+              projects={MOCK_PROJECTS}
+              selectedProjectId={selectedProjectId}
+              onProjectChange={(projectId) => {
+                setSelectedProjectId(projectId);
+              }}
+            />
+
             <nav className='flex flex-1 flex-col'>
               <ul
                 role='list'
@@ -639,7 +794,9 @@ const DashboardNavbar = () => {
                         className='ml-4 text-sm font-semibold leading-6 text-gray-900'
                         aria-hidden='true'
                       >
-                        {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : 'Loading...'}
+                        {userInfo
+                          ? `${userInfo.first_name} ${userInfo.last_name}`
+                          : 'Loading...'}
                       </span>
                       <ChevronDownIcon
                         className='ml-2 h-5 w-5 text-gray-400'
