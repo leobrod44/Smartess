@@ -1,65 +1,56 @@
 "use client";
 
 import ManageAccountsList from "@/app/components/ManageAccountsList";
-import {
-  Project,
-  generateMockProjects,
-  Individual,
-  currentUserId,
-} from "../../mockData"; // Adjust the path as needed
+import { Project, generateMockProjects, Individual } from "../../mockData";
+import AddIcon from "@mui/icons-material/Add"; // Import MUI Add Icon
 
 const projects: Project[] = generateMockProjects();
 
-// Function to filter and consolidate users across multiple projects
-const getFilteredAndConsolidatedUsers = (
+// Mock current user with a "master" role
+const currentUser = {
+  individualId: "10",
+  role: "master",
+  address: ["1000 De La Gauchetiere", "750 Rue Peel"],
+};
+
+const consolidateUsers = (
   projects: Project[],
-  currentUserId: string
+  currentUserAddresses: string[]
 ) => {
   const userMap: {
-    [individualId: string]: { user: Individual; addresses: Set<string> };
+    [tokenId: string]: { user: Individual; addresses: string[] };
   } = {};
 
   projects.forEach((project) => {
-    // Check if the current user is part of this project using individualId
-    const isCurrentUserInProject = project.projectUsers.some(
-      (user) => user.individualId === currentUserId
-    );
-
-    if (isCurrentUserInProject) {
-      // If the current user is part of the project, process other users
+    // Check if the project address is linked to the current user
+    if (currentUserAddresses.includes(project.address)) {
       project.projectUsers.forEach((user) => {
-        if (user.individualId !== currentUserId) {
-          if (!userMap[user.individualId]) {
-            // Initialize the user in the map with a set for unique addresses
-            userMap[user.individualId] = {
-              user,
-              addresses: new Set(),
-            };
-          }
-          // Add the current project's address to the user's addresses
-          userMap[user.individualId].addresses.add(project.address);
+        if (userMap[user.individualId]) {
+          // If the user already exists, add the new project address
+          userMap[user.individualId].addresses.push(project.address);
+        } else {
+          // If the user is new, add them to the map
+          userMap[user.individualId] = {
+            user,
+            addresses: [project.address],
+          };
         }
       });
     }
   });
 
-  // Convert the addresses from Set to Array and prepare the final list
-  return Object.values(userMap).map(({ user, addresses }) => ({
-    user,
-    addresses: Array.from(addresses),
-  }));
+  return Object.values(userMap);
 };
 
 const ManageUsersPage = () => {
-  // Use the currentUserId from mockData
-  const consolidatedUsers = getFilteredAndConsolidatedUsers(
-    projects,
-    currentUserId
-  );
-
+  // Filter users to only those linked to the current user's addresses
+  const consolidatedUsers = consolidateUsers(projects, currentUser.address);
+  const handleAddUserClick = () => {
+    // Implement the functionality to add a user
+    console.log("Add user clicked!");
+  };
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      {/* Column Labels */}
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Address
@@ -70,13 +61,23 @@ const ManageUsersPage = () => {
         <p className="flex-1 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Permission
         </p>
+
+        {currentUser.role === "master" && (
+          <div
+            onClick={handleAddUserClick}
+            className="cursor-pointer pl-2 flex items-center"
+            style={{ fontSize: "2rem" }}
+          >
+            <AddIcon className="text-[#30525E]" fontSize="inherit" />
+          </div>
+        )}
       </div>
 
-      {/* Loop through filtered and consolidated users and render each one */}
+      {/* Loop through consolidated users and render each one */}
       {consolidatedUsers.map(({ user, addresses }) => {
-        // Create the address string with "(+1 more)" if necessary
+        // Create the address string with "(+1 more)" only if the current user has the "master" role
         const addressString =
-          addresses.length > 1
+          addresses.length > 1 && currentUser.role === "master"
             ? `${addresses[0]} (+${addresses.length - 1} more)`
             : addresses[0];
 

@@ -404,12 +404,6 @@ const generateMockProjectUsers2 = (): Individual[] => [
     lastName: "Prince",
     role: "admin",
   },
-  {
-    individualId: "ind-5",
-    firstName: "Sara",
-    lastName: "Johnson",
-    role: "basic",
-  },
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
@@ -441,4 +435,3 @@ const generateMockProjectUsers4 = (): Individual[] => [
     role: "admin",
   },
 ];
-export const currentUserId = "ind-5";
