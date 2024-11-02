@@ -1,6 +1,4 @@
 "use client";
-
-import { FC } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 
 interface ManageAccountsListProps {
@@ -10,7 +8,7 @@ interface ManageAccountsListProps {
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
 }
 
-const ManageAccountsList: FC<ManageAccountsListProps> = ({
+const ManageAccountsList: React.FunctionComponent<ManageAccountsListProps> = ({
   address,
   userName,
   permission,

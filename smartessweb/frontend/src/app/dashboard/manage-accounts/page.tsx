@@ -3,7 +3,6 @@
 import ManageAccountsList from "@/app/components/ManageAccountsList";
 import { Project, generateMockProjects, Individual } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
 
 const projects: Project[] = generateMockProjects();
 
@@ -15,7 +14,11 @@ const currentUser: {
 } = {
   individualId: "10",
   role: "master",
-  address: ["1000 De La Gauchetiere", "750 Rue Peel"],
+  address: [
+    "1000 De La Gauchetiere",
+    "750 Rue Peel",
+    "131 Chemin des Conifere",
+  ],
 };
 
 const consolidateUsers = (
@@ -80,9 +83,9 @@ const ManageUsersPage = () => {
 
       {/* Loop through consolidated users and render each one */}
       {consolidatedUsers.map(({ user, addresses }) => {
-        // Create the address string with "(+1 more)" only if the current user has the "master" role
+        // Create the address string with "(+1 more)" only if there are multiple addresses
         const addressString =
-          addresses.length > 1 && currentUser.role === "master"
+          addresses.length > 1
             ? `${addresses[0]} (+${addresses.length - 1} more)`
             : addresses[0];
 
