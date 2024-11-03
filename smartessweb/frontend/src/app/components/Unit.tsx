@@ -8,6 +8,7 @@ import {
   TicketsType,
   Owner,
   Unit,
+  Alert,
   generateMockProjects,
 } from "../mockData";
 
@@ -31,7 +32,7 @@ const UnitComponent = ({
     lastName: "",
     email: "",
   });
-  const [alerts, setAlerts] = useState<{ message: string }[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
 
   // Simulate a backend API call
   const fetchData = async (
@@ -53,7 +54,7 @@ const UnitComponent = ({
         setUsers(data.users);
         setTickets(data.tickets);
         setOwner(data.owner);
-        setAlerts(data.alerts);
+        setAlerts(data.alerts as Alert[]);
       }
     };
 
