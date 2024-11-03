@@ -70,8 +70,9 @@ const ManageAccountsList = ({
         open={isModalOpen}
         onClose={handleCloseModal}
         userName={userName}
-        role={permission}
-        addresses={addresses} // Pass the full addresses array
+        role={currentUserRole}
+        addresses={addresses}
+        currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
       />
     </>
   );

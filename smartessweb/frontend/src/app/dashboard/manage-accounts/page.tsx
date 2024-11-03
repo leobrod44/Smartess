@@ -11,14 +11,14 @@ import { useState } from "react";
 const itemsPerPage = 8;
 const projects: Project[] = generateMockProjects();
 
-// Mock current user with a "master" role
+// Mock current user
 const currentUser: {
   individualId: string;
   role: "master" | "admin" | "basic";
   address: string[];
 } = {
   individualId: "10",
-  role: "master",
+  role: "admin",
   address: [
     "1000 De La Gauchetiere",
     "750 Rue Peel",

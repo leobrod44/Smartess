@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
 
 interface UserInfoModalProps {
   open: boolean;
@@ -8,6 +9,7 @@ interface UserInfoModalProps {
   userName: string;
   role: "admin" | "basic" | "master";
   addresses: string[];
+  currentUserRole: "admin" | "basic" | "master";
 }
 
 function UserInfoModal({
@@ -41,7 +43,7 @@ function UserInfoModal({
           <Typography
             variant="h6"
             id="user-details-modal"
-            className="text-[#30525E] font-sequel-sans-medium text-lg mb-2"
+            className="text-[#30525E] font-sequel-sans-medium text-lg mb-2 pb-4"
           >
             {userName}
           </Typography>
@@ -55,7 +57,14 @@ function UserInfoModal({
                 {role}
               </span>
             </div>
+            {/* Pencil Icon (only visible for 'master' or 'admin' roles) */}
+            {(role === "master" || role === "admin") && (
+              <IconButton className="ml-4 text-[#30525E]">
+                <EditIcon />
+              </IconButton>
+            )}
           </div>
+
           <Typography
             variant="body1"
             className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium text-left w-full pl-2"
