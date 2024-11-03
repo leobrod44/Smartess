@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface UserInfoModalProps {
   open: boolean;
@@ -17,9 +18,19 @@ function UserInfoModal({
   onClose,
   userName,
   role,
-  addresses,
+  addresses: initialAddresses,
   currentUserRole,
 }: UserInfoModalProps) {
+  const [addresses, setAddresses] = useState(initialAddresses);
+
+  // Function to handle address deletion
+  const handleDeleteAddress = (index: number) => {
+    // Create a new array without the deleted address
+    const updatedAddresses = addresses.filter(
+      (_, addrIndex) => addrIndex !== index
+    );
+    setAddresses(updatedAddresses); // Update the addresses state
+  };
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
       <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[80vh]">
@@ -58,7 +69,7 @@ function UserInfoModal({
                 {role}
               </span>
             </div>
-            {/* Pencil Icon (only visible for 'master' or 'admin' roles) */}
+            {/* Edit Icon (only visible for 'master' or 'admin' roles) */}
             {(currentUserRole === "master" || currentUserRole === "admin") && (
               <IconButton className="ml-4 text-[#30525E]">
                 <EditIcon />
@@ -80,6 +91,14 @@ function UserInfoModal({
                 className="account-card border p-2 rounded shadow-md flex items-center justify-start"
               >
                 <p className="flex-1">{address}</p>
+                {currentUserRole === "master" && (
+                  <IconButton
+                    className="text-red-600"
+                    onClick={() => handleDeleteAddress(index)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </div>
             ))}
           </div>
