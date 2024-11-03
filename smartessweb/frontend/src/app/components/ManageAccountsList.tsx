@@ -42,7 +42,10 @@ const ManageAccountsList = ({
 
   return (
     <>
-      <div className="account-card border p-4 rounded shadow-sm flex items-center justify-between">
+      <div
+        className="account-card border p-4 rounded shadow-sm flex items-center justify-between cursor-pointer"
+        onClick={handleOpenModal}
+      >
         <div className="flex-1">
           <p>{address}</p>
         </div>
