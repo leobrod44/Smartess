@@ -18,6 +18,7 @@ function UserInfoModal({
   userName,
   role,
   addresses,
+  currentUserRole,
 }: UserInfoModalProps) {
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
@@ -58,7 +59,7 @@ function UserInfoModal({
               </span>
             </div>
             {/* Pencil Icon (only visible for 'master' or 'admin' roles) */}
-            {(role === "master" || role === "admin") && (
+            {(currentUserRole === "master" || currentUserRole === "admin") && (
               <IconButton className="ml-4 text-[#30525E]">
                 <EditIcon />
               </IconButton>
