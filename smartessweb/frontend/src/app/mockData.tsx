@@ -61,7 +61,7 @@ export interface Unit {
 
   owner: Owner;
 
-  alerts: { message: string }[];
+  alerts: Alert[];
 }
 
 export interface Alert {
