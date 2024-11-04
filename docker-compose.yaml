@@ -72,7 +72,7 @@ services:
     container_name: mockhub
     build:
       context: ./go
-      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path relative to the build context
+      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path pqueuerelative to the build context
     ports:
       - "8765:8765"
     networks:
