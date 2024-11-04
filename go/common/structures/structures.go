@@ -34,12 +34,6 @@ type Announcement struct {
 	Priority       string     `json:"priority"`        // Priority level (e.g., "low", "normal", "high")
 }
 
-type GenericMessage struct {
-	HubID     int          `json:"id"`         // ID of the sender
-	Content   EventDetails `json:"json"`       // The message content
-	TimeStamp time.Time    `json:"time_fired"` // Timestamp for when the message was created
-}
-
 type StateEvent struct {
 	HubID     int       `json:"id"`         // ID of the sender
 	DeviceID  string    `json:"device"`     // ID of the device
@@ -80,4 +74,12 @@ type EventContext struct {
 	ID       string `json:"id"`
 	ParentID string `json:"parent_id"`
 	UserID   string `json:"user_id"`
+}
+
+type Alert struct {
+	HubID     string    `json:"id"`         // ID of the sender
+	DeviceID  string    `json:"device"`     // ID of the device
+	State     string    `json:"state"`      // The message content
+	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
+	Message   string    `json:"message"`    // Alert message
 }

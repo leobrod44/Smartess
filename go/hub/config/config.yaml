@@ -1,0 +1,8 @@
+hub:
+  alerts:
+    conditions: [
+      {
+        name: "light",
+        status: "ON"
+      }
+    ]

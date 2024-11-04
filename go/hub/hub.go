@@ -2,12 +2,15 @@ package hub
 
 import (
 	"Smartess/go/common/rabbitmq"
+	"Smartess/go/common/structures"
 	"Smartess/go/hub/ha"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
+	"time"
 
 	"Smartess/go/hub/logs"
 
@@ -59,10 +62,14 @@ func (r *SmartessHub) Start() {
 			r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
 			continue
 		}
-		r.Logger.Info(fmt.Sprintf("Received event: %s", event.Event.EventType))
-
+		_, err = r.checkPublishAlert(&event)
+		if err != nil {
+			r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
+		}
 	}
 }
+
+// TODO add with options which are dynamic with type of config, generic with event type, condition?
 
 // TODO check for all valid events for a message
 
@@ -182,4 +189,27 @@ func (client *SmartessHub) PublishMongo(message []byte) error {
 			ContentType: "text/plain",
 			Body:        []byte(message),
 		})
+}
+
+// TODO generalize
+func (r *SmartessHub) checkPublishAlert(message *ha.WebhookMessage) (bool, error) {
+
+	if !strings.Contains(message.Event.Data.EntityID, "light") {
+		return false, nil
+	}
+	timeFired, err := time.Parse(time.RFC3339, message.Event.TimeFired)
+	if err != nil {
+		return false, errors.New("failed to parse time fired")
+	}
+	alert := structures.Alert{
+		HubID:     os.Getenv("HUB_IP"),
+		DeviceID:  message.Event.Data.EntityID,
+		Message:   "Light state changed",
+		State:     message.Event.Data.NewState.State,
+		TimeStamp: timeFired,
+	}
+	return true, r.Publish(
+		"alert", // Routing key
+		[]byte(fmt.Sprintf("%v", alert)),
+	)
 }

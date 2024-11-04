@@ -25,30 +25,64 @@ type MessageHandler interface {
 	Handle(msg amqp.Delivery, logger *zap.Logger) error
 }
 
-type GenericMessageHandler struct{}
-
-func (h *GenericMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
-	fmt.Printf("Another handler processing: %s\n", msg.Body)
-	return nil
-}
-
 type HubLogHandler struct {
 	logLevel int
 }
 
 func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
+
 	var log structures.HubLog
 	logger.Info("messsage", zap.String("body", string(msg.Body)))
 	err := json.Unmarshal(msg.Body, &log)
 	if err != nil {
 		return err
 	}
-	logger.Info("log",
-		zap.String("hub_id", log.HubID),
-		zap.String("message", log.Message),
-		zap.String("time_fired", log.TimeStamp.String()),
-	)
+	switch h.logLevel {
+	case 0:
+		logger.Info("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	case 1:
+		logger.Warn("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	case 2:
+		logger.Error("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	default:
+		logger.Info("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	}
+	return nil
+}
 
+type AlertHandler struct{}
+
+func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
+	var alert structures.Alert
+	logger.Info("alert", zap.String("body", string(msg.Body)))
+	err := json.Unmarshal(msg.Body, &alert)
+	if err != nil {
+		return err
+	}
+	//TODO @ryan: send alert to Mongo
+	logger.Info("alert",
+		zap.String("hub_id", alert.HubID),
+		zap.String("device_id", alert.DeviceID),
+		zap.String("state", alert.State),
+		zap.String("message", alert.Message),
+		zap.String("time_fired", alert.TimeStamp.String()),
+	)
 	return nil
 }
 
