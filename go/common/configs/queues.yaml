@@ -8,12 +8,6 @@ queues:
     exclusive: false
     no_wait: false
     arguments: { }
-    message_format:
-      type: json
-      schema:
-        id: integer           # ID of the sender
-        json: string          # The message content
-        time_fired: string    # Timestamp of message creation
 
   - name: hub-warn-logs
     type: standard
@@ -24,11 +18,7 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-    message_format:
-      type: json
-      schema:
-          message: string
-          time_fired: string
+
   - name: hub-error-logs
     type: standard
     max_size: 100
@@ -38,11 +28,7 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-    message_format:
-      type: json
-      schema:
-          message: string
-          time_fired: string
+
   - name: hub-info-logs
     max_size: 100
     passive: false
@@ -51,11 +37,7 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-    message_format:
-      type: json
-      schema:
-          message: string
-          time_fired: string
+
   - name: alerts
     max_size: 100
     passive: false
@@ -64,8 +46,3 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-    message_format:
-      type: json
-      schema:
-          message: string
-          time_fired: string

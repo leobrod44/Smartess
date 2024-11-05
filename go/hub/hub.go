@@ -10,7 +10,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"time"
 
 	"Smartess/go/hub/logs"
 
@@ -65,6 +64,7 @@ func (r *SmartessHub) Start() {
 		_, err = r.checkPublishAlert(&event)
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
+			continue
 		}
 	}
 }
@@ -194,22 +194,29 @@ func (client *SmartessHub) PublishMongo(message []byte) error {
 // TODO generalize
 func (r *SmartessHub) checkPublishAlert(message *ha.WebhookMessage) (bool, error) {
 
-	if !strings.Contains(message.Event.Data.EntityID, "light") {
+	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
 		return false, nil
 	}
-	timeFired, err := time.Parse(time.RFC3339, message.Event.TimeFired)
-	if err != nil {
-		return false, errors.New("failed to parse time fired")
-	}
+	r.Logger.InternalLogger.Info(fmt.Sprintf("Received message %v", message))
+
 	alert := structures.Alert{
-		HubID:     os.Getenv("HUB_IP"),
+		HubIP:     os.Getenv("HUB_IP"),
 		DeviceID:  message.Event.Data.EntityID,
 		Message:   "Light state changed",
 		State:     message.Event.Data.NewState.State,
-		TimeStamp: timeFired,
+		TimeStamp: message.Event.Data.NewState.LastChanged,
 	}
+	r.Logger.InternalLogger.Info(fmt.Sprintf("Sent alert for %s", alert))
+
+	alertJson, err := json.Marshal(alert)
+
+	if err != nil {
+		return false, errors.New("failed to marshal alert")
+	}
+	r.Logger.InternalLogger.Info(fmt.Sprintf("Json alert %s", alertJson))
 	return true, r.Publish(
-		"alert", // Routing key
-		[]byte(fmt.Sprintf("%v", alert)),
+		"alerts",
+		alertJson,
 	)
+
 }

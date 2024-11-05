@@ -29,6 +29,7 @@ func Init() (RabbitMQServer, error) {
 	}
 	var consumers []QueueConsumer
 
+	//TODO add marshals struct, or check if necessary
 	for _, queueConfig := range instance.Config.Queues {
 		queue, err := instance.Channel.QueueDeclare(
 			queueConfig.Queue,      // name of the queue
@@ -76,10 +77,8 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				err := queue.messageHandler.Handle(msg, r.Logger)
-				if err != nil {
-					r.Logger.Error("Failed to handle message", zap.Error(err))
-				}
+				queue.messageHandler.Handle(msg, r.Logger)
+
 			}
 		}(smartessQueue)
 	}

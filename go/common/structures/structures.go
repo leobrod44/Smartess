@@ -77,9 +77,9 @@ type EventContext struct {
 }
 
 type Alert struct {
-	HubID     string    `json:"id"`         // ID of the sender
-	DeviceID  string    `json:"device"`     // ID of the device
-	State     string    `json:"state"`      // The message content
-	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
-	Message   string    `json:"message"`    // Alert message
+	HubIP     string    `json:"hub_ip"`
+	DeviceID  string    `json:"device"`
+	State     string    `json:"state"`
+	Message   string    `json:"message"`
+	TimeStamp time.Time `json:"time_fired"`
 }
