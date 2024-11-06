@@ -56,7 +56,8 @@ exports.getHubDetails = async (req, res) => {
             .from('alerts')
             .select('*')
             .eq('hub_id', hub_id)
-            .eq('active', true);
+            .eq('active', true)
+            .order('created_at', { ascending: false });
 
         if (alertsError) {
             return res.status(500).json({ error: 'Failed to fetch alerts.' });
