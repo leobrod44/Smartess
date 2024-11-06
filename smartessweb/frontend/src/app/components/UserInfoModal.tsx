@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Typography, IconButton } from "@mui/material";
+import { Modal, Typography, IconButton, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -23,8 +23,10 @@ function UserInfoModal({
   currentUserRole,
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
-  const [addresses, setAddresses] = useState(initialAddresses);
+  const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [isEditingRole, setIsEditingRole] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
+  const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -34,15 +36,25 @@ function UserInfoModal({
     setRole(newRole); // Update the role state
     setIsEditingRole(false); // Hide the role editing form
   };
-
-  // Function to handle address deletion
-  const handleDeleteAddress = (index: number) => {
-    // Create a new array without the deleted address
-    const updatedAddresses = addresses.filter(
-      (_, addrIndex) => addrIndex !== index
-    );
-    setAddresses(updatedAddresses); // Update the addresses state
+  const handleDeleteClick = (address: string) => {
+    setAddressToDelete(address);
+    setDeletePopupOpen(true);
   };
+  const handleConfirmDelete = () => {
+    if (addressToDelete) {
+      // Filter out the address to be deleted
+      const updatedAddresses = addresses.filter(
+        (addr) => addr !== addressToDelete
+      );
+      setAddresses(updatedAddresses); // Update the addresses state
+      setDeletePopupOpen(false); // Close the confirmation popup
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeletePopupOpen(false);
+  };
+
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
       <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[80vh]">
@@ -118,7 +130,7 @@ function UserInfoModal({
                 {currentUserRole === "master" && (
                   <IconButton
                     className="text-red-600"
-                    onClick={() => handleDeleteAddress(index)}
+                    onClick={() => handleDeleteClick(address)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -127,6 +139,32 @@ function UserInfoModal({
             ))}
           </div>
         </div>
+        {isDeletePopupOpen && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-red-500 rounded-lg shadow-lg p-6 z-30">
+            <p className="text-center text-black mb-4">
+              This action will delete "{addressToDelete}" from "{userName}"
+              permanently.
+            </p>
+            <div className="flex justify-center gap-4">
+              <div
+                onClick={handleConfirmDelete}
+                className="w-[120px] h-[10px] px-[25px] py-5 bg-[#b3261e] rounded-[30px] border-2 border-[#b3261e] justify-center items-center gap-2.5 inline-flex cursor-pointer hover:bg-[#9b211b] hover:border-[#9b211b] transition-colors"
+              >
+                <div className="text-center text-white text-2xl font-['Sequel Sans']">
+                  Delete
+                </div>
+              </div>
+              <div
+                onClick={handleCancelDelete}
+                className="w-[120px] h-[10px] px-[25px] py-5 bg-[#cccccc] rounded-[30px] border-2 border-[#cccccc] justify-center items-center gap-2.5 inline-flex cursor-pointer hover:bg-[#b3b3b3] hover:border-[#b3b3b3] transition-colors"
+              >
+                <div className="text-center text-white text-2xl font-['Sequel Sans']">
+                  Cancel
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Modal>
   );
