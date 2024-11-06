@@ -2,31 +2,7 @@ import { useEffect, useState } from "react";
 import AlertWidget from "./AlertWidget";
 import SystemHealthWidget from "./SystemHealthWidget";
 import SystemOverviewWidget from "./SystemOverviewWidget";
-
-interface SystemOverview {
-  projects: number;
-  totalUnits: number;
-  pendingTickets: number;
-  totalAdminUsers: number;
-}
-
-interface SystemAlerts {
-  alertType: string;
-  unitAddress: string;
-  unitNumber: string;
-}
-
-interface SystemHealth {
-  systemsLive: number;
-  systemsDown: number;
-}
-
-interface MockDashboard {
-  companyId: string;
-  systemOverview: SystemOverview;
-  alerts: SystemAlerts[];
-  systemHealth: SystemHealth;
-}
+import { dashboardApi, SystemOverview, SystemAlerts, SystemHealth } from "@/api/components/DashboardComponents/DashboardWidget";
 
 const DashboardWidget = () => {
   const [systemOverview, setSystemOverview] = useState<SystemOverview>({
@@ -42,65 +18,53 @@ const DashboardWidget = () => {
   });
 
   const [systemAlerts, setSystemAlerts] = useState<SystemAlerts[]>([]);
-
-  // Simulate a backend API call
-  const fetchData = async (): Promise<MockDashboard> => {
-    // Mock API response
-
-    const response: MockDashboard = {
-      companyId: "1234",
-      systemOverview: {
-        projects: 19,
-        totalUnits: 3,
-        pendingTickets: 32,
-        totalAdminUsers: 3,
-      },
-      alerts: [
-        {
-          alertType: "Smoke Alarm Activated",
-          unitAddress: "1000 De La Gauchetiere",
-          unitNumber: "Unit 103",
-        },
-        {
-          alertType: "Smoke Alarm Activated",
-          unitAddress: "750 Peel Street",
-          unitNumber: "Unit 205",
-        },
-        {
-          alertType: "Smoke Alarm Activated",
-          unitAddress: "1500 Maisonneuve Blvd",
-          unitNumber: "Unit 501",
-        },
-        {
-          alertType: "Smoke Alarm Activated",
-          unitAddress: "1500 Maisonneuve Blvd",
-          unitNumber: "Unit 501",
-        },
-      ],
-      systemHealth: {
-        systemsLive: 20,
-        systemsDown: 1,
-      },
-    };
-
-    // Simulate network delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(response);
-      }, 1000);
-    });
-  };
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const getData = async () => {
-      const data = await fetchData();
-      setSystemOverview(data.systemOverview);
-      setSystemHealth(data.systemHealth);
-      setSystemAlerts(data.alerts);
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          throw new Error('Authentication token not found');
+        }
+
+        const data = await dashboardApi.getDashboardData(token);
+        
+        setSystemOverview(data.systemOverview);
+        setSystemHealth(data.systemHealth);
+        setSystemAlerts(data.alerts);
+
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred while fetching dashboard data');
+        console.error('Dashboard fetch error:', err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    getData();
+    fetchDashboardData();
   }, []);
+
+  if (error) {
+    return (
+      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <span className="block sm:inline">Failed to load dashboard data: {error}</span>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[200px] bg-[#14323B] rounded-[7px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row justify-between bg-[#14323B] p-1.5 rounded-[7px] shadow-md md:max-w-full hover:bg-[#4B7D8D] transition duration-300 text-[#fff] w-full p-2.5 gap-2">
