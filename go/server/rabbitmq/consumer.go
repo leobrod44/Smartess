@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"Smartess/go/common/structures"
+
+	"Smartess/go/common/structures"
 	"log"
 	"time"
 
@@ -83,6 +85,26 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		zap.String("message", alert.Message),
 		zap.String("time_fired", alert.TimeStamp.String()),
 	)
+}
+
+type HubLogHandler struct {
+	logLevel int
+}
+
+func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
+	var log structures.HubLog
+	logger.Info("messsage", zap.String("body", string(msg.Body)))
+	err := json.Unmarshal(msg.Body, &log)
+	if err != nil {
+		return err
+	}
+	logger.Info("log",
+		zap.String("hub_id", log.HubID),
+		zap.String("message", log.Message),
+		zap.String("time_fired", log.TimeStamp.String()),
+	)
+
+	return nil
 }
 
 var mongoClient *mongo.Client
