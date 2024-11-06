@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
+	"Smartess/go/common/structures"
 	"log"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
 )
 
 type QueueConsumer struct {
@@ -19,13 +22,33 @@ type QueueConsumer struct {
 	messageHandler MessageHandler
 }
 type MessageHandler interface {
-	Handle(amqp.Delivery) error
+	Handle(msg amqp.Delivery, logger *zap.Logger) error
 }
 
 type GenericMessageHandler struct{}
 
-func (h *GenericMessageHandler) Handle(msg amqp.Delivery) error {
+func (h *GenericMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
 	fmt.Printf("Another handler processing: %s\n", msg.Body)
+	return nil
+}
+
+type HubLogHandler struct {
+	logLevel int
+}
+
+func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
+	var log structures.HubLog
+	logger.Info("messsage", zap.String("body", string(msg.Body)))
+	err := json.Unmarshal(msg.Body, &log)
+	if err != nil {
+		return err
+	}
+	logger.Info("log",
+		zap.String("hub_id", log.HubID),
+		zap.String("message", log.Message),
+		zap.String("time_fired", log.TimeStamp.String()),
+	)
+
 	return nil
 }
 
@@ -56,7 +79,7 @@ type MongoMessage struct {
 	Timestamp time.Time          `bson:"timestamp"`
 }
 
-func (h *MongoMessageHandler) Handle(msg amqp.Delivery) error {
+func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
 	ConnectToMongo()
 	// Process the message here
 	var message MongoMessage

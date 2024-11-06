@@ -76,8 +76,10 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				r.Logger.Info("Received message", zap.String("message", string(msg.Body)))
-				queue.messageHandler.Handle(msg)
+				err := queue.messageHandler.Handle(msg, r.Logger)
+				if err != nil {
+					r.Logger.Error("Failed to handle message", zap.Error(err))
+				}
 			}
 		}(smartessQueue)
 	}
@@ -93,8 +95,12 @@ func setHandler(queue amqp.Queue) (MessageHandler, error) {
 		return &GenericMessageHandler{}, nil
 	case "mongo-messages":
 		return &MongoMessageHandler{}, nil
-	case "test-queue":
-		return &GenericMessageHandler{}, nil // Add a handler for test-queue
+	case "hub-info-logs":
+		return &HubLogHandler{logLevel: 0}, nil
+	case "hub-warn-logs":
+		return &HubLogHandler{logLevel: 1}, nil
+	case "hub-error-logs":
+		return &HubLogHandler{logLevel: 2}, nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}
