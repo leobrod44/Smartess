@@ -37,7 +37,7 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-
+    
   - name: alerts
     max_size: 100
     passive: false
