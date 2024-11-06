@@ -3,8 +3,8 @@ import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RoleEditForm from "./RoleEditForm"; // Import the RoleEditForm component
-import DeleteConfirmationPopup from "./DeleteConfirmation"; // Import the new DeleteConfirmationPopup component
+import RoleEditForm from "./RoleEditForm";
+import DeleteConfirmationPopup from "./DeleteConfirmation";
 
 interface UserInfoModalProps {
   open: boolean;
@@ -104,7 +104,7 @@ function UserInfoModal({
               </IconButton>
             )}
 
-            {/* Pop-up Form Positioned in the Center */}
+            {/* Role pop-up */}
             {isEditingRole && (
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-[#266472] rounded-lg shadow-lg p-4 z-20">
                 <RoleEditForm
