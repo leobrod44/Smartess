@@ -34,19 +34,19 @@ type Announcement struct {
 	Priority       string     `json:"priority"`        // Priority level (e.g., "low", "normal", "high")
 }
 
-type GenericMessage struct {
-	HubID     int          `json:"id"`         // ID of the sender
-	Content   EventDetails `json:"json"`       // The message content
-	TimeStamp time.Time    `json:"time_fired"` // Timestamp for when the message was created
-}
-
 type StateEvent struct {
 	HubID     int       `json:"id"`         // ID of the sender
+	DeviceID  string    `json:"device"`     // ID of the device
+	State     State     `json:"state"`      // The message content
 	DeviceID  string    `json:"device"`     // ID of the device
 	State     State     `json:"state"`      // The message content
 	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
 }
 
+type HubLog struct {
+	HubID     string    `json:"id"`
+	Message   string    `json:"message"`
+	TimeStamp time.Time `json:"time_fired"`
 type HubLog struct {
 	HubID     string    `json:"id"`
 	Message   string    `json:"message"`
@@ -59,8 +59,15 @@ type EventDetails struct {
 	Origin    string       `json:"origin"`
 	TimeFired string       `json:"time_fired"`
 	Context   EventContext `json:"context"`
+type EventDetails struct {
+	EventType string       `json:"event_type"`
+	Data      EventData    `json:"data"`
+	Origin    string       `json:"origin"`
+	TimeFired string       `json:"time_fired"`
+	Context   EventContext `json:"context"`
 }
 
+type EventData struct {
 type EventData struct {
 	EntityID string `json:"entity_id"`
 	OldState State  `json:"old_state"`
@@ -80,4 +87,12 @@ type EventContext struct {
 	ID       string `json:"id"`
 	ParentID string `json:"parent_id"`
 	UserID   string `json:"user_id"`
+}
+
+type Alert struct {
+	HubIP     string    `json:"hub_ip"`
+	DeviceID  string    `json:"device"`
+	State     string    `json:"state"`
+	Message   string    `json:"message"`
+	TimeStamp time.Time `json:"time_fired"`
 }
