@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import Unit from "../components/Unit";
-import { Project, generateMockProjects } from "../mockData";
+import { generateMockProjects } from "../mockData";
 import { projectApi } from "@/api/components/ProjectComponent";
 
 interface ApiProject {
