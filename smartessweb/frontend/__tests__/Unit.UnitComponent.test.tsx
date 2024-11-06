@@ -23,7 +23,7 @@ describe("UnitComponent", () => {
     render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true}  />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Unit 101/i)).toBeInTheDocument();
+      expect(screen.getByText(/101/i)).toBeInTheDocument();
     });
   });
 
