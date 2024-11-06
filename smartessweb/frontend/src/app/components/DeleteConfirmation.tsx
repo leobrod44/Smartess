@@ -1,4 +1,3 @@
-// DeleteConfirmationPopup.tsx
 import React from "react";
 
 interface DeleteConfirmationPopupProps {
