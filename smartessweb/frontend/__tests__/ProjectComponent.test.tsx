@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import '@testing-library/jest-dom';
 import ProjectInfo from "@/app/components/ProjectComponent"; 
 import { Project } from "@/app/mockData"; 
@@ -78,8 +78,8 @@ describe("ProjectInfo", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "More" })[0]);
 
     // Check that the units are now visible
-    expect(screen.getByText("Unit 101")).toBeInTheDocument();
-    expect(screen.getByText("Unit 102")).toBeInTheDocument();
+    waitFor(() => expect(screen.getByText("Unit 101")).toBeInTheDocument());
+    waitFor(() => expect(screen.getByText("Unit 102")).toBeInTheDocument());
 
     // Click the "More" button again to hide the units
     fireEvent.click(screen.getAllByRole("button", { name: "More" })[0]);
