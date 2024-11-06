@@ -3,16 +3,20 @@ import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
-import { User, TicketsType, Owner, Alert } from "../mockData";
+import { User, TicketsType, Owner, Alert, Unit, generateMockProjects } from "../mockData";
 import { hubApi } from "@/api/components/Unit";
+
+interface UnitComponentProps {
+  unitNumber: string;
+  projectId: string;
+  isTest?: boolean;
+}
 
 const UnitComponent = ({
   unitNumber,
   projectId,
-}: {
-  unitNumber: string;
-  projectId: string;
-}) => {
+  isTest = false,
+}: UnitComponentProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [tickets, setTickets] = useState<TicketsType>({
     total: 0,
@@ -30,20 +34,40 @@ const UnitComponent = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchHubDetails = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
+  const fetchMockData = async (
+    projectId: string,
+    unitNumber: string
+  ): Promise<Unit | undefined> => {
+    const project = generateMockProjects().find(
+      (project) => project.projectId === projectId
+    );
+    return project?.units.find((unit) => unit.unitNumber === unitNumber);
+  };
 
-        const data = await hubApi.getHubDetails(projectId, unitNumber, token);
-        
-        setUsers(data.users);
-        setTickets(data.tickets);
-        setOwner(data.owner);
-        setAlerts(data.alerts);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (isTest) {
+          const unit = await fetchMockData(projectId, unitNumber);
+          if (unit) {
+            setUsers(unit.users);
+            setTickets(unit.tickets);
+            setOwner(unit.owner);
+            setAlerts(unit.alerts);
+          }
+        } else {
+          // Use real API
+          const token = localStorage.getItem('token');
+          if (!token) {
+            throw new Error('No authentication token found');
+          }
+
+          const data = await hubApi.getHubDetails(projectId, unitNumber, token);
+          setUsers(data.users);
+          setTickets(data.tickets);
+          setOwner(data.owner);
+          setAlerts(data.alerts);
+        }
       } catch (err) {
         console.error('Error fetching hub details:', err);
         setError(err instanceof Error ? err.message : 'Failed to load hub details');
@@ -52,8 +76,8 @@ const UnitComponent = ({
       }
     };
 
-    fetchHubDetails();
-  }, [projectId, unitNumber]);
+    fetchData();
+  }, [projectId, unitNumber, isTest]);
 
   if (loading) {
     return <div className="flex justify-center items-center p-4">

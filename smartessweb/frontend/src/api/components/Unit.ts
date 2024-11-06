@@ -10,7 +10,7 @@ interface HubDetails {
 export const hubApi = {
   getHubDetails: async (projectId: string, unitNumber: string, token: string): Promise<HubDetails> => {
     const response = await fetch(
-      `${API_URL}/api/hubs/${projectId}/units/${unitNumber}`,
+      `${API_URL}/hubs/${projectId}/units/${unitNumber}`,
       {
         headers: {
           'Authorization': `Bearer ${token}`,
