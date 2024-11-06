@@ -38,8 +38,6 @@ type StateEvent struct {
 	HubID     int       `json:"id"`         // ID of the sender
 	DeviceID  string    `json:"device"`     // ID of the device
 	State     State     `json:"state"`      // The message content
-	DeviceID  string    `json:"device"`     // ID of the device
-	State     State     `json:"state"`      // The message content
 	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
 }
 
@@ -47,10 +45,6 @@ type HubLog struct {
 	HubID     string    `json:"id"`
 	Message   string    `json:"message"`
 	TimeStamp time.Time `json:"time_fired"`
-type HubLog struct {
-	HubID     string    `json:"id"`
-	Message   string    `json:"message"`
-	TimeStamp time.Time `json:"time_fired"`
 }
 
 type EventDetails struct {
@@ -59,15 +53,8 @@ type EventDetails struct {
 	Origin    string       `json:"origin"`
 	TimeFired string       `json:"time_fired"`
 	Context   EventContext `json:"context"`
-type EventDetails struct {
-	EventType string       `json:"event_type"`
-	Data      EventData    `json:"data"`
-	Origin    string       `json:"origin"`
-	TimeFired string       `json:"time_fired"`
-	Context   EventContext `json:"context"`
 }
 
-type EventData struct {
 type EventData struct {
 	EntityID string `json:"entity_id"`
 	OldState State  `json:"old_state"`
