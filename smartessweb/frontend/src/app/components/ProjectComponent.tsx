@@ -1,69 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import React, { useState } from "react";
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid"; // Import icons for the arrow
 import Unit from "../components/Unit";
-import { generateMockProjects } from "../mockData";
-import { projectApi } from "@/api/components/ProjectComponent";
+import { Project } from "../mockData"; // Adjust the import path as needed
 
-interface ApiProject {
-  proj_id: string;
-  name: string;
-  address: string;
-  units_count: number;
-  hub_users_count: number;
-  admin_users_count: number;
-  pending_tickets_count: number;
+interface ProjectInfoProps {
+  projects: Project[];
 }
 
-export default function ProjectInfo() {
-  const [showUnits, setShowUnits] = useState<number | null>(null);
-  const [projects, setProjects] = useState<ApiProject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Get mock data for units
-  const mockProjects = generateMockProjects();
-
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No authentication token found');
-        }
-
-        const data = await projectApi.getUserProjects(token);
-        setProjects(data.projects);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load projects');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
+export default function ProjectInfo({ projects }: ProjectInfoProps) {
+  const [showUnits, setShowUnits] = useState<number | null>(null); // Track which project is toggled open
 
   const handleToggle = (index: number) => {
     setShowUnits(showUnits === index ? null : index);
   };
 
-  if (loading) {
-    return <div className="w-full flex justify-center items-center p-8">
-      <div className="text-[#14323B] text-lg">Loading projects...</div>
-    </div>;
-  }
-
-  if (error) {
-    return <div className="w-full flex justify-center items-center p-8">
-      <div className="text-red-600 text-lg">{error}</div>
-    </div>;
-  }
-
   return (
     <div className="w-full">
+      {/* Loop through each project */}
       {projects.map((project, index) => (
         <div
-          key={project.proj_id}
+          key={index}
           className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30 hover:border-[#4b7d8d] transition duration-300"
         >
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 w-full border-b border-gray-300 pb-2">
@@ -104,26 +60,26 @@ export default function ProjectInfo() {
               <p className="mt-1">{project.address}</p>
             </div>
             <div className="text-center">
-              <p className="mt-1">{project.units_count}</p>
+              <p className="mt-1">{project.units.length}</p>
             </div>
             <div className="flex justify-center">
               <div className="w-[78px] h-8 px-5 bg-[#729987] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
-                  {project.admin_users_count}
+                  {project.adminUsers}
                 </div>
               </div>
             </div>
             <div className="flex justify-center">
               <div className="w-[78px] h-8 px-5 bg-[#729987] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
-                  {project.hub_users_count}
+                  {project.hubUsers}
                 </div>
               </div>
             </div>
             <div className="flex justify-center">
               <div className="w-[78px] h-8 px-5 bg-[#a65146] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
-                  {project.pending_tickets_count}
+                  {project.pendingTickets}
                 </div>
               </div>
             </div>
@@ -146,11 +102,12 @@ export default function ProjectInfo() {
 
           {showUnits === index && (
             <div className="pt-4 space-y-4 max-h-60 overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
-              {mockProjects[index].units.map((unit) => (
+              {" "}
+              {project.units.map((unit) => (
                 <Unit
-                  key={`${mockProjects[index].projectId}-${unit.unitNumber}`}
+                  key={`${project.projectId}-${unit.unitNumber}`}
                   unitNumber={unit.unitNumber}
-                  projectId={mockProjects[index].projectId}
+                  projectId={project.projectId}
                 />
               ))}
             </div>

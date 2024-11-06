@@ -2,16 +2,14 @@ const supabase = require('../config/supabase');
 
 exports.getUserProjects = async (req, res) => {
     try {
-        const token = req.token; // From middleware
+        const token = req.token;
         
-        // Get user email from token
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
         
         if (authError) {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        // Get user_id from user table using email
         const { data: userData, error: userError } = await supabase
             .from('user')
             .select('user_id')
@@ -26,7 +24,6 @@ exports.getUserProjects = async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
-        // Get org_ids from org_user table
         const { data: orgUserData, error: orgUserError } = await supabase
             .from('org_user')
             .select('org_id')
@@ -36,23 +33,20 @@ exports.getUserProjects = async (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch organization data.' });
         }
 
-        // Extract org_ids
         const orgIds = orgUserData.map(org => org.org_id);
 
         if (orgIds.length === 0) {
             return res.json({ projects: [] });
         }
 
-        // Get projects with basic info, sorted by proj_id
+        // Get projects with basic info
         const { data: projects, error: projectError } = await supabase
             .from('project')
             .select(`
                 proj_id,
-                name,
                 address,
-                units_count,
-                hub_users_count,
                 admin_users_count,
+                hub_users_count,
                 pending_tickets_count
             `)
             .in('org_id', orgIds)
@@ -62,8 +56,9 @@ exports.getUserProjects = async (req, res) => {
             return res.status(500).json({ error: 'Failed to fetch projects.' });
         }
 
-        // For each project, fetch the unit numbers from hubs with sorting
-        const projectsWithUnits = await Promise.all(projects.map(async (project) => {
+        // Transform projects to match Project interface
+        const transformedProjects = await Promise.all(projects.map(async (project) => {
+            // Fetch unit numbers for each project
             const { data: hubs, error: hubError } = await supabase
                 .from('hub')
                 .select('unit_number')
@@ -72,19 +67,41 @@ exports.getUserProjects = async (req, res) => {
 
             if (hubError) {
                 console.error(`Error fetching hubs for project ${project.proj_id}:`, hubError);
-                return {
-                    ...project,
-                    unit_numbers: []
-                };
+                return null;
             }
 
+            // Transform to match Project interface in frontend
             return {
-                ...project,
-                unit_numbers: hubs.map(hub => hub.unit_number)
+                projectId: project.proj_id,
+                address: project.address,
+                adminUsers: project.admin_users_count,
+                hubUsers: project.hub_users_count,
+                pendingTickets: project.pending_tickets_count,
+                projectUsers: [], // Empty array
+                units: hubs.map(hub => ({
+                    unitNumber: hub.unit_number,
+                    users: [], // Empty array
+                    tickets: {  // Empty ticket
+                        total: 0,
+                        open: 0,
+                        pending: 0,
+                        closed: 0
+                    },
+                    owner: {   // Empty owner info
+                        tokenId: "",
+                        firstName: "",
+                        lastName: "",
+                        email: ""
+                    },
+                    alerts: [] // Empty alerts array
+                }))
             };
         }));
 
-        res.json({ projects: projectsWithUnits });
+        // Filter out any null values from failed transformations
+        const validProjects = transformedProjects.filter(project => project !== null);
+
+        res.json({ projects: validProjects });
 
     } catch (error) {
         console.error('Error:', error);
