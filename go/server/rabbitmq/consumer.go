@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"Smartess/go/common/structures"
+
+	"Smartess/go/common/structures"
 	"log"
 	"time"
 
@@ -22,14 +24,67 @@ type QueueConsumer struct {
 	messageHandler MessageHandler
 }
 type MessageHandler interface {
-	Handle(msg amqp.Delivery, logger *zap.Logger) error
+	Handle(msg amqp.Delivery, logger *zap.Logger)
 }
 
-type GenericMessageHandler struct{}
+type HubLogHandler struct {
+	logLevel int
+}
 
-func (h *GenericMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
-	fmt.Printf("Another handler processing: %s\n", msg.Body)
-	return nil
+func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+
+	var log structures.HubLog
+	err := json.Unmarshal(msg.Body, &log)
+	if err != nil {
+		logger.Error("Failed to unmarshal log", zap.Error(err))
+	}
+	switch h.logLevel {
+	case 0:
+		logger.Info("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	case 1:
+		logger.Warn("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	case 2:
+		logger.Error("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	default:
+		logger.Info("log",
+			zap.String("hub_id", log.HubID),
+			zap.String("message", log.Message),
+			zap.String("time_fired", log.TimeStamp.String()),
+		)
+	}
+}
+
+type AlertHandler struct{}
+
+func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+	var alert structures.Alert
+	err := json.Unmarshal(msg.Body, &alert)
+	if err != nil {
+		logger.Error("Failed to unmarshal alert",
+			zap.Error(err),
+			zap.String("msg", string(msg.Body)),
+		)
+	}
+	//TODO @ryan: send alert to Mongo
+	logger.Info("alert",
+		zap.String("hub_id", alert.HubIP),
+		zap.String("device_id", alert.DeviceID),
+		zap.String("state", alert.State),
+		zap.String("message", alert.Message),
+		zap.String("time_fired", alert.TimeStamp.String()),
+	)
 }
 
 type HubLogHandler struct {
@@ -79,14 +134,13 @@ type MongoMessage struct {
 	Timestamp time.Time          `bson:"timestamp"`
 }
 
-func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) error {
+func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	ConnectToMongo()
 	// Process the message here
 	var message MongoMessage
 	err := json.Unmarshal(msg.Body, &message)
 	if err != nil {
-		log.Printf("Failed to unmarshal message: %v", err)
-		return nil
+		logger.Error("Failed to unmarshal message", zap.Error(err))
 	}
 
 	// Insert the message into MongoDB
@@ -97,10 +151,6 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) erro
 		{"timestamp", message.Timestamp},
 	})
 	if err != nil {
-		log.Printf("Failed to insert message into MongoDB: %v", err)
-		return nil
+		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
 	}
-
-	fmt.Printf("Inserted message into MongoDB: %+v\n", message)
-	return nil
 }
