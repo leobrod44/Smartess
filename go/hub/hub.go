@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"Smartess/go/hub/logs"
+	"Smartess/go/hub/logger"
 
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
