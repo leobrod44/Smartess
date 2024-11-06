@@ -4,13 +4,7 @@ import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
 import { User, TicketsType, Owner, Alert } from "../mockData";
-
-interface HubDetails {
-  owner: Owner;
-  users: User[];
-  tickets: TicketsType;
-  alerts: Alert[];
-}
+import { hubApi } from "@/api/components/Unit";
 
 const UnitComponent = ({
   unitNumber,
@@ -44,21 +38,7 @@ const UnitComponent = ({
           throw new Error('No authentication token found');
         }
 
-        const response = await fetch(
-          `http://localhost:3000/api/hubs/${projectId}/units/${unitNumber}`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch hub details');
-        }
-
-        const data: HubDetails = await response.json();
+        const data = await hubApi.getHubDetails(projectId, unitNumber, token);
         
         setUsers(data.users);
         setTickets(data.tickets);
