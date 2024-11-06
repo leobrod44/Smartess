@@ -1,0 +1,30 @@
+import { API_URL } from "../api";
+import { User, TicketsType, Owner, Alert } from "@/app/mockData";
+interface HubDetails {
+  owner: Owner;
+  users: User[];
+  tickets: TicketsType;
+  alerts: Alert[];
+}
+
+export const hubApi = {
+  getHubDetails: async (projectId: string, unitNumber: string, token: string): Promise<HubDetails> => {
+    const response = await fetch(
+      `${API_URL}/api/hubs/${projectId}/units/${unitNumber}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch hub details');
+    }
+
+    return data;
+  }
+};

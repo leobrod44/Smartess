@@ -3,14 +3,14 @@ import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
-import {
-  User,
-  TicketsType,
-  Owner,
-  Unit,
-  Alert,
-  generateMockProjects,
-} from "../mockData";
+import { User, TicketsType, Owner, Alert } from "../mockData";
+
+interface HubDetails {
+  owner: Owner;
+  users: User[];
+  tickets: TicketsType;
+  alerts: Alert[];
+}
 
 const UnitComponent = ({
   unitNumber,
@@ -33,37 +33,63 @@ const UnitComponent = ({
     email: "",
   });
   const [alerts, setAlerts] = useState<Alert[]>([]);
-
-  // Simulate a backend API call
-  const fetchData = async (
-    projectId: string,
-    unitNumber: string
-  ): Promise<Unit | undefined> => {
-    // Mock API response
-    const project = generateMockProjects().find(
-      (project) => project.projectId === projectId
-    );
-    // If the project is found, return the specific unit
-    return project?.units.find((unit) => unit.unitNumber === unitNumber);
-  };
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getData = async () => {
-      const data = await fetchData(projectId, unitNumber);
-      if (data) {
+    const fetchHubDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        const response = await fetch(
+          `http://localhost:3000/api/hubs/${projectId}/units/${unitNumber}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch hub details');
+        }
+
+        const data: HubDetails = await response.json();
+        
         setUsers(data.users);
         setTickets(data.tickets);
         setOwner(data.owner);
-        setAlerts(data.alerts as Alert[]);
+        setAlerts(data.alerts);
+      } catch (err) {
+        console.error('Error fetching hub details:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load hub details');
+      } finally {
+        setLoading(false);
       }
     };
 
-    getData();
+    fetchHubDetails();
   }, [projectId, unitNumber]);
+
+  if (loading) {
+    return <div className="flex justify-center items-center p-4">
+      <div className="text-[#14323B] text-lg">Loading unit details...</div>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center p-4">
+      <div className="text-red-600 text-lg">{error}</div>
+    </div>;
+  }
 
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
-      <div className=" w-full h-full unit-title text-white text-l flex justify-center">
+      <div className="w-full h-full unit-title text-white text-l flex justify-center">
         <button className="w-full font-sequel-sans-black">
           Unit {unitNumber}
         </button>
