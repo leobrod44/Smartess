@@ -106,7 +106,7 @@ function UserInfoModal({
 
             {/* Pop-up Form Positioned in the Center */}
             {isEditingRole && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-blue-500 rounded-lg shadow-lg p-4 z-20">
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-[#266472] rounded-lg shadow-lg p-4 z-20">
                 <RoleEditForm
                   currentRole={role}
                   onRoleChange={handleRoleChange}
