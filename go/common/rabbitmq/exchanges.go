@@ -1,5 +1,11 @@
 package rabbitmq
 
+const (
+	Test0TopicExchangeName      = "smartess_topic_exchange"
+	Test0NotificationRoutingKey = "smartess.notification"
+	Test0AlertRoutingKey        = "smartess.alert"
+)
+
 type ExchangeConfig struct {
 	Name          string                 `yaml:"name"`
 	ExchangeType  string                 `yaml:"type"`

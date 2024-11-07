@@ -1,7 +1,7 @@
 package hub
 
 import (
-	"Smartess/go/common/rabbitmq"
+	common_rabbitmq "Smartess/go/common/rabbitmq"
 	"Smartess/go/common/structures"
 	"Smartess/go/hub/ha"
 	"encoding/json"
@@ -9,18 +9,23 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"Smartess/go/hub/logger"
 
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
-	"go.uber.org/zap"
 )
 
-// RabbitMQ client holds the connection and channel to RabbitMQ
+/*
+a.k.a RabbitMQHub;
+rabbitmq client holds config (queues &exchanges)
+the connection (socket,phys,ip)
+and channel(s) to rabbitmq instance
+*/
 type SmartessHub struct {
-	instance    *rabbitmq.RabbitMQInstance
+	instance    *common_rabbitmq.RabbitMQInstance
 	webhookConn *websocket.Conn
 	Logger      *logs.Logger
 }
@@ -32,12 +37,25 @@ func Init() (SmartessHub, error) {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ logger: " + err.Error())
 	}
 
-	instance, err := rabbitmq.Init("/app/config/queues.yaml")
+	instance, err := common_rabbitmq.Init("/app/config/queues.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
-
-	webhookConn, err := connectWebhook(logger)
+	// Declare the topic exchange
+	err = instance.Channel.ExchangeDeclare(
+		common_rabbitmq.Test0TopicExchangeName, // name of the exchange
+		"topic",                                // type of exchange
+		true,                                   // durable
+		false,                                  // auto-deleted
+		false,                                  // internal
+		false,                                  // no-wait
+		nil,                                    // arguments
+	)
+	if err != nil {
+		return SmartessHub{}, fmt.Errorf("Failed to declare topic exchange: %v", err)
+	}
+	//webhookConn, err := connectWebhook(logger)
+	webhookConn, err := connectTestMongoWebhook(logger)
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to connect to Home Assistant: " + err.Error())
 	}
@@ -49,24 +67,31 @@ func Init() (SmartessHub, error) {
 	}, nil
 }
 
+// TODO GIVE THIS SOME CLI ARGS TO PARSE SO THAT ONCE CAN PICK BETWEEN : RPI/HA, MONGOMOCK, MOCK
 func (r *SmartessHub) Start() {
 	for {
-		_, message, err := r.webhookConn.ReadMessage()
+		msgType, message, err := r.webhookConn.ReadMessage()
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to read message from WebSocket: %v", err))
 			continue
 		}
-		var event ha.WebhookMessage
-		if err := json.Unmarshal(message, &event); err != nil {
-			r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
-			continue
-		}
-		_, err = r.checkPublishAlert(&event)
+		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s\n", strconv.Itoa(msgType), message))
+
+		err = r.PublishMongo(message)
 		if err != nil {
-			r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
-			continue
+			r.Logger.Error(fmt.Sprintf("Failed to publish message to RabbitMQ: %v", err))
 		}
-		r.Logger.Info(fmt.Sprintf("Received event: %s", event.Event.EventType))
+		//var event ha.WebhookMessage
+		//if err := json.Unmarshal(message, &event); err != nil {
+		//	r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
+		//	continue
+		//}
+		//_, err = r.checkPublishAlert(&event)
+		//if err != nil {
+		//	r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
+		//	continue
+		//}
+		//r.Logger.Info(fmt.Sprintf("Received event: %s", event.Event.EventType))
 
 	}
 }
@@ -158,7 +183,7 @@ func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func connectTestMongoWebhook(logger *zap.Logger) (*websocket.Conn, error) {
+func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 
 	u := url.URL{Scheme: "ws", Host: "mock-mongo-server:9090", Path: "/ws"}
 	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
