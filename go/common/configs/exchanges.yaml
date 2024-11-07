@@ -1,0 +1,44 @@
+exchanges:
+  - name: system_broadcast
+    type: fanout
+    durable: true
+    auto_delete: false
+    description: "Exchange for broadcasting system-wide updates, availability/functional critical events or dev announcements"
+    bindings:
+      - queue: system_wide_updates
+        routing_key: ""
+
+  - name: events_topic
+    type: topic
+    durable: true
+    auto_delete: false
+    description: "Exchange for handling different types of events based on categories, priorities, origin, and tags"
+    bindings:
+      - queue: device_events_explicit
+        routing_key: "iot.high.#"
+      - queue: device_events_auto
+        routing_key: "iot.low.#"
+      - queue: request_response
+        routing_key: "user.*.requests.#"
+      - queue: notifications_general
+        routing_key: "notifications.#"
+      - queue: alerts_critical
+        routing_key: "alerts.critical.#"
+      - queue: alerts_warning
+        routing_key: "alerts.warning.#"
+      - queue: device_generic
+        routing_key: "iot.#"
+      - queue: user_generic
+        routing_key: "user.*.#"
+      - queue: failure_queue
+        routing_key: "*.failure.#"
+
+  - name: direct_exchange
+    type: direct
+    durable: false
+    auto_delete: true
+    description: "Exchange for direct routing of specific messages between hub and server"
+    bindings:
+      - queue: middleware_service_queue
+        routing_key: "hub.middleware"
+
