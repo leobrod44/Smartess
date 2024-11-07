@@ -50,17 +50,25 @@ const UnitPage = () => {
 
       <div className="bg-[#4b7d8d] p-[5px] rounded-[7px] w-full mx-auto">
         {/* Map through each project and render a UnitComponent for each project’s units */}
-        {filteredProjects.map((project) => (
-          <div key={project.projectId}>
-            {project.filteredUnits.map((unit) => (
-              <UnitComponent
-                key={unit.unitNumber}
-                unit={unit}
-                projectAddress={project.address}
-              />
-            ))}
-          </div>
-        ))}
+        {filteredProjects.every(
+          (project) => project.filteredUnits.length === 0
+        ) ? (
+          <h3 className="font-sequel-sans-medium text-center text-lg text-[#fff] text-[30px] leading-10 tracking-tight">
+            No matching projects or units found.
+          </h3>
+        ) : (
+          filteredProjects.map((project) => (
+            <div key={project.projectId}>
+              {project.filteredUnits.map((unit) => (
+                <UnitComponent
+                  key={unit.unitNumber}
+                  unit={unit}
+                  projectAddress={project.address}
+                />
+              ))}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
