@@ -1,4 +1,0 @@
-queues:
-  - name: test-queue
-    durable: true
-    autoDelete: false
