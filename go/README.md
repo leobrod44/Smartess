@@ -1,4 +1,4 @@
-# Codebase design and structure description
+# Go Backend (Hub and Server): Codebase design and structure description
 
 _The go/ folder is the backend of the Smartess project. It is the core of the system, handling the IoT events on hardware and networks, and microservices needed into processing and using them_
 
@@ -43,6 +43,24 @@ Methods to: Marshall into configStructs from yaml-config , then from configstruc
 ### common/structures
 Common data structures, Entities, Contexts, States, EntityFormats structs \
 [WIP] TODO: Eventually have proper models/structs distinguishable between 'server' and 'hub'
+
+## hub/
+Any scripts, configs, utilities specifically related to the Hub service \
+   .Local configs and hub specific rules sets \
+   .Home Assistant related gateways/utilities, parsing of IoT events.. \
+   .hub specific logger \
+   . SmartessHub/RabbitMQHub (RabbitMQInstance, websocket/webhook conn, hub_logger) Init() Start() \
+   . RabbitMQ Publishers and publisher-side exchanges \
+   . WebSocket... hub app ports, hub IP; Networking, phys con, virtual chans, hosts, RabbitMQ Dialer \
+   . Different Connection setups and webhooks: production or dev Hub is RPI/HA, dev or test Hub is mockups \
+   . [WIP] Token, Authentification, security, data/connection integrity, 
+## server/
+Any scripts, configs, utilities specifically related to the Backend service \
+  .RabbitMQServer (RabbitMQInstance, logger, consumers, exchanges, bindings) Init() and Start() \
+  .RabbitMQ Consumers and Consumer-side Exchanges setup \
+  . [WIP] Microservices and Managers \
+  . [WIP] Model & Orchestrator logic to manage and containrize microservices \
+  . [WIP] Data,Persistence, Microservice, Managers and Business logic to service frontend-apis/views \
 
 # Dependencies and Design from Wikis
 For Go, RabbitMQ, Docker, and other dependencies, see the Architecture wiki and Infrastructure and Tools wikis. \
