@@ -6,6 +6,23 @@ _The go/ folder is the backend of the Smartess project. It is the core of the sy
  
 > Collaborators of go/: &nbsp; Leo, Ryan, Antoine,Renaud 
 
+## cmd/ 
+Main entry points for drivers/executables of core services
+
+## cmd/hub/
+- The hub is the smart devices gateway.
+- It is the core IoT controller of the system.
+- It is the core RabbitMQ Publisher in our system design.
+- Architecturally, it is directly related to the HA daemon and any other IoT configs/networking related directly to handling the smart devices. 
+it will play the role of data aggregator and will transform HA / raw Smartess IoT events into asynchronous RabbitMQ messages / events
+ 
+## cmd/server/
+- The (backend Smartess) server is the backend processor.
+- It is the core IoT-event model of the system.
+- It holds the core RabbitMQ Consumers; themselves built into microservices / managers.
+- Architecturally, it is the orchestrator between various data managers before they reach the frontend/views API of the website/app.
+- It arbors microservices that handle the layered-architecture's business logic equivalents more or less; e.g. alerts, notifications, system updates, requests/responses middleware between view and device controllers
+
 
 # Dependencies and Design from Wikis
 For Go, RabbitMQ, Docker, and other dependencies, see the Architecture wiki and Infrastructure and Tools wikis. \
