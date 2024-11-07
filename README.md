@@ -33,7 +33,7 @@ What would a new developer need to do to get the system up and running?
 ```
 git clone https://github.com/leobrod44/Smartess.git 
 ```
-2) Navigate to the smartesswebb folder
+2) Navigate to the smartessweb folder
 3) run ``` npm install ```
 4) create a new .env file in Smartess/smartessweb and reach out to tuan via email at 1tuananhp@gmail.com to get access to the content of the .env file
 5) Finally, start the project by running ``` npm run dev ``` in your terminal and navigate to http://localhost:3001/ on your browser
