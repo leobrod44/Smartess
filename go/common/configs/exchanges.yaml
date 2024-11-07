@@ -42,3 +42,37 @@ exchanges:
       - queue: middleware_service_queue
         routing_key: "hub.middleware"
 
+  - name: dead_letter_exchange
+    type: direct
+    durable: true
+    auto_delete: false
+    bindings:
+      - queue: dead_letter_queue
+        routing_key: "dlx"
+
+queues:
+  - name: system_wide_updates
+    durable: true
+    arguments:
+      x-dead-letter-exchange: dead_letter_exchange
+
+  - name: device_generic
+    durable: false
+    arguments:
+      x-dead-letter-exchange: dead_letter_exchange  # Set the DLX for this queue
+
+  - name: user_generic
+    durable: false
+    arguments:
+      x-dead-letter-exchange: dead_letter_exchange  # Set the DLX for this queue
+
+  - name: failure_queue
+    durable: false
+    arguments:
+      x-dead-letter-exchange: dead_letter_exchange  # Set the DLX for this queue
+
+  - name: dead_letter_queue
+    durable: true  # This queue will hold dead letters
+    arguments:
+      x-message-ttl: 60000  # Time-to-live for messages in this queue (in ms)
+      x-max-length: 1000  # Maximum number of messages in this queue
