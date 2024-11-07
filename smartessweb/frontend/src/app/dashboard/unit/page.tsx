@@ -2,15 +2,21 @@
 import UnitComponent from "@/app/components/UnitListComponent";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
+import { Pagination } from "@mui/material";
 import { useEffect, useState } from "react";
 import { generateMockProjects, Project, Unit } from "../../mockData";
 
 const UnitPage = () => {
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
+
   const [searchQuery, setSearchQuery] = useState("");
+
   const filterOptionsForUnits = ["Addresse A-Z"];
   const [filter, setFilter] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const allUnits = projects.flatMap((project) => project.units);
@@ -47,6 +53,19 @@ const UnitPage = () => {
     setFilter(filterValue);
   };
 
+  //pagination logic
+  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
+  const currentItems = filteredProjects.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
       <div className="flex flex row justify-between">
@@ -67,7 +86,7 @@ const UnitPage = () => {
       </div>
 
       <div className="bg-[#4b7d8d] p-[5px] rounded-[7px] w-full mx-auto">
-        {/* Map through each project and render a UnitComponent for each project’s units */}
+        {/* / Map through (paginated projects) and render each project's component. */}
         {filteredProjects.every(
           (project) => project.filteredUnits.length === 0
         ) ? (
@@ -75,7 +94,7 @@ const UnitPage = () => {
             No matching projects or units found.
           </h3>
         ) : (
-          filteredProjects.map((project) => (
+          currentItems.map((project) => (
             <div key={project.projectId}>
               {project.filteredUnits.map((unit) => (
                 <UnitComponent
@@ -87,6 +106,15 @@ const UnitPage = () => {
             </div>
           ))
         )}
+      </div>
+      <div className="mt-4 flex justify-center">
+        <Pagination
+          className="custom-pagination"
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
       </div>
     </div>
   );
