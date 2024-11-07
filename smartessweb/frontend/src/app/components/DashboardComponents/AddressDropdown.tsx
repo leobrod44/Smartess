@@ -1,23 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid';
-
-export interface UnitData {
-  unitNumber: string;
-}
-
-export interface Project {
-  projectId: string;
-  address: string;
-  units: UnitData[];
-  adminUsers: number;
-  hubUsers: number;
-  pendingTickets: number;
-}
+import { Project } from '@/app/mockData';
+import { useProjectContext } from '@/context/ProjectProvider';
 
 interface AddressDropdownProps {
   projects: Project[];
-  selectedProjectId: string;
-  onProjectChange: (projectId: string) => void;
+  onProjectChange: (projectId: string, projectAddress: string) => void;
 }
 
 function classNames(...classes: string[]) {
@@ -26,10 +14,27 @@ function classNames(...classes: string[]) {
 
 const AddressDropdown: React.FC<AddressDropdownProps> = ({
   projects,
-  selectedProjectId,
   onProjectChange,
 }) => {
+  const {
+    selectedProjectId,
+    selectedProjectAddress,
+    setSelectedProjectId,
+    setSelectedProjectAddress,
+  } = useProjectContext();
   const [isOpen, setIsOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleProjectChange = (projectId: string, projectAddress: string) => {
+    setSelectedProjectId(projectId);
+    setSelectedProjectAddress(projectAddress);
+    onProjectChange(projectId, projectAddress);
+    setIsOpen(false);
+  };
 
   return (
     <div className='w-full'>
@@ -37,8 +42,7 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className='inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3b5c6b]'
       >
-        {projects.find((project) => project.projectId === selectedProjectId)
-          ?.address || 'ALL PROJECTS'}
+        {isMounted ? selectedProjectAddress : 'ALL PROJECTS'}
         {isOpen ? (
           <ChevronUpIcon
             className='-mr-1 h-5 w-5 text-gray-400'
@@ -58,10 +62,9 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({
             {projects.map((project) => (
               <button
                 key={project.projectId}
-                onClick={() => {
-                  onProjectChange(project.projectId);
-                  setIsOpen(false);
-                }}
+                onClick={() =>
+                  handleProjectChange(project.projectId, project.address)
+                }
                 className={classNames(
                   selectedProjectId === project.projectId
                     ? 'bg-gray-100 text-gray-900'

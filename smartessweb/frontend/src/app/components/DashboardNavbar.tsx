@@ -37,7 +37,9 @@ import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usePathname, useRouter } from 'next/navigation';
 import AddressDropdown from './DashboardComponents/AddressDropdown';
-import { generateMockProjects } from '../mockData';
+import { useProjectContext } from '@/context/ProjectProvider';
+import { projectApi } from '@/api/page';
+import { Project } from '../mockData';
 
 // TypeScript Interface
 interface UserInfo {
@@ -138,9 +140,13 @@ const DashboardNavbar = () => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const { selectedProjectId, setSelectedProjectId, setSelectedProjectAddress } =
+    useProjectContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const sidebarItems = [
     ...home,
@@ -149,6 +155,13 @@ const DashboardNavbar = () => {
     ...community,
     ...information,
   ];
+
+  const handleProjectChange = (projectId: string, projectAddress: string) => {
+    setSelectedProjectId(projectId);
+    setSelectedProjectAddress(projectAddress);
+    localStorage.setItem('selectedProjectId', projectId);
+    localStorage.setItem('selectedProjectAddress', projectAddress);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
@@ -170,11 +183,21 @@ const DashboardNavbar = () => {
   };
 
   useEffect(() => {
+    // Load the saved project ID and address from localStorage on component mount
+    const savedProjectId = localStorage.getItem('selectedProjectId');
+    const savedProjectAddress = localStorage.getItem('selectedProjectAddress');
+
+    if (savedProjectId) {
+      setSelectedProjectId(savedProjectId);
+    }
+    if (savedProjectAddress) {
+      setSelectedProjectAddress(savedProjectAddress);
+    }
+
     const fetchUserInfo = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-
         const data = await userApi.getUserInfo(token);
         setUserInfo(data);
       } catch (error) {
@@ -182,13 +205,35 @@ const DashboardNavbar = () => {
       }
     };
 
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/sign-in');
+          return;
+        }
+        const response = await projectApi.getUserProjects(token);
+        setProjects(response.projects);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError(
+          err instanceof Error ? err.message : 'Failed to load projects'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchUserInfo();
-  }, []);
+    fetchProjects();
+  }, [router, setSelectedProjectId, setSelectedProjectAddress]);
 
   const handleLogout = async () => {
     try {
       await authApi.logout();
       localStorage.removeItem('token');
+      localStorage.removeItem('selectedProjectId');
+      localStorage.removeItem('selectedProjectAddress');
       showToastSuccess('Logged out successfully');
       setTimeout(() => {
         router.push('/');
@@ -278,11 +323,8 @@ const DashboardNavbar = () => {
 
                     {/* Address Dropdown */}
                     <AddressDropdown
-                      projects={generateMockProjects()}
-                      selectedProjectId={selectedProjectId}
-                      onProjectChange={(projectId) => {
-                        setSelectedProjectId(projectId);
-                      }}
+                      projects={projects}
+                      onProjectChange={handleProjectChange}
                     />
 
                     <nav className='flex flex-1 flex-col'>
@@ -460,13 +502,9 @@ const DashboardNavbar = () => {
               </Link>
             </div>
 
-            {/* Address Dropdown */}
             <AddressDropdown
-              projects={generateMockProjects()}
-              selectedProjectId={selectedProjectId}
-              onProjectChange={(projectId) => {
-                setSelectedProjectId(projectId);
-              }}
+              projects={projects}
+              onProjectChange={handleProjectChange}
             />
 
             <nav className='flex flex-1 flex-col'>
