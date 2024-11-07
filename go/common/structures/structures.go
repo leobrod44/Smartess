@@ -34,65 +34,52 @@ type Announcement struct {
 	Priority       string     `json:"priority"`        // Priority level (e.g., "low", "normal", "high")
 }
 
-type GenericMessage struct {
+type StateEvent struct {
 	HubID     int       `json:"id"`         // ID of the sender
-	Content   string    `json:"json"`       // The message content
+	DeviceID  string    `json:"device"`     // ID of the device
+	State     State     `json:"state"`      // The message content
 	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
 }
 
-// Sample light switch event message:
-type LightSwitchEventMessage struct {
-	ID    int    `json:"id"`
-	Type  string `json:"type"`
-	Event Event  `json:"event"`
+type HubLog struct {
+	HubID     string    `json:"id"`
+	Message   string    `json:"message"`
+	TimeStamp time.Time `json:"time_fired"`
 }
 
-type Event struct {
-	EventType string    `json:"event_type"`
-	Data      Data      `json:"data"`
-	Origin    string    `json:"origin"`
-	TimeFired time.Time `json:"time_fired"`
-	Context   Context   `json:"context"`
+type EventDetails struct {
+	EventType string       `json:"event_type"`
+	Data      EventData    `json:"data"`
+	Origin    string       `json:"origin"`
+	TimeFired string       `json:"time_fired"`
+	Context   EventContext `json:"context"`
 }
 
-type Data struct {
+type EventData struct {
 	EntityID string `json:"entity_id"`
 	OldState State  `json:"old_state"`
 	NewState State  `json:"new_state"`
 }
 
 type State struct {
-	EntityID    string     `json:"entity_id"`
-	State       string     `json:"state"`
-	Attributes  Attributes `json:"attributes"`
-	LastChanged time.Time  `json:"last_changed"`
-	LastUpdated time.Time  `json:"last_updated"`
-	Context     Context    `json:"context"`
+	EntityID    string                 `json:"entity_id"`
+	State       string                 `json:"state"`
+	Attributes  map[string]interface{} `json:"attributes"`   // Added to capture dynamic attributes
+	LastChanged time.Time              `json:"last_changed"` // Added to capture last changed time
+	LastUpdated time.Time              `json:"last_updated"` // Added to capture last updated time
+	Context     EventContext           `json:"context"`      // Added to include context information
 }
 
-type Attributes struct {
-	MinColorTempKelvin  int       `json:"min_color_temp_kelvin"`
-	MaxColorTempKelvin  int       `json:"max_color_temp_kelvin"`
-	MinMireds           int       `json:"min_mireds"`
-	MaxMireds           int       `json:"max_mireds"`
-	EffectList          []string  `json:"effect_list"`
-	SupportedColorModes []string  `json:"supported_color_modes"`
-	ColorMode           string    `json:"color_mode,omitempty"`
-	Brightness          int       `json:"brightness,omitempty"`
-	HsColor             []float64 `json:"hs_color,omitempty"`
-	RgbColor            []int     `json:"rgb_color,omitempty"`
-	XyColor             []float64 `json:"xy_color,omitempty"`
-	Effect              string    `json:"effect,omitempty"`
-	Mode                string    `json:"mode"`
-	Dynamics            string    `json:"dynamics"`
-	FriendlyName        string    `json:"friendly_name"`
-	SupportedFeatures   int       `json:"supported_features"`
+type EventContext struct {
+	ID       string `json:"id"`
+	ParentID string `json:"parent_id"`
+	UserID   string `json:"user_id"`
 }
 
-type Context struct {
-	ID       string  `json:"id"`
-	ParentID *string `json:"parent_id"`
-	UserID   *string `json:"user_id"`
+type Alert struct {
+	HubIP     string    `json:"hub_ip"`
+	DeviceID  string    `json:"device"`
+	State     string    `json:"state"`
+	Message   string    `json:"message"`
+	TimeStamp time.Time `json:"time_fired"`
 }
-
-//End of light switch event message

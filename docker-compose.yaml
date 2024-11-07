@@ -9,14 +9,18 @@ services:
       - ./observability/loki/data:/loki
       - ./observability/loki/wal:/wal
     command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - smartess_network
 
   promtail:
     container_name: promtail
     image: grafana/promtail:latest
     volumes:
       - ./observability/promtail/config:/etc/promtail
-      - /var/log/app:/var/log/app
+      - ./go/cmd/server/logs:/app/logs
     command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - smartess_network
 
   grafana:
     container_name: grafana
@@ -25,11 +29,16 @@ services:
       - "3001:3000"
     volumes:
       - ./observability/grafana/data:/var/lib/grafana
+      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards  # For dashboards
+      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/datasources  # For data sources
+
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     depends_on:
       - loki
+    networks:
+      - smartess_network
   server:
     container_name: server
     build:
@@ -38,7 +47,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./observability/server/logs:/app/logs/server
+      - ./go/cmd/server/logs:/app/logs
       - ./go/common/configs:/app/config
     depends_on:
       rabbitmq:
@@ -68,15 +77,15 @@ services:
       start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
-  mockhub:
-    container_name: mockhub
-    build:
-      context: ./go
-      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path relative to the build context
-    ports:
-      - "8765:8765"
-    networks:
-      - smartess_network
+  # mockhub:
+  #   container_name: mockhub
+  #   build:
+  #     context: ./go
+  #     dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path pqueuerelative to the build context
+  #   ports:
+  #     - "8765:8765"
+  #   networks:
+  #     - smartess_network
 networks:
   smartess_network:
     external: true

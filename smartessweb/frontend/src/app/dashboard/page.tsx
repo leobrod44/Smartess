@@ -6,16 +6,16 @@ import ProjectComponent from "../components/ProjectComponent";
 import DashboardWidget from "../components/DashboardComponents/DashboardWidget";
 import Searchbar from "../components/Searchbar";
 import FilterComponent from "../components/FilterList";
-import { generateMockProjects, Project } from "../mockData";
+import { Project } from "../mockData";
+import { projectApi } from "@/api/page";
 
 const DashboardPage = () => {
   const router = useRouter();
-  const [projects] = useState<Project[]>(generateMockProjects());
-  const [filteredProjects, setFilteredProjects] = useState<Project[]>(projects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  /**
-   * These filter options will change on every page, based on the data being displayed
-   */
   const filterOptionsDashboard = [
     "Address A-Z",
     "Most Units",
@@ -27,16 +27,26 @@ const DashboardPage = () => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/sign-in");
+      return;
     }
+
+    const fetchProjects = async () => {
+      try {
+        const response = await projectApi.getUserProjects(token);
+        setProjects(response.projects);
+        setFilteredProjects(response.projects);
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
   }, [router]);
 
-  /**
-   * Function takes a query string and checks if there is a matching address, hub owner, or hub user name.
-   * If so, it filters the PROJECT that contains that matching query and displays it
-   * @param query
-   */
   const handleSearch = (query: string) => {
-    // Update filteredProjects based on the search query
     const filtered = projects.filter((project) => {
       const addressMatch = project.address
         .toLowerCase()
@@ -61,13 +71,8 @@ const DashboardPage = () => {
     setFilteredProjects(filtered);
   };
 
-  /**
-   * Function to determine which filter value was selected and sort the projects in the correct
-   * order based on that filter.
-   * @param filterValue
-   */
   const handleFilterChange = (filterValue: string) => {
-    const newFilteredProjects = [...projects]; // Start with all projects
+    const newFilteredProjects = [...projects];
 
     switch (filterValue) {
       case "Address A-Z":
@@ -88,6 +93,18 @@ const DashboardPage = () => {
     setFilteredProjects(newFilteredProjects);
   };
 
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">
+      <div className="text-[#14323B] text-lg">Loading projects...</div>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center h-screen">
+      <div className="text-red-600 text-lg">{error}</div>
+    </div>;
+  }
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
@@ -96,7 +113,7 @@ const DashboardPage = () => {
       <DashboardWidget />
 
       <div className="flex items-center pt-4 justify-between">
-        <div className=" pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px]  leading-10 tracking-tight">
+        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-10 tracking-tight">
           Your Projects
         </div>
         <div className="flex items-center pt-2">

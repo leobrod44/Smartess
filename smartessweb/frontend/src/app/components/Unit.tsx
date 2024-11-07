@@ -8,17 +8,14 @@ import {
   TicketsType,
   Owner,
   Unit,
-  Alert,
   generateMockProjects,
 } from "../mockData";
 
 const UnitComponent = ({
   unitNumber,
   projectId,
-}: {
-  unitNumber: string;
-  projectId: string;
-}) => {
+  isTest = false,
+}: UnitComponentProps) => {
   const [users, setUsers] = useState<User[]>([]);
   const [tickets, setTickets] = useState<TicketsType>({
     total: 0,
@@ -32,18 +29,17 @@ const UnitComponent = ({
     lastName: "",
     email: "",
   });
-  const [alerts, setAlerts] = useState<{ message: string }[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Simulate a backend API call
-  const fetchData = async (
+  const fetchMockData = async (
     projectId: string,
     unitNumber: string
   ): Promise<Unit | undefined> => {
-    // Mock API response
     const project = generateMockProjects().find(
       (project) => project.projectId === projectId
     );
-    // If the project is found, return the specific unit
     return project?.units.find((unit) => unit.unitNumber === unitNumber);
   };
 
@@ -54,7 +50,7 @@ const UnitComponent = ({
         setUsers(data.users);
         setTickets(data.tickets);
         setOwner(data.owner);
-        setAlerts(data.alerts as Alert[]);
+        setAlerts(data.alerts);
       }
     };
 
@@ -63,7 +59,7 @@ const UnitComponent = ({
 
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
-      <div className=" w-full h-full unit-title text-white text-l flex justify-center">
+      <div className="w-full h-full unit-title text-white text-l flex justify-center">
         <button className="w-full font-sequel-sans-black">
           Unit {unitNumber}
         </button>

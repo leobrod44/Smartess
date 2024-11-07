@@ -29,6 +29,7 @@ func Init() (RabbitMQServer, error) {
 	}
 	var consumers []QueueConsumer
 
+	//TODO add marshals struct, or check if necessary
 	for _, queueConfig := range instance.Config.Queues {
 		queue, err := instance.Channel.QueueDeclare(
 			queueConfig.Queue,      // name of the queue
@@ -76,8 +77,8 @@ func (r *RabbitMQServer) Start() {
 				r.Logger.Error("Failed to consume messages", zap.Error(err))
 			}
 			for msg := range msgs {
-				r.Logger.Info("Received message", zap.String("message", string(msg.Body)))
-				queue.messageHandler.Handle(msg)
+				queue.messageHandler.Handle(msg, r.Logger)
+
 			}
 		}(smartessQueue)
 	}
@@ -89,12 +90,16 @@ func (r *RabbitMQServer) Start() {
 
 func setHandler(queue amqp.Queue) (MessageHandler, error) {
 	switch queue.Name {
-	case "generic-messages":
-		return &GenericMessageHandler{}, nil
 	case "mongo-messages":
 		return &MongoMessageHandler{}, nil
-	case "test-queue":
-		return &GenericMessageHandler{}, nil // Add a handler for test-queue
+	case "hub-info-logs":
+		return &HubLogHandler{logLevel: 0}, nil
+	case "hub-warn-logs":
+		return &HubLogHandler{logLevel: 1}, nil
+	case "hub-error-logs":
+		return &HubLogHandler{logLevel: 2}, nil
+	case "alerts":
+		return &AlertHandler{}, nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}

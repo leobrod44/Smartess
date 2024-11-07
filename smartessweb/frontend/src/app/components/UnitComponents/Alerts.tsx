@@ -3,7 +3,6 @@ import { Alert } from "@/app/mockData";
 const Alerts = ({ alerts }: { alerts: Alert[] }) => {
   //show the 2 most recent alerts in the list by their date
   const recentAlerts = [...alerts]
-    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 2);
 
 
