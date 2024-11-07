@@ -2,8 +2,8 @@ import { useState } from "react";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
-import Alerts from "./UnitComponents/Alerts";
-import { User, TicketsType, Owner, Unit, Alert } from "../mockData";
+import ActiveAlert from "./UnitComponents/ActiveAlerts";
+import { User, TicketsType, Owner, Unit, ActiveAlerts } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -21,6 +21,14 @@ const UnitComponent = ({
       closed: 0,
     }
   );
+
+  const [activeAlerts] = useState<ActiveAlerts>(
+    unit.activeAlerts || {
+      active: 0,
+      closed: 0,
+    }
+  );
+
   const [owner] = useState<Owner>(
     unit.owner || {
       tokenId: "",
@@ -29,8 +37,6 @@ const UnitComponent = ({
       email: "",
     }
   );
-  const [alerts] = useState<Alert[]>(unit.alerts);
-
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
       <div className="bg-[#fff] rounded-[7px] w-full mt-2 mb-2 shadow-xl">
@@ -50,14 +56,14 @@ const UnitComponent = ({
             <HubUsers users={users} />
           </div>
           <div className="flex-1">
-            <Alerts alerts={alerts} />
+            <ActiveAlert activeAlerts={activeAlerts} />
           </div>
 
           <div className="flex-1 md:min-w-[150px]">
             <Tickets tickets={tickets} />
           </div>
         </div>
-    
+
         <div className="flex justify-center p-6">
           <div>
             <button className="bg-[#4b7d8d] w-40 h-12 rounded-[10px] text-white text-md font-sequel-sans-black hover:bg-[#1f505e] transition duration-300">

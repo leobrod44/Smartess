@@ -8,6 +8,7 @@ import {
   TicketsType,
   Owner,
   Unit,
+  Alert,
   generateMockProjects,
 } from "../mockData";
 
@@ -53,7 +54,7 @@ const UnitComponent = ({
         setUsers(data.users);
         setTickets(data.tickets);
         setOwner(data.owner);
-        setAlerts(data.alerts);
+        setAlerts(data.alerts as Alert[]);
       }
     };
 
