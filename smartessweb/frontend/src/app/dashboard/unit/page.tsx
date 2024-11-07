@@ -1,14 +1,16 @@
 "use client";
+import UnitComponent from "@/app/components/UnitListComponent";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import { useEffect, useState } from "react";
 import { generateMockProjects, Project, Unit } from "../../mockData";
 
-import UnitComponent from "@/app/components/UnitListComponent";
 const UnitPage = () => {
+  const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [allUnits, setAllUnits] = useState<Unit[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
+  const filterOptionsForUnits = ["Addresse A-Z"];
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     const allUnits = projects.flatMap((project) => project.units);
@@ -17,21 +19,32 @@ const UnitPage = () => {
   }, [projects]);
 
   // Generate filtered units grouped by project
-  const filteredProjects = projects.map((project) => {
-    const projectMatch = project.address.toLowerCase().includes(searchQuery);
-    const filteredUnits = project.units.filter(
-      (unit) =>
-        unit.unitNumber.toLowerCase().includes(searchQuery) || projectMatch
-    );
+  const filteredProjects = projects
+    .map((project) => {
+      const projectMatch = project.address.toLowerCase().includes(searchQuery);
+      const filteredUnits = project.units.filter(
+        (unit) =>
+          unit.unitNumber.toLowerCase().includes(searchQuery) || projectMatch
+      );
 
-    return {
-      ...project,
-      filteredUnits,
-    };
-  });
+      return {
+        ...project,
+        filteredUnits,
+      };
+    })
+    .sort((a, b) => {
+      if (filter === "Addresse A-Z") {
+        return a.address.localeCompare(b.address);
+      }
+      return 0;
+    });
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+  };
+
+  const handleFilterChange = (filterValue: string) => {
+    setFilter(filterValue);
   };
 
   return (
@@ -42,8 +55,13 @@ const UnitPage = () => {
             Units
           </h2>
         </div>
-        <div className="pt-2">{/* <FilterComponent filterOptions={} /> */}</div>
         <div className="flex row ">
+          <div className="pt-2">
+            <FilterComponent
+              onFilterChange={handleFilterChange}
+              filterOptions={filterOptionsForUnits}
+            />
+          </div>
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
