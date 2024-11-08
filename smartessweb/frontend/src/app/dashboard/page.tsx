@@ -16,7 +16,7 @@ const DashboardPage = () => {
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { selectedProjectId, selectedProjectAddress } = useProjectContext();
+  const { selectedProjectId } = useProjectContext();
 
   const filterOptionsDashboard = [
     "Address A-Z",
@@ -56,7 +56,7 @@ const DashboardPage = () => {
     };
 
     fetchProjects();
-  }, [selectedProjectId]);
+  }, [router, selectedProjectId]);
 
   const handleSearch = (query: string) => {
     const relevantProjects = selectedProjectId

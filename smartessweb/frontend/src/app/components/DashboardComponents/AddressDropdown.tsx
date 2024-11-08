@@ -7,6 +7,7 @@ import { useProjectContext } from "@/context/ProjectProvider";
 
 interface AddressDropdownProps {
   projects: Project[];
+  onProjectChange: (projectId: string, projectAddress: string) => void;
 }
 
 function classNames(...classes: string[]) {
