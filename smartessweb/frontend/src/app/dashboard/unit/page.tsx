@@ -3,8 +3,8 @@ import UnitComponent from "@/app/components/UnitListComponent";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
-import { useEffect, useState } from "react";
-import { generateMockProjects, Project, Unit } from "../../mockData";
+import { useState } from "react";
+import { generateMockProjects, Project } from "../../mockData";
 
 const UnitPage = () => {
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
