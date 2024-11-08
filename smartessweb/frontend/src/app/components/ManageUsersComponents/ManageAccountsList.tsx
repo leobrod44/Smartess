@@ -76,6 +76,10 @@ const ManageAccountsList = ({
         role={permission}
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
+        onDeleteUser={() => {
+          // Logic to delete the user, e.g., making an API call
+          console.log("User deleted");
+        }}
       />
     </>
   );

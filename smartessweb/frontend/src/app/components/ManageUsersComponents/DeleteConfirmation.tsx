@@ -1,8 +1,9 @@
 import React from "react";
 
 interface DeleteConfirmationPopupProps {
-  addressToDelete: string | null;
+  addressToDelete?: string | null;
   userName: string;
+  isUserDeletion?: boolean; //New prop to differentiate between user and project deletion
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -10,13 +11,16 @@ interface DeleteConfirmationPopupProps {
 function DeleteConfirmationPopup({
   addressToDelete,
   userName,
+  isUserDeletion = false, // Default to false for project deletion
   onConfirm,
   onCancel,
 }: DeleteConfirmationPopupProps) {
   return (
     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-2 border-red-500 rounded-lg shadow-lg p-6 z-30">
       <p className="text-center text-black mb-4">
-        Are you sure you want to delete "{addressToDelete}" from {userName}?
+        {isUserDeletion
+          ? `Are you sure you want to delete ${userName}?`
+          : `Are you sure you want to delete "${addressToDelete}" from ${userName}?`}
       </p>
       <div className="flex justify-center gap-4">
         <div

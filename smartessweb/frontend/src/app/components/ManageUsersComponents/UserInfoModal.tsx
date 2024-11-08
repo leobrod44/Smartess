@@ -16,6 +16,7 @@ interface UserInfoModalProps {
   role: "admin" | "basic" | "master";
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
+  onDeleteUser: () => void;
 }
 
 function UserInfoModal({
@@ -25,6 +26,7 @@ function UserInfoModal({
   role: initialRole,
   addresses: initialAddresses,
   currentUserRole,
+  onDeleteUser,
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -32,6 +34,7 @@ function UserInfoModal({
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
+  const [isUserDeletion, setIsUserDeletion] = useState(false);
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -47,17 +50,23 @@ function UserInfoModal({
 
   const handleDeleteClick = (address: string) => {
     setAddressToDelete(address);
+    setIsUserDeletion(false);
     setDeletePopupOpen(true);
   };
-
+  const handleDeleteUserClick = () => {
+    setIsUserDeletion(true); // Set to true for user deletion
+    setDeletePopupOpen(true);
+  };
   const handleConfirmDelete = () => {
-    if (addressToDelete) {
+    if (isUserDeletion) {
+      onDeleteUser(); // Handle user deletion
+    } else if (addressToDelete) {
       const updatedAddresses = addresses.filter(
         (addr) => addr !== addressToDelete
       );
       setAddresses(updatedAddresses);
-      setDeletePopupOpen(false);
     }
+    setDeletePopupOpen(false);
   };
 
   const handleCancelDelete = () => {
@@ -70,7 +79,15 @@ function UserInfoModal({
 
   const handleAddressSelect = (address: string) => {
     setAddresses((prevAddresses) => [...prevAddresses, address]);
-    setProjectMenuOpen(false); // Close the dropdown after selection
+    setProjectMenuOpen(false);
+  };
+
+  const handleSave = () => {
+    onClose();
+  };
+
+  const handleDeleteUser = () => {
+    onDeleteUser();
   };
 
   const unlinkedAddresses: string[] = generateMockProjects()
@@ -174,11 +191,38 @@ function UserInfoModal({
           </div>
         </div>
 
+        {/* Custom Save and Delete Buttons */}
+        <div className="flex justify-center gap-4 mt-8">
+          {/* Save button for both admin and master */}
+          {(currentUserRole === "master" || currentUserRole === "admin") && (
+            <div
+              onClick={handleSave}
+              className="w-[150px] h-[25px] px-[25px] py-5 bg-[#266472] rounded-[30px] border-2 border-[#266472] justify-center items-center gap-2.5 inline-flex cursor-pointer"
+            >
+              <div className="text-center text-white text-2xl font-['Sequel Sans']">
+                Save
+              </div>
+            </div>
+          )}
+          {/* Delete button only for master */}
+          {currentUserRole === "master" && (
+            <div
+              onClick={handleDeleteUserClick}
+              className="w-[150px] h-[25px] px-[25px] py-5 bg-red-600 rounded-[30px] border-2 border-red-600 justify-center items-center gap-2.5 inline-flex cursor-pointer"
+            >
+              <div className="text-center text-white text-2xl font-['Sequel Sans']">
+                Delete
+              </div>
+            </div>
+          )}
+        </div>
+
         {isDeletePopupOpen && (
           <DeleteConfirmationPopup
             addressToDelete={addressToDelete}
             userName={userName}
             onConfirm={handleConfirmDelete}
+            isUserDeletion={isUserDeletion}
             onCancel={handleCancelDelete}
           />
         )}
