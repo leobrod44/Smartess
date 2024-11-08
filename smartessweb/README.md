@@ -7,11 +7,13 @@ There is a security aspect which requires setting a .env file. This needs to be 
 
 1. Locate the smartessweb folder:
 
-   ![image](https://github.com/user-attachments/assets/f36ec39d-bfee-478f-ba7d-17a96dc8f5fb)
+   ![image](https://github.com/user-attachments/assets/18494e02-1b17-4a34-beb2-f8c83e58d367)
+
 
 2. Install create a .env file like the following:
 
-   ![image](https://github.com/user-attachments/assets/695a3320-51a1-4c83-8834-fc79ae283e75)
+   ![image](https://github.com/user-attachments/assets/359a96da-33f7-4f03-aac0-44b693c58855)
+
 
 3. Paste the following code:
 
