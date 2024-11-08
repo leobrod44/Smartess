@@ -20,7 +20,6 @@ const UnitPage = () => {
 
   useEffect(() => {
     const allUnits = projects.flatMap((project) => project.units);
-    console.log("All Units: ", allUnits); // Log units
     setAllUnits(allUnits);
   }, [projects]);
 
