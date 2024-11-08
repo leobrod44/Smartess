@@ -86,10 +86,6 @@ function UserInfoModal({
     onClose();
   };
 
-  const handleDeleteUser = () => {
-    onDeleteUser();
-  };
-
   const unlinkedAddresses: string[] = generateMockProjects()
     .map((project) => project.address)
     .filter((address) => !addresses.includes(address));
