@@ -26,7 +26,7 @@ services:
     container_name: grafana
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - "4000:4000"
     volumes:
       - ./observability/grafana/data:/var/lib/grafana
       - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards  # For dashboards
@@ -86,6 +86,26 @@ services:
   #     - "8765:8765"
   #   networks:
   #     - smartess_network
+
+  #to launch only smartess web use the following command: docker-compose up --build smartessweb
+  smartessweb:
+    container_name: smartessweb
+    build:
+      context: .
+      dockerfile: smartessweb/Dockerfile
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./smartessweb:/app
+      - /app/node_modules
+      - /app/.next
+      - /app/frontend/node_modules
+      - /app/frontend/.next
+    networks:
+      - smartess_network
+
+# make sure to use docker network create smartess_network for first time use
 networks:
   smartess_network:
     external: true
