@@ -3,7 +3,6 @@ import HubOwner from "../components/UnitComponents/HubOwner";
 import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
-
 import {
   User,
   TicketsType,
@@ -13,6 +12,12 @@ import {
   generateMockProjects,
 } from "../mockData";
 import { hubApi } from "@/api/components/Unit";
+
+interface UnitComponentProps {
+  unitNumber: string;
+  projectId: string;
+  isTest?: boolean;
+}
 
 const UnitComponent = ({
   unitNumber,
@@ -47,18 +52,57 @@ const UnitComponent = ({
   };
 
   useEffect(() => {
-    const getData = async () => {
-      const data = await fetchData(projectId, unitNumber);
-      if (data) {
-        setUsers(data.users);
-        setTickets(data.tickets);
-        setOwner(data.owner);
-        setAlerts(data.alerts);
+    const fetchData = async () => {
+      try {
+        if (isTest) {
+          const unit = await fetchMockData(projectId, unitNumber);
+          if (unit) {
+            setUsers(unit.users);
+            setTickets(unit.tickets);
+            setOwner(unit.owner);
+            setAlerts(unit.alerts);
+          }
+        } else {
+          // Use real API
+          const token = localStorage.getItem("token");
+          if (!token) {
+            throw new Error("No authentication token found");
+          }
+
+          const data = await hubApi.getHubDetails(projectId, unitNumber, token);
+          setUsers(data.users);
+          setTickets(data.tickets);
+          setOwner(data.owner);
+          setAlerts(data.alerts);
+        }
+      } catch (err) {
+        console.error("Error fetching hub details:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load hub details"
+        );
+      } finally {
+        setLoading(false);
       }
     };
 
-    getData();
-  }, [projectId, unitNumber]);
+    fetchData();
+  }, [projectId, unitNumber, isTest]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        <div className="text-[#14323B] text-lg">Loading unit details...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center p-4">
+        <div className="text-red-600 text-lg">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
