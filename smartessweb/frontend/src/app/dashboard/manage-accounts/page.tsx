@@ -18,7 +18,7 @@ const currentUser: {
   address: string[];
 } = {
   individualId: "10",
-  role: "basic",
+  role: "master",
   address: [
     "1000 De La Gauchetiere",
     "750 Rue Peel",

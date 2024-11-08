@@ -135,7 +135,8 @@ function UserInfoModal({
               )}
             </div>
             {(currentUserRole === "master" || currentUserRole === "admin") &&
-              !isEditingRole && (
+              !isEditingRole &&
+              role !== "master" && (
                 <IconButton
                   className="ml-4 text-[#30525E] relative z-10"
                   onClick={handleEditRoleClick}
