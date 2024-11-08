@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Typography } from "@mui/material";
-import Searchbar from "./Searchbar";
+import Searchbar from "../Searchbar";
 
 interface ProjectAddressMenuProps {
   unlinkedAddresses: string[];

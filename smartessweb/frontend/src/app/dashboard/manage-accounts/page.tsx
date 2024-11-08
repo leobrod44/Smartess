@@ -1,6 +1,6 @@
 "use client";
 
-import ManageAccountsList from "@/app/components/ManageAccountsList";
+import ManageAccountsList from "@/app/components/ManageUsersComponents/ManageAccountsList";
 import { Project, generateMockProjects, Individual } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";

@@ -7,7 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import { generateMockProjects } from "../mockData";
+import { generateMockProjects } from "../../mockData";
 
 interface UserInfoModalProps {
   open: boolean;

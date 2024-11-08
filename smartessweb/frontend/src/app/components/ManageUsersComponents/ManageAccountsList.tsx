@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
-import UserInfoModal from "../components/UserInfoModal";
+import UserInfoModal from "../ManageUsersComponents/UserInfoModal";
 interface ManageAccountsListProps {
   address: string;
   userName: string;
