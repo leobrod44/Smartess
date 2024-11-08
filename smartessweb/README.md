@@ -65,5 +65,8 @@ For any question DM Abdullah.
      http://localhost:3001/
    ```
 
-   You should see the app will be launched.
+   You should see the app will be lauched on this page:
+
+   ![image](https://github.com/user-attachments/assets/ecb51ebd-34fe-412b-a0c4-436c7bf8bba5)
+
 
