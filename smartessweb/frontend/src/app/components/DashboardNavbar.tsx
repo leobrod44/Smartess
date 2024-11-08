@@ -145,8 +145,6 @@ const DashboardNavbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [_loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
 
   const sidebarItems = [
     ...home,
@@ -203,11 +201,6 @@ const DashboardNavbar = () => {
         setProjects(response.projects);
       } catch (err) {
         console.error("Error fetching projects:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to load projects"
-        );
-      } finally {
-        setLoading(false);
       }
     };
 
