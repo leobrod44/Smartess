@@ -6,6 +6,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
+import ProjectAddressMenu from "./ProjectAddressMenu";
+import { generateMockProjects } from "../mockData";
 
 interface UserInfoModalProps {
   open: boolean;
@@ -29,6 +31,7 @@ function UserInfoModal({
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
+  const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -61,10 +64,22 @@ function UserInfoModal({
     setDeletePopupOpen(false);
   };
 
+  const handleAddClick = () => {
+    setProjectMenuOpen(!isProjectMenuOpen);
+  };
+
+  const handleAddressSelect = (address: string) => {
+    setAddresses((prevAddresses) => [...prevAddresses, address]);
+    setProjectMenuOpen(false); // Close the dropdown after selection
+  };
+
+  const unlinkedAddresses: string[] = generateMockProjects()
+    .map((project) => project.address)
+    .filter((address) => !addresses.includes(address));
+
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
       <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[80vh]">
-        {/* Close Button */}
         <IconButton
           onClick={onClose}
           className="absolute top-2 right-2 text-[#30525E]"
@@ -72,16 +87,13 @@ function UserInfoModal({
           <CloseIcon />
         </IconButton>
 
-        {/* Modal Content */}
         <div className="flex flex-col items-center justify-center">
-          {/* Profile Picture */}
           <img
-            src="path_to_profile_picture.jpg" // Replace with the actual image URL
+            src="path_to_profile_picture.jpg"
             alt="Profile Picture"
             className="w-24 h-24 rounded-full border-2 border-black mb-2"
           />
 
-          {/* User Details */}
           <Typography
             variant="h6"
             id="user-details-modal"
@@ -128,12 +140,21 @@ function UserInfoModal({
               <strong>Projects</strong>
             </Typography>
             {currentUserRole === "master" && (
-              <IconButton className="text-[#30525E]">
+              <IconButton className="text-[#30525E]" onClick={handleAddClick}>
                 <AddIcon />
               </IconButton>
             )}
           </div>
-          <div className="flex flex-col gap-2 w-full">
+
+          {isProjectMenuOpen && (
+            <ProjectAddressMenu
+              unlinkedAddresses={unlinkedAddresses}
+              onSelectAddress={handleAddressSelect}
+            />
+          )}
+
+          {/* Project Address Cards */}
+          <div className="flex flex-col gap-2 w-full mt-4">
             {addresses.map((address, index) => (
               <div
                 key={index}
@@ -153,7 +174,6 @@ function UserInfoModal({
           </div>
         </div>
 
-        {/* Delete Confirmation Popup */}
         {isDeletePopupOpen && (
           <DeleteConfirmationPopup
             addressToDelete={addressToDelete}
