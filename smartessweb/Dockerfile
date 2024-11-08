@@ -1,0 +1,22 @@
+# Use a newer Node version
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files for both root and frontend
+COPY smartessweb/package*.json ./
+COPY smartessweb/frontend/package*.json ./frontend/
+
+# Install dependencies for root and frontend
+RUN npm install
+RUN cd frontend && npm install
+
+# Copy project files
+COPY smartessweb/ ./
+
+# Expose ports (3000 for backend, 3001 for frontend)
+EXPOSE 3000 3001
+
+# Start both frontend and backend using the dev script from package.json
+CMD ["npm", "run", "dev"]
