@@ -59,8 +59,6 @@ export interface Unit {
 
   tickets: TicketsType;
 
-  activeAlerts: ActiveAlerts;
-
   owner: Owner;
 
   alerts: Alert[];
@@ -87,12 +85,6 @@ export interface Alert {
   resolved: boolean;
 
   icon: string;
-}
-
-export interface ActiveAlerts {
-  active: number;
-
-  closed: number;
 }
 
 // Function to generate mock projects
@@ -177,8 +169,6 @@ const generateMockUnits = (): Unit[] => [
 
     tickets: generateMockTickets(),
 
-    activeAlerts: generateMockActiveAlerts(),
-
     owner: generateMockOwner(),
 
     alerts: generateMockAlerts(),
@@ -191,8 +181,6 @@ const generateMockUnits = (): Unit[] => [
 
     tickets: generateMockTickets(),
 
-    activeAlerts: generateMockActiveAlerts(),
-
     owner: generateMockOwner(),
 
     alerts: generateMockAlerts(),
@@ -204,8 +192,6 @@ const generateMockUnits = (): Unit[] => [
     users: generateMockUsers(),
 
     tickets: generateMockTickets(),
-
-    activeAlerts: generateMockActiveAlerts(),
 
     owner: generateMockOwner(),
 
@@ -237,14 +223,6 @@ const generateMockTickets = (): TicketsType => ({
   pending: 4,
 
   closed: 12,
-});
-
-// Function to generate mock tickets
-
-const generateMockActiveAlerts = (): ActiveAlerts => ({
-  active: 19,
-
-  closed: 3,
 });
 
 // Function to generate mock owner
@@ -341,8 +319,6 @@ const generateMockUnits2 = (): Unit[] => [
 
     tickets: generateMockTickets(),
 
-    activeAlerts: generateMockActiveAlerts(),
-
     owner: generateMockOwner2(),
 
     alerts: generateMockAlerts(),
@@ -355,8 +331,6 @@ const generateMockUnits2 = (): Unit[] => [
 
     tickets: generateMockTickets(),
 
-    activeAlerts: generateMockActiveAlerts(),
-
     owner: generateMockOwner2(),
 
     alerts: generateMockAlerts(),
@@ -368,8 +342,6 @@ const generateMockUnits2 = (): Unit[] => [
     users: generateMockUsers2(),
 
     tickets: generateMockTickets(),
-
-    activeAlerts: generateMockActiveAlerts(),
 
     owner: generateMockOwner(),
 
