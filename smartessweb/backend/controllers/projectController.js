@@ -61,16 +61,94 @@ exports.getUserProjects = async (req, res) => {
             // Fetch unit numbers for each project
             const { data: hubs, error: hubError } = await supabase
                 .from('hub')
-                .select('unit_number')
+                .select('hub_id, unit_number')
                 .eq('proj_id', project.proj_id)
                 .order('unit_number', { ascending: true });
-
+        
             if (hubError) {
                 console.error(`Error fetching hubs for project ${project.proj_id}:`, hubError);
                 return null;
             }
-
-            // Transform to match Project interface in frontend
+        
+            // Fetch users for each hub and transform the data to match the frontend Project interface
+            const units = await Promise.all(hubs.map(async (hub) => {
+                // Fetch user IDs and hub_user_type for the current hub
+                const { data: hubUsers, error: hubUserError } = await supabase
+                    .from('hub_user')
+                    .select('user_id, hub_user_type')
+                    .eq('hub_id', hub.hub_id)
+                    .order('hub_id', { ascending: true });
+        
+                if (hubUserError) {
+                    console.error(`Error fetching users for hub ${hub.hub_id}:`, hubUserError);
+                    return null;
+                }
+        
+                // Find the owner by filtering for hub_user_type
+                const hubOwner = hubUsers.find(user => user.hub_user_type === 'owner');
+                
+                // Fetch user data for the owner if exists
+                let owner = {
+                    tokenId: "",
+                    firstName: "",
+                    lastName: "",
+                    email: ""
+                };
+                if (hubOwner) {
+                    const { data: userData, error: userError } = await supabase
+                        .from('user')
+                        .select('user_id, first_name, last_name, email')
+                        .eq('user_id', hubOwner.user_id);
+        
+                    if (userError) {
+                        console.error(`Error fetching data for user ${hubOwner.user_id}:`, userError);
+                    } else {
+                        owner = {
+                            tokenId: userData[0].user_id,
+                            firstName: userData[0].first_name,
+                            lastName: userData[0].last_name,
+                            email: userData[0].email,
+                        };
+                    }
+                }
+        
+                // Fetch user data for each user_id associated with the hub
+                const users = await Promise.all(hubUsers.map(async (hubUser) => {
+                    const { data: userData, error: userError } = await supabase
+                        .from('user')
+                        .select('user_id, first_name, last_name, email')
+                        .eq('user_id', hubUser.user_id);
+        
+                    if (userError) {
+                        console.error(`Error fetching data for user ${hubUser.user_id}:`, userError);
+                        return null;
+                    }
+        
+                    // Return the user data for the frontend
+                    return {
+                        tokenId: userData[0].user_id,
+                        firstName: userData[0].first_name,
+                        lastName: userData[0].last_name,
+                        email: userData[0].email,
+                    };
+                }));
+        
+                // Return the transformed unit data with the owner populated
+                return {
+                    unitNumber: hub.unit_number,
+                    users: users.filter(user => user !== null),
+                    tickets: {  
+                        total: 0,
+                        open: 0,
+                        pending: 0,
+                        closed: 0
+                    },
+                    owner,
+                    alerts: [] // Empty alerts array
+                };
+            }));
+        
+            // Return the transformed project data
             return {
                 projectId: project.proj_id,
                 address: project.address,
@@ -78,25 +156,9 @@ exports.getUserProjects = async (req, res) => {
                 hubUsers: project.hub_users_count,
                 pendingTickets: project.pending_tickets_count,
                 projectUsers: [], // Empty array
-                units: hubs.map(hub => ({
-                    unitNumber: hub.unit_number,
-                    users: [], // Empty array
-                    tickets: {  // Empty ticket
-                        total: 0,
-                        open: 0,
-                        pending: 0,
-                        closed: 0
-                    },
-                    owner: {   // Empty owner info
-                        tokenId: "",
-                        firstName: "",
-                        lastName: "",
-                        email: ""
-                    },
-                    alerts: [] // Empty alerts array
-                }))
+                units: units.filter(unit => unit !== null) 
             };
-        }));
+        })); 
 
         // Filter out any null values from failed transformations
         const validProjects = transformedProjects.filter(project => project !== null);
