@@ -4,17 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"Smartess/go/common/structures"
-	"log"
-	"time"
-
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"log"
 )
 
 type QueueConsumer struct {
@@ -85,12 +84,27 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		zap.String("message", alert.Message),
 		zap.String("time_fired", alert.TimeStamp.String()),
 	)
+
+	ConnectToMongo()
+	collection := mongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
+	_, err = collection.InsertOne(context.TODO(), bson.D{
+		{"_id", primitive.NewObjectID()},
+		{"hub_id", alert.HubIP},
+		{"device_id", alert.DeviceID},
+		{"state", alert.State},
+		{"message", alert.Message},
+		{"time_fired", alert.TimeStamp.String()},
+	})
+	if err != nil {
+		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+	}
+
 }
 
 var mongoClient *mongo.Client
 
 func ConnectToMongo() {
-	clientOptions := options.Client().ApplyURI("mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
 
 	var err error
 	mongoClient, err = mongo.Connect(context.TODO(), clientOptions)
@@ -108,16 +122,10 @@ func ConnectToMongo() {
 
 type MongoMessageHandler struct{}
 
-type MongoMessage struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"` // MongoDB will generate this ID
-	Data      string             `bson:"content"`
-	Timestamp time.Time          `bson:"timestamp"`
-}
-
 func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	ConnectToMongo()
 	// Process the message here
-	var message MongoMessage
+	var message structures.TestMongoMessage
 	err := json.Unmarshal(msg.Body, &message)
 	if err != nil {
 		logger.Error("Failed to unmarshal message", zap.Error(err))

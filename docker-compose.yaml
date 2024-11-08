@@ -54,6 +54,7 @@ services:
         condition: service_healthy  # Correct placement of health condition
     environment:
       RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
+      MONGO_STRING: mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
     networks:
       - smartess_network
   

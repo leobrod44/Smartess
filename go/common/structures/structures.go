@@ -1,6 +1,9 @@
 package structures
 
-import "time"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"time"
+)
 
 type ChatMessage struct {
 	MessageID   string    `json:"message_id"`  // Unique identifier for the message
@@ -82,4 +85,10 @@ type Alert struct {
 	State     string    `json:"state"`
 	Message   string    `json:"message"`
 	TimeStamp time.Time `json:"time_fired"`
+}
+
+type TestMongoMessage struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty"` // MongoDB will generate this ID
+	Data      string             `bson:"content"`
+	Timestamp time.Time          `bson:"timestamp"`
 }
