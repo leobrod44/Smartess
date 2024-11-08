@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Modal, Typography, IconButton, Button } from "@mui/material";
+import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
+import RoleEditForm from "./RoleEditForm";
 
 interface UserInfoModalProps {
   open: boolean;
@@ -92,56 +93,19 @@ function UserInfoModal({
             <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
               Role
             </p>
-            <div className="flex-1 text-center pr-12">
+            <div className="flex-1 pl-12">
               {isEditingRole ? (
-                // Inline Role Edit Form with Padding, Black Radio Buttons, and Save Button
-                <div className="flex flex-col items-start">
-                  {/* Radio Options with Left Padding */}
-                  <div className="pl-12">
-                    <div className="flex gap-4 mb-2">
-                      {["admin", "basic"].map((r) => (
-                        <label key={r} className="flex items-center">
-                          <input
-                            type="radio"
-                            value={r}
-                            checked={role === r}
-                            onChange={() =>
-                              handleRoleChange(r as "admin" | "basic")
-                            }
-                            className="mr-2 form-radio text-black" // Black radio button
-                          />
-                          {r.charAt(0).toUpperCase() + r.slice(1)}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="text-center w-full">
-                    <Button
-                      onClick={handleSaveRoleChange}
-                      variant="contained"
-                      sx={{
-                        width: "113px",
-                        height: "25px",
-                        padding: "5px 25px",
-                        backgroundColor: "#30525E",
-                        borderRadius: "30px",
-                        color: "#fffff",
-                        fontWeight: "bold",
-                        "&:hover": {
-                          backgroundColor: "#b3b3b3",
-                          borderColor: "#b3b3b3",
-                        },
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </div>
+                <RoleEditForm
+                  currentRole={role}
+                  onRoleChange={handleRoleChange}
+                  onSave={handleSaveRoleChange}
+                />
               ) : (
-                // Display Role as Text
-                <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
-                  {role}
-                </span>
+                <div className="pl-12">
+                  <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
+                    {role}
+                  </span>
+                </div>
               )}
             </div>
             {(currentUserRole === "master" || currentUserRole === "admin") &&
