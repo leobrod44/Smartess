@@ -37,6 +37,9 @@ func Init() (RabbitMQServer, error) {
 		false,                                  // no-wait
 		nil,                                    // arguments
 	)
+	if err != nil {
+		logger.Fatal("Failed to declare topic exchange", zap.Error(err))
+	}
 	var consumers []QueueConsumer
 
 	//TODO add marshals struct, or check if necessary
@@ -54,45 +57,36 @@ func Init() (RabbitMQServer, error) {
 			instance.Conn.Close() // Close connection if there's an error
 			logger.Fatal("Failed to declare queue", zap.String("queue", queueConfig.Queue), zap.Error(err))
 		}
-		//TODO HAVE PARSING (NOT JUST SWITCH CASING QUEUE NAMES)
-		// TO DETERMINE WHICH CLASS OF TOPIC PATTERNS NEEDED
-
-		//TODO HAVE MULTIPLE PATTERNS,LABELS,KEYS PATTERNS.. TO DECIDE WHICH TO BIND...
-		//TODO: var routingKeys []string
 
 		// Bind queue to topic exchange based on the queue name
-		var routingKey string
-		switch queueConfig.Queue {
-		case "notifications":
-			routingKey = common_rabbitmq.Test0NotificationRoutingKey
-		case "alerts":
-			routingKey = common_rabbitmq.Test0AlertRoutingKey
-		default:
-			return RabbitMQServer{}, fmt.Errorf("no valid routing key found for queue: %s", queueConfig.Queue)
-		}
-		err = instance.Channel.QueueBind(
-			queue.Name,                             // queue name
-			routingKey,                             // routing key
-			common_rabbitmq.Test0TopicExchangeName, // exchange name
-			false,                                  // no-wait
-			nil,                                    // arguments
-		)
-		if err != nil {
-			return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name, common_rabbitmq.Test0TopicExchangeName, routingKey, err)
-		}
-		//todo for _, routingKey := range routingKeys {
-		//	err = instance.Channel.QueueBind(
-		//		queue.Name,                             // queue name
-		//		routingKey,                             // routing key
-		//		common_rabbitmq.Test0TopicExchangeName, // exchange name
-		//		false,                                  // no-wait
-		//		nil,                                    // arguments
-		//	)
-		//	if err != nil {
-		//		return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name, ExchangeName, routingKey, err)
-		//	}
+		//var routingKeys []string
+		//switch queueConfig.Queue {
+		//case "notifications":
+		//	routingKey = common_rabbitmq.Test0NotificationRoutingKey
+		//case "alerts":
+		//	routingKey = common_rabbitmq.Test0AlertRoutingKey
+		//default:
+		//	return RabbitMQServer{}, fmt.Errorf("no valid routing key found for queue: %s", queueConfig.Queue)
 		//}
-		handler, err := setHandler(queue)
+		routingKey := ""
+		//todo: Now only one exchange is supported, but eventually go through all exchanges
+		for _, binding := range instance.Config.Exchanges[0].QueueBindings {
+			if binding.Queue == queue.Name {
+				routingKey = binding.RoutingKey
+				err = instance.Channel.QueueBind(
+					queue.Name,                             // queue name
+					routingKey,                             // routing key
+					common_rabbitmq.Test0TopicExchangeName, // exchange name
+					false,
+					nil,
+				)
+				if err != nil {
+					return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
+						common_rabbitmq.Test0TopicExchangeName, routingKey, err)
+				}
+			}
+		}
+		handler, err := setHandler(queue, routingKey)
 		if err != nil {
 			return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 		}
@@ -137,7 +131,7 @@ func (r *RabbitMQServer) Start() {
 }
 
 // TODO Consider exchanges here...
-func setHandler(queue amqp.Queue) (MessageHandler, error) {
+func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, error) {
 	switch queue.Name {
 	case "mongo-messages":
 		return &MongoMessageHandler{}, nil
