@@ -38,8 +38,8 @@ const UnitComponent = ({
     }
   );
   return (
-    <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
-      <div className="bg-[#fff] rounded-[7px] w-full mt-2 mb-2 shadow-xl">
+    <div className="unit-container max-w-fit sm:max-w-full mx-auto">
+      <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
         <div className="text-[#4B7D8D] font-sequel-sans-black text-center text-2xl p-2">
           {projectAddress}
         </div>
