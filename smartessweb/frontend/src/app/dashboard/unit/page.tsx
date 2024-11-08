@@ -1,4 +1,8 @@
 "use client";
+
+import { useProjectContext } from "@/context/ProjectProvider";
+
+("use client");
 import UnitComponent from "@/app/components/UnitListComponent";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
@@ -7,6 +11,17 @@ import { useState } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 
 const UnitPage = () => {
+  const { selectedProjectId, selectedProjectAddress } = useProjectContext();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <p>Loading...</p>;
+  }
+
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -59,54 +74,65 @@ const UnitPage = () => {
   };
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
-      <div className="flex flex row justify-between">
-        <div className="flex row">
-          <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
-            Units
-          </h2>
-        </div>
-        <div className="flex row ">
-          <div className="pt-2">
-            <FilterComponent
-              onFilterChange={handleFilterChange}
-              filterOptions={filterOptionsForUnits}
-            />
+    <div>
+      <h1>Unit Page</h1>
+      {selectedProjectId ? (
+        <>
+          <p>Selected Project ID: {selectedProjectId}</p>
+          <p>Project Address: {selectedProjectAddress}</p>
+        </>
+      ) : (
+        <p>No project selected.</p>
+      )}
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
+        <div className="flex flex row justify-between">
+          <div className="flex row">
+            <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
+              Units
+            </h2>
           </div>
-          <Searchbar onSearch={handleSearch} />
-        </div>
-      </div>
-
-      <div className="bg-[#4b7d8d] p-[5px] rounded-[7px] w-full mx-auto">
-        {/* / Map through (paginated projects) and render each project's component. */}
-        {filteredProjects.every(
-          (project) => project.filteredUnits.length === 0
-        ) ? (
-          <h3 className="font-sequel-sans-medium text-center text-lg text-[#fff] text-[30px] leading-10 tracking-tight">
-            No matching projects or units found.
-          </h3>
-        ) : (
-          currentItems.map((project) => (
-            <div key={project.projectId}>
-              {project.filteredUnits.map((unit) => (
-                <UnitComponent
-                  key={unit.unitNumber}
-                  unit={unit}
-                  projectAddress={project.address}
-                />
-              ))}
+          <div className="flex row ">
+            <div className="pt-2">
+              <FilterComponent
+                onFilterChange={handleFilterChange}
+                filterOptions={filterOptionsForUnits}
+              />
             </div>
-          ))
-        )}
-      </div>
-      <div className="mt-4 flex justify-center">
-        <Pagination
-          className="custom-pagination"
-          count={totalPages}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
+            <Searchbar onSearch={handleSearch} />
+          </div>
+        </div>
+
+        <div className="bg-[#4b7d8d] p-[5px] rounded-[7px] w-full mx-auto">
+          {/* / Map through (paginated projects) and render each project's component. */}
+          {filteredProjects.every(
+            (project) => project.filteredUnits.length === 0
+          ) ? (
+            <h3 className="font-sequel-sans-medium text-center text-lg text-[#fff] text-[30px] leading-10 tracking-tight">
+              No matching projects or units found.
+            </h3>
+          ) : (
+            currentItems.map((project) => (
+              <div key={project.projectId}>
+                {project.filteredUnits.map((unit) => (
+                  <UnitComponent
+                    key={unit.unitNumber}
+                    unit={unit}
+                    projectAddress={project.address}
+                  />
+                ))}
+              </div>
+            ))
+          )}
+        </div>
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            className="custom-pagination"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </div>
       </div>
     </div>
   );
