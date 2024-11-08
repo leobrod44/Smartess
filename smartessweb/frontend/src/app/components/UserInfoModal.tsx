@@ -3,6 +3,7 @@ import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 
@@ -119,13 +120,19 @@ function UserInfoModal({
               )}
           </div>
 
-          <Typography
-            variant="body1"
-            className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium text-left w-full pl-2"
-          >
-            <strong>Projects</strong>
-          </Typography>
-
+          <div className="flex items-center w-full">
+            <Typography
+              variant="body1"
+              className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium text-left w-full pl-2"
+            >
+              <strong>Projects</strong>
+            </Typography>
+            {currentUserRole === "master" && (
+              <IconButton className="text-[#30525E]">
+                <AddIcon />
+              </IconButton>
+            )}
+          </div>
           <div className="flex flex-col gap-2 w-full">
             {addresses.map((address, index) => (
               <div
