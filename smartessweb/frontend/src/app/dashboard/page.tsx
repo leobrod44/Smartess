@@ -8,6 +8,7 @@ import Searchbar from "../components/Searchbar";
 import FilterComponent from "../components/FilterList";
 import { Project } from "../mockData";
 import { projectApi } from "@/api/page";
+import { useProjectContext } from "@/context/ProjectProvider";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -15,6 +16,7 @@ const DashboardPage = () => {
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { selectedProjectId, selectedProjectAddress } = useProjectContext();
 
   const filterOptionsDashboard = [
     "Address A-Z",
@@ -33,25 +35,38 @@ const DashboardPage = () => {
     const fetchProjects = async () => {
       try {
         const response = await projectApi.getUserProjects(token);
-        setProjects(response.projects);
-        setFilteredProjects(response.projects);
+        const fetchedProjects = response.projects;
+
+        const filteredBySelectedId = selectedProjectId
+          ? fetchedProjects.filter(
+              (project) => project.projectId === selectedProjectId
+            )
+          : fetchedProjects;
+
+        setProjects(fetchedProjects);
+        setFilteredProjects(filteredBySelectedId);
       } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load projects');
+        console.error("Error fetching projects:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load projects"
+        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchProjects();
-  }, [router]);
+  }, [selectedProjectId]);
 
   const handleSearch = (query: string) => {
-    const filtered = projects.filter((project) => {
+    const relevantProjects = selectedProjectId
+      ? projects.filter((project) => project.projectId === selectedProjectId)
+      : projects;
+
+    const filtered = relevantProjects.filter((project) => {
       const addressMatch = project.address
         .toLowerCase()
         .includes(query.toLowerCase());
-
       const userMatch = project.units.some((unit) =>
         unit.users.some((user) =>
           `${user.firstName} ${user.lastName}`
@@ -59,7 +74,6 @@ const DashboardPage = () => {
             .includes(query.toLowerCase())
         )
       );
-
       const ownerMatch = project.units.some((unit) =>
         `${unit.owner.firstName} ${unit.owner.lastName}`
           .toLowerCase()
@@ -72,7 +86,7 @@ const DashboardPage = () => {
   };
 
   const handleFilterChange = (filterValue: string) => {
-    const newFilteredProjects = [...projects];
+    const newFilteredProjects = [...filteredProjects];
 
     switch (filterValue) {
       case "Address A-Z":
@@ -94,15 +108,19 @@ const DashboardPage = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="text-[#14323B] text-lg">Loading projects...</div>
-    </div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-[#14323B] text-lg">Loading projects...</div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex justify-center items-center h-screen">
-      <div className="text-red-600 text-lg">{error}</div>
-    </div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-red-600 text-lg">{error}</div>
+      </div>
+    );
   }
 
   return (

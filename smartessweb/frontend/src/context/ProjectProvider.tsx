@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
 import {
   createContext,
   useContext,
   useState,
-  useEffect,
   ReactNode,
   Dispatch,
   SetStateAction,
-} from 'react';
+} from "react";
 
 interface ProjectContextProps {
   selectedProjectId: string;
@@ -22,30 +21,9 @@ const ProjectContext = createContext<ProjectContextProps | undefined>(
 );
 
 export const ProjectProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedProjectId, setSelectedProjectId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('selectedProjectId') || '';
-    }
-    return '';
-  });
-
-  const [selectedProjectAddress, setSelectedProjectAddress] = useState<string>(
-    () => {
-      if (typeof window !== 'undefined') {
-        return localStorage.getItem('selectedProjectAddress') || 'ALL PROJECTS';
-      }
-      return 'ALL PROJECTS';
-    }
-  );
-
-  useEffect(() => {
-    if (selectedProjectId) {
-      localStorage.setItem('selectedProjectId', selectedProjectId);
-    }
-    if (selectedProjectAddress) {
-      localStorage.setItem('selectedProjectAddress', selectedProjectAddress);
-    }
-  }, [selectedProjectId, selectedProjectAddress]);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
+  const [selectedProjectAddress, setSelectedProjectAddress] =
+    useState<string>("ALL PROJECTS");
 
   return (
     <ProjectContext.Provider
@@ -64,7 +42,7 @@ export const ProjectProvider = ({ children }: { children: ReactNode }) => {
 export const useProjectContext = () => {
   const context = useContext(ProjectContext);
   if (!context) {
-    throw new Error('useProjectContext must be used within a ProjectProvider');
+    throw new Error("useProjectContext must be used within a ProjectProvider");
   }
   return context;
 };
