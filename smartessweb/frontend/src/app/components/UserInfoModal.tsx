@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Modal, Typography, IconButton } from "@mui/material";
+import { Modal, Typography, IconButton, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RoleEditForm from "./RoleEditForm";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 
 interface UserInfoModalProps {
@@ -35,6 +34,9 @@ function UserInfoModal({
 
   const handleRoleChange = (newRole: "admin" | "basic" | "master") => {
     setRole(newRole);
+  };
+
+  const handleSaveRoleChange = () => {
     setIsEditingRole(false);
   };
 
@@ -91,28 +93,66 @@ function UserInfoModal({
               Role
             </p>
             <div className="flex-1 text-center pr-12">
-              <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
-                {role}
-              </span>
+              {isEditingRole ? (
+                // Inline Role Edit Form with Padding, Black Radio Buttons, and Save Button
+                <div className="flex flex-col items-start">
+                  {/* Radio Options with Left Padding */}
+                  <div className="pl-12">
+                    <div className="flex gap-4 mb-2">
+                      {["admin", "basic"].map((r) => (
+                        <label key={r} className="flex items-center">
+                          <input
+                            type="radio"
+                            value={r}
+                            checked={role === r}
+                            onChange={() =>
+                              handleRoleChange(r as "admin" | "basic")
+                            }
+                            className="mr-2 form-radio text-black" // Black radio button
+                          />
+                          {r.charAt(0).toUpperCase() + r.slice(1)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-center w-full">
+                    <Button
+                      onClick={handleSaveRoleChange}
+                      variant="contained"
+                      sx={{
+                        width: "113px",
+                        height: "25px",
+                        padding: "5px 25px",
+                        backgroundColor: "#30525E",
+                        borderRadius: "30px",
+                        color: "#fffff",
+                        fontWeight: "bold",
+                        "&:hover": {
+                          backgroundColor: "#b3b3b3",
+                          borderColor: "#b3b3b3",
+                        },
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Display Role as Text
+                <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
+                  {role}
+                </span>
+              )}
             </div>
-            {(currentUserRole === "master" || currentUserRole === "admin") && (
-              <IconButton
-                className="ml-4 text-[#30525E] relative z-10"
-                onClick={handleEditRoleClick}
-              >
-                <EditIcon />
-              </IconButton>
-            )}
-
-            {/* Role pop-up */}
-            {isEditingRole && (
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-4 border-[#266472] rounded-lg shadow-lg p-4 z-20">
-                <RoleEditForm
-                  currentRole={role}
-                  onRoleChange={handleRoleChange}
-                />
-              </div>
-            )}
+            {(currentUserRole === "master" || currentUserRole === "admin") &&
+              !isEditingRole && (
+                <IconButton
+                  className="ml-4 text-[#30525E] relative z-10"
+                  onClick={handleEditRoleClick}
+                >
+                  <EditIcon />
+                </IconButton>
+              )}
           </div>
 
           <Typography
