@@ -8,8 +8,6 @@ import { generateMockProjects, Project, Unit } from "../../mockData";
 
 const UnitPage = () => {
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
-  const [allUnits, setAllUnits] = useState<Unit[]>([]);
-
   const [searchQuery, setSearchQuery] = useState("");
 
   const filterOptionsForUnits = ["Addresse A-Z"];
@@ -17,11 +15,6 @@ const UnitPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-
-  useEffect(() => {
-    const allUnits = projects.flatMap((project) => project.units);
-    setAllUnits(allUnits);
-  }, [projects]);
 
   // Generate filtered units grouped by project
   const filteredProjects = projects
