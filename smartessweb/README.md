@@ -33,7 +33,7 @@ There is a security aspect which requires setting a .env file. This needs to be 
 6. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
 
    ```bash
-     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess\smartessweb>
+     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess>
    ```
 
 7. Make docker network called smartess_web:
