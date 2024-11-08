@@ -1,8 +1,6 @@
 "use client";
 
 import { useProjectContext } from "@/context/ProjectProvider";
-
-("use client");
 import UnitComponent from "@/app/components/UnitListComponent";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
@@ -14,14 +12,6 @@ const UnitPage = () => {
   const { selectedProjectId, selectedProjectAddress } = useProjectContext();
   const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) {
-    return <p>Loading...</p>;
-  }
-
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -30,6 +20,14 @@ const UnitPage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return <p>Loading...</p>;
+  }
 
   // Generate filtered units grouped by project
   const filteredProjects = projects
