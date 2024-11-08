@@ -47,25 +47,6 @@ function RoleEditForm({
         />
         Basic
       </label>
-      <div className="ml-auto">
-        <Button
-          onClick={onSave}
-          variant="contained"
-          sx={{
-            backgroundColor: "#30525E",
-            borderRadius: "30px",
-            color: "#ffffff",
-            fontWeight: "bold",
-            padding: "5px 10px",
-            "&:hover": {
-              backgroundColor: "#b3b3b3",
-              borderColor: "#b3b3b3",
-            },
-          }}
-        >
-          Save
-        </Button>
-      </div>
     </div>
   );
 }
