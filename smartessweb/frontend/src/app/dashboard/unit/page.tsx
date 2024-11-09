@@ -65,10 +65,12 @@ const UnitPage = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   };
 
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
+    setCurrentPage(1);
   };
 
   //pagination logic
