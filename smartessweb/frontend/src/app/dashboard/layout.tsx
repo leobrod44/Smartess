@@ -1,5 +1,6 @@
 import DashboardNavbar from '../components/DashboardNavbar';
 import { ReactNode } from 'react';
+import { ProjectProvider } from '@/context/ProjectProvider';
 
 interface DashboardProps {
   children: ReactNode;
@@ -7,10 +8,10 @@ interface DashboardProps {
 
 const DashboardLayout = ({ children }: DashboardProps) => {
   return (
-    <div>
+    <ProjectProvider>
       <DashboardNavbar />
       <main className='min-h-screen py-10 lg:pl-72'>{children}</main>
-    </div>
+    </ProjectProvider>
   );
 };
 
