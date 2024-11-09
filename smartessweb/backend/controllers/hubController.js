@@ -3,8 +3,15 @@ const supabase = require('../config/supabase');
 exports.getHubDetails = async (req, res) => {
     try {
         const token = req.token; // From middleware
-        const { proj_id, unit_number } = req.params; // Get from URL params
         
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { proj_id, unit_number } = req.params;
+
         // First, get the hub_id using proj_id and unit_number
         const { data: hubData, error: hubError } = await supabase
             .from('hub')
