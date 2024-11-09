@@ -60,7 +60,9 @@ const UnitComponent = ({
           </div>
 
           <div className="flex-1 md:min-w-[150px]">
-            <Tickets tickets={tickets} />
+            <div className="w-3/5 mx-auto">
+              <Tickets tickets={tickets} />
+            </div>
           </div>
         </div>
 
