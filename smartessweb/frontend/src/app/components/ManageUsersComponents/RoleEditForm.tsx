@@ -1,6 +1,5 @@
 // RoleEditForm.tsx
 import React, { useState } from "react";
-import { Button } from "@mui/material";
 
 interface RoleEditFormProps {
   currentRole: "admin" | "basic" | "master";
@@ -8,11 +7,7 @@ interface RoleEditFormProps {
   onSave: () => void; // Add a callback for Save action
 }
 
-function RoleEditForm({
-  currentRole,
-  onRoleChange,
-  onSave,
-}: RoleEditFormProps) {
+function RoleEditForm({ currentRole, onRoleChange }: RoleEditFormProps) {
   const [selectedRole, setSelectedRole] = useState<
     "admin" | "basic" | "master"
   >(currentRole);
