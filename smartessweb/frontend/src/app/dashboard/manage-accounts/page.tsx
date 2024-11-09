@@ -35,14 +35,11 @@ const consolidateUsers = (
   } = {};
 
   projects.forEach((project) => {
-    // Check if the project address is linked to the current user
     if (currentUserAddresses.includes(project.address)) {
       project.projectUsers.forEach((user) => {
         if (userMap[user.individualId]) {
-          // If the user already exists, add the new project address
           userMap[user.individualId].addresses.push(project.address);
         } else {
-          // If the user is new, add them to the map
           userMap[user.individualId] = {
             user,
             addresses: [project.address],
@@ -59,37 +56,60 @@ const ManageUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const filterOptionsManageUsers = ["Address A-Z", "User A-Z"];
+
+  // Add roles to filter options
+  const filterOptionsManageUsers = [
+    "Address A-Z",
+    "User A-Z",
+    "master",
+    "admin",
+    "basic",
+  ];
+
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
   };
+
   const consolidatedUsers = consolidateUsers(projects, currentUser.address);
+
   const filteredUsers = consolidatedUsers
     .filter(({ user, addresses }) => {
       const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
       const addressString = addresses.join(" ").toLowerCase();
+      const role = user.role.toLowerCase();
       const query = searchQuery.toLowerCase();
 
-      return fullName.includes(query) || addressString.includes(query);
+      const matchesSearch =
+        fullName.includes(query) ||
+        addressString.includes(query) ||
+        role.includes(query);
+
+      const matchesFilter =
+        filter === "" ||
+        filter === "Address A-Z" ||
+        filter === "User A-Z" ||
+        user.role.toLowerCase() === filter.toLowerCase();
+
+      return matchesSearch && matchesFilter;
     })
     .sort((a, b) => {
       if (filter === "Address A-Z") {
-        // Sort by address alphabetically
         return a.addresses[0].localeCompare(b.addresses[0]);
       } else if (filter === "User A-Z") {
-        // Sort by user name alphabetically
         const nameA = `${a.user.firstName} ${a.user.lastName}`;
         const nameB = `${b.user.firstName} ${b.user.lastName}`;
         return nameA.localeCompare(nameB);
       }
-      return 0; // No sorting if no sort filter is selected
+      return 0;
     });
-  //pagination logic
+
+  // Pagination logic
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const currentItems = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     page: number
@@ -97,12 +117,12 @@ const ManageUsersPage = () => {
     setCurrentPage(page);
   };
 
-  // Function to handle search input change
+  // Search input change handler
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
+
   const handleAddUserClick = () => {
-    // Implement the functionality to add a user
     console.log("Add user clicked!");
   };
 
@@ -130,8 +150,8 @@ const ManageUsersPage = () => {
 
         {currentUser.role === "master" && (
           <div
-            onClick={handleAddUserClick} //function yet to be implemented
-            className="cursor-pointer  flex items-center"
+            onClick={handleAddUserClick}
+            className="cursor-pointer flex items-center"
             style={{ fontSize: "2rem" }}
           >
             <AddIcon className="text-[#30525E]" fontSize="inherit" />
@@ -147,7 +167,7 @@ const ManageUsersPage = () => {
 
           return (
             <ManageAccountsList
-              key={user.individualId} // Use a unique key for project-level users
+              key={user.individualId}
               address={addressString}
               userName={`${user.firstName} ${user.lastName}`}
               permission={user.role}
