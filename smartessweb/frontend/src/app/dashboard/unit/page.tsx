@@ -15,7 +15,7 @@ const UnitPage = () => {
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filterOptionsForUnits = ["Address A-Z"];
+  const filterOptionsForUnits = ["Address A-Z", "Most Pending Tickets"];
   const [filter, setFilter] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,23 +29,36 @@ const UnitPage = () => {
     return <p>Loading...</p>;
   }
 
-  // Generate filtered units grouped by project
   const filteredProjects = projects
     .map((project) => {
-      const projectMatch = project.address.toLowerCase().includes(searchQuery);
-      const filteredUnits = project.units.filter(
-        (unit) =>
-          unit.unitNumber.toLowerCase().includes(searchQuery) || projectMatch
-      );
+      const projectMatch = project.address
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-      return {
-        ...project,
-        filteredUnits,
-      };
+      const filteredUnits = project.units.filter((unit) => {
+        const unitMatch = unit.unitNumber
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+
+        const userMatch = unit.users.some((user) =>
+          `${user.firstName} ${user.lastName}`
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())
+        );
+        const ownerMatch = `${unit.owner.firstName} ${unit.owner.lastName}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
+
+        return projectMatch || unitMatch || userMatch || ownerMatch;
+      });
+
+      return { ...project, filteredUnits };
     })
     .sort((a, b) => {
       if (filter === "Address A-Z") {
         return a.address.localeCompare(b.address);
+      } else if (filter === "Most Pending Tickets") {
+        return b.pendingTickets - a.pendingTickets;
       }
       return 0;
     });
