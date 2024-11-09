@@ -1,5 +1,5 @@
 ### NOTE
-- There are 2 section. The first section will explain how to setup your environment. The second section will tell you about how to run the API.
+- There are 2 section. The first section will explain how to setup your environment when using for the first time. The second section will tell you about how to run web for development.
 
 ### One-time Instructions:
 
@@ -46,20 +46,28 @@ For any question DM Abdullah.
 
 ### Running Instructions:
 
-1. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
+There are two possible ways to run the Web: With Docker(Recommended) & Without Docker.
 
-2. Type the following command and press enter:
+#### With Docker (Recommended):
+1) clone the repository on your local machine using 
+```bash
+git cl
+
+2) In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
+
+3) Type the following command and press enter:
 
    ```bash
       docker-compose up --build smartessweb
    ```
 
-   NOTEs: 
+   NOTES: 
       -Give some time to initially build it. Usually it should take 50s but wait 5 min (may depend on computer's hardware).
+
       -We are only running the smartess web from this command. We will be needing to run the whole docker compose file later in the project. The instructions will be updated accordingly. 
 
 
-4. Open your broswer and type :
+4) Open your broswer and type :
 
    ```bash
      http://localhost:3001/
@@ -70,3 +78,14 @@ For any question DM Abdullah.
    ![image](https://github.com/user-attachments/assets/ecb51ebd-34fe-412b-a0c4-436c7bf8bba5)
 
 
+
+#### Without Docker:
+
+1) clone the repository on your local machine using 
+```bash
+git clone https://github.com/leobrod44/Smartess.git 
+```
+2) Navigate to the smartessweb folder
+3) run ``` npm install ```
+4) create a new .env file in Smartess/smartessweb and reach out to tuan via email at 1tuananhp@gmail.com to get access to the content of the .env file
+5) Finally, start the project by running ``` npm run dev ``` in your terminal and navigate to http://localhost:3001/ on your browser

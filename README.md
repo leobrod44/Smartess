@@ -29,12 +29,10 @@ Smartess is an all-in-one smart home system designed for condominium and residen
 ## Developer getting started guide
 What would a new developer need to do to get the system up and running?
 
-1) clone the repository on your local machine using 
-```
-git clone https://github.com/leobrod44/Smartess.git 
-```
-2) Navigate to the smartessweb folder
-3) run ``` npm install ```
-4) create a new .env file in Smartess/smartessweb and reach out to tuan via email at 1tuananhp@gmail.com to get access to the content of the .env file
-5) Finally, start the project by running ``` npm run dev ``` in your terminal and navigate to http://localhost:3001/ on your browser
+Currently the hub and web system are being developped separately as for scalability benefits. Later in the project, some commands will be set up to launch both systems at the same time.
+
+For Hub: Refer to []()
+For Web: Refer to [Web developper's guide](https://github.com/leobrod44/Smartess/tree/main/smartessweb#readme)
+
+
 
