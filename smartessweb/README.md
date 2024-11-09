@@ -1,5 +1,5 @@
 ### NOTE
-- There are 2 section. The first section will explain how to setup your environment. The second section will tell you about how to run the API.
+- There are 2 section. The first section will explain how to setup your environment when using for the first time. The second section will tell you about how to run web for development.
 
 ### One-time Instructions:
 
@@ -30,7 +30,7 @@ There is a security aspect which requires setting a .env file. This needs to be 
 
 5. Replace the values accordingly.
 
-6. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
+6. In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
 
    ```bash
      PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess>
@@ -46,7 +46,8 @@ For any question DM Abdullah.
 
 ### Running Instructions:
 
-1. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
+
+1. In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
 
 2. Type the following command and press enter:
 
@@ -54,12 +55,13 @@ For any question DM Abdullah.
       docker-compose up --build smartessweb
    ```
 
-   NOTEs: 
+   NOTES: 
       -Give some time to initially build it. Usually it should take 50s but wait 5 min (may depend on computer's hardware).
+
       -We are only running the smartess web from this command. We will be needing to run the whole docker compose file later in the project. The instructions will be updated accordingly. 
 
 
-4. Open your broswer and type :
+3. Open your broswer and type :
 
    ```bash
      http://localhost:3001/
@@ -68,5 +70,4 @@ For any question DM Abdullah.
    You should see the app will be lauched on this page:
 
    ![image](https://github.com/user-attachments/assets/ecb51ebd-34fe-412b-a0c4-436c7bf8bba5)
-
 
