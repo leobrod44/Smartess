@@ -1,8 +1,7 @@
 version: '3.7'
 
 services:
-
-    mockhub:
+  mockhub:
     container_name: mockhub
     build:
       context: ../../../go
