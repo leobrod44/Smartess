@@ -3,7 +3,7 @@ import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
 import ActiveAlert from "./UnitComponents/ActiveAlerts";
-import { User, TicketsType, Owner, Unit, ActiveAlerts } from "../mockData";
+import { User, TicketsType, Owner, Unit } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -22,11 +22,17 @@ const UnitComponent = ({
     }
   );
 
-  const [activeAlerts] = useState<ActiveAlerts>(
-    unit.activeAlerts || {
-      active: 0,
-      closed: 0,
-    }
+  // Count active and closed alerts based on resolved status
+  const activeAlerts = unit.alerts.reduce(
+    (a, alert) => {
+      if (alert.resolved) {
+        a.closed += 1;
+      } else {
+        a.active += 1;
+      }
+      return a;
+    },
+    { active: 0, closed: 0 }
   );
 
   const [owner] = useState<Owner>(
