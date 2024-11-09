@@ -7,35 +7,47 @@ import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import Pagination from "@mui/material/Pagination";
 import { useState } from "react";
+import { useProjectContext } from "@/context/ProjectProvider";
 
 const itemsPerPage = 8;
 const projects: Project[] = generateMockProjects();
 
-// Mock current user
+/*  Mock current organization user data, this is different from the data 
+    displayed on the page (all organization users) which you can find in the mockData.tsx
+    This data is only used for the logic of displaying different UI
+    based on the current user role (master,admn, or basic) and addresses -
+     only organization users that share the same addresses as currentUser
+    are displayed in the page as they should belong to the same organizations 
+    ie: currentUser is an organization user currently logged into the system 
+*/
 const currentUser: {
   individualId: string;
   role: "master" | "admin" | "basic";
   address: string[];
 } = {
-  individualId: "10",
+  individualId: "ind-7",
   role: "master",
-  address: [
-    "1000 De La Gauchetiere",
-    "750 Rue Peel",
-    "131 Chemin des Conifere",
-  ],
+  address: ["1000 De La Gauchetiere", "750 Peel Street"],
 };
 
 const consolidateUsers = (
   projects: Project[],
-  currentUserAddresses: string[]
+  currentUserAddresses: string[],
+  selectedProjectAddress: string
 ) => {
   const userMap: {
     [tokenId: string]: { user: Individual; addresses: string[] };
   } = {};
 
   projects.forEach((project) => {
-    if (currentUserAddresses.includes(project.address)) {
+    const shouldIncludeProject =
+      selectedProjectAddress === "ALL PROJECTS" ||
+      project.address === selectedProjectAddress;
+
+    if (
+      shouldIncludeProject &&
+      currentUserAddresses.includes(project.address)
+    ) {
       project.projectUsers.forEach((user) => {
         if (userMap[user.individualId]) {
           userMap[user.individualId].addresses.push(project.address);
@@ -56,6 +68,8 @@ const ManageUsersPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const { selectedProjectAddress } = useProjectContext();
+  console.log(selectedProjectAddress);
 
   // Add roles to filter options
   const filterOptionsManageUsers = [
@@ -70,7 +84,11 @@ const ManageUsersPage = () => {
     setFilter(filterValue);
   };
 
-  const consolidatedUsers = consolidateUsers(projects, currentUser.address);
+  const consolidatedUsers = consolidateUsers(
+    projects,
+    currentUser.address,
+    selectedProjectAddress
+  );
 
   const filteredUsers = consolidatedUsers
     .filter(({ user, addresses }) => {
