@@ -49,13 +49,14 @@ For any question DM Abdullah.
 There are two possible ways to run the Web: With Docker(Recommended) & Without Docker.
 
 #### With Docker (Recommended):
-1) clone the repository on your local machine using 
-```bash
-git cl
+1. clone the repository on your local machine using a terminal at the desired directory:
+   ```bash
+      git clone https://github.com/leobrod44/Smartess.git 
+   ```
 
-2) In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
+2. In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
 
-3) Type the following command and press enter:
+3. Type the following command and press enter:
 
    ```bash
       docker-compose up --build smartessweb
@@ -67,7 +68,7 @@ git cl
       -We are only running the smartess web from this command. We will be needing to run the whole docker compose file later in the project. The instructions will be updated accordingly. 
 
 
-4) Open your broswer and type :
+4. Open your broswer and type :
 
    ```bash
      http://localhost:3001/
@@ -81,7 +82,7 @@ git cl
 
 #### Without Docker:
 
-1) clone the repository on your local machine using 
+1) clone the repository on your local machine using a terminal at the desired directory:
 ```bash
 git clone https://github.com/leobrod44/Smartess.git 
 ```
