@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// need to pass true in cmd/hub/main.go Init to use the mock hub before running the test
 func TestSmartessHubWithDocker(t *testing.T) {
 	// Start the services using Docker
 	mockhuberr := RunCommand("docker-compose", []string{"up", "-d"}, "../cmd/mockhub")
