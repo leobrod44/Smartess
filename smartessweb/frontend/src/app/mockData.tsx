@@ -110,7 +110,7 @@ export const generateMockProjects = (): Project[] => {
     {
       projectId: "a12294",
 
-      address: "750 Rue Peel",
+      address: "750 Peel Street",
 
       adminUsers: 2,
 
