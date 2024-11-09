@@ -8,7 +8,7 @@
     "server": "nodemon backend/server.js",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "lint": "npm run lint --prefix frontend",
-    "test": "jest --roots backend/tests"
+    "test": "jest --roots backend/tests --coverage"
   },
   "keywords": [],
   "author": "",
