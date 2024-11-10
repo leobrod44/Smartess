@@ -1,4 +1,4 @@
-# Hub Developer getting started guide
+# Hub Developer Getting Started Guide
 
 1. If you do not already have the smartess_network set up on docker, in the main directory "Smartess" run:
 
@@ -24,7 +24,7 @@
 
 5. Go to the directory:
 
-``` Smartess\go\hub```
+    ``` Smartess\go\hub```
 
 6. Run:
 
