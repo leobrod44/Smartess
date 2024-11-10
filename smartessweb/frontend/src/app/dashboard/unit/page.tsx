@@ -12,14 +12,14 @@ const UnitPage = () => {
   const { selectedProjectId, selectedProjectAddress } = useProjectContext();
   const [isMounted, setIsMounted] = useState(false);
 
-  const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
+  const [projects] = useState<Project[]>(generateMockProjects());
   const [searchQuery, setSearchQuery] = useState("");
 
   const filterOptionsForUnits = ["Address A-Z"];
   const [filter, setFilter] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const projectsPerPage = 1; // paginates 1 project and units per page
 
   useEffect(() => {
     setIsMounted(true);
@@ -54,6 +54,7 @@ const UnitPage = () => {
 
       return { ...project, filteredUnits };
     })
+    .filter((project) => project.filteredUnits.length > 0) // Only keep projects with matching units
     .sort((a, b) => {
       if (filter === "Address A-Z") {
         return a.address.localeCompare(b.address);
@@ -72,10 +73,10 @@ const UnitPage = () => {
   };
 
   //pagination logic
-  const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
-  const currentItems = filteredProjects.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+  const totalPages = Math.ceil(filteredProjects.length / projectsPerPage);
+  const currentProjects = filteredProjects.slice(
+    (currentPage - 1) * projectsPerPage,
+    currentPage * projectsPerPage
   );
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -114,7 +115,7 @@ const UnitPage = () => {
         </div>
 
         <div className="bg-[#4b7d8d] p-[10px] rounded-[7px] w-full mx-auto">
-          {/* / Map through (paginated projects) and render each project's component. */}
+          {/* / Maps through (paginated projects) and render each project's component. */}
           {filteredProjects.every(
             (project) => project.filteredUnits.length === 0
           ) ? (
@@ -122,7 +123,7 @@ const UnitPage = () => {
               No matching projects or units found.
             </h3>
           ) : (
-            currentItems.map((project) => (
+            currentProjects.map((project) => (
               <div key={project.projectId}>
                 {project.filteredUnits.map((unit) => (
                   <UnitComponent
