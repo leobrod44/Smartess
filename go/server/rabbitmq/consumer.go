@@ -1,12 +1,13 @@
 package rabbitmq
 
 import (
+	"Smartess/go/common/structures"
+	"Smartess/go/hub"
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"Smartess/go/common/structures"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -132,5 +133,43 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	})
 	if err != nil {
 		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+	}
+}
+
+type TopicMessageHandler struct {
+}
+
+func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+	var eventMsg hub.TopicMessage
+	err := json.Unmarshal(msg.Body, &eventMsg)
+	if err != nil {
+		logger.Error("Failed to unmarshal topic eventMsg",
+			zap.Error(err),
+			zap.String("msg", string(msg.Body)),
+		)
+	}
+	handled_timestamp := fmt.Sprintf("(handled)%s", time.Now().Format(time.RFC3339))
+
+	logger.Info("topic_message_event",
+		zap.String("content", eventMsg.Content),
+		zap.String("routing_key", eventMsg.RoutingKey),
+		zap.String("handled_timestamp", handled_timestamp),
+	)
+
+	if strings.Contains(eventMsg.RoutingKey, "storemongo") {
+		//bsonData, err := bson.Marshal(eventMsg)
+		//if err != nil {
+		//	log.Fatalf("Error marshalling BSON: %v", err)
+		//}
+		ConnectToMongo()
+		collection := mongoClient.Database("TestDB1").Collection("test")
+		_, err = collection.InsertOne(context.TODO(), bson.D{
+			{"_id", primitive.NewObjectID()},
+			{"content", eventMsg.Content},
+			{"timestamp", handled_timestamp},
+		})
+		if err != nil {
+			logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+		}
 	}
 }
