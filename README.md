@@ -31,7 +31,7 @@ What would a new developer need to do to get the system up and running?
 
 Currently the hub and web system are being developped separately as for scalability benefits. Later in the project, some commands will be set up to launch both systems at the same time.
 
-For Hub: Refer to []()
+For Hub: Refer to [Hub developper's guide](https://github.com/leobrod44/Smartess/blob/main/go#readme)
 
 For Web: Refer to [Web developper's guide](https://github.com/leobrod44/Smartess/tree/main/smartessweb#readme)
 
