@@ -1,3 +1,37 @@
+# Hub Developer Getting Started Guide
+
+1. If you do not already have the smartess_network set up on docker, in the main directory "Smartess" run:
+
+    ```bash
+      docker network create smartess_network
+    ```
+   
+2. In the "Smartess" directory, run:
+
+    ```bash
+      docker-compose up
+    ```
+
+3. Go to the directory:
+
+    ``` Smartess\go\mock_mongo_server```
+
+4. Run:
+
+    ```bash
+      docker-compose up
+    ```
+
+5. Go to the directory:
+
+    ``` Smartess\go\hub```
+
+6. Run:
+
+    ```bash
+      docker-compose up
+    ```
+
 # Go Backend (Hub and Server): Codebase design and structure description
 
 _The go/ folder is the backend of the Smartess project. It is the core of the system, handling the IoT events on hardware and networks, and microservices needed into processing and using them_
