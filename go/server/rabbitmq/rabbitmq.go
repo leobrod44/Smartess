@@ -68,30 +68,36 @@ func Init() (RabbitMQServer, error) {
 		//default:
 		//	return RabbitMQServer{}, fmt.Errorf("no valid routing key found for queue: %s", queueConfig.Queue)
 		//}
-		routingKey := ""
+		var routingKeysBinded []string
 		//todo: Now only one exchange is supported, but eventually go through all exchanges
 		for _, binding := range instance.Config.Exchanges[0].QueueBindings {
 			if binding.Queue == queue.Name {
-				routingKey = binding.RoutingKey
 				err = instance.Channel.QueueBind(
 					queue.Name,                             // queue name
-					routingKey,                             // routing key
+					binding.RoutingKey,                     // routing key
 					common_rabbitmq.Test0TopicExchangeName, // exchange name
 					false,
 					nil,
 				)
 				if err != nil {
 					return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
-						common_rabbitmq.Test0TopicExchangeName, routingKey, err)
+						common_rabbitmq.Test0TopicExchangeName, binding.RoutingKey, err)
 				}
+				routingKeysBinded = append(routingKeysBinded, binding.RoutingKey)
+
 			}
 		}
-		handler, err := setHandler(queue, routingKey)
-		if err != nil {
-			return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
+		if len(routingKeysBinded) == 0 {
+			routingKeysBinded = append(routingKeysBinded, "")
 		}
-		consumer := QueueConsumer{rabbitmqQueue: queue, messageHandler: handler}
-		consumers = append(consumers, consumer)
+		for _, routingKey := range routingKeysBinded {
+			handler, err := setHandler(queue, routingKey)
+			if err != nil {
+				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
+			}
+			consumer := QueueConsumer{rabbitmqQueue: queue, messageHandler: handler}
+			consumers = append(consumers, consumer)
+		}
 	}
 
 	// Return RabbitMQServer with consumers
@@ -105,21 +111,22 @@ func Init() (RabbitMQServer, error) {
 // Start starts the RabbitMQ server and begins processing messages from the queues.
 func (r *RabbitMQServer) Start() {
 	for _, smartessQueue := range r.consumers {
-		go func(queue QueueConsumer) {
+		go func(queueConsumer QueueConsumer) {
 			msgs, err := r.instance.Channel.Consume(
-				queue.rabbitmqQueue.Name, // Queue name
-				"",                       // Consumer
-				true,                     // Auto-acknowledge
-				false,                    // Exclusive
-				false,                    // No-local
-				false,                    // No-wait
-				nil,                      // Arguments
+				queueConsumer.rabbitmqQueue.Name, // Queue name
+				"",                               // Consumer
+				true,                             // Auto-acknowledge
+				false,                            // Exclusive
+				false,                            // No-local
+				false,                            // No-wait
+				nil,                              // Arguments
 			)
 			if err != nil {
-				r.Logger.Error("Failed to consume messages", zap.Error(err))
+				r.Logger.Error(fmt.Sprintf("Failed to consume messages \n\t(Current Consumer: %v)\n\t", queueConsumer),
+					zap.Error(err))
 			}
 			for msg := range msgs {
-				queue.messageHandler.Handle(msg, r.Logger)
+				queueConsumer.messageHandler.Handle(msg, r.Logger)
 
 			}
 		}(smartessQueue)
@@ -132,6 +139,10 @@ func (r *RabbitMQServer) Start() {
 
 // TODO Consider exchanges here...
 func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, error) {
+
+	if optionalRoutingKey != "" {
+		return &TopicMessageHandler{}, nil
+	}
 	switch queue.Name {
 	case "mongo-messages":
 		return &MongoMessageHandler{}, nil
