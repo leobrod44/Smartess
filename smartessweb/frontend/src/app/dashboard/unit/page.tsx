@@ -87,15 +87,6 @@ const UnitPage = () => {
 
   return (
     <div>
-      <h1>Unit Page</h1>
-      {selectedProjectId ? (
-        <>
-          <p>Selected Project ID: {selectedProjectId}</p>
-          <p>Project Address: {selectedProjectAddress}</p>
-        </>
-      ) : (
-        <p>No project selected.</p>
-      )}
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
         <div className="flex flex row justify-between">
           <div className="flex row">
