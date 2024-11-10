@@ -15,7 +15,7 @@ const UnitPage = () => {
   const [projects] = useState<Project[]>(generateMockProjects()); // Initialize with mock projects
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filterOptionsForUnits = ["Address A-Z", "Most Pending Tickets"];
+  const filterOptionsForUnits = ["Address A-Z"];
   const [filter, setFilter] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -57,8 +57,6 @@ const UnitPage = () => {
     .sort((a, b) => {
       if (filter === "Address A-Z") {
         return a.address.localeCompare(b.address);
-      } else if (filter === "Most Pending Tickets") {
-        return b.pendingTickets - a.pendingTickets;
       }
       return 0;
     });
