@@ -1,0 +1,42 @@
+[
+  {
+    "routing_key": "hub32.alerts.low",
+    "content": "{\"message\": \"Low level alert from hub 32\"}"
+  },
+  {
+    "routing_key": "system.alerts.normal.threshold",
+    "content": "{\"message\": \"System alert at normal threshold\"}"
+  },
+  {
+    "routing_key": "user123.notifications.update.success",
+    "content": "{\"message\": \"User 123 update successful\"}"
+  },
+  {
+    "routing_key": "user123.notifications.update.failure",
+    "content": "{\"message\": \"User 123 update failed\"}"
+  },
+  {
+    "routing_key": "admin123.notifications.critical.lowmemory",
+    "content": "{\"message\": \"Critical low memory alert for admin 123\"}"
+  },
+  {
+    "routing_key": "system.alerts.critical.diskspace",
+    "content": "{\"message\": \"Critical disk space alert for system\"}"
+  },
+  {
+    "routing_key": "hub99.alerts.high",
+    "content": "{\"message\": \"High level alert from hub 99\"}"
+  },
+  {
+    "routing_key": "user456.notifications.critical.diskfailure",
+    "content": "{\"message\": \"Critical disk failure notification for user 456\"}"
+  },
+  {
+    "routing_key": "client789.storemongo.create",
+    "content": "{\"message\": \"Create operation stored in MongoDB for client 789\"}"
+  },
+  {
+    "routing_key": "client789.storemongo.update",
+    "content": "{\"message\": \"Update operation stored in MongoDB for client 789\"}"
+  }
+]
