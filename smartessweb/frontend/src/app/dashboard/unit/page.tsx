@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 
 const UnitPage = () => {
-  const { selectedProjectId, selectedProjectAddress } = useProjectContext();
   const [isMounted, setIsMounted] = useState(false);
 
   const [projects] = useState<Project[]>(generateMockProjects());
