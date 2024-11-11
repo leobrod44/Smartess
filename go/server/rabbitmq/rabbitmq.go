@@ -137,11 +137,11 @@ func (r *RabbitMQServer) Start() {
 	select {}
 }
 
-// TODO Consider exchanges here...
+// TODO Consider migrating fully to exchanges here...
 func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, error) {
 
 	if optionalRoutingKey != "" {
-		return &TopicMessageHandler{}, nil
+		return &TopicMessageHandler{RoutingKey: optionalRoutingKey}, nil
 	}
 	switch queue.Name {
 	case "mongo-messages":

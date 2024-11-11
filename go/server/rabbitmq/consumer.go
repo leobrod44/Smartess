@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"Smartess/go/common/structures"
-	"Smartess/go/hub"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -137,10 +136,15 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 }
 
 type TopicMessageHandler struct {
+	RoutingKey string `json:"routing_key"`
+}
+type TopicMessageContent struct {
+	Message string `json:"message"`
 }
 
 func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
-	var eventMsg hub.TopicMessage
+	var eventMsg TopicMessageContent //hub.TopicMessage
+	//fmt.Printf("[topic] BYTEARR STATE: %v \n\r", msg.Body)
 	err := json.Unmarshal(msg.Body, &eventMsg)
 	if err != nil {
 		logger.Error("Failed to unmarshal topic eventMsg",
@@ -148,15 +152,16 @@ func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 			zap.String("msg", string(msg.Body)),
 		)
 	}
-	handled_timestamp := fmt.Sprintf("(handled)%s", time.Now().Format(time.RFC3339))
+	//fmt.Printf("[topic] UNMARSHALLED OBJ STATE: %v \n\r", eventMsg)
+	handled_timestamp := fmt.Sprintf("%s", time.Now().Format(time.RFC3339Nano))
 
 	logger.Info("topic_message_event",
-		zap.String("content", eventMsg.Content),
-		zap.String("routing_key", eventMsg.RoutingKey),
+		zap.String("content", eventMsg.Message),
+		zap.String("routing_key", h.RoutingKey),
 		zap.String("handled_timestamp", handled_timestamp),
 	)
 
-	if strings.Contains(eventMsg.RoutingKey, "storemongo") {
+	if strings.Contains(h.RoutingKey, "storemongo") {
 		//bsonData, err := bson.Marshal(eventMsg)
 		//if err != nil {
 		//	log.Fatalf("Error marshalling BSON: %v", err)
@@ -165,7 +170,7 @@ func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		collection := mongoClient.Database("TestDB1").Collection("test")
 		_, err = collection.InsertOne(context.TODO(), bson.D{
 			{"_id", primitive.NewObjectID()},
-			{"content", eventMsg.Content},
+			{"content", eventMsg.Message},
 			{"timestamp", handled_timestamp},
 		})
 		if err != nil {
