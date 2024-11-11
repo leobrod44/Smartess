@@ -5,7 +5,8 @@ import (
 )
 
 func main() {
-	hub, err := hub.Init()
+	// pass in true to use the mock hub, false to use physical hub
+	hub, err := hub.Init(true)
 	if err != nil {
 		panic(err)
 	}

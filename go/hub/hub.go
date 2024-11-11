@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"Smartess/go/hub/logger"
+	logs "Smartess/go/hub/logger"
 
 	"github.com/gorilla/websocket"
 	"github.com/streadway/amqp"
@@ -25,7 +25,7 @@ type SmartessHub struct {
 	Logger      *logs.Logger
 }
 
-func Init() (SmartessHub, error) {
+func Init(useMock bool) (SmartessHub, error) {
 
 	logger, err := logs.NewRabbitMQLogger()
 	if err != nil {
@@ -37,9 +37,14 @@ func Init() (SmartessHub, error) {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
 
-	webhookConn, err := connectWebhook(logger)
+	var webhookConn *websocket.Conn
+	if useMock {
+		webhookConn, err = connectMockHubWebhook(logger)
+	} else {
+		webhookConn, err = connectWebhook(logger)
+	}
 	if err != nil {
-		return SmartessHub{}, errors.New("Failed to connect to Home Assistant: " + err.Error())
+		return SmartessHub{}, errors.New("Failed to connect to WebSocket: " + err.Error())
 	}
 
 	return SmartessHub{

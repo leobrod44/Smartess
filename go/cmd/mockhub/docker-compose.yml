@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+  mockhub:
+    container_name: mockhub
+    build:
+      context: ../../../go
+      dockerfile: cmd/mockhub/Dockerfile  # Specify the Dockerfile path relative to the build context
+    environment:
+      - HUB_IP=mockhub:8765 # temporary hub_ip value for easier logging (logging set up for real hub)
+    ports:
+      - "8765:8765"
+    networks:
+      - smartess_network
+networks:
+  smartess_network:
+    external: true
