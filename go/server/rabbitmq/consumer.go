@@ -1,18 +1,20 @@
 package rabbitmq
 
 import (
-    "Smartess/go/common/structures"
-    "context"
-    "encoding/json"
-    "fmt"
-    "log"
-    "time"
-    "github.com/streadway/amqp"
-    "go.mongodb.org/mongo-driver/bson"
-    "go.mongodb.org/mongo-driver/bson/primitive"
-    "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
-    "go.uber.org/zap"
+	"Smartess/go/common/structures"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/streadway/amqp"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.uber.org/zap"
+	"log"
+	"os"
+	"strings"
+	"time"
 )
 
 type QueueConsumer struct {
