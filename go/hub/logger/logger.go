@@ -123,7 +123,10 @@ func (r *Logger) Error(message string) error {
 	r.InternalLogger.Error(message)
 	return r.logToRabbitMQ(r.errorQueue.Name, message)
 }
-
+func (r *Logger) Fatal(message string) error {
+	r.InternalLogger.Fatal(message)
+	return r.logToRabbitMQ(r.errorQueue.Name, message)
+}
 func (r *Logger) Close() {
 	r.channel.Close()
 	r.connection.Close()

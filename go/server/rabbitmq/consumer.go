@@ -1,20 +1,20 @@
 package rabbitmq
 
 import (
+	"Smartess/go/common/structures"
 	"context"
 	"encoding/json"
 	"fmt"
-
-	"Smartess/go/common/structures"
-	"log"
-	"time"
-
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
+	"log"
+	"os"
+	"strings"
+	"time"
 )
 
 type QueueConsumer struct {
@@ -85,12 +85,27 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		zap.String("message", alert.Message),
 		zap.String("time_fired", alert.TimeStamp.String()),
 	)
+
+	ConnectToMongo()
+	collection := mongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
+	_, err = collection.InsertOne(context.TODO(), bson.D{
+		{"_id", primitive.NewObjectID()},
+		{"hub_id", alert.HubIP},
+		{"device_id", alert.DeviceID},
+		{"state", alert.State},
+		{"message", alert.Message},
+		{"time_fired", alert.TimeStamp.String()},
+	})
+	if err != nil {
+		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+	}
+
 }
 
 var mongoClient *mongo.Client
 
 func ConnectToMongo() {
-	clientOptions := options.Client().ApplyURI("mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
 
 	var err error
 	mongoClient, err = mongo.Connect(context.TODO(), clientOptions)
@@ -108,16 +123,10 @@ func ConnectToMongo() {
 
 type MongoMessageHandler struct{}
 
-type MongoMessage struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty"` // MongoDB will generate this ID
-	Data      string             `bson:"content"`
-	Timestamp time.Time          `bson:"timestamp"`
-}
-
 func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	ConnectToMongo()
 	// Process the message here
-	var message MongoMessage
+	var message structures.TestMongoMessage
 	err := json.Unmarshal(msg.Body, &message)
 	if err != nil {
 		logger.Error("Failed to unmarshal message", zap.Error(err))
@@ -132,5 +141,49 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	})
 	if err != nil {
 		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+	}
+}
+
+type TopicMessageHandler struct {
+	RoutingKey string `json:"routing_key"`
+}
+type TopicMessageContent struct {
+	Message string `json:"message"`
+}
+
+func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+	var eventMsg TopicMessageContent //hub.TopicMessage
+	//fmt.Printf("[topic] BYTEARR STATE: %v \n\r", msg.Body)
+	err := json.Unmarshal(msg.Body, &eventMsg)
+	if err != nil {
+		logger.Error("Failed to unmarshal topic eventMsg",
+			zap.Error(err),
+			zap.String("msg", string(msg.Body)),
+		)
+	}
+	//fmt.Printf("[topic] UNMARSHALLED OBJ STATE: %v \n\r", eventMsg)
+	handled_timestamp := fmt.Sprintf("%s", time.Now().Format(time.RFC3339Nano))
+
+	logger.Info("topic_message_event",
+		zap.String("content", eventMsg.Message),
+		zap.String("routing_key", h.RoutingKey),
+		zap.String("handled_timestamp", handled_timestamp),
+	)
+
+	if strings.Contains(h.RoutingKey, "storemongo") {
+		//bsonData, err := bson.Marshal(eventMsg)
+		//if err != nil {
+		//	log.Fatalf("Error marshalling BSON: %v", err)
+		//}
+		ConnectToMongo()
+		collection := mongoClient.Database("TestDB1").Collection("test")
+		_, err = collection.InsertOne(context.TODO(), bson.D{
+			{"_id", primitive.NewObjectID()},
+			{"content", eventMsg.Message},
+			{"timestamp", handled_timestamp},
+		})
+		if err != nil {
+			logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+		}
 	}
 }
