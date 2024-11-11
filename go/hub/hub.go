@@ -190,7 +190,7 @@ func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) {
+func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) { // This is here to simulate a connection to rpi
 
 	u := url.URL{Scheme: "ws", Host: "mock-mongo-server:9090", Path: "/ws"}
 	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
@@ -213,7 +213,7 @@ func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (client *SmartessHub) PublishMongo(message []byte) error {
+func (client *SmartessHub) PublishMongo(message []byte) error { // This is here to simulate a connection to rpi
 	return client.instance.Channel.Publish(
 		"", // exchange
 		"mongo-messages",
