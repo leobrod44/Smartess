@@ -1,14 +1,18 @@
 package main
 
 import (
+	"Smartess/go/common/structures"
 	"Smartess/go/hub"
 )
 
 func main() {
-	hub, err := hub.Init()
+	// Select between Local Host Hub, Physical HA RPI Hub and Mongo Atlas Hub
+	SELECTED_HUB := structures.LOCAL_MOCK_HUB
+
+	hub, err := hub.Init(SELECTED_HUB)
 	if err != nil {
 		panic(err)
 	}
-	hub.Start()
+	hub.Start(SELECTED_HUB)
 	defer hub.Close()
 }
