@@ -28,7 +28,7 @@ describe('Auth Controller', () => {
 
       const response = await request(app)
         .post('/auth/login')
-        .send({ email: 'test@example.com', password: 'password' });
+        .send({ email: 'random@email.com', password: 'password' });
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
@@ -48,6 +48,17 @@ describe('Auth Controller', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ error: 'Invalid login credentials' });
+    });
+
+    it('should return 500 if server error occurs during login', async () => {
+      supabase.auth.signInWithPassword.mockRejectedValue(new Error('Server error'));
+
+      const response = await request(app)
+        .post('/auth/login')
+        .send({ email: 'random@email.com', password: 'password' });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ error: 'Server error' });
     });
   });
 
@@ -69,6 +80,15 @@ describe('Auth Controller', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ error: 'Logout error' });
+    });
+
+    it('should return 500 if server error occurs during logout', async () => {
+      supabase.auth.signOut.mockRejectedValue(new Error('Server error'));
+
+      const response = await request(app).post('/auth/logout');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ error: 'Server error' });
     });
   });
 });

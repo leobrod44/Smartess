@@ -69,7 +69,7 @@ func Init() (RabbitMQServer, error) {
 		//	return RabbitMQServer{}, fmt.Errorf("no valid routing key found for queue: %s", queueConfig.Queue)
 		//}
 		var routingKeysBinded []string
-		//todo: Now only one exchange is supported, but eventually go through all exchanges
+		//todo: Now only one exchange is setup, but eventually go through all exchanges
 		for _, binding := range instance.Config.Exchanges[0].QueueBindings {
 			if binding.Queue == queue.Name {
 				err = instance.Channel.QueueBind(

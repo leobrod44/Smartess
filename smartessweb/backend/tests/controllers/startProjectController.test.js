@@ -15,99 +15,187 @@ jest.mock('../../services/startProjectService', () => ({
 describe('Start Project Controller', () => {
   describe('POST /project/send-email', () => {
     it('should return 400 if any required field is missing', async () => {
-      const response = await request(app)
-        .post('/project/send-email')
-        .send({ email: 'test@example.com' });
+      const testCases = [
+        { field: 'businessName', data: { firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'firstName', data: { businessName: 'Business', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'lastName', data: { businessName: 'Business', firstName: 'John', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'telephoneNumber', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', email: 'random@email.com', description: 'Test' } },
+        { field: 'email', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', description: 'Test' } },
+        { field: 'description', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com' } }
+      ];
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: 'All fields are required' });
+      for (const testCase of testCases) {
+        const response = await request(app)
+          .post('/project/send-email')
+          .send(testCase.data);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'All fields are required' });
+      }
     });
 
-    it('should return 200 and a success message if email is sent successfully', async () => {
+    it('should send email with correct content and format', async () => {
       sendEmail.mockResolvedValue({ success: true, data: 'Email data' });
 
-      const response = await request(app).post('/project/send-email').send({
-        businessName: 'Business',
+      const testData = {
+        businessName: 'Test Business',
         firstName: 'John',
         lastName: 'Doe',
         telephoneNumber: '1234567890',
         email: 'john@example.com',
-        description: 'Test description',
-      });
+        description: 'Test description'
+      };
+
+      const response = await request(app)
+        .post('/project/send-email')
+        .send(testData);
+
+      expect(sendEmail).toHaveBeenCalledWith(
+        expect.stringContaining('Smartess <support@'),
+        expect.any(String),
+        'Inquiry from John Doe',
+        expect.stringContaining('<h2>New Inquiry from Test Business</h2>')
+      );
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         message: 'Email sent successfully',
-        data: 'Email data',
+        data: 'Email data'
       });
     });
 
-    it('should return 500 if email fails to send', async () => {
-      sendEmail.mockResolvedValue({ success: false, error: 'Email error' });
+    it('should handle email sending failure', async () => {
+      sendEmail.mockResolvedValue({ success: false, error: 'Failed to send' });
 
-      const response = await request(app).post('/project/send-email').send({
-        businessName: 'Business',
-        firstName: 'John',
-        lastName: 'Doe',
-        telephoneNumber: '1234567890',
-        email: 'john@example.com',
-        description: 'Test description',
-      });
+      const response = await request(app)
+        .post('/project/send-email')
+        .send({
+          businessName: 'Test Business',
+          firstName: 'John',
+          lastName: 'Doe',
+          telephoneNumber: '1234567890',
+          email: 'john@example.com',
+          description: 'Test description'
+        });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         message: 'Failed to send email',
-        error: 'Email error',
+        error: 'Failed to send'
+      });
+    });
+
+    it('should handle server errors', async () => {
+      sendEmail.mockRejectedValue(new Error('Server error'));
+
+      const response = await request(app)
+        .post('/project/send-email')
+        .send({
+          businessName: 'Test Business',
+          firstName: 'John',
+          lastName: 'Doe',
+          telephoneNumber: '1234567890',
+          email: 'john@example.com',
+          description: 'Test description'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        message: 'Server error',
+        error: 'Server error'
       });
     });
   });
 
   describe('POST /project/store-start-project-data', () => {
     it('should return 400 if any required field is missing', async () => {
-      const response = await request(app)
-        .post('/project/store-start-project-data')
-        .send({ email: 'test@example.com' });
+      const testCases = [
+        { field: 'businessName', data: { firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'firstName', data: { businessName: 'Business', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'lastName', data: { businessName: 'Business', firstName: 'John', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
+        { field: 'telephoneNumber', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', email: 'random@email.com', description: 'Test' } },
+        { field: 'email', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', description: 'Test' } },
+        { field: 'description', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com' } }
+      ];
 
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ message: 'All fields are required' });
+      for (const testCase of testCases) {
+        const response = await request(app)
+          .post('/project/store-start-project-data')
+          .send(testCase.data);
+
+        expect(response.status).toBe(400);
+        expect(response.body).toEqual({ message: 'All fields are required' });
+      }
     });
 
-    it('should return 200 and a success message if data is stored successfully', async () => {
+    it('should store data successfully', async () => {
       storeData.mockResolvedValue({ success: true });
+
+      const testData = {
+        businessName: 'Test Business',
+        firstName: 'John',
+        lastName: 'Doe',
+        telephoneNumber: '1234567890',
+        email: 'john@example.com',
+        description: 'Test description'
+      };
 
       const response = await request(app)
         .post('/project/store-start-project-data')
-        .send({
-          businessName: 'Business',
-          firstName: 'John',
-          lastName: 'Doe',
-          telephoneNumber: '1234567890',
-          email: 'john@example.com',
-          description: 'Test description',
-        });
+        .send(testData);
+
+      expect(storeData).toHaveBeenCalledWith(
+        testData.businessName,
+        testData.firstName,
+        testData.lastName,
+        testData.telephoneNumber,
+        testData.email,
+        testData.description
+      );
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ message: 'Data stored successfully' });
     });
 
-    it('should return 500 if data fails to store', async () => {
-      storeData.mockResolvedValue({ success: false, error: 'Storage error' });
+    it('should handle data storage failure', async () => {
+      storeData.mockResolvedValue({ success: false, error: 'Storage failed' });
 
       const response = await request(app)
         .post('/project/store-start-project-data')
         .send({
-          businessName: 'Business',
+          businessName: 'Test Business',
           firstName: 'John',
           lastName: 'Doe',
           telephoneNumber: '1234567890',
           email: 'john@example.com',
-          description: 'Test description',
+          description: 'Test description'
         });
 
       expect(response.status).toBe(500);
       expect(response.body).toEqual({
         message: 'Failed to store data',
-        error: 'Storage error',
+        error: 'Storage failed'
+      });
+    });
+
+    it('should handle server errors during storage', async () => {
+      storeData.mockRejectedValue(new Error('Server error'));
+
+      const response = await request(app)
+        .post('/project/store-start-project-data')
+        .send({
+          businessName: 'Test Business',
+          firstName: 'John',
+          lastName: 'Doe',
+          telephoneNumber: '1234567890',
+          email: 'john@example.com',
+          description: 'Test description'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        message: 'Server error',
+        error: 'Server error'
       });
     });
   });

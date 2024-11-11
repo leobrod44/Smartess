@@ -10,7 +10,6 @@ app.use(express.json());
 logger.info('Server is initializing...');
 
 //Add routes here
-const testRoutes = require('./routes/testRoutes');
 const authRoutes = require('./routes/authRoutes');
 const startProjectRoutes = require('./routes/startProjectRoutes');
 const userRoutes = require('./routes/userRoutes');
@@ -21,8 +20,6 @@ const widgetRoutes = require('./routes/widgetRoutes');
 //Add path here
 app.use('/api/auth', authRoutes);
 app.use('/api', startProjectRoutes);
-app.use('/test1', testRoutes);
-app.use('/test2', testRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/hubs', hubRoutes);

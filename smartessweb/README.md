@@ -1,80 +1,73 @@
 ### NOTE
-
-- This README file will be updated once again when the backend API will be contained.
-- There are 3 section. The first section will explain how to setup your environment. The second section will tell you about how to run the API. The third will explain how to organize and write code.
+- There are 2 section. The first section will explain how to setup your environment when using for the first time. The second section will tell you about how to run web for development.
 
 ### One-time Instructions:
 
-There is a security aspect which requires setting a .env file. This needs to be done only once initially. For running instructions just head over to the next section below.
+There is a security aspect which requires setting a .env file. This needs to be done only once initially. You will also need to setup a docker network for the first time. For running instructions just head over to the next section below.
 
 1. Locate the smartessweb folder:
 
-   ![image](https://github.com/user-attachments/assets/f36ec39d-bfee-478f-ba7d-17a96dc8f5fb)
+   ![image](https://github.com/user-attachments/assets/18494e02-1b17-4a34-beb2-f8c83e58d367)
+
 
 2. Install create a .env file like the following:
 
-   ![image](https://github.com/user-attachments/assets/695a3320-51a1-4c83-8834-fc79ae283e75)
+   ![image](https://github.com/user-attachments/assets/359a96da-33f7-4f03-aac0-44b693c58855)
+
 
 3. Paste the following code:
 
 ```bash
-  PORT=3000
-  SUPABASE_URL="URL"
-  SUPABASE_ANON_KEY="KEY"
+   SUPABASE_URL="URL"
+   SUPABASE_ANON_KEY="KEY"
+   RESEND_API_KEY="KEY"
+   RESEND_DOMAIN ="DOMAIN"
+   RESEND_EMAIL_TO ="YOUR EMAIL"
+   PORT = 3000
 ```
 
-4. DM Abdullah. He will provide you with the URL and key.
+4. DM Abdullah. He will provide you with the URL and key. For TAs and Prof, refer to the presentation slides. A link is shared to download this.
 
-5. Replace the URL and KEY accordingly.
+5. Replace the values accordingly.
+
+6. In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
+
+   ```bash
+     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess>
+   ```
+
+7. Make docker network called smartess_web:
+
+   ```bash
+      docker network create smartess_network
+   ```
 
 For any question DM Abdullah.
 
 ### Running Instructions:
 
-These instructions will be updated once contained.
 
-1. In your code editor terminal go to the correct folder/directory (it is "smartessweb"). For reference, here is how mine looks:
-
-   ```bash
-     PS C:\Users\Abdullah\Desktop\Fall2024\SOEN490\Capstone\Smartess\smartessweb>
-   ```
+1. In your code editor terminal go to the correct folder/directory. For reference, here is how mine looks:
 
 2. Type the following command and press enter:
 
    ```bash
-     npm install
+      docker-compose up --build smartessweb
    ```
 
-3. Now to start the server type the following and press enter:
+   NOTES: 
+      -Give some time to initially build it. Usually it should take 50s but wait 5 min (may depend on computer's hardware).
+
+      -We are only running the smartess web from this command. We will be needing to run the whole docker compose file later in the project. The instructions will be updated accordingly. 
+
+
+3. Open your broswer and type :
 
    ```bash
-    npm start
+     http://localhost:3001/
    ```
 
-4. Test 1: Open your broswer and type :
+   You should see the app will be lauched on this page:
 
-   ```bash
-     http://localhost:3001/test1
-   ```
+   ![image](https://github.com/user-attachments/assets/ecb51ebd-34fe-412b-a0c4-436c7bf8bba5)
 
-   You should see something like the following result:
-
-   ![image](https://github.com/user-attachments/assets/6b0bb83e-ada9-40bd-a232-2a4a5b1a2e0f)
-
-5. Test 2: Open your broswer and type :
-
-   ```bash
-     http://localhost:3001/test2/test2
-   ```
-
-   You should see something like the following result:
-
-   ![image](https://github.com/user-attachments/assets/8b605570-3166-4a72-bf0e-9a58da256ce2)
-
-For any question DM Abdullah.
-
-### Guide on how to create code:
-
-Coming soon.
-
-For any question DM Abdullah.
