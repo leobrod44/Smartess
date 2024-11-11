@@ -15,19 +15,19 @@ exchanges:
     description: "Exchange for handling different types of events based on categories, priorities, origin, and tags"
     bindings:
       - queue: device_events_explicit
-        routing_key: "iot.high.#"
+        routing_key: "#.iot.high.#"
       - queue: device_events_auto
-        routing_key: "iot.low.#"
+        routing_key: "#.iot.low.#"
       - queue: request_response
-        routing_key: "user.*.requests.#"
+        routing_key: "#.user.*.requests.#"
       - queue: notifications_general
-        routing_key: "notifications.#"
+        routing_key: "#.notifications.#"
       - queue: alerts_critical
-        routing_key: "alerts.critical.#"
+        routing_key: "#.alerts.critical.#"
       - queue: alerts_warning
-        routing_key: "alerts.warning.#"
+        routing_key: "#.alerts.warning.#"
       - queue: device_generic
-        routing_key: "iot.#"
+        routing_key: "#.iot.#"
       - queue: user_generic
         routing_key: "user.*.#"
       - queue: failure_queue
@@ -40,7 +40,7 @@ exchanges:
     description: "Exchange for direct routing of specific messages between hub and server"
     bindings:
       - queue: middleware_service_queue
-        routing_key: "hub.middleware"
+        routing_key: "hubsoftware.middleware"
 
   - name: dead_letter_exchange
     type: direct

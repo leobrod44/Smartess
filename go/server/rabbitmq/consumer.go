@@ -1,19 +1,18 @@
 package rabbitmq
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"os"
-
-	"Smartess/go/common/structures"
-	"github.com/streadway/amqp"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.uber.org/zap"
-	"log"
+    "Smartess/go/common/structures"
+    "context"
+    "encoding/json"
+    "fmt"
+    "log"
+    "time"
+    "github.com/streadway/amqp"
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/bson/primitive"
+    "go.mongodb.org/mongo-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
+    "go.uber.org/zap"
 )
 
 type QueueConsumer struct {
@@ -140,5 +139,49 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	})
 	if err != nil {
 		logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+	}
+}
+
+type TopicMessageHandler struct {
+	RoutingKey string `json:"routing_key"`
+}
+type TopicMessageContent struct {
+	Message string `json:"message"`
+}
+
+func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+	var eventMsg TopicMessageContent //hub.TopicMessage
+	//fmt.Printf("[topic] BYTEARR STATE: %v \n\r", msg.Body)
+	err := json.Unmarshal(msg.Body, &eventMsg)
+	if err != nil {
+		logger.Error("Failed to unmarshal topic eventMsg",
+			zap.Error(err),
+			zap.String("msg", string(msg.Body)),
+		)
+	}
+	//fmt.Printf("[topic] UNMARSHALLED OBJ STATE: %v \n\r", eventMsg)
+	handled_timestamp := fmt.Sprintf("%s", time.Now().Format(time.RFC3339Nano))
+
+	logger.Info("topic_message_event",
+		zap.String("content", eventMsg.Message),
+		zap.String("routing_key", h.RoutingKey),
+		zap.String("handled_timestamp", handled_timestamp),
+	)
+
+	if strings.Contains(h.RoutingKey, "storemongo") {
+		//bsonData, err := bson.Marshal(eventMsg)
+		//if err != nil {
+		//	log.Fatalf("Error marshalling BSON: %v", err)
+		//}
+		ConnectToMongo()
+		collection := mongoClient.Database("TestDB1").Collection("test")
+		_, err = collection.InsertOne(context.TODO(), bson.D{
+			{"_id", primitive.NewObjectID()},
+			{"content", eventMsg.Message},
+			{"timestamp", handled_timestamp},
+		})
+		if err != nil {
+			logger.Error("Failed to insert message into MongoDB", zap.Error(err))
+		}
 	}
 }

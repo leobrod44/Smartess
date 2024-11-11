@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/url"
 	"os"
 	"strconv"
@@ -79,7 +81,12 @@ func (r *SmartessHub) Start() {
 
 		err = r.PublishMongo(message)
 		if err != nil {
-			r.Logger.Error(fmt.Sprintf("Failed to publish message to RabbitMQ: %v", err))
+			r.Logger.Error(fmt.Sprintf("Failed to publish Mongo-Test message to RabbitMQ: %v", err))
+		}
+
+		err = r.PublishTopicMessages()
+		if err != nil {
+			r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
 		}
 		//var event ha.WebhookMessage
 		//if err := json.Unmarshal(message, &event); err != nil {
@@ -246,4 +253,57 @@ func (r *SmartessHub) checkPublishAlert(message *ha.WebhookMessage) (bool, error
 		alertJson,
 	)
 
+}
+func loadTopicMessages(path string) ([]TopicMessage, error) {
+	var messages []TopicMessage
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := json.Unmarshal(data, &messages); err != nil {
+		return nil, err
+	}
+
+	return messages, nil
+}
+func (client *SmartessHub) PublishTopicMessages() error {
+	var messages []TopicMessage
+	var err error
+	messages, err = loadTopicMessages("/app/config/test_topic_messages.json")
+	if err != nil {
+		log.Fatalf("Failed to load test messages: %v\n", err)
+	}
+
+	for _, msg := range messages {
+		err := client.instance.Channel.Publish(
+			common_rabbitmq.Test0TopicExchangeName, // exchange
+			msg.RoutingKey,                         // routing key
+			false,                                  // mandatory
+			false,                                  // immediate
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        []byte(msg.Content),
+			})
+
+		if err != nil {
+			log.Printf("Failed to publish message with routing key %s: %v\n", msg.RoutingKey, err)
+			return err
+		} else {
+			log.Printf("Published message with routing key %s\n", msg.RoutingKey)
+		}
+	}
+	return nil
+}
+
+type TopicMessage struct {
+	RoutingKey string `json:"routing_key"`
+	Content    string `json:"content"`
 }
