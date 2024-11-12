@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import IndividualTicket from "@/app/components/IndividualTicket";
 import { generateMockProjects, Ticket } from "../../mockData";
-import BackArrowButton from "@/app/components/BackArrowButton";
+import BackArrowButton from "@/app/components/BackArrowBtn";
 
 const IndividualTicketPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
