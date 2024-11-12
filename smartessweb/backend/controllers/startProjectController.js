@@ -1,7 +1,10 @@
-const { sendEmail, storeData } = require('../services/startProjectService');
 require('dotenv').config();
 
-exports.sendEmailController = async (req, res) => {
+const supabase = require('../config/supabase');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+exports.sendEmail = async (req, res) => {
   const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
 
   if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
@@ -10,10 +13,11 @@ exports.sendEmailController = async (req, res) => {
   console.log(`Sending email to: ${email}...`);
 
   try {
-    const result = await sendEmail(
-      `Smartess <support@${process.env.RESEND_DOMAIN}>`,
-      `${process.env.RESEND_EMAIL_TO}`,
-      `Inquiry from ${firstName} ${lastName}`,
+    const { data, error } = await resend.emails.send({
+      from: `Smartess <support@${process.env.RESEND_DOMAIN}>`,
+      to: `${process.env.RESEND_EMAIL_TO}`,
+      subject: `Inquiry from ${firstName} ${lastName}`,
+      html: 
       `
         <h2>New Inquiry from ${businessName}</h2>
         <p><strong>Name:</strong> ${firstName} ${lastName}</p>
@@ -21,31 +25,31 @@ exports.sendEmailController = async (req, res) => {
         <p><strong>Email:</strong> ${email}</p>
         <p><strong>Description:</strong> ${description}</p>
       `
-    );
+    });
 
-    if (result.success) {
-      console.log('Email sent successfully');
-      return res.status(200).json({
-        message: 'Email sent successfully',
-        data: result.data,
-      });
-    } else {
+    if (error) {
       console.log('Failed to send email');
       return res.status(500).json({
         message: 'Failed to send email',
-        error: result.error,
+        error
+      });
+    } else {
+      console.log('Email sent successfully');
+      return res.status(200).json({
+        message: 'Email sent successfully',
+        data
       });
     }
-
   } catch (error) {
+      console.error('Error sending email:', error);
       return res.status(500).json({
-        message: 'Server error',
+        message: 'Server error sending email',
         error: error.message,
       });
   }
 };
 
-exports.storeDataController = async (req, res) => {
+exports.storeData = async (req, res) => {
   const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
 
   if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
@@ -54,23 +58,32 @@ exports.storeDataController = async (req, res) => {
   console.log(`Storing data for ${email} in database...`);
 
   try {
-    const result = await storeData(businessName, firstName, lastName, telephoneNumber, email, description);
+    const { error } = await supabase
+    .from('start_project')
+    .insert([{
+      business_name: businessName,
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      phone_number: telephoneNumber,
+      description
+    }]);
 
-    if (result.success) {
-      console.log('Data stored successfully');
-      return res.status(200).json({ 
-        message: 'Data stored successfully' 
+    if (error) {
+      console.error('Failed to store data');
+      return res.status(500).json({
+        message: 'Failed to store data',
+        error
       });
     } else {
-      console.error('Failed to store data');
-      return res.status(500).json({ 
-        message: 'Failed to store data', 
-        error: result.error 
-      });
+        console.log('Data stored successfully');
+        return res.status(200).json({
+          message: 'Data stored successfully'
+        });
     }
   } catch (error) {
       return res.status(500).json({
-        message: 'Server error',
+        message: 'Server error storing data',
         error: error.message,
       });
   }
