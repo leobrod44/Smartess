@@ -1,4 +1,3 @@
-// RoleEditForm.tsx
 import React, { useState } from "react";
 
 interface RoleEditFormProps {
@@ -7,7 +6,11 @@ interface RoleEditFormProps {
   onSave: () => void; // Add a callback for Save action
 }
 
-function RoleEditForm({ currentRole, onRoleChange }: RoleEditFormProps) {
+function RoleEditForm({
+  currentRole,
+  onRoleChange,
+  onSave,
+}: RoleEditFormProps) {
   const [selectedRole, setSelectedRole] = useState<
     "admin" | "basic" | "master"
   >(currentRole);
@@ -16,6 +19,7 @@ function RoleEditForm({ currentRole, onRoleChange }: RoleEditFormProps) {
     const newRole = event.target.value as "admin" | "basic" | "master";
     setSelectedRole(newRole);
     onRoleChange(newRole);
+    onSave(); // Trigger save and close form on role change
   };
 
   return (
