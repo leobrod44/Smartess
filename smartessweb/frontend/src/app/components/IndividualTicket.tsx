@@ -10,6 +10,8 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
   const [showFullText, setShowFullText] = useState(false);
   const [isTextShort, setIsTextShort] = useState(false);
 
+  const formattedDate = ticket.created_at.toLocaleDateString();
+
   const textRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -31,6 +33,10 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
   const handleToggle = () => {
     setShowFullText((prev) => !prev);
   };
+
+  //get unit number through the unit id
+
+  //get project address through unit id --> proj id --> proj address
 
   return (
     <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
@@ -76,7 +82,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
             {ticket.title}
           </div>
           <div className="text-black text-l font-normal font-['Sequel Sans']">
-            date
+            {formattedDate}
           </div>
         </div>
 
