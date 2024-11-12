@@ -53,9 +53,15 @@ export interface Individual {
 }
 
 export interface Unit {
+  projectId: string;
+
+  unit_id: string;
+
   unitNumber: string;
 
   users: User[];
+
+  ticket:Ticket[];
 
   tickets: TicketsType;
 
@@ -87,6 +93,32 @@ export interface Alert {
   icon: string;
 }
 
+export interface Ticket {
+
+  ticket_id: string;
+
+  unit_id: string;
+
+  unit_number:string;
+
+  project_address:string;
+  
+  submitted_by_email: string,
+
+  submitted_by_firstName:string,
+
+  submitted_by_lastName:string,
+
+  title:string,
+
+  description: string;
+
+  status: "open" | "pending" | "closed";
+
+  created_at: Date;
+
+  type: "repair" | "bug" | "alert" | "other";
+}
 // Function to generate mock projects
 
 export const generateMockProjects = (): Project[] => {
@@ -163,10 +195,15 @@ export const generateMockProjects = (): Project[] => {
 
 const generateMockUnits = (): Unit[] => [
   {
+    projectId:"1",
+    unit_id:"1",
+
     unitNumber: "101",
 
     users: generateMockUsers(),
 
+    ticket:generateMockTickets2(),
+
     tickets: generateMockTickets(),
 
     owner: generateMockOwner(),
@@ -175,10 +212,14 @@ const generateMockUnits = (): Unit[] => [
   },
 
   {
+    projectId:"1",
+    unit_id:"2",
     unitNumber: "102",
 
     users: generateMockUsers(),
 
+    ticket:generateMockTickets2(),
+
     tickets: generateMockTickets(),
 
     owner: generateMockOwner(),
@@ -187,9 +228,13 @@ const generateMockUnits = (): Unit[] => [
   },
 
   {
+    projectId:"1",
+    unit_id:"3",
     unitNumber: "103",
 
     users: generateMockUsers(),
+
+    ticket:generateMockTickets2(),
 
     tickets: generateMockTickets(),
 
@@ -225,6 +270,84 @@ const generateMockTickets = (): TicketsType => ({
   closed: 12,
 });
 
+
+
+const generateMockTickets2 = (): Ticket[] => [
+  {
+  ticket_id: '1',
+
+  unit_id: '1',
+
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "LarryJ@hotmail.com",
+
+  submitted_by_firstName:"Larry",
+
+  submitted_by_lastName:"Johnson",
+
+  title:'My window is broken',
+
+  description: "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
+
+  status: "open",
+
+  created_at: new Date("2024-10-31T10:15:00"),
+
+  type: "repair",
+},
+{
+  ticket_id: '2',
+
+  unit_id: '1',
+
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "KLittle@hotmail.com",
+
+  submitted_by_firstName:"Karen",
+
+  submitted_by_lastName:"Little",
+
+  title:'Parking spot',
+
+  description: "My reserved parking spot keeps getting taken! The persons license plate is XXXXXXX.",
+
+  status: "open",
+
+  created_at: new Date("2024-11-11T10:15:00"),
+
+  type: "other",
+},
+{
+  ticket_id: '3',
+
+  unit_id: '3',
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "Wendys@hotmail.com",
+
+  submitted_by_firstName:"Wendy",
+
+  submitted_by_lastName:"McDonald",
+
+  title:'Moving day Query',
+
+  description: "Im moving out in 2 weeks, i need to reserve the elevator 3 for the movers to be able to come in and out with my items.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+
+  status: "open",
+
+  created_at: new Date("2024-10-11T9:15:00"),
+
+  type: "other",
+}
+];
 // Function to generate mock owner
 
 const generateMockOwner = (): Owner => ({
@@ -313,10 +436,15 @@ const generateMockAlerts = (): Alert[] => [
 
 const generateMockUnits2 = (): Unit[] => [
   {
+    projectId:"2",
+    unit_id:"1",
+
     unitNumber: "101",
 
     users: generateMockUsers2(),
 
+    ticket: generateMockTickets2(),
+
     tickets: generateMockTickets(),
 
     owner: generateMockOwner2(),
@@ -325,10 +453,15 @@ const generateMockUnits2 = (): Unit[] => [
   },
 
   {
+    projectId:"2",
+    unit_id:"2",
+
     unitNumber: "102",
 
     users: generateMockUsers(),
 
+    ticket: generateMockTickets2(),
+
     tickets: generateMockTickets(),
 
     owner: generateMockOwner2(),
@@ -337,9 +470,14 @@ const generateMockUnits2 = (): Unit[] => [
   },
 
   {
+    projectId:"2",
+    unit_id:"3",
+
     unitNumber: "103",
 
     users: generateMockUsers2(),
+
+    ticket: generateMockTickets2(),
 
     tickets: generateMockTickets(),
 
