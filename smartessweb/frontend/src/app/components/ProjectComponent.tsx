@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid"; // Import icons for the arrow
+import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import { Pagination } from "@mui/material";
 import Unit from "../components/Unit";
-import { Project } from "../mockData"; // Adjust the import path as needed
+import { Project } from "../mockData";
 
 interface ProjectInfoProps {
   projects: Project[];
@@ -9,15 +10,31 @@ interface ProjectInfoProps {
 
 export default function ProjectInfo({ projects }: ProjectInfoProps) {
   const [showUnits, setShowUnits] = useState<number | null>(null); // Track which project is toggled open
+  const [page, setPage] = useState(1); // Track the current page
 
   const handleToggle = (index: number) => {
     setShowUnits(showUnits === index ? null : index);
   };
 
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+    setShowUnits(null); // Close any expanded units when changing page
+  };
+
+  // Calculate which projects to display based on the current page
+  const projectsPerPage = 3;
+  const startIndex = (page - 1) * projectsPerPage;
+  const projectsToDisplay = projects.slice(
+    startIndex,
+    startIndex + projectsPerPage
+  );
+
   return (
     <div className="w-full">
-      {/* Loop through each project */}
-      {projects.map((project, index) => (
+      {projectsToDisplay.map((project, index) => (
         <div
           key={index}
           className="bg-white rounded-lg shadow-md p-4 my-2 border border-black border-opacity-30 hover:border-[#4b7d8d] transition duration-300"
@@ -87,10 +104,10 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
               <div className="flex justify-center">
                 <button
                   className="bg-[#4b7d8d] pl-2 text-white w-[82px] h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
-                  onClick={() => handleToggle(index)}
+                  onClick={() => handleToggle(startIndex + index)}
                 >
                   More
-                  {showUnits === index ? (
+                  {showUnits === startIndex + index ? (
                     <ChevronUpIcon className="w-5 h-5 ml-2" />
                   ) : (
                     <ChevronDownIcon className="w-5 h-5 ml-2" />
@@ -100,9 +117,8 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
             </div>
           </div>
 
-          {showUnits === index && (
+          {showUnits === startIndex + index && (
             <div className="pt-4 space-y-4 max-h-60 overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
-              {" "}
               {project.units.map((unit) => (
                 <Unit
                   key={`${project.projectId}-${unit.unitNumber}`}
@@ -114,6 +130,17 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
           )}
         </div>
       ))}
+
+      {/* Pagination  */}
+      <div className="flex justify-center mt-8">
+        <Pagination
+          className="custom-pagination"
+          count={Math.ceil(projects.length / projectsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          color="primary"
+        />
+      </div>
     </div>
   );
 }
