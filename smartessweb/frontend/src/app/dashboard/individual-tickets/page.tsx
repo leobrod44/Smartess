@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import IndividualTicket from "@/app/components/IndividualTicket";
 import { generateMockProjects, Ticket } from "../../mockData";
+import BackArrowButton from "@/app/components/BackArrowButton";
 
 const IndividualTicketPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -19,8 +20,11 @@ const IndividualTicketPage = () => {
   return (
     <div>
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-        <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
-          Ticket Information
+        <div className="flex items-center justify-between pb-4">
+          <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
+            Ticket Information
+          </div>
+          <BackArrowButton />
         </div>
         {selectedTicket && <IndividualTicket ticket={selectedTicket} />}
       </div>
