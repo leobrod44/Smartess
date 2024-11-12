@@ -1,11 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
+import { Ticket } from "../mockData";
 
-function TicketHeader() {
+interface IndividualTicketProps {
+  ticket: Ticket;
+}
+
+function IndividualTicket({ ticket }: IndividualTicketProps) {
   const [showFullText, setShowFullText] = useState(false);
   const [isTextShort, setIsTextShort] = useState(false);
 
-  const fullText = `It is really cold inside, please come and fix my window. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
   const textRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -16,21 +20,20 @@ function TicketHeader() {
         setIsTextShort(isShort);
       }
     };
-    checkTextHeight(); 
-    window.addEventListener("resize", checkTextHeight); 
+    checkTextHeight();
+    window.addEventListener("resize", checkTextHeight);
 
     return () => {
-      window.removeEventListener("resize", checkTextHeight); 
+      window.removeEventListener("resize", checkTextHeight);
     };
-  }, [fullText]);
-
+  }, [ticket.description]);
 
   const handleToggle = () => {
     setShowFullText((prev) => !prev);
   };
 
   return (
-    <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl">
+    <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
       <div className="w-full px-[13px] pt-6 flex items-center justify-between">
         <div className="flex flex-col items-start">
           <div className="text-[#254752] text-[30px] font-sequel-sans-black">
@@ -42,16 +45,16 @@ function TicketHeader() {
         </div>
 
         <div className=" px-5 bg-[#729987] rounded-[20px] flex justify-center items-center text-center text-white text-s font-sequel-sans">
-          Open
+          {ticket.status}
         </div>
       </div>
 
       <div className="w-full pt-6 px-4 flex flex-col items-start">
         <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
-          Ticket ID: 1
+          Ticket ID: {ticket.ticket_id}
         </div>
         <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
-          Ticket Type: REPAIR
+          Ticket Type: {ticket.type}
         </div>
         <div className="flex justify-start items-start gap-8">
           <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
@@ -70,24 +73,24 @@ function TicketHeader() {
       <div className="w-full px-4 flex flex-col items-start gap-[7px]">
         <div className="w-full flex justify-between items-end">
           <div className="text-[#14323b] text-2xl font-sequel-sans">
-            My Window is Broken
+            {ticket.title}
           </div>
           <div className="text-black text-l font-normal font-['Sequel Sans']">
-            April 13, 2024
+            date
           </div>
         </div>
 
         <div
           ref={textRef}
-          className={`text-black text-s font-normal font-sequel-sans leading-[30px] pb-6 ${
-            showFullText ?  "block" : "text-truncate"
+          className={`text-black text-s font-normal font-sequel-sans leading-[30px]  ${
+            showFullText ? "block" : "text-truncate"
           }`}
         >
-          {fullText}
+          {ticket.description}
         </div>
 
         {!isTextShort && (
-          <div className="flex justify-end w-full mb-6">
+          <div className="flex justify-end w-full py-2">
             <button
               className="bg-[#4b7d8d] pl-2 text-white h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
               onClick={handleToggle}
@@ -106,4 +109,4 @@ function TicketHeader() {
   );
 }
 
-export default TicketHeader;
+export default IndividualTicket;
