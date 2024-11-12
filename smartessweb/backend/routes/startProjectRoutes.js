@@ -1,8 +1,8 @@
 const express = require('express');
-const { sendEmailController, storeDataController } = require('../controllers/startProjectController');
+const { sendEmail, storeData } = require('../controllers/startProjectController');
 const router = express.Router();
 
-router.post('/send-email', sendEmailController);
-router.post('/store-start-project-data', storeDataController);
+router.post('/send-email', sendEmail);
+router.post('/store-start-project-data', storeData);
 
 module.exports = router;
