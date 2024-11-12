@@ -99,6 +99,16 @@ export interface Ticket {
 
   unit_id: string;
 
+  unit_number:string;
+
+  project_address:string;
+  
+  submitted_by_email: string,
+
+  submitted_by_firstName:string,
+
+  submitted_by_lastName:string,
+
   title:string,
 
   description: string;
@@ -268,6 +278,16 @@ const generateMockTickets2 = (): Ticket[] => [
 
   unit_id: '1',
 
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "LarryJ@hotmail.com",
+
+  submitted_by_firstName:"Larry",
+
+  submitted_by_lastName:"Johnson",
+
   title:'My window is broken',
 
   description: "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
@@ -283,6 +303,16 @@ const generateMockTickets2 = (): Ticket[] => [
 
   unit_id: '1',
 
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "KLittle@hotmail.com",
+
+  submitted_by_firstName:"Karen",
+
+  submitted_by_lastName:"Little",
+
   title:'Parking spot',
 
   description: "My reserved parking spot keeps getting taken! The persons license plate is XXXXXXX.",
@@ -297,6 +327,15 @@ const generateMockTickets2 = (): Ticket[] => [
   ticket_id: '3',
 
   unit_id: '3',
+  unit_number:"101",
+
+  project_address:"1000 De La Gauchetiere",
+
+  submitted_by_email: "Wendys@hotmail.com",
+
+  submitted_by_firstName:"Wendy",
+
+  submitted_by_lastName:"McDonald",
 
   title:'Moving day Query',
 

@@ -9,7 +9,7 @@ const IndividualTicketPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
 
   useEffect(() => {
-    // Example to set the ticket (for demonstration, fetching from mock data)
+    // Example to set the ticket (for demonstration, fetching from mock data)-- will be changed once backend is connected
     const projects = generateMockProjects();
     const specificTicket = projects[0]?.units[0]?.ticket[0];
     if (specificTicket) {

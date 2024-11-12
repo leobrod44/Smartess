@@ -14,6 +14,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
 
   const textRef = useRef<HTMLDivElement | null>(null);
 
+
   useEffect(() => {
     const checkTextHeight = () => {
       if (textRef.current) {
@@ -34,26 +35,26 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
     setShowFullText((prev) => !prev);
   };
 
-  //get unit number through the unit id
 
-  //get project address through unit id --> proj id --> proj address
 
   return (
     <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
       <div className="w-full px-[13px] pt-6 flex items-center justify-between">
         <div className="flex flex-col items-start">
           <div className="text-[#254752] text-[30px] font-sequel-sans-black">
-            Unit 103
+            Unit {ticket.unit_number}
           </div>
           <div className="text-[#254752] text-[20px] font-sequel-sans ">
-            1000 de la Gauchetiere
+           {ticket.project_address}
           </div>
         </div>
 
         <div className=" px-5 bg-[#729987] rounded-[20px] flex justify-center items-center text-center text-white text-s font-sequel-sans">
           {ticket.status}
         </div>
+        
       </div>
+     
 
       <div className="w-full pt-6 px-4 flex flex-col items-start">
         <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
@@ -64,7 +65,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
         </div>
         <div className="flex justify-start items-start gap-8">
           <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
-            Submitted by: Larry Johnson
+            Submitted by: {ticket.submitted_by_firstName} {ticket.submitted_by_lastName}
           </div>
           <button className="px-[17px] py-2 bg-[#729987] rounded-[20px] flex justify-center items-center hover:bg-[#5C7A6B] transition duration-300">
             <div className="text-center text-white text-m font-sequel-sans leading-3">
