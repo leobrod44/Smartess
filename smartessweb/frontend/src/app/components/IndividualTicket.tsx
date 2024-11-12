@@ -1,10 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 
 function TicketHeader() {
   const [showFullText, setShowFullText] = useState(false);
+  const [isTextShort, setIsTextShort] = useState(false);
 
-  const fullText = `It is really cold inside, please come and fix my window. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+  const fullText = `It is really cold inside, please come and fix my window. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+  const textRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const checkTextHeight = () => {
+      if (textRef.current) {
+        const isShort =
+          textRef.current.scrollHeight <= textRef.current.clientHeight;
+        setIsTextShort(isShort);
+      }
+    };
+    checkTextHeight(); 
+    window.addEventListener("resize", checkTextHeight); 
+
+    return () => {
+      window.removeEventListener("resize", checkTextHeight); 
+    };
+  }, [fullText]);
+
 
   const handleToggle = () => {
     setShowFullText((prev) => !prev);
@@ -57,28 +76,31 @@ function TicketHeader() {
             April 13, 2024
           </div>
         </div>
-        <div className="text-black text-s font-normal font-sequel-sans leading-[30px]">
-          <div
-            className={`transition-all duration-300 ${
-              showFullText ? "" : "text-truncate"
-            }`}
-          >
-            {fullText}
+
+        <div
+          ref={textRef}
+          className={`text-black text-s font-normal font-sequel-sans leading-[30px] pb-6 ${
+            showFullText ? "" : "line-clamp-2"
+          }`}
+        >
+          {fullText}
+        </div>
+
+        {!isTextShort && (
+          <div className="flex justify-end w-full mb-6">
+            <button
+              className="bg-[#4b7d8d] pl-2 text-white h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
+              onClick={handleToggle}
+            >
+              {showFullText ? "See Less" : "See More"}
+              {showFullText ? (
+                <ChevronUpIcon className="w-5 h-5 ml-2" />
+              ) : (
+                <ChevronDownIcon className="w-5 h-5 ml-2" />
+              )}
+            </button>
           </div>
-        </div>
-        <div className="flex justify-end w-full mb-6">
-          <button
-            className="bg-[#4b7d8d] pl-2 text-white h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
-            onClick={handleToggle}
-          >
-            {showFullText ? "See Less" : "See More"}
-            {showFullText ? (
-              <ChevronUpIcon className="w-5 h-5 ml-2" />
-            ) : (
-              <ChevronDownIcon className="w-5 h-5 ml-2" />
-            )}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
