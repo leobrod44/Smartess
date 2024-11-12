@@ -5,7 +5,7 @@ function TicketHeader() {
   const [showFullText, setShowFullText] = useState(false);
   const [isTextShort, setIsTextShort] = useState(false);
 
-  const fullText = `It is really cold inside, please come and fix my window. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+  const fullText = `It is really cold inside, please come and fix my window. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
   const textRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ function TicketHeader() {
         <div
           ref={textRef}
           className={`text-black text-s font-normal font-sequel-sans leading-[30px] pb-6 ${
-            showFullText ? "" : "line-clamp-2"
+            showFullText ?  "block" : "text-truncate"
           }`}
         >
           {fullText}
