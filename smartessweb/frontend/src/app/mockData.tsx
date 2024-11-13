@@ -61,7 +61,7 @@ export interface Unit {
 
   users: User[];
 
-  ticket:Ticket[];
+  ticket: Ticket[];
 
   tickets: TicketsType;
 
@@ -94,22 +94,21 @@ export interface Alert {
 }
 
 export interface Ticket {
-
   ticket_id: string;
 
   unit_id: string;
 
-  unit_number:string;
+  unit_number: string;
 
-  project_address:string;
-  
-  submitted_by_email: string,
+  project_address: string;
 
-  submitted_by_firstName:string,
+  submitted_by_email: string;
 
-  submitted_by_lastName:string,
+  submitted_by_firstName: string;
 
-  title:string,
+  submitted_by_lastName: string;
+
+  title: string;
 
   description: string;
 
@@ -174,7 +173,7 @@ export const generateMockProjects = (): Project[] => {
     {
       projectId: "cd10294",
 
-      address: "131 Chemin des Conifere",
+      address: "131 Chemin des Coniferes",
 
       adminUsers: 3,
 
@@ -195,14 +194,14 @@ export const generateMockProjects = (): Project[] => {
 
 const generateMockUnits = (): Unit[] => [
   {
-    projectId:"1",
-    unit_id:"1",
+    projectId: "1",
+    unit_id: "1",
 
     unitNumber: "101",
 
     users: generateMockUsers(),
 
-    ticket:generateMockTickets2(),
+    ticket: generateMockTickets2(),
 
     tickets: generateMockTickets(),
 
@@ -212,13 +211,13 @@ const generateMockUnits = (): Unit[] => [
   },
 
   {
-    projectId:"1",
-    unit_id:"2",
+    projectId: "1",
+    unit_id: "2",
     unitNumber: "102",
 
     users: generateMockUsers(),
 
-    ticket:generateMockTickets2(),
+    ticket: generateMockTickets2(),
 
     tickets: generateMockTickets(),
 
@@ -228,13 +227,13 @@ const generateMockUnits = (): Unit[] => [
   },
 
   {
-    projectId:"1",
-    unit_id:"3",
+    projectId: "1",
+    unit_id: "3",
     unitNumber: "103",
 
     users: generateMockUsers(),
 
-    ticket:generateMockTickets2(),
+    ticket: generateMockTickets2(),
 
     tickets: generateMockTickets(),
 
@@ -270,83 +269,84 @@ const generateMockTickets = (): TicketsType => ({
   closed: 12,
 });
 
-
-
 const generateMockTickets2 = (): Ticket[] => [
   {
-  ticket_id: '1',
+    ticket_id: "1",
 
-  unit_id: '1',
+    unit_id: "1",
 
-  unit_number:"101",
+    unit_number: "101",
 
-  project_address:"1000 De La Gauchetiere",
+    project_address: "1000 De La Gauchetiere",
 
-  submitted_by_email: "LarryJ@hotmail.com",
+    submitted_by_email: "LarryJ@hotmail.com",
 
-  submitted_by_firstName:"Larry",
+    submitted_by_firstName: "Larry",
 
-  submitted_by_lastName:"Johnson",
+    submitted_by_lastName: "Johnson",
 
-  title:'My window is broken',
+    title: "My window is broken",
 
-  description: "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
+    description:
+      "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
 
-  status: "open",
+    status: "open",
 
-  created_at: new Date("2024-10-31T10:15:00"),
+    created_at: new Date("2024-10-31T10:15:00"),
 
-  type: "repair",
-},
-{
-  ticket_id: '2',
+    type: "repair",
+  },
+  {
+    ticket_id: "2",
 
-  unit_id: '1',
+    unit_id: "1",
 
-  unit_number:"101",
+    unit_number: "101",
 
-  project_address:"1000 De La Gauchetiere",
+    project_address: "1000 De La Gauchetiere",
 
-  submitted_by_email: "KLittle@hotmail.com",
+    submitted_by_email: "KLittle@hotmail.com",
 
-  submitted_by_firstName:"Karen",
+    submitted_by_firstName: "Karen",
 
-  submitted_by_lastName:"Little",
+    submitted_by_lastName: "Little",
 
-  title:'Parking spot',
+    title: "Parking spot",
 
-  description: "My reserved parking spot keeps getting taken! The persons license plate is XXXXXXX.",
+    description:
+      "My reserved parking spot keeps getting taken! The persons license plate is XXXXXXX.",
 
-  status: "open",
+    status: "open",
 
-  created_at: new Date("2024-11-11T10:15:00"),
+    created_at: new Date("2024-11-11T10:15:00"),
 
-  type: "other",
-},
-{
-  ticket_id: '3',
+    type: "other",
+  },
+  {
+    ticket_id: "3",
 
-  unit_id: '3',
-  unit_number:"101",
+    unit_id: "3",
+    unit_number: "101",
 
-  project_address:"1000 De La Gauchetiere",
+    project_address: "1000 De La Gauchetiere",
 
-  submitted_by_email: "Wendys@hotmail.com",
+    submitted_by_email: "Wendys@hotmail.com",
 
-  submitted_by_firstName:"Wendy",
+    submitted_by_firstName: "Wendy",
 
-  submitted_by_lastName:"McDonald",
+    submitted_by_lastName: "McDonald",
 
-  title:'Moving day Query',
+    title: "Moving day Query",
 
-  description: "Im moving out in 2 weeks, i need to reserve the elevator 3 for the movers to be able to come in and out with my items.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
+    description:
+      "Im moving out in 2 weeks, i need to reserve the elevator 3 for the movers to be able to come in and out with my items.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
 
-  status: "open",
+    status: "open",
 
-  created_at: new Date("2024-10-11T9:15:00"),
+    created_at: new Date("2024-10-11T9:15:00"),
 
-  type: "other",
-}
+    type: "other",
+  },
 ];
 // Function to generate mock owner
 
@@ -436,8 +436,8 @@ const generateMockAlerts = (): Alert[] => [
 
 const generateMockUnits2 = (): Unit[] => [
   {
-    projectId:"2",
-    unit_id:"1",
+    projectId: "2",
+    unit_id: "1",
 
     unitNumber: "101",
 
@@ -453,8 +453,8 @@ const generateMockUnits2 = (): Unit[] => [
   },
 
   {
-    projectId:"2",
-    unit_id:"2",
+    projectId: "2",
+    unit_id: "2",
 
     unitNumber: "102",
 
@@ -470,8 +470,8 @@ const generateMockUnits2 = (): Unit[] => [
   },
 
   {
-    projectId:"2",
-    unit_id:"3",
+    projectId: "2",
+    unit_id: "3",
 
     unitNumber: "103",
 
