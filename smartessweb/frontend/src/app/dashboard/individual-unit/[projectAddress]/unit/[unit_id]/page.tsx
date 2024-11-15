@@ -1,4 +1,5 @@
 import { generateMockProjects, Unit } from "../../../../../mockData";
+import HubOwner from "@/app/components/IndividualUnitComponents/HubOwner";
 
 export default function UnitPage({
   params,
@@ -30,19 +31,17 @@ export default function UnitPage({
   return (
     <div>
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-        <h1 className="text-2xl font-bold">Unit Details</h1>
-        <p>
-          <strong>Project Address:</strong> {decodedAddress}
-        </p>
-        <p>
-          <strong>Unit ID:</strong> {unit.unit_id}
-        </p>
-        <p>
-          <strong>Unit Number:</strong> {unit.unitNumber}
-        </p>
-        <p>
-          <strong>Owner:</strong> {unit.owner.firstName} {unit.owner.lastName}
-        </p>
+        <h1 className="text-2xl text-[#4b7d8d] font-bold">{decodedAddress}</h1>
+        <h1 className="text-2xl text-[#325a67] font-bold">
+          Unit {unit.unitNumber}
+        </h1>
+
+        {/* Render HubOwner Component with surrounding background */}
+        <div className="my-4 rounded-lg bg-[#4b7d8d] p-2">
+          <div className="bg-white rounded-lg p-4">
+            <HubOwner owner={unit.owner} />
+          </div>
+        </div>
       </div>
     </div>
   );
