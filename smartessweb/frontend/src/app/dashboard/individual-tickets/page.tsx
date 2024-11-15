@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import IndividualTicket from "@/app/components/IndividualTicket";
+import IndividualTicket from "@/app/components/IndividualTicketPageComponents/IndividualTicket";
 import { generateMockProjects, Ticket } from "../../mockData";
 import BackArrowButton from "@/app/components/BackArrowBtn";
+import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
 
 const IndividualTicketPage = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -27,6 +28,20 @@ const IndividualTicketPage = () => {
           <BackArrowButton />
         </div>
         {selectedTicket && <IndividualTicket ticket={selectedTicket} />}
+        <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
+          Manage Ticket Assignment
+        </div>
+        {selectedTicket && <ManageTicketAssignment ticket={selectedTicket} />}
+
+        <div className="flex justify-center gap-10 mt-8">
+          <button className=" px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+            Close Ticket
+          </button>
+
+          <button className=" px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+            Delete Ticket
+          </button>
+        </div>
       </div>
     </div>
   );
