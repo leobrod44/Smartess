@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
-import { Ticket } from "../mockData";
+import { Ticket } from "../../mockData";
 
 interface IndividualTicketProps {
   ticket: Ticket;
