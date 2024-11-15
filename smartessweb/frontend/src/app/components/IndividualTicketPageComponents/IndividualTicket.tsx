@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
-import { Ticket } from "../mockData";
+import { Ticket } from "../../mockData";
 
 interface IndividualTicketProps {
   ticket: Ticket;
@@ -13,7 +13,6 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
   const formattedDate = ticket.created_at.toLocaleDateString();
 
   const textRef = useRef<HTMLDivElement | null>(null);
-
 
   useEffect(() => {
     const checkTextHeight = () => {
@@ -35,7 +34,17 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
     setShowFullText((prev) => !prev);
   };
 
-
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "closed":
+        return "#cccccc";
+      case "pending":
+        return "#a6634f";
+      case "open":
+      default:
+        return "#729987";
+    }
+  };
 
   return (
     <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
@@ -45,16 +54,17 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
             Unit {ticket.unit_number}
           </div>
           <div className="text-[#254752] text-[20px] font-sequel-sans ">
-           {ticket.project_address}
+            {ticket.project_address}
           </div>
         </div>
 
-        <div className=" px-5 bg-[#729987] rounded-[20px] flex justify-center items-center text-center text-white text-s font-sequel-sans">
+        <div
+          className=" px-5 rounded-[20px] flex justify-center items-center text-center text-white text-s font-sequel-sans"
+          style={{ backgroundColor: getStatusColor(ticket.status) }}
+        >
           {ticket.status}
         </div>
-        
       </div>
-     
 
       <div className="w-full pt-6 px-4 flex flex-col items-start">
         <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
@@ -65,7 +75,8 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
         </div>
         <div className="flex justify-start items-start gap-8">
           <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
-            Submitted by: {ticket.submitted_by_firstName} {ticket.submitted_by_lastName}
+            Submitted by: {ticket.submitted_by_firstName}{" "}
+            {ticket.submitted_by_lastName}
           </div>
           <button className="px-[17px] py-2 bg-[#729987] rounded-[20px] flex justify-center items-center hover:bg-[#5C7A6B] transition duration-300">
             <div className="text-center text-white text-m font-sequel-sans leading-3">

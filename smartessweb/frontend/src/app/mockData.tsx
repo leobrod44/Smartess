@@ -117,6 +117,8 @@ export interface Ticket {
   created_at: Date;
 
   type: "repair" | "bug" | "alert" | "other";
+
+  assigned_employees: Individual[];
 }
 // Function to generate mock projects
 
@@ -295,6 +297,8 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-10-31T10:15:00"),
 
     type: "repair",
+
+    assigned_employees: generateMockProjectUsers(),
   },
   {
     ticket_id: "2",
@@ -321,11 +325,13 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-11-11T10:15:00"),
 
     type: "other",
+    assigned_employees: generateMockProjectUsers2(),
   },
   {
     ticket_id: "3",
 
     unit_id: "3",
+
     unit_number: "101",
 
     project_address: "1000 De La Gauchetiere",
@@ -346,6 +352,8 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-10-11T9:15:00"),
 
     type: "other",
+
+    assigned_employees: generateMockProjectUsers(),
   },
 ];
 // Function to generate mock owner
@@ -526,6 +534,12 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
+  /*   {
+    individualId: "ind-3",
+    firstName: "Karen",
+    lastName: "Philipeli",
+    role: "basic",
+  }, */
 ];
 
 // Function to generate mock project users for the second project
