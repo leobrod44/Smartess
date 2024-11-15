@@ -27,7 +27,6 @@ export default function UnitPage({
     return <div>Unit not found</div>;
   }
 
-  // Wrap the content with ProjectProvider
   return (
     <div>
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
