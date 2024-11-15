@@ -25,6 +25,8 @@ export interface Owner {
 
   lastName: string;
 
+  telephone: string;
+
   email: string;
 }
 
@@ -356,6 +358,7 @@ const generateMockOwner = (): Owner => ({
   firstName: "LARRY",
 
   lastName: "JOHNSON",
+  telephone: "5143334422",
 
   email: "larryJ@hotmail.com",
 });
@@ -497,6 +500,8 @@ const generateMockOwner2 = (): Owner => ({
   firstName: "KAREN",
 
   lastName: "FIELDS",
+
+  telephone: "5148886595",
 
   email: "kfields@gmail.com",
 });
