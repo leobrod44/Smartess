@@ -1,5 +1,27 @@
 # Smartess
 
+## Release 1 Demo
+https://drive.google.com/file/d/1VhbKIfahZcb6RqXoC6UfZoBpeX1w_sCs/view?usp=sharing
+
+## Important files
+### Top 5 files
+  
+| File path with clickable link | Purpose (1 line description) |
+|------|------------|
+|[go/hub/hub.go](https://github.com/leobrod44/Smartess/blob/main/go/hub/hub.go)|Intercepts hub events and logs to server|
+|[go/server/rabbitmq/rabbitmq.go](https://github.com/leobrod44/Smartess/blob/main/go/server/rabbitmq/rabbitmq.go)|Server; main backend processor and orchestrator of microservices/managers|
+|[smartessweb/frontend/src/app/dashboard/page.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/src/app/dashboard/page.tsx)|Dashboard page, main entry for multiple components. |
+|[smartessweb/backend/app.js](https://github.com/leobrod44/Smartess/blob/main/smartessweb/backend/app.js)|Main entry for the backend (Web) and contains all routes|
+|[smartessweb/frontend/src/app/components/DashboardNavbar.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/src/app/components/DashboardNavbar.tsx)|Navigation bar used across the whole web|
+### Top 5 Tests
+| File path with clickable link | Purpose (1 line description) |
+|------|------------|
+|[go/tests/event_test.go](https://github.com/leobrod44/Smartess/blob/main/go/tests/event_test.go)|Integration test for hub events interception|
+|[smartessweb/backend/tests/controllers/authController.test.js](https://github.com/leobrod44/Smartess/blob/main/smartessweb/backend/tests/controllers/authController.test.js)|Tests behavior of web authorization system|
+|[smartessweb/backend/tests/controllers/projectController.test.js](https://github.com/leobrod44/Smartess/blob/main/smartessweb/backend/tests/controllers/projectController.test.js)|Tests behavior of projects data retrieval for web|
+|[smartessweb/backend/tests/controllers/hubcontroller.test.js](https://github.com/leobrod44/Smartess/blob/main/smartessweb/backend/tests/controllers/hubcontroller.test.js)|Tests behavior of hubs data retrieval for web|
+|[smartessweb/frontend/__tests__/ProjectComponent.test.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/__tests__/ProjectComponent.test.tsx)|Test the frontend Project component’s behavior|
+
 ## CI information
 
 In this project, we use a Continuous Integration (CI) pipeline to automate the development and testing of our application. The main tools involved are GitHub Actions for automation, Docker for containerization, Jest for testing, and ESLint for checking code quality. This combination of tools ensures that code is consistently tested and validated as soon as changes are made. This setup catches issues early in the development process, reducing the cost and effort required to fix them if they were discovered later in the development lifecycle.
