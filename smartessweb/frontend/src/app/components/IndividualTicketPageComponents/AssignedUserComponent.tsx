@@ -7,12 +7,12 @@ interface AssignedUserProps {
 
 function AssignedUser({ Individual }: AssignedUserProps) {
   return (
-    <div className="w-full px-3 py-3 my-5 rounded-[5px] border border-[#266472]/40 items-center inline-flex justify-between ">
-      <div className=" text-[#266472] text-s font-['Sequel Sans'] ">
+    <div className="w-full px-3 py-3 my-5 rounded-[5px] border border-[#266472]/40 items-center inline-flex justify-between">
+      <div className=" text-[#266472] text-xs font-['Sequel Sans'] ">
         {Individual.individualId}
       </div>
 
-      <div className=" text-[#266472] text-s font-['Sequel Sans'] ">
+      <div className=" text-[#266472] text-xs font-['Sequel Sans'] ">
         {Individual.firstName} {" "}
         {Individual.lastName}
       </div>
