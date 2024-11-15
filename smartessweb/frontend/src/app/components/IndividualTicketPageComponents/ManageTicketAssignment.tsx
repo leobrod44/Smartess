@@ -25,8 +25,8 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
             onClick={() => console.log("Assign yourself clicked")}
           >
             Assign yourself
-          </span>
-         {" "} or{" "}
+          </span>{" "}
+          or{" "}
           <span
             className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
             onClick={() => console.log("Assign another user clicked")}
@@ -49,11 +49,13 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
             <AssignedUser key={index} Individual={Individual} />
           ))}
 
-          <div className="flex justify-center mt-6">
-            <button className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
-              Assign Employees
-            </button>
-          </div>
+          {assignedUsers.length < 3 && (
+            <div className="flex justify-center mt-3">
+              <button className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+                Assign User
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
