@@ -298,7 +298,7 @@ const generateMockTickets2 = (): Ticket[] => [
 
     type: "repair",
 
-    assigned_employees:generateMockProjectUsers()
+    assigned_employees: generateMockProjectUsers(),
   },
   {
     ticket_id: "2",
@@ -325,13 +325,13 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-11-11T10:15:00"),
 
     type: "other",
-    assigned_employees:generateMockProjectUsers2()
+    assigned_employees: generateMockProjectUsers2(),
   },
   {
     ticket_id: "3",
 
     unit_id: "3",
-    
+
     unit_number: "101",
 
     project_address: "1000 De La Gauchetiere",
@@ -353,7 +353,7 @@ const generateMockTickets2 = (): Ticket[] => [
 
     type: "other",
 
-    assigned_employees:generateMockProjectUsers()
+    assigned_employees: generateMockProjectUsers(),
   },
 ];
 // Function to generate mock owner
@@ -534,7 +534,7 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
-/*   {
+  /*   {
     individualId: "ind-3",
     firstName: "Karen",
     lastName: "Philipeli",
