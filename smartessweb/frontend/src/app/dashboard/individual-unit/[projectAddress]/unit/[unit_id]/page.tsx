@@ -1,5 +1,6 @@
 import { generateMockProjects, Unit } from "../../../../../mockData";
 import HubOwner from "@/app/components/IndividualUnitComponents/HubOwner";
+import BackArrowButton from "@/app/components/BackArrowBtn";
 
 export default function UnitPage({
   params,
@@ -30,7 +31,11 @@ export default function UnitPage({
 
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+      <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+        {/* Back Arrow Button */}
+        <div className="flex justify-end mb-4">
+          <BackArrowButton />
+        </div>
         <h1 className="text-2xl text-[#4b7d8d] font-bold">{decodedAddress}</h1>
         <h1 className="text-2xl text-[#325a67] font-bold">
           Unit {unit.unitNumber}
