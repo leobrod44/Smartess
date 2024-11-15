@@ -192,7 +192,7 @@ export const generateMockProjects = (): Project[] => {
 
 // Function to generate mock units
 
-const generateMockUnits = (): Unit[] => [
+export const generateMockUnits = (): Unit[] => [
   {
     projectId: "1",
     unit_id: "1",

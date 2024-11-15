@@ -1,4 +1,6 @@
+"use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
@@ -13,6 +15,7 @@ const UnitComponent = ({
   projectAddress: string;
 }) => {
   const [users] = useState<User[]>(unit.users || []);
+  const router = useRouter();
   const [tickets] = useState<TicketsType>(
     unit.tickets || {
       total: 0,
@@ -43,6 +46,14 @@ const UnitComponent = ({
       email: "",
     }
   );
+
+  const handleViewUnit = () => {
+    // Navigate to the unit details page with the dynamic route
+    router.push(
+      `../dashboard/individual-unit/${projectAddress}/unit/${unit.unit_id}`
+    );
+  };
+
   return (
     <div className="unit-container max-w-fit sm:max-w-full mx-auto">
       <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
@@ -74,7 +85,10 @@ const UnitComponent = ({
 
         <div className="flex justify-center p-6">
           <div>
-            <button className="bg-[#4b7d8d] w-40 h-12 rounded-[10px] text-white text-md font-sequel-sans-black hover:bg-[#1f505e] transition duration-300">
+            <button
+              className="bg-[#4b7d8d] w-40 h-12 rounded-[10px] text-white text-md font-sequel-sans-black hover:bg-[#1f505e] transition duration-300"
+              onClick={handleViewUnit}
+            >
               View Unit
             </button>
           </div>
