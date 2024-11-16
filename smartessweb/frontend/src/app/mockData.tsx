@@ -1,4 +1,4 @@
-export interface User {
+export interface HubUser {
   tokenId: string;
 
   firstName: string;
@@ -61,7 +61,7 @@ export interface Unit {
 
   unitNumber: string;
 
-  users: User[];
+  hubUsers: HubUser[];
 
   ticket: Ticket[];
 
@@ -203,7 +203,7 @@ export const generateMockUnits = (): Unit[] => [
 
     unitNumber: "101",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -219,7 +219,7 @@ export const generateMockUnits = (): Unit[] => [
     unit_id: "2",
     unitNumber: "102",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -235,7 +235,7 @@ export const generateMockUnits = (): Unit[] => [
     unit_id: "3",
     unitNumber: "103",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -251,7 +251,7 @@ export const generateMockUnits = (): Unit[] => [
 
 // Function to generate mock users
 
-const generateMockUsers = (): User[] => [
+const generateMockUsers = (): HubUser[] => [
   { tokenId: "2", firstName: "Mary", lastName: "Johnson", role: "basic" },
 
   { tokenId: "3", firstName: "Ken", lastName: "Long", role: "basic" },
@@ -452,7 +452,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "101",
 
-    users: generateMockUsers2(),
+    hubUsers: generateMockUsers2(),
 
     ticket: generateMockTickets2(),
 
@@ -469,7 +469,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "102",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -486,7 +486,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "103",
 
-    users: generateMockUsers2(),
+    hubUsers: generateMockUsers2(),
 
     ticket: generateMockTickets2(),
 
@@ -516,7 +516,7 @@ const generateMockOwner2 = (): Owner => ({
 
 // Second Function to generate mock users, simply to test searchbar
 
-const generateMockUsers2 = (): User[] => [
+const generateMockUsers2 = (): HubUser[] => [
   { tokenId: "6", firstName: "BILL", lastName: "Bong", role: "basic" },
 
   { tokenId: "7", firstName: "Penny", lastName: "Wise", role: "basic" },

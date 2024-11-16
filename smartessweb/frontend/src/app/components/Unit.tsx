@@ -4,7 +4,7 @@ import HubUsers from "../components/UnitComponents/HubUsers";
 import Tickets from "../components/UnitComponents/Tickets";
 import Alerts from "../components/UnitComponents/Alerts";
 import {
-  User,
+  HubUser,
   TicketsType,
   Owner,
   Alert,
@@ -24,7 +24,7 @@ const UnitComponent = ({
   projectId,
   isTest = false,
 }: UnitComponentProps) => {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<HubUser[]>([]);
   const [tickets, setTickets] = useState<TicketsType>({
     total: 0,
     open: 0,
@@ -36,6 +36,7 @@ const UnitComponent = ({
     firstName: "",
     lastName: "",
     email: "",
+    telephone: "",
   });
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +58,7 @@ const UnitComponent = ({
         if (isTest) {
           const unit = await fetchMockData(projectId, unitNumber);
           if (unit) {
-            setUsers(unit.users);
+            setUsers(unit.hubUsers);
             setTickets(unit.tickets);
             setOwner(unit.owner);
             setAlerts(unit.alerts);
@@ -70,7 +71,7 @@ const UnitComponent = ({
           }
 
           const data = await hubApi.getHubDetails(projectId, unitNumber, token);
-          setUsers(data.users);
+          setUsers(data.hubUsers);
           setTickets(data.tickets);
           setOwner(data.owner);
           setAlerts(data.alerts);
@@ -120,7 +121,7 @@ const UnitComponent = ({
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
 
         <div className="flex-1 md:min-w-[108px]">
-          <HubUsers users={users} />
+          <HubUsers hubUsers={users} />
         </div>
 
         <div className="divider bg-[#a0bfca] w-[1px]"></div>

@@ -1,8 +1,8 @@
 import { API_URL } from "../api";
-import { User, TicketsType, Owner, Alert } from "@/app/mockData";
+import { HubUser, TicketsType, Owner, Alert } from "@/app/mockData";
 interface HubDetails {
   owner: Owner;
-  users: User[];
+  hubUsers: HubUser[];
   tickets: TicketsType;
   alerts: Alert[];
 }
