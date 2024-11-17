@@ -1,9 +1,11 @@
 "use client";
 
 import { useProjectContext } from "@/context/ProjectProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import TicketList from "@/app/components/TicketComponents/TicketList";
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
+import FilterComponent from "@/app/components/FilterList";
+import Searchbar from "@/app/components/Searchbar";
 
 interface Ticket {
   ticketId: string;
@@ -11,15 +13,15 @@ interface Ticket {
   unitId: string;
   name: string;
   description: string;
-  type: string;
+  type: "Alert" | "Repair" | "Other";
   unit: string;
-  status: string;
+  status: "Open" | "Pending" | "Closed";
   date: string;
 }
 
 const tickets: Ticket[] = [
   {
-    ticketId: "1",
+    ticketId: "t1",
     projectId: "1",
     unitId: "101",
     name: "TICKET-001",
@@ -31,7 +33,7 @@ const tickets: Ticket[] = [
     date: "2024-11-15",
   },
   {
-    ticketId: "2",
+    ticketId: "t2",
     projectId: "1",
     unitId: "102",
     name: "TICKET-002",
@@ -42,7 +44,7 @@ const tickets: Ticket[] = [
     date: "2024-11-14",
   },
   {
-    ticketId: "3",
+    ticketId: "t3",
     projectId: "1",
     unitId: "103",
     name: "TICKET-003",
@@ -53,7 +55,7 @@ const tickets: Ticket[] = [
     date: "2024-11-13",
   },
   {
-    ticketId: "4",
+    ticketId: "t4",
     projectId: "2",
     unitId: "104",
     name: "TICKET-004",
@@ -64,7 +66,7 @@ const tickets: Ticket[] = [
     date: "2024-11-12",
   },
   {
-    ticketId: "5",
+    ticketId: "t5",
     projectId: "2",
     unitId: "105",
     name: "TICKET-005",
@@ -75,7 +77,7 @@ const tickets: Ticket[] = [
     date: "2024-11-11",
   },
   {
-    ticketId: "6",
+    ticketId: "t6",
     projectId: "4",
     unitId: "106",
     name: "TICKET-006",
@@ -86,7 +88,7 @@ const tickets: Ticket[] = [
     date: "2024-11-10",
   },
   {
-    ticketId: "7",
+    ticketId: "t7",
     projectId: "4",
     unitId: "107",
     name: "TICKET-007",
@@ -100,59 +102,134 @@ const tickets: Ticket[] = [
 
 const TicketPage = () => {
   const { selectedProjectId } = useProjectContext();
-  const [isMounted, setIsMounted] = useState(false);
+  const [query, setQuery] = useState("");
+  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
+
+  const filterOptionsTicket = [
+    "Ticket A-Z",
+    "Status",
+    "Most Recent",
+    "Least Recent",
+    "Most Important",
+    "Least Important",
+  ];
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    const projectTickets = selectedProjectId
+      ? tickets.filter((ticket) => ticket.projectId == selectedProjectId)
+      : tickets;
 
-  if (!isMounted) {
-    return <p>Loading...</p>;
-  }
+    setFilteredTickets(
+      projectTickets.filter((ticket) =>
+        [
+          ticket.ticketId,
+          ticket.name,
+          ticket.unitId,
+          ticket.description,
+          ticket.type,
+          ticket.unit,
+          ticket.status,
+          ticket.date,
+        ].some((field) => field.toLowerCase().includes(query.toLowerCase()))
+      )
+    );
+  }, [selectedProjectId, query]);
 
-  // Filter tickets based on selectedProjectId
-  const filteredTickets =
-    selectedProjectId == ""
-      ? tickets
-      : tickets.filter((ticket) => ticket.projectId == selectedProjectId);
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
 
-  // Calculate widget counts
-  const totalTickets = filteredTickets.length;
-  const pendingTickets = filteredTickets.filter(
-    (ticket) => ticket.status === "Pending"
-  ).length;
-  const openTickets = filteredTickets.filter(
-    (ticket) => ticket.status === "Open"
-  ).length;
-  const closedTickets = filteredTickets.filter(
-    (ticket) => ticket.status === "Closed"
-  ).length;
+  const ticketCounts = useMemo(() => {
+    const total = filteredTickets.length;
+    const pending = filteredTickets.filter(
+      (ticket) => ticket.status === "Pending"
+    ).length;
+    const open = filteredTickets.filter(
+      (ticket) => ticket.status === "Open"
+    ).length;
+    const closed = filteredTickets.filter(
+      (ticket) => ticket.status === "Closed"
+    ).length;
+    return { total, pending, open, closed };
+  }, [filteredTickets]);
+
+  const handleFilterChange = (filterValue: string) => {
+    const newFilteredTickets = [...filteredTickets];
+
+    switch (filterValue) {
+      case "Ticket A-Z":
+        newFilteredTickets.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "Status":
+        newFilteredTickets.sort((a, b) => {
+          const statusOrder = { Open: 1, Pending: 2, Closed: 3 };
+          return statusOrder[a.status] - statusOrder[b.status];
+        });
+        break;
+      case "Most Recent":
+        newFilteredTickets.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        break;
+      case "Least Recent":
+        newFilteredTickets.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        break;
+      case "Most Important":
+        newFilteredTickets.sort((a, b) => {
+          const importanceOrder = { Alert: 1, Repair: 2, Other: 3 };
+          return importanceOrder[a.type] - importanceOrder[b.type];
+        });
+        break;
+      case "Least Important":
+        newFilteredTickets.sort((a, b) => {
+          const importanceOrder = { Alert: 1, Repair: 2, Other: 3 };
+          return importanceOrder[b.type] - importanceOrder[a.type];
+        });
+        break;
+      default:
+        break;
+    }
+    setFilteredTickets(newFilteredTickets);
+  };
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
-        {/* Widget Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6 border-2 border-black rounded-lg p-4">
           <TicketWidget
-            count={totalTickets}
+            count={ticketCounts.total}
             label="Total Tickets"
             backgroundColor="bg-[#56798d]"
           />
           <TicketWidget
-            count={pendingTickets}
+            count={ticketCounts.pending}
             label="Pending Tickets"
             backgroundColor="bg-[#A6634F]"
           />
           <TicketWidget
-            count={openTickets}
+            count={ticketCounts.open}
             label="Open Tickets"
             backgroundColor="bg-[#729987]"
           />
           <TicketWidget
-            count={closedTickets}
+            count={ticketCounts.closed}
             label="Closed Tickets"
             backgroundColor="bg-[#CCCCCC]"
           />
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-10 tracking-tight">
+          Your Tickets
+        </div>
+        <div className="flex items-center space-x-4">
+          <FilterComponent
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptionsTicket}
+          />
+          <Searchbar onSearch={handleSearch} />
         </div>
       </div>
       <TicketList tickets={filteredTickets} />
