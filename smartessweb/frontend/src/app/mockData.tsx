@@ -8,6 +8,13 @@ export interface HubUser {
   role: "admin" | "basic";
 }
 
+export interface OrgUser {
+  user_id: number; 
+  org_id: number;
+  proj_id: number;
+  org_user_type: string;
+}
+
 export interface TicketsType {
   total: number;
 
