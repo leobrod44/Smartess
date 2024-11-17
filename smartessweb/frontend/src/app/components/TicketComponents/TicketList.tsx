@@ -44,43 +44,43 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
               <tr>
                 <th
                   scope="col"
-                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#14323B] sm:pl-3"
+                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#14323B] sm:pl-3 w-1/12"
                 >
                   ID
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-3/12"
                 >
                   Ticket
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Type
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Unit
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-2/12"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-2/12"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-center text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-center text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Action
                 </th>
@@ -102,7 +102,7 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
                     >
                       {ticket.name}
                     </Link>
-                    <div className="text-gray-500 text-xs truncate overflow-hidden max-w-[150px]">
+                    <div className="text-gray-500 text-xs truncate overflow-hidden md:text-sm max-w-xs md:max-w-sm lg:max-w-md">
                       {ticket.description}
                     </div>
                   </td>

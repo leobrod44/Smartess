@@ -26,7 +26,7 @@ const tickets: Ticket[] = [
     unitId: "101",
     name: "TICKET-001",
     description:
-      "Fix broken window annanananananananananananananananananananan",
+      "Fix broken window dsfsfsfsfsfsfsfsfsfsfsfsfsffsanananananananandsdsdsdsdsdsananan",
     type: "Repair",
     unit: "101",
     status: "Open",
