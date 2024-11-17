@@ -77,7 +77,7 @@ const UnitPage = () => {
     })
     .sort((a, b) => {
       if (filter === "Most Pending Tickets") {
-        return b.pendingTickets - b.pendingTickets;
+        return b.pendingTickets - a.pendingTickets;
       }
       return 0; // Default case - no sorting
     });
