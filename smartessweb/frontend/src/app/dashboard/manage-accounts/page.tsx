@@ -1,13 +1,15 @@
 "use client";
 
 import ManageAccountsList from "@/app/components/ManageUsersComponents/ManageAccountsList";
-import { Project, generateMockProjects, Individual } from "../../mockData";
+import { Project, generateMockProjects, Individual, OrgUser } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import Pagination from "@mui/material/Pagination";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useProjectContext } from "@/context/ProjectProvider";
+import { orgUsersApi } from "@/api/page";
 
 const itemsPerPage = 8;
 const projects: Project[] = generateMockProjects();
@@ -21,11 +23,11 @@ const projects: Project[] = generateMockProjects();
     ie: currentUser is an organization user currently logged into the system 
 */
 const currentUser: {
-  individualId: string;
+  orgUserId: string;
   role: "master" | "admin" | "basic";
   address: string[];
 } = {
-  individualId: "ind-7",
+  orgUserId: "ind-7",                                                                             /// REMOVE THIS PART AND FETCH FROM BACKEND
   role: "master",
   address: ["1000 De La Gauchetiere", "750 Peel Street"],
 };
@@ -65,12 +67,13 @@ const consolidateUsers = (
 };
 
 const ManageUsersPage = () => {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const { selectedProjectAddress } = useProjectContext();
-  console.log(selectedProjectAddress);
-
+  const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
+  
   // Add roles to filter options
   const filterOptionsManageUsers = [
     "Address A-Z",
@@ -79,6 +82,33 @@ const ManageUsersPage = () => {
     "admin",
     "basic",
   ];
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchOrgUsers = async () => {
+      try {
+        const response = await orgUsersApi.getOrgUsersApi(token);
+        const fetchedOrgUsers = response.orgUsers;
+
+        setOrgUsers(fetchedOrgUsers);
+
+      } catch (err) {
+        console.error("Error fetching org users:", err);
+      } finally {
+        //setLoading(false);
+      }
+    };
+
+    fetchOrgUsers();
+
+  
+  }, [router]);
 
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
