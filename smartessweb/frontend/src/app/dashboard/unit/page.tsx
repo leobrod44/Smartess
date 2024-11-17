@@ -2,6 +2,8 @@
 
 import { useProjectContext } from "@/context/ProjectProvider";
 import UnitComponent from "@/app/components/UnitListComponent";
+import Searchbar from "@/app/components/Searchbar";
+import FilterComponent from "@/app/components/FilterList";
 import { useState, useEffect } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 
@@ -9,6 +11,9 @@ const UnitPage = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [projects] = useState<Project[]>(generateMockProjects());
   const { selectedProjectAddress } = useProjectContext();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState("");
+  const filterOptionsUnits = ["Most Pending Tickets"];
 
   useEffect(() => {
     setIsMounted(true);
@@ -25,21 +30,65 @@ const UnitPage = () => {
       projectAddress: project.address,
       projectId: project.projectId,
       hubUsers: project.hubUsers,
-      hubOwners: unit.owner,
-      pendingTickets: unit.ticket[2],
+      hubOwners: unit.owner.firstName,
+      pendingTickets: unit.tickets.pending,
     }))
   );
 
-  // Filtering by project in Navbar
-  const filteredUnitsByProject = allUnits.filter((unit) => {
-    const effectiveProjectAddress = selectedProjectAddress || "ALL PROJECTS";
-    const matchesProjectAddress =
-      effectiveProjectAddress === "ALL PROJECTS"
-        ? true
-        : unit.projectAddress === effectiveProjectAddress;
+  // Filtering and Sorting
+  const filteredUnitsByProject = allUnits
+    .filter((unit) => {
+      const effectiveProjectAddress = selectedProjectAddress || "ALL PROJECTS";
 
-    return matchesProjectAddress;
-  });
+      const matchesProjectAddress =
+        effectiveProjectAddress === "ALL PROJECTS"
+          ? true
+          : unit.projectAddress === effectiveProjectAddress;
+
+      const matchesSearchQuery =
+        effectiveProjectAddress === "ALL PROJECTS"
+          ? unit.projectAddress
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            unit.owner.firstName
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            unit.users.some(
+              (user) =>
+                user.firstName
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+            ) // Check each user's first and last name
+          : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            unit.owner.firstName
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            unit.users.some(
+              (user) =>
+                user.firstName
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase()) ||
+                user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+
+      return matchesProjectAddress && matchesSearchQuery;
+    })
+    .sort((a, b) => {
+      if (filter === "Most Pending Tickets") {
+        return b.pendingTickets - b.pendingTickets;
+      }
+      return 0; // Default case - no sorting
+    });
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilterChange = (filterValue: string) => {
+    setFilter(filterValue);
+  };
 
   return (
     <div>
@@ -51,14 +100,22 @@ const UnitPage = () => {
             </h2>
           </div>
           {/* Filtering and searching div */}
-          <div className="flex flex-row"></div>
+          <div className="flex flex-row">
+            <div className="pt-2">
+              <FilterComponent
+                onFilterChange={handleFilterChange}
+                filterOptions={filterOptionsUnits}
+              />
+            </div>
+            <Searchbar onSearch={handleSearch} />
+          </div>
         </div>
 
         <div className="bg-[#4b7d8d] p-[10px] rounded-[7px] w-full mx-auto mt-4">
           {/* Mapping of Filtered units by project selected in navar */}
           {filteredUnitsByProject.map((unit) => (
             <UnitComponent
-              key={unit.unitNumber}
+              key={`${unit.projectId}-${unit.unitNumber}`}
               unit={unit}
               projectAddress={unit.projectAddress}
             />
