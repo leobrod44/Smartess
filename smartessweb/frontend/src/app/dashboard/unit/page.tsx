@@ -50,7 +50,7 @@ const UnitPage = () => {
           ? unit.projectAddress
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.owner.firstName
+            unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
             unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
