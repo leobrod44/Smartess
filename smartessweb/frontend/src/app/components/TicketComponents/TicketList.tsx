@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface Ticket {
@@ -94,7 +95,12 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
                     {ticket.ticketId}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-[#14323B]">
-                    <div className="font-semibold">{ticket.name}</div>
+                    <Link
+                      href={`/dashboard/ticket/${ticket.ticketId}`}
+                      className="font-semibold text-[#14323B] hover:underline"
+                    >
+                      {ticket.name}
+                    </Link>
                     <div className="text-gray-500 text-xs truncate overflow-hidden max-w-[150px]">
                       {ticket.description}
                     </div>

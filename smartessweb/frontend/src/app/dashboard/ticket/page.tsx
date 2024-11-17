@@ -3,7 +3,7 @@
 import { useProjectContext } from "@/context/ProjectProvider";
 import { useEffect, useState } from "react";
 import TicketList from "@/app/components/TicketComponents/TicketList";
-import Link from "next/link";
+import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 
 interface Ticket {
   ticketId: string;
@@ -116,16 +116,45 @@ const TicketPage = () => {
       ? tickets
       : tickets.filter((ticket) => ticket.projectId == selectedProjectId);
 
+  // Calculate widget counts
+  const totalTickets = filteredTickets.length;
+  const pendingTickets = filteredTickets.filter(
+    (ticket) => ticket.status === "Pending"
+  ).length;
+  const openTickets = filteredTickets.filter(
+    (ticket) => ticket.status === "Open"
+  ).length;
+  const closedTickets = filteredTickets.filter(
+    (ticket) => ticket.status === "Closed"
+  ).length;
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
-        {/* Widget and Search Bar */}
+        {/* Widget Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6">
+          <TicketWidget
+            count={totalTickets}
+            label="Total Tickets"
+            backgroundColor="bg-[#56798d]"
+          />
+          <TicketWidget
+            count={pendingTickets}
+            label="Pending Tickets"
+            backgroundColor="bg-[#A6634F]"
+          />
+          <TicketWidget
+            count={openTickets}
+            label="Open Tickets"
+            backgroundColor="bg-[#729987]"
+          />
+          <TicketWidget
+            count={closedTickets}
+            label="Closed Tickets"
+            backgroundColor="bg-[#CCCCCC]"
+          />
+        </div>
       </div>
-      <Link href="../dashboard/individual-tickets">
-        <button className="bg-[#4b7d8d] pl-2 text-white h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300">
-          Click here to go to individual ticket page
-        </button>
-      </Link>
       <TicketList tickets={filteredTickets} />
     </div>
   );
