@@ -58,7 +58,7 @@ const UnitPage = () => {
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
           : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            unit.owner.firstName
+            unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
             unit.users.some((user) =>
