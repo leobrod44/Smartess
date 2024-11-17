@@ -54,23 +54,15 @@ const UnitPage = () => {
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
             unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            unit.users.some(
-              (user) =>
-                user.firstName
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+            unit.users.some((user) =>
+              user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
           : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.owner.firstName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.users.some(
-              (user) =>
-                user.firstName
-                  .toLowerCase()
-                  .includes(searchQuery.toLowerCase()) ||
-                user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+            unit.users.some((user) =>
+              user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             );
 
       return matchesProjectAddress && matchesSearchQuery;
