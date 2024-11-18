@@ -282,7 +282,7 @@ const generateMockTickets = (): TicketsType => ({
 
 const generateMockTickets2 = (): Ticket[] => [
   {
-    ticket_id: "1",
+    ticket_id: "t1",
 
     unit_id: "1",
 
@@ -310,7 +310,7 @@ const generateMockTickets2 = (): Ticket[] => [
     assigned_employees: generateMockProjectUsers(),
   },
   {
-    ticket_id: "2",
+    ticket_id: "t2",
 
     unit_id: "1",
 
@@ -337,7 +337,7 @@ const generateMockTickets2 = (): Ticket[] => [
     assigned_employees: generateMockProjectUsers2(),
   },
   {
-    ticket_id: "3",
+    ticket_id: "t3",
 
     unit_id: "3",
 
