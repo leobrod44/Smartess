@@ -1,12 +1,12 @@
-import { User } from "../../mockData";
+import { HubUser } from "../../mockData";
 
 interface HubUsersProps {
-  users: User[];
+  hubUsers: HubUser[];
 }
 
-const HubUsers = ({ users }: HubUsersProps) => {
+const HubUsers = ({ hubUsers }: HubUsersProps) => {
   //only display first 3 users
-  const displayedUsers = users.slice(0, 3);
+  const displayedUsers = hubUsers.slice(0, 3);
 
   // Function to format the names as "M. Johnson"
   const formatUserName = (firstName: string, lastName: string) => {
@@ -25,12 +25,12 @@ const HubUsers = ({ users }: HubUsersProps) => {
       </div>
       <div className="flex flex-col w-full gap-1">
         <div className="flex-col justify-center items-center gap-1 inline-flex">
-          {displayedUsers.map((user, index) => (
+          {displayedUsers.map((hubUsers, index) => (
             <div
               key={index}
               className="text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight text-center pb-1"
             >
-              {formatUserName(user.firstName, user.lastName)}
+              {formatUserName(hubUsers.firstName, hubUsers.lastName)}
             </div>
           ))}
         </div>

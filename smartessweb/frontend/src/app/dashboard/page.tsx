@@ -68,7 +68,7 @@ const DashboardPage = () => {
         .toLowerCase()
         .includes(query.toLowerCase());
       const userMatch = project.units.some((unit) =>
-        unit.users.some((user) =>
+        unit.hubUsers.some((user) =>
           `${user.firstName} ${user.lastName}`
             .toLowerCase()
             .includes(query.toLowerCase())

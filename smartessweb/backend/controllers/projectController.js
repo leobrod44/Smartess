@@ -136,7 +136,7 @@ exports.getUserProjects = async (req, res) => {
                 // Return the transformed unit data with the owner populated
                 return {
                     unitNumber: hub.unit_number,
-                    users: users.filter(user => user !== null),
+                    hubUsers: users.filter(user => user !== null),
                     tickets: {  
                         total: 0,
                         open: 0,
@@ -152,9 +152,9 @@ exports.getUserProjects = async (req, res) => {
             return {
                 projectId: project.proj_id,
                 address: project.address,
-                adminUsers: project.admin_users_count,
-                hubUsers: project.hub_users_count,
-                pendingTickets: project.pending_tickets_count,
+                adminUsersCount: project.admin_users_count,
+                hubUsersCount: project.hub_users_count,
+                pendingTicketsCount: project.pending_tickets_count,
                 projectUsers: [], // Empty array
                 units: units.filter(unit => unit !== null) 
             };

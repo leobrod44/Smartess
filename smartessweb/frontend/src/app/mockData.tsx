@@ -1,4 +1,4 @@
-export interface User {
+export interface HubUser {
   tokenId: string;
 
   firstName: string;
@@ -6,6 +6,13 @@ export interface User {
   lastName: string;
 
   role: "admin" | "basic";
+}
+
+export interface OrgUser {
+  user_id: number; 
+  org_id: number;
+  proj_id: number;
+  org_user_type: string;
 }
 
 export interface TicketsType {
@@ -35,11 +42,11 @@ export interface Project {
 
   address: string;
 
-  adminUsers: number;
+  adminUsersCount: number;
 
-  hubUsers: number;
+  hubUsersCount: number;
 
-  pendingTickets: number;
+  pendingTicketsCount: number;
 
   units: Unit[];
 
@@ -61,7 +68,7 @@ export interface Unit {
 
   unitNumber: string;
 
-  users: User[];
+  hubUsers: HubUser[];
 
   ticket: Ticket[];
 
@@ -131,11 +138,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "1000 De La Gauchetiere",
 
-      adminUsers: 1, //all of these numbers shouldnt be harcoded, but be the sum of all of these values within the unit components
+      adminUsersCount: 1, //all of these numbers shouldnt be harcoded, but be the sum of all of these values within the unit components
 
-      hubUsers: 6,
+      hubUsersCount: 6,
 
-      pendingTickets: 4,
+      pendingTicketsCount: 4,
 
       projectUsers: generateMockProjectUsers(),
 
@@ -147,11 +154,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "750 Peel Street",
 
-      adminUsers: 2,
+      adminUsersCount: 2,
 
-      hubUsers: 3,
+      hubUsersCount: 3,
 
-      pendingTickets: 10,
+      pendingTicketsCount: 10,
 
       projectUsers: generateMockProjectUsers2(),
 
@@ -163,11 +170,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "50 Rue Guy",
 
-      adminUsers: 1,
+      adminUsersCount: 1,
 
-      hubUsers: 1,
+      hubUsersCount: 1,
 
-      pendingTickets: 3,
+      pendingTicketsCount: 3,
 
       projectUsers: generateMockProjectUsers3(),
 
@@ -179,11 +186,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "131 Chemin des Coniferes",
 
-      adminUsers: 3,
+      adminUsersCount: 3,
 
-      hubUsers: 6,
+      hubUsersCount: 6,
 
-      pendingTickets: 4,
+      pendingTicketsCount: 4,
 
       projectUsers: generateMockProjectUsers2(),
 
@@ -203,7 +210,7 @@ export const generateMockUnits = (): Unit[] => [
 
     unitNumber: "101",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -219,7 +226,7 @@ export const generateMockUnits = (): Unit[] => [
     unit_id: "2",
     unitNumber: "102",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -235,7 +242,7 @@ export const generateMockUnits = (): Unit[] => [
     unit_id: "3",
     unitNumber: "103",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -251,7 +258,7 @@ export const generateMockUnits = (): Unit[] => [
 
 // Function to generate mock users
 
-const generateMockUsers = (): User[] => [
+const generateMockUsers = (): HubUser[] => [
   { tokenId: "2", firstName: "Mary", lastName: "Johnson", role: "basic" },
 
   { tokenId: "3", firstName: "Ken", lastName: "Long", role: "basic" },
@@ -452,7 +459,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "101",
 
-    users: generateMockUsers2(),
+    hubUsers: generateMockUsers2(),
 
     ticket: generateMockTickets2(),
 
@@ -469,7 +476,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "102",
 
-    users: generateMockUsers(),
+    hubUsers: generateMockUsers(),
 
     ticket: generateMockTickets2(),
 
@@ -486,7 +493,7 @@ const generateMockUnits2 = (): Unit[] => [
 
     unitNumber: "103",
 
-    users: generateMockUsers2(),
+    hubUsers: generateMockUsers2(),
 
     ticket: generateMockTickets2(),
 
@@ -516,7 +523,7 @@ const generateMockOwner2 = (): Owner => ({
 
 // Second Function to generate mock users, simply to test searchbar
 
-const generateMockUsers2 = (): User[] => [
+const generateMockUsers2 = (): HubUser[] => [
   { tokenId: "6", firstName: "BILL", lastName: "Bong", role: "basic" },
 
   { tokenId: "7", firstName: "Penny", lastName: "Wise", role: "basic" },
