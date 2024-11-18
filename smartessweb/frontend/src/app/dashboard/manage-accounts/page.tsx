@@ -93,13 +93,15 @@ const ManageUsersPage = () => {
 
     const fetchOrgUsers = async () => {
       try {
+        console.log("Fetching organization users...");
         const response = await orgUsersApi.getOrgUsersApi(token);
         const fetchedOrgUsers = response.orgUsers;
 
         setOrgUsers(fetchedOrgUsers);
 
+        console.log("Organization users fetched successfully.");
       } catch (err) {
-        console.error("Error fetching org users:", err);
+        console.error("Error fetching organization users:", err);
       } finally {
         //setLoading(false);
       }
@@ -107,13 +109,12 @@ const ManageUsersPage = () => {
 
     fetchOrgUsers();
 
-  
   }, [router]);
 
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
   };
-
+  console.log(orgUsers);
   const consolidatedUsers = consolidateUsers(
     projects,
     currentUser.address,
