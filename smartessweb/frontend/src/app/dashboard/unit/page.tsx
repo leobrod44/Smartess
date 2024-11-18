@@ -24,7 +24,7 @@ const UnitPage = () => {
       ...unit,
       projectAddress: project.address,
       projectId: project.projectId,
-      hubUsers: project.hubUsers,
+      hubUsersCount: project.hubUsersCount,
       hubOwners: unit.owner,
       pendingTickets: unit.ticket[2],
     }))

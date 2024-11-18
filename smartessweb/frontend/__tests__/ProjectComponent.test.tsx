@@ -22,9 +22,9 @@ describe("ProjectInfo", () => {
           alerts: [{message: "Smoke Alarm Activated",}]
          }
       ],
-      adminUsers: 9,
-      hubUsers: 1,
-      pendingTickets: 16,
+      adminUsersCount: 9,
+      hubUsersCount: 1,
+      pendingTicketsCount: 16,
     },
     {
       projectId: "2",
@@ -37,9 +37,9 @@ describe("ProjectInfo", () => {
           alerts: [{message: "Smoke Alarm Activated",}]
         }, 
       ],
-      adminUsers: 30,
-      hubUsers: 32,
-      pendingTickets: 39,
+      adminUsersCount: 30,
+      hubUsersCount: 32,
+      pendingTicketsCount: 39,
     },
   ];
 

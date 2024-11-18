@@ -42,11 +42,11 @@ export interface Project {
 
   address: string;
 
-  adminUsers: number;
+  adminUsersCount: number;
 
-  hubUsers: number;
+  hubUsersCount: number;
 
-  pendingTickets: number;
+  pendingTicketsCount: number;
 
   units: Unit[];
 
@@ -138,11 +138,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "1000 De La Gauchetiere",
 
-      adminUsers: 1, //all of these numbers shouldnt be harcoded, but be the sum of all of these values within the unit components
+      adminUsersCount: 1, //all of these numbers shouldnt be harcoded, but be the sum of all of these values within the unit components
 
-      hubUsers: 6,
+      hubUsersCount: 6,
 
-      pendingTickets: 4,
+      pendingTicketsCount: 4,
 
       projectUsers: generateMockProjectUsers(),
 
@@ -154,11 +154,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "750 Peel Street",
 
-      adminUsers: 2,
+      adminUsersCount: 2,
 
-      hubUsers: 3,
+      hubUsersCount: 3,
 
-      pendingTickets: 10,
+      pendingTicketsCount: 10,
 
       projectUsers: generateMockProjectUsers2(),
 
@@ -170,11 +170,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "50 Rue Guy",
 
-      adminUsers: 1,
+      adminUsersCount: 1,
 
-      hubUsers: 1,
+      hubUsersCount: 1,
 
-      pendingTickets: 3,
+      pendingTicketsCount: 3,
 
       projectUsers: generateMockProjectUsers3(),
 
@@ -186,11 +186,11 @@ export const generateMockProjects = (): Project[] => {
 
       address: "131 Chemin des Coniferes",
 
-      adminUsers: 3,
+      adminUsersCount: 3,
 
-      hubUsers: 6,
+      hubUsersCount: 6,
 
-      pendingTickets: 4,
+      pendingTicketsCount: 4,
 
       projectUsers: generateMockProjectUsers2(),
 
