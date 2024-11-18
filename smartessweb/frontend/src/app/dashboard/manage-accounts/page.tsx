@@ -114,7 +114,7 @@ const ManageUsersPage = () => {
   const handleFilterChange = (filterValue: string) => {
     setFilter(filterValue);
   };
-  console.log(orgUsers);
+
   const consolidatedUsers = consolidateUsers(
     projects,
     currentUser.address,
