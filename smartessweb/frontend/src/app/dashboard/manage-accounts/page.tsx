@@ -98,6 +98,7 @@ const ManageUsersPage = () => {
         const fetchedOrgUsers = response.orgUsers;
 
         setOrgUsers(fetchedOrgUsers);
+        console.log(orgUsers)
 
         console.log("Organization users fetched successfully.");
       } catch (err) {
