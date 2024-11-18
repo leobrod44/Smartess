@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { Pagination } from "@mui/material";
 
 interface Ticket {
   ticketId: string;
@@ -13,6 +16,22 @@ interface Ticket {
 }
 
 const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
+  const [page, setPage] = useState(1);
+  const ticketsPerPage = 20;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
+
+  const startIndex = (page - 1) * ticketsPerPage;
+  const ticketsToDisplay = tickets.slice(
+    startIndex,
+    startIndex + ticketsPerPage
+  );
+
   const formatStatus = (status: string) => {
     switch (status) {
       case "Open":
@@ -25,7 +44,8 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
   };
 
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
+    const [year, month, day] = dateStr.split("-").map(Number);
+    const date = new Date(year, month - 1, day);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -42,50 +62,50 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
               <tr>
                 <th
                   scope="col"
-                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#14323B] sm:pl-3"
+                  className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-[#14323B] sm:pl-3 w-1/12"
                 >
                   ID
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-3/12"
                 >
                   Ticket
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Type
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Unit
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-2/12"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-left text-sm font-semibold text-[#14323B] w-2/12"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="px-3 py-3.5 text-center text-sm font-semibold text-[#14323B]"
+                  className="px-3 py-3.5 text-center text-sm font-semibold text-[#14323B] w-1/12"
                 >
                   Action
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white">
-              {tickets.map((ticket) => (
+              {ticketsToDisplay.map((ticket) => (
                 <tr
                   key={ticket.ticketId}
                   className="even:bg-gray-50"
@@ -94,8 +114,13 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
                     {ticket.ticketId}
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-[#14323B]">
-                    <div className="font-semibold">{ticket.name}</div>
-                    <div className="text-gray-500 text-xs truncate overflow-hidden max-w-[150px]">
+                    <Link
+                      href={`/dashboard/ticket/${ticket.ticketId}`}
+                      className="font-semibold text-[#14323B] hover:underline"
+                    >
+                      {ticket.name}
+                    </Link>
+                    <div className="text-gray-500 text-xs truncate overflow-hidden md:text-sm max-w-xs md:max-w-sm lg:max-w-md">
                       {ticket.description}
                     </div>
                   </td>
@@ -130,6 +155,14 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="flex justify-center mt-4">
+        <Pagination
+          count={Math.ceil(tickets.length / ticketsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          color="primary"
+        />
       </div>
     </div>
   );
