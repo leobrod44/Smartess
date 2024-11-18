@@ -5,7 +5,6 @@ import IndividualTicket from "@/app/components/IndividualTicketPageComponents/In
 import { generateMockProjects, Ticket } from "@/app/mockData"; // Adjusted the import path for mockData
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
-import { useProjectContext } from "@/context/ProjectProvider";
 
 const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
   const { ticketId } = params;
