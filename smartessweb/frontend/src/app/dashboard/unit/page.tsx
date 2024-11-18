@@ -29,9 +29,9 @@ const UnitPage = () => {
       ...unit,
       projectAddress: project.address,
       projectId: project.projectId,
-      hubUsers: project.hubUsers,
-      hubOwners: unit.owner.firstName,
-      pendingTickets: unit.tickets.pending,
+      hubUsersCount: project.hubUsersCount,
+      hubOwners: unit.owner,
+      pendingTickets: unit.ticket[2],
     }))
   );
 
@@ -54,14 +54,14 @@ const UnitPage = () => {
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
             unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            unit.users.some((user) =>
+            unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
           : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.users.some((user) =>
+            unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             );
 
@@ -69,7 +69,7 @@ const UnitPage = () => {
     })
     .sort((a, b) => {
       if (filter === "Most Pending Tickets") {
-        return b.pendingTickets - a.pendingTickets;
+        return Number(b.pendingTickets) - Number(a.pendingTickets);
       }
       return 0; // Default case - no sorting
     });

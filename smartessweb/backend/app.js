@@ -16,6 +16,7 @@ const userRoutes = require('./routes/userRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const hubRoutes = require('./routes/hubRoutes');
 const widgetRoutes = require('./routes/widgetRoutes');
+const manageAccountsRoutes = require('./routes/manageAccountsRoutes');
 
 //Add path here
 app.use('/api/auth', authRoutes);
@@ -24,5 +25,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/hubs', hubRoutes);
 app.use('/api/widgets', widgetRoutes);
+app.use('/api/manage-accounts', manageAccountsRoutes);
 
 module.exports = app;

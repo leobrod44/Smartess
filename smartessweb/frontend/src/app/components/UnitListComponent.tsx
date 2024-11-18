@@ -5,7 +5,7 @@ import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
 import ActiveAlert from "./UnitComponents/ActiveAlerts";
-import { User, TicketsType, Owner, Unit } from "../mockData";
+import { HubUser, TicketsType, Owner, Unit } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -14,7 +14,7 @@ const UnitComponent = ({
   unit: Unit;
   projectAddress: string;
 }) => {
-  const [users] = useState<User[]>(unit.users || []);
+  const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
   const router = useRouter();
   const [tickets] = useState<TicketsType>(
     unit.tickets || {
@@ -70,7 +70,7 @@ const UnitComponent = ({
           </div>
 
           <div className="flex-1 md:min-w-[108px]">
-            <HubUsers users={users} />
+            <HubUsers hubUsers={hubUsers} />
           </div>
           <div className="flex-1">
             <ActiveAlert activeAlerts={activeAlerts} />
