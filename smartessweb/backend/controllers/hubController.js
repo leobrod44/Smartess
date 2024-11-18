@@ -108,7 +108,7 @@ exports.getHubDetails = async (req, res) => {
 
         res.json({
             owner,
-            users,
+            hubUsers: users,
             tickets: ticketStats,
             alerts: formattedAlerts
         });

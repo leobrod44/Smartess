@@ -14,7 +14,7 @@ const UnitComponent = ({
   unit: Unit;
   projectAddress: string;
 }) => {
-  const [users] = useState<HubUser[]>(unit.hubUsers || []);
+  const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
   const router = useRouter();
   const [tickets] = useState<TicketsType>(
     unit.tickets || {
@@ -70,7 +70,7 @@ const UnitComponent = ({
           </div>
 
           <div className="flex-1 md:min-w-[108px]">
-            <HubUsers hubUsers={users} />
+            <HubUsers hubUsers={hubUsers} />
           </div>
           <div className="flex-1">
             <ActiveAlert activeAlerts={activeAlerts} />

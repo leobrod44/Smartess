@@ -24,7 +24,7 @@ const UnitComponent = ({
   projectId,
   isTest = false,
 }: UnitComponentProps) => {
-  const [users, setUsers] = useState<HubUser[]>([]);
+  const [hubUsers, setHubUsers] = useState<HubUser[]>([]);
   const [tickets, setTickets] = useState<TicketsType>({
     total: 0,
     open: 0,
@@ -58,7 +58,7 @@ const UnitComponent = ({
         if (isTest) {
           const unit = await fetchMockData(projectId, unitNumber);
           if (unit) {
-            setUsers(unit.hubUsers);
+            setHubUsers(unit.hubUsers);
             setTickets(unit.tickets);
             setOwner(unit.owner);
             setAlerts(unit.alerts);
@@ -71,7 +71,7 @@ const UnitComponent = ({
           }
 
           const data = await hubApi.getHubDetails(projectId, unitNumber, token);
-          setUsers(data.hubUsers);
+          setHubUsers(data.hubUsers);
           setTickets(data.tickets);
           setOwner(data.owner);
           setAlerts(data.alerts);
@@ -121,7 +121,7 @@ const UnitComponent = ({
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
 
         <div className="flex-1 md:min-w-[108px]">
-          <HubUsers hubUsers={users} />
+          <HubUsers hubUsers={hubUsers} />
         </div>
 
         <div className="divider bg-[#a0bfca] w-[1px]"></div>
