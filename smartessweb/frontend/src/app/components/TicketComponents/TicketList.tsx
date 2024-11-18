@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { Pagination } from "@mui/material";
 
 interface Ticket {
   ticketId: string;
@@ -14,6 +16,22 @@ interface Ticket {
 }
 
 const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
+  const [page, setPage] = useState(1);
+  const ticketsPerPage = 20;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
+
+  const startIndex = (page - 1) * ticketsPerPage;
+  const ticketsToDisplay = tickets.slice(
+    startIndex,
+    startIndex + ticketsPerPage
+  );
+
   const formatStatus = (status: string) => {
     switch (status) {
       case "Open":
@@ -87,7 +105,7 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {tickets.map((ticket) => (
+              {ticketsToDisplay.map((ticket) => (
                 <tr
                   key={ticket.ticketId}
                   className="even:bg-gray-50"
@@ -137,6 +155,14 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="flex justify-center mt-4">
+        <Pagination
+          count={Math.ceil(tickets.length / ticketsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          color="primary"
+        />
       </div>
     </div>
   );
