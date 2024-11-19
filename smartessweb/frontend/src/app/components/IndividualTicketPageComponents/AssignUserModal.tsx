@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CondensedUserComponent from "./CondensedUserComponent";
 import { Individual } from "@/app/mockData";
 import Pagination from "@mui/material/Pagination";
+import Searchbar from "@/app/components/Searchbar";
 
 interface AssignUserModalProps {
   onClose: () => void;
@@ -15,28 +16,12 @@ const AssignUserModalComponent = ({
   availableUsers,
   onAssignUser,
 }: AssignUserModalProps) => {
+  const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const [assignedUsers, setAssignedUsers] = useState<{
     [key: string]: boolean;
   }>({});
-  const availableUsersCopy = [...availableUsers];
-
-  const totalPages = Math.ceil(availableUsersCopy.length / itemsPerPage);
-  const currentItems = availableUsersCopy.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  console.log("Current Page:", currentPage);
-  console.log(
-    "Current Items:",
-    currentItems.map((item) => item.individualId)
-  );
-  console.log(
-    "Available Users:",
-    availableUsers.map((item) => item.individualId)
-  );
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -50,6 +35,23 @@ const AssignUserModalComponent = ({
     onAssignUser(userId, newState);
   };
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const filteredUsers = availableUsers.filter(({ firstName, lastName }) => {
+    const fullName = `${firstName} ${lastName}`.toLowerCase();
+    const query = searchQuery.toLowerCase();
+    return fullName.includes(query);
+  });
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const currentItems = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className=" w-[500px] relative border-2 bg-white border-[#266472] rounded-md px-5 py-5 flex-col gap-3 inline-flex">
@@ -62,6 +64,7 @@ const AssignUserModalComponent = ({
         <div className="w-full text-center text-[#14323b] text-lg font-['Sequel Sans'] my-2">
           Users Available for Assignment
         </div>
+        <Searchbar onSearch={handleSearch} />
 
         <div className="w-full flex justify-between flex items-center text-[#266472]">
           <div className="w-1/4 text-s leading-tight tracking-tight whitespace-nowrap">
