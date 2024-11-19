@@ -59,6 +59,7 @@ export interface Individual {
   firstName: string;
   lastName: string;
   role: "admin" | "basic" | "master";
+  assigned_tickets: Ticket[]; //list of tickets this user is assigned to
 }
 
 export interface Unit {
@@ -539,12 +540,14 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
+    assigned_tickets:generateMockTickets2(),
   },
   {
     individualId: "ind-2",
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
+    assigned_tickets:generateMockTickets2(),
   },
   /*   {
     individualId: "ind-3",
@@ -561,12 +564,14 @@ const generateMockProjectUsers2 = (): Individual[] => [
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
+    assigned_tickets:generateMockTickets2(),
   },
   {
     individualId: "ind-4",
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
+    assigned_tickets:generateMockTickets2(),
   },
 ];
 
@@ -576,11 +581,13 @@ const generateMockProjectUsers3 = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    assigned_tickets:generateMockTickets2(),
   },
   {
     individualId: "ind-6",
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    assigned_tickets:generateMockTickets2(),
   },
 ];
