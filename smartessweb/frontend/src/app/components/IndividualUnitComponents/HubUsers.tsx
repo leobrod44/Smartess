@@ -43,7 +43,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                 {user.email}
               </p>
               <p>
-                <button className="ml-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+                <button className="ml-2 mt-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                   Contact
                 </button>
               </p>
