@@ -7,7 +7,7 @@ const CloseTicketModal = ({
 }) => {
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8  lg:ml-[25%] xl:ml-[25%]">
+      <div className="bg-white rounded-xl shadow-lg p-8">
         <div className="text-[#254752] text-s font-sequel-sans-black mb-4">
           Are you sure you want to close this ticket?
         </div>
