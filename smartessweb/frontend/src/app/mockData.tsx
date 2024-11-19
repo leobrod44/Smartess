@@ -603,7 +603,7 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     role: "admin",
   },
   {
-    individualId: "ind-6",
+    individualId: "ind-12",
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",

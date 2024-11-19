@@ -1,7 +1,8 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import CondensedUserComponent from "./CondensedUserComponent";
 import { Individual } from "@/app/mockData";
+import Pagination from "@mui/material/Pagination";
 
 interface AssignUserModalProps {
   onClose: () => void;
@@ -14,9 +15,41 @@ const AssignUserModalComponent = ({
   availableUsers,
   onAssignUser,
 }: AssignUserModalProps) => {
+  const itemsPerPage = 4;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [assignedUsers, setAssignedUsers] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const availableUsersCopy = [...availableUsers];
+
+  const totalPages = Math.ceil(availableUsersCopy.length / itemsPerPage);
+  const currentItems = availableUsersCopy.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  console.log("Current Page:", currentPage);
+  console.log(
+    "Current Items:",
+    currentItems.map((item) => item.individualId)
+  );
+  console.log(
+    "Available Users:",
+    availableUsers.map((item) => item.individualId)
+  );
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
   const handleToggleAssign = (userId: string, newState: boolean) => {
+    setAssignedUsers((prev) => ({ ...prev, [userId]: newState }));
     onAssignUser(userId, newState);
   };
+
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className=" w-[500px] relative border-2 bg-white border-[#266472] rounded-md px-5 py-5 flex-col gap-3 inline-flex">
@@ -42,16 +75,27 @@ const AssignUserModalComponent = ({
           </div>
         </div>
 
-        {availableUsers.slice(0, 4).map((user) => (
+        {currentItems.map((user) => (
           <CondensedUserComponent
             key={user.individualId}
             Individual={user}
-            isAssigned={false}
+            isAssigned={!!assignedUsers[user.individualId]}
             onToggle={(newState) =>
               handleToggleAssign(user.individualId, newState)
             }
           />
         ))}
+
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            className="custom-pagination"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </div>
+
         <div className="flex justify-center items-center mt-3 w-full">
           <button
             className="px-4 py-2 bg-[#266472] rounded-md text-center text-white text-s font-['Sequel Sans'] leading-tight tracking-tight hover:bg-[#14323b] transition duration-300"

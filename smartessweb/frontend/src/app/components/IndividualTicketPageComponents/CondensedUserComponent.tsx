@@ -12,12 +12,10 @@ const CondensedUserComponent = ({
   isAssigned,
   onToggle,
 }: CondensedUserProps) => {
-  const [assigned, setAssigned] = useState(isAssigned);
 
   const handleToggle = () => {
-    const newState = !assigned;
-    setAssigned(newState);
-    onToggle(newState);
+    const newState = !isAssigned;
+    onToggle(newState); //notify parent of toggle
   };
 
   return (
@@ -32,7 +30,7 @@ const CondensedUserComponent = ({
         <label className="relative inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
-            checked={assigned}
+            checked={isAssigned}
             onChange={handleToggle}
             className="sr-only peer"
           />
