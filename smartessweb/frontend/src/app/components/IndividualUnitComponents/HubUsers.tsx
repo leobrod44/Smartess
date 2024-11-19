@@ -36,7 +36,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
             <div>{user.telephone || "Not Provided"}</div>
             <div>{user.email}</div>
             <div>
-              <button className="w-[80px] h-[22px] bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+              <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                 Contact
               </button>
             </div>
