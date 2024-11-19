@@ -30,18 +30,14 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
           >
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center">
-              <p>
-                <div className="text-[#14323B] font-semibold">User:</div>{" "}
-                {user.firstName} {user.lastName}
-              </p>
-              <p>
-                <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
-                {user.telephone || "Not Provided"}
-              </p>
-              <p>
-                <div className="text-[#14323B] font-semibold">Email:</div>{" "}
-                {user.email}
-              </p>
+              <div className="text-[#14323B] font-semibold">User:</div>{" "}
+              {user.firstName} {user.lastName}
+              <div className="text-[#14323B] font-semibold">
+                Telephone:
+              </div>{" "}
+              {user.telephone || "Not Provided"}
+              <div className="text-[#14323B] font-semibold">Email:</div>{" "}
+              {user.email}
               <p>
                 <button className="ml-2 mt-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                   Contact
@@ -64,6 +60,11 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
             </div>
           </div>
         ))}
+      </div>
+      <div className=" flex justify-center md:flex justify-center">
+        <button className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+          Manage All Users
+        </button>
       </div>
     </div>
   );
