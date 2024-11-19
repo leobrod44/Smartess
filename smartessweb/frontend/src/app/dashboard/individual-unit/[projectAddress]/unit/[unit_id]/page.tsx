@@ -49,7 +49,7 @@ export default function UnitPage({
           </div>
         </div>
 
-        <div className="my-4 rounded-lg bg-[#4b7d8d] p-2">
+        <div className=" rounded-lg bg-[#4b7d8d] p-2">
           <div className="bg-white rounded-lg p-4">
             <HubUsers hubUsers={unit.hubUsers} />
           </div>
