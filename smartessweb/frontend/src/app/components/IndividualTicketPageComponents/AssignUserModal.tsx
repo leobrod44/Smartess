@@ -42,7 +42,7 @@ const AssignUserModalComponent = ({
           </div>
         </div>
 
-        {availableUsers.map((user) => (
+        {availableUsers.slice(0, 4).map((user) => (
           <CondensedUserComponent
             key={user.individualId}
             Individual={user}
@@ -52,7 +52,6 @@ const AssignUserModalComponent = ({
             }
           />
         ))}
-
         <div className="flex justify-center items-center mt-3 w-full">
           <button
             className="px-4 py-2 bg-[#266472] rounded-md text-center text-white text-s font-['Sequel Sans'] leading-tight tracking-tight hover:bg-[#14323b] transition duration-300"

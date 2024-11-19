@@ -602,4 +602,40 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     lastName: "Eilish",
     role: "admin",
   },
+  {
+    individualId: "ind-6",
+    firstName: "Mark",
+    lastName: "Johns",
+    role: "admin",
+  },
+  {
+    individualId: "ind-7",
+    firstName: "Kellie",
+    lastName: "Bells",
+    role: "admin",
+  },
+  {
+    individualId: "ind-8",
+    firstName: "Kaitlyn",
+    lastName: "Jingle",
+    role: "admin",
+  },
+  {
+    individualId: "ind-9",
+    firstName: "Timothy",
+    lastName: "Brown",
+    role: "admin",
+  },
+  {
+    individualId: "ind-10",
+    firstName: "Bob",
+    lastName: "Blinker",
+    role: "admin",
+  },
+  {
+    individualId: "ind-11",
+    firstName: "Sarah",
+    lastName: "Michaels",
+    role: "admin",
+  },
 ];
