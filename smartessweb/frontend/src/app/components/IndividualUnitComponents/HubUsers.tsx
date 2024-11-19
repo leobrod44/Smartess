@@ -13,7 +13,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       </div>
 
       {/* Table Headers */}
-      <div className="grid grid-cols-4 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
+      <div className="hidden md:grid md:grid-cols-4 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
         <div>User</div>
         <div>Telephone</div>
         <div>Email</div>
@@ -26,15 +26,37 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
         {hubUsers.map((user, index) => (
           <div
             key={index}
-            className="grid grid-cols-4 w-full text-center text-black text-sm"
+            className="md:grid md:grid-cols-4 w-full text-center text-black text-sm gap-2"
           >
-            <div>
+            {/* Stacked view for small screens */}
+            <div className="md:hidden text-center">
+              <p>
+                <strong>User:</strong> {user.firstName} {user.lastName}
+              </p>
+              <p>
+                <strong>Telephone:</strong> {user.telephone || "Not Provided"}
+              </p>
+              <p>
+                <strong>Email:</strong> {user.email}
+              </p>
+              <p>
+                <strong>Contact:</strong>
+                <button className="ml-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+                  Contact
+                </button>
+              </p>
+            </div>
+
+            {/* Table view for medium and larger screens */}
+            <div className="hidden md:block">
               {user.firstName} {user.lastName}
             </div>
-            <div>{user.telephone || "Not Provided"}</div>
-            <div>{user.email}</div>
-            <div>
-              <button className="w-[80px] h-[22px] ml-4 bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+            <div className="hidden md:block">
+              {user.telephone || "Not Provided"}
+            </div>
+            <div className="hidden md:block">{user.email}</div>
+            <div className="hidden md:flex justify-center">
+              <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                 Contact
               </button>
             </div>
