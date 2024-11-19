@@ -31,13 +31,16 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center">
               <p>
-                <strong>User:</strong> {user.firstName} {user.lastName}
+                <div className="text-[#14323B] font-semibold">User:</div>{" "}
+                {user.firstName} {user.lastName}
               </p>
               <p>
-                <strong>Telephone:</strong> {user.telephone || "Not Provided"}
+                <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
+                {user.telephone || "Not Provided"}
               </p>
               <p>
-                <strong>Email:</strong> {user.email}
+                <div className="text-[#14323B] font-semibold">Email:</div>{" "}
+                {user.email}
               </p>
               <p>
                 <button className="ml-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
