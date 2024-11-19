@@ -6,7 +6,7 @@ interface HubUsersProps {
 
 const HubUsers = ({ hubUsers }: HubUsersProps) => {
   return (
-    <div>
+    <div className="relative">
       {/* Title */}
       <div className="h-5 mb-6 text-center text-[#4b7d8d] text-[25px] font-bold leading-tight tracking-tight">
         Hub Users
@@ -21,12 +21,12 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       </div>
       {/* Separator Line */}
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
-      {/* Table Rows */}
-      <div className="flex flex-col gap-6">
+
+      <div className="flex flex-col gap-6 overflow-y-auto max-h-[300px] custom-scrollbar scrollbar-thumb-[#4b7d8d] scrollbar-track-gray-200">
         {hubUsers.map((user, index) => (
           <div
             key={index}
-            className="md:grid md:grid-cols-4 w-full text-center text-black text-sm gap-2"
+            className="md:grid md:grid-cols-4 w-full text-center text-black text-sm gap-2 px-2"
           >
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center">
@@ -61,7 +61,8 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
           </div>
         ))}
       </div>
-      <div className=" flex justify-center md:flex justify-center">
+
+      <div className="flex justify-center">
         <button className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
           Manage All Users
         </button>
