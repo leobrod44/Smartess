@@ -5,10 +5,14 @@ import IndividualTicket from "@/app/components/IndividualTicketPageComponents/In
 import { generateMockProjects, Ticket } from "@/app/mockData"; // Adjusted the import path for mockData
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
+import CloseTicketModal from "@/app/components/IndividualTicketPageComponents/CloseTicketModal";
+import DeleteTicketModal from "@/app/components/IndividualTicketPageComponents/DeleteTicketModal";
 
 const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
   const { ticketId } = params;
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     // Fetch the specific ticket based on ticketId from mock data
@@ -29,6 +33,28 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
     setSelectedTicket(foundTicket);
   }, [ticketId]);
 
+  // Handlers for CloseTicketModal
+  const handleOpenCloseModal = () => {
+    console.log("Close ticket Button Clicked");
+    setIsCloseModalOpen(true);
+  };
+  const handleCloseCloseModal = () => setIsCloseModalOpen(false);
+  const handleConfirmCloseTicket = () => {
+    console.log("Ticket closed");
+    setIsCloseModalOpen(false);
+  };
+
+  // Handlers for DeleteTicketModal
+  const handleOpenDeleteModal = () => {
+    console.log("Delete ticket Button Clicked");
+    setIsDeleteModalOpen(true);
+  };
+  const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
+  const handleConfirmDeleteTicket = () => {
+    console.log("Ticket deleted");
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <div>
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
@@ -47,13 +73,33 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
             </div>
             <ManageTicketAssignment ticket={selectedTicket} />
             <div className="flex justify-center gap-10 mt-8">
-              <button className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+              <button
+                className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                onClick={handleOpenCloseModal}
+              >
                 Close Ticket
               </button>
-              <button className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+              <button
+                className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                onClick={handleOpenDeleteModal}
+              >
                 Delete Ticket
               </button>
             </div>
+
+            {isCloseModalOpen && (
+              <CloseTicketModal
+                onBack={handleCloseCloseModal}
+                onCloseTicket={handleConfirmCloseTicket}
+              />
+            )}
+
+            {isDeleteModalOpen && (
+              <DeleteTicketModal
+                onBack={handleCloseDeleteModal}
+                onDeleteTicket={handleConfirmDeleteTicket}
+              />
+            )}
           </>
         ) : (
           <p>Loading ticket details...</p>
