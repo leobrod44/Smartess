@@ -40,7 +40,6 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                 <strong>Email:</strong> {user.email}
               </p>
               <p>
-                <strong>Contact:</strong>
                 <button className="ml-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                   Contact
                 </button>
