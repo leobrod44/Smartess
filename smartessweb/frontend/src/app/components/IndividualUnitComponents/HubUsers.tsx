@@ -8,7 +8,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
   return (
     <div>
       {/* Title */}
-      <div className="text-center text-[#4b7d8d] text-lg font-bold mb-4">
+      <div className="h-5 mb-6 text-center text-[#4b7d8d] text-[25px] font-bold leading-tight tracking-tight">
         Hub Users
       </div>
 
