@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Ticket } from "../../mockData";
+import React, { useState, useEffect } from "react";
+import { Individual, Ticket } from "../../mockData";
 import AssignedUser from "./AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
+import { mockUsersNotAssignedToTicker } from "../../mockData";
 interface ManageTicketProps {
   ticket: Ticket;
 }
@@ -10,12 +11,27 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // get a list of users that are part of the proj that this ticket is in, but not assigned to the ticket. these are available users
+  const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
+  //since i cant do that right now, i will hardcode some users that arent assigned
+  useEffect(() => {
+    const users = mockUsersNotAssignedToTicker(); // Call the function to get mock users
+    setAvailableUsers(users); 
+  }, []); 
+
   const handleAssignUserClick = () => {
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleAssignUser = (userId: string, isAssigned: boolean) => {
+    // Update assignment logic here
+    console.log(
+      `User ${userId} has been ${isAssigned ? "assigned" : "unassigned"}.`
+    );
   };
 
   return (
@@ -70,7 +86,13 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
           )}
         </>
       )}
-      {isModalOpen && <AssignUserModalComponent onClose={handleCloseModal} />}
+      {isModalOpen && (
+        <AssignUserModalComponent
+          onClose={handleCloseModal}
+          availableUsers={availableUsers}
+          onAssignUser={handleAssignUser}
+        />
+      )}
     </div>
   );
 }

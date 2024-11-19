@@ -311,7 +311,7 @@ const generateMockTickets2 = (): Ticket[] => [
 
     type: "repair",
 
-    assigned_employees: generateMockProjectUsers(),
+    assigned_employees: generateMockProjectUsers2(),
   },
   {
     ticket_id: "t2",
@@ -338,7 +338,7 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-11-11T10:15:00"),
 
     type: "other",
-    assigned_employees: generateMockProjectUsers2(),
+    assigned_employees: generateMockProjectUsers(),
   },
   {
     ticket_id: "t3",
@@ -575,6 +575,21 @@ const generateMockProjectUsers2 = (): Individual[] => [
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
+  {
+    individualId: "ind-5",
+    firstName: "Sara",
+    lastName: "Johnson",
+    role: "master",
+  },
+  {
+    individualId: "ind-6",
+    firstName: "Billie",
+    lastName: "Eilish",
+    role: "admin",
+  },
+];
+
+export const mockUsersNotAssignedToTicker = (): Individual[] => [
   {
     individualId: "ind-5",
     firstName: "Sara",
