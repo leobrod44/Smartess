@@ -1,17 +1,14 @@
 import React, { useState } from "react";
+import { Individual } from "@/app/mockData";
 
 interface CondensedUserProps {
-  userId: string;
-  firstName: string;
-  lastName: string;
+  Individual: Individual;
   isAssigned: boolean;
   onToggle: (newState: boolean) => void;
 }
 
 const CondensedUserComponent = ({
-  userId,
-  firstName,
-  lastName,
+  Individual,
   isAssigned,
   onToggle,
 }: CondensedUserProps) => {
@@ -26,10 +23,10 @@ const CondensedUserComponent = ({
   return (
     <div className="w-full flex items-center border border-[#266472]/40 rounded-md py-3 px-4">
       <div className="w-1/4 text-[#266472] text-s font-['Sequel Sans'] leading-tight tracking-tight">
-        {userId}
+        {Individual.individualId}
       </div>
       <div className="w-1/2 text-[#266472] text-s font-['Sequel Sans'] leading-tight tracking-tight truncate">
-        {firstName} {lastName}
+        {Individual.firstName} {Individual.lastName}
       </div>
       <div className="w-1/4 flex justify-center items-center">
         <label className="relative inline-flex items-center cursor-pointer">
