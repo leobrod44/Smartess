@@ -47,7 +47,8 @@ exports.getOrgUsers = async (req, res) => {
             .from('org_user')
             .select('user_id, org_id, proj_id, org_user_type')
             .in('org_id', orgIds)
-            .in('proj_id', projIds);
+            .in('proj_id', projIds)
+            .neq('user_id', userData.user_id);
 
         if (allOrgUsersError) {
             return res.status(500).json({ error: 'Failed to fetch organization users.' });
