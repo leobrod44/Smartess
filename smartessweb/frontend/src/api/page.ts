@@ -21,7 +21,7 @@ export const projectApi = {
 };
 
 export const orgUsersApi = {
-  getCurrentUserApi: async (token: string): Promise<{ currentUser: any }> => {
+  getCurrentUserApi: async (token: string): Promise<{ currentUser: unknown }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-current-user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
