@@ -55,5 +55,24 @@ export const orgUsersApi = {
     }
 
     return data;
+  },
+
+  getOrgUsersProjects: async (fetchedOrgUsers: OrgUser[], token: string): Promise<{ projects: Project[] }> => {
+    const response = await fetch(`${API_URL}/manage-accounts/get-org-users-projects`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fetchedOrgUsers }), 
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch project data');
+    }
+
+    return data;
   }
 };
