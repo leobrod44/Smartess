@@ -1,5 +1,5 @@
 import { API_URL } from "./api";
-import { Project, OrgUser } from "@/app/mockData";
+import { Project, OrgUser, Individual } from "@/app/mockData";
 
 export const projectApi = {
   getUserProjects: async (token: string): Promise<{ projects: Project[] }> => {
@@ -33,6 +33,25 @@ export const orgUsersApi = {
 
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch org users');
+    }
+
+    return data;
+  },
+
+  getOrgIndividualsData: async (fetchedOrgUsers: OrgUser[], token: string): Promise<{ individuals: Individual[] }> => {
+    const response = await fetch(`${API_URL}/manage-accounts/get-org-individuals-data`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fetchedOrgUsers }), 
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch individual data');
     }
 
     return data;
