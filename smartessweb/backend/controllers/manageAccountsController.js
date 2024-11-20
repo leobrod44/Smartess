@@ -110,3 +110,40 @@ exports.getOrgIndividualsData = async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+
+exports.getOrgUsersProjects = async (req, res) => {
+    try {
+        const token = req.token;
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { fetchedOrgUsers } = req.body;
+
+        if (!fetchedOrgUsers || fetchedOrgUsers.length === 0) {
+            return res.status(400).json({ error: 'No organization users provided.' });
+        }
+
+        const uniqueProjIds = [...new Set(fetchedOrgUsers.map(user => user.proj_id))];
+
+        const { data: projects, error: queryError } = await supabase
+            .from('project')
+            .select('*')
+            .in('proj_id', uniqueProjIds);
+
+        if (queryError) {
+            console.error('Query Error:', queryError);
+            return res.status(500).json({ error: 'Failed to fetch projects.' });
+        }
+
+        res.json({ projects: projects });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};

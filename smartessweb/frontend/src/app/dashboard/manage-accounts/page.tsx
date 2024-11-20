@@ -104,6 +104,9 @@ const ManageUsersPage = () => {
         const fetchedIndividuals = responseIndividuals.individuals;
         console.log("individuals: ", fetchedIndividuals)
 
+        const responseProjects = await orgUsersApi.getOrgUsersProjects(fetchedOrgUsers, token);
+        const fetchedProjects = responseProjects.projects;
+        console.log("projects: ", fetchedProjects)
 
         console.log(orgUsers)
 
