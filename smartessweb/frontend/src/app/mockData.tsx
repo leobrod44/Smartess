@@ -55,7 +55,7 @@ export interface Project {
 
 // New interface for project-specific individuals
 export interface Individual {
-  individualId: string; // Unique ID for project-specific users
+  individualId: number; // Unique ID for project-specific users
   firstName: string;
   lastName: string;
   role: "admin" | "basic" | "master";
@@ -535,13 +535,13 @@ const generateMockUsers2 = (): HubUser[] => [
 
 const generateMockProjectUsers = (): Individual[] => [
   {
-    individualId: "ind-1",
+    individualId: 1,
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
   },
   {
-    individualId: "ind-2",
+    individualId: 2,
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
@@ -557,13 +557,13 @@ const generateMockProjectUsers = (): Individual[] => [
 // Function to generate mock project users for the second project
 const generateMockProjectUsers2 = (): Individual[] => [
   {
-    individualId: "ind-3",
+    individualId: 3,
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
   },
   {
-    individualId: "ind-4",
+    individualId: 4,
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
@@ -572,13 +572,13 @@ const generateMockProjectUsers2 = (): Individual[] => [
 
 const generateMockProjectUsers3 = (): Individual[] => [
   {
-    individualId: "ind-5",
+    individualId: 5,
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
   },
   {
-    individualId: "ind-6",
+    individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
