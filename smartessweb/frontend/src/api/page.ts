@@ -21,6 +21,23 @@ export const projectApi = {
 };
 
 export const orgUsersApi = {
+  getCurrentUserApi: async (token: string): Promise<{ currentUser: any }> => {
+    const response = await fetch(`${API_URL}/manage-accounts/get-current-user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch current user data');
+    }
+
+    return data;
+  },
+
   getOrgUsersApi: async (token: string): Promise<{ orgUsers: OrgUser[] }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-org-users`, {
       headers: {
