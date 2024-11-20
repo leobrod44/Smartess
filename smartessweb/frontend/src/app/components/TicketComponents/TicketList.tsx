@@ -158,6 +158,7 @@ const TicketList = ({ tickets }: { tickets: Ticket[] }) => {
       </div>
       <div className="flex justify-center mt-4">
         <Pagination
+          className="custom-pagination"
           count={Math.ceil(tickets.length / ticketsPerPage)}
           page={page}
           onChange={handleChangePage}

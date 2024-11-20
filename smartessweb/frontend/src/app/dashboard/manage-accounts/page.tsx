@@ -94,10 +94,20 @@ const ManageUsersPage = () => {
     const fetchOrgUsers = async () => {
       try {
         console.log("Fetching organization users...");
-        const response = await orgUsersApi.getOrgUsersApi(token);
-        const fetchedOrgUsers = response.orgUsers;
+        const responseOrgUsers = await orgUsersApi.getOrgUsersApi(token);
+        const fetchedOrgUsers = responseOrgUsers.orgUsers;
 
         setOrgUsers(fetchedOrgUsers);
+        console.log("orgUsers: ", fetchedOrgUsers)
+
+        const responseIndividuals = await orgUsersApi.getOrgIndividualsData(fetchedOrgUsers, token);
+        const fetchedIndividuals = responseIndividuals.individuals;
+        console.log("individuals: ", fetchedIndividuals)
+
+        const responseProjects = await orgUsersApi.getOrgUsersProjects(fetchedOrgUsers, token);
+        const fetchedProjects = responseProjects.projects;
+        console.log("projects: ", fetchedProjects)
+
         console.log(orgUsers)
 
         console.log("Organization users fetched successfully.");
