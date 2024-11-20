@@ -1,7 +1,7 @@
 "use client";
 
 import ManageAccountsList from "@/app/components/ManageUsersComponents/ManageAccountsList";
-import { Project, generateMockProjects, Individual, OrgUser } from "../../mockData";
+import { Project, Individual, OrgUser } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
