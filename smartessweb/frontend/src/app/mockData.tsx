@@ -15,6 +15,12 @@ export interface OrgUser {
   org_user_type: string;
 }
 
+export interface CurrentUser {
+  userId: string;
+  role: "master" | "admin" | "basic";
+  address: string[];
+}
+
 export interface TicketsType {
   total: number;
 

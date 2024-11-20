@@ -1,7 +1,7 @@
 "use client";
 
 import ManageAccountsList from "@/app/components/ManageUsersComponents/ManageAccountsList";
-import { Project, Individual, OrgUser } from "../../mockData";
+import { Project, Individual, OrgUser, CurrentUser } from "../../mockData";
 import AddIcon from "@mui/icons-material/Add";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
@@ -31,11 +31,7 @@ const ManageUsersPage = () => {
   const { selectedProjectAddress } = useProjectContext();
   const [orgUsers, setOrgUsers] = useState<OrgUser[]>([]);
   const [individuals, setIndividuals] = useState<Individual[]>([]);
-  const [currentUser, setCurrentUser] = useState<{
-    userId: string;
-    role: "master" | "admin" | "basic";
-    address: string[];
-  } | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser>();
   const [projects, setProjects] = useState<Project[]>([]);
   
   // Add roles to filter options

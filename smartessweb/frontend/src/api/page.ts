@@ -1,5 +1,5 @@
 import { API_URL } from "./api";
-import { Project, OrgUser, Individual } from "@/app/mockData";
+import { Project, OrgUser, Individual, CurrentUser } from "@/app/mockData";
 
 export const projectApi = {
   getUserProjects: async (token: string): Promise<{ projects: Project[] }> => {
@@ -21,7 +21,7 @@ export const projectApi = {
 };
 
 export const orgUsersApi = {
-  getCurrentUserApi: async (token: string): Promise<{ currentUser: unknown }> => {
+  getCurrentUserApi: async (token: string): Promise<{ currentUser: CurrentUser }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-current-user`, {
       headers: {
         'Authorization': `Bearer ${token}`,
