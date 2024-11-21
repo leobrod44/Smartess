@@ -43,41 +43,6 @@ const ManageUsersPage = () => {
     "basic",
   ];
 
-
-// const consolidateUsers = (
-//   projects: Project[],
-//   currentUserAddresses: string[],
-//   selectedProjectAddress: string
-// ) => {
-//   const userMap: {
-//     [tokenId: string]: { user: Individual; addresses: string[] };
-//   } = {};
-
-//   projects.forEach((project) => {
-//     const shouldIncludeProject =
-//       selectedProjectAddress === "ALL PROJECTS" ||
-//       project.address === selectedProjectAddress;
-
-//     if (
-//       shouldIncludeProject &&
-//       currentUserAddresses.includes(project.address)
-//     ) {
-//       project.projectUsers.forEach((user) => {
-//         if (userMap[user.individualId]) {
-//           userMap[user.individualId].addresses.push(project.address);
-//         } else {
-//           userMap[user.individualId] = {
-//             user,
-//             addresses: [project.address],
-//           };
-//         }
-//       });
-//     }
-//   });
-
-//   return Object.values(userMap);
-// };
-
 const consolidateUsers = (
   projects: Project[],
   orgUsers: OrgUser[],
