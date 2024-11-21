@@ -1,6 +1,71 @@
 const supabase = require('../config/supabase');
 
 
+
+exports.getCurrentUser = async (req, res) => {
+    try {
+        const token = req.token;
+        
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { data: userData, error: userError } = await supabase
+        .from('user')
+        .select('user_id')
+        .eq('email', user.email)
+        .single();
+
+        if (userError) {
+            return res.status(500).json({ error: 'Failed to fetch user data.' });
+        }
+
+        if (!userData) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        const { data: currentUser, error: currentUserError } = await supabase
+        .from('org_user')
+        .select('user_id, proj_id, org_id, org_user_type')
+        .eq('user_id', userData.user_id);
+
+        if (currentUserError) {
+            return res.status(500).json({ error: 'Failed to fetch current user data.' });
+        }
+
+        if (!currentUser) {
+            return res.status(404).json({ error: 'Current user not found.' });
+        }
+
+        const projectIds = currentUser.map((cUser) => cUser.proj_id);
+        const { data: projects, error: projectError } = await supabase
+            .from('project')
+            .select('address')
+            .in('proj_id', projectIds);
+
+        if (projectError) {
+            return res.status(500).json({ error: 'Failed to fetch project addresses.' });
+        }
+
+        const addresses = projects.map((project) => project.address);
+        const role = currentUser[0].org_user_type; 
+
+        const formattedCurrentUser = {
+            userId: userData.user_id,
+            role: role === 'master' || role === 'admin' || role === 'basic' ? role : 'basic', 
+            address: addresses
+        };
+
+        res.json({ currentUser: formattedCurrentUser });
+        
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+}
+
 exports.getOrgUsers = async (req, res) => {
     try {
         const token = req.token;
@@ -130,15 +195,27 @@ exports.getOrgUsersProjects = async (req, res) => {
 
         const uniqueProjIds = [...new Set(fetchedOrgUsers.map(user => user.proj_id))];
 
-        const { data: projects, error: queryError } = await supabase
+        const { data: projectData, error: queryError } = await supabase
             .from('project')
-            .select('*')
+            .select('proj_id, address, admin_users_count, hub_users_count, pending_tickets_count')
             .in('proj_id', uniqueProjIds);
 
         if (queryError) {
             console.error('Query Error:', queryError);
             return res.status(500).json({ error: 'Failed to fetch projects.' });
         }
+
+        if (!projectData || projectData.length === 0) {
+            return res.status(404).json({ error: 'No projects found for the provided IDs.' });
+        }
+
+        const projects = projectData.map(project => ({
+            projectId: project.proj_id.toString(),
+            address: project.address,
+            adminUsersCount: project.admin_users_count,
+            hubUsersCount: project.hub_users_count,
+            pendingTicketsCount: project.pending_tickets_count,
+        }));
 
         res.json({ projects: projects });
 
