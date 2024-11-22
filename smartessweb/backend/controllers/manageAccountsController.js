@@ -224,3 +224,48 @@ exports.getOrgUsersProjects = async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+exports.getOrgProjects = async (req, res) => {
+    try {
+        const token = req.token;
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { currentOrg } = req.body;
+
+        if (!currentOrg) {
+            return res.status(400).json({ error: 'Organization ID (org_id) is required.' });
+        }
+
+        const { data: projectData, error: queryError } = await supabase
+            .from('project')
+            .select('proj_id, address, admin_users_count, hub_users_count, pending_tickets_count')
+            .eq('org_id', currentOrg);
+
+        if (queryError) {
+            console.error('Query Error:', queryError);
+            return res.status(500).json({ error: 'Failed to fetch projects.' });
+        }
+
+        if (!projectData || projectData.length === 0) {
+            return res.status(404).json({ error: 'No projects found for the provided organization ID.' });
+        }
+
+        const projects = projectData.map(project => ({
+            projectId: project.proj_id.toString(),
+            address: project.address,
+            adminUsersCount: project.admin_users_count,
+            hubUsersCount: project.hub_users_count,
+            pendingTicketsCount: project.pending_tickets_count,
+        }));
+
+        res.json({ orgProjects: projects });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
