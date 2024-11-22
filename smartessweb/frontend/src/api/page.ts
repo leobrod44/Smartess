@@ -20,7 +20,7 @@ export const projectApi = {
   }
 };
 
-export const orgUsersApi = {
+export const manageAccountsApi = {
   getCurrentUserApi: async (token: string): Promise<{ currentUser: CurrentUser }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-current-user`, {
       headers: {
@@ -94,7 +94,6 @@ export const orgUsersApi = {
   },
 
   getOrgProjects: async (currentOrg: number | undefined, token: string): Promise<{ orgProjects: Project[] }> => {
-    console.log("Current organization:----------", currentOrg);
     const response = await fetch(`${API_URL}/manage-accounts/get-org-projects`, {
       method: 'POST', 
       headers: {
@@ -102,6 +101,30 @@ export const orgUsersApi = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ currentOrg }), 
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch project data');
+    }
+
+    return data;
+  },
+
+  assignOrgUserToProject: async (user_id: number, org_id: number | undefined, proj_id: number, org_user_type: string, token: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/manage-accounts/assign-org-user-to-project`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id,
+        org_id,
+        proj_id,
+        org_user_type
+      }),
     });
 
     const data = await response.json();
