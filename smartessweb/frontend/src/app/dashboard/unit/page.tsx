@@ -92,10 +92,13 @@ const UnitPage = () => {
   };
 
   const totalPages = Math.ceil(filteredUnitsByProject.length / unitsPerPage);
-  const currentUnits = filteredUnitsByProject.slice(
-    (currentPage - 1) * unitsPerPage,
-    currentPage * unitsPerPage
-  );
+  const currentUnits =
+    filteredUnitsByProject.length === 0
+      ? [] // Reset to an empty array if no filtered units exist
+      : filteredUnitsByProject.slice(
+          (currentPage - 1) * unitsPerPage,
+          currentPage * unitsPerPage
+        );
 
   return (
     <div>
