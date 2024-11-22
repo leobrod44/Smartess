@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,25 +7,31 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import { generateMockProjects } from "../../mockData";
+import { Project, generateMockProjects } from "../../mockData";
+import { manageAccountsApi } from "@/api/page";
+import router from "next/router";
 
 interface UserInfoModalProps {
+  uid: number;
   open: boolean;
   onClose: () => void;
   userName: string;
   role: "admin" | "basic" | "master";
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
+  currentOrg: number | undefined;
   onDeleteUser: () => void;
 }
 
 function UserInfoModal({
+  uid,
   open,
   onClose,
   userName,
   role: initialRole,
   addresses: initialAddresses,
   currentUserRole,
+  currentOrg,
   onDeleteUser,
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
@@ -35,6 +41,29 @@ function UserInfoModal({
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
+  const [orgProjects, setOrgProjects] = useState<Project[]>([]);
+
+  useEffect ( () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchOrgProjectsData = async () => {
+      try {
+        const responseOrgProjects = await manageAccountsApi.getOrgProjects(currentOrg, token);
+        const fetchedOrgProjects = responseOrgProjects.orgProjects;
+        setOrgProjects(fetchedOrgProjects);
+
+      } catch (err) {
+        console.error("Error fetching organization projects:", err);
+      }
+    };
+
+    fetchOrgProjectsData();
+  } , [addresses] );
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -77,18 +106,35 @@ function UserInfoModal({
     setProjectMenuOpen(!isProjectMenuOpen);
   };
 
-  const handleAddressSelect = (address: string) => {
-    setAddresses((prevAddresses) => [...prevAddresses, address]);
-    setProjectMenuOpen(false);
+  const handleProjectSelect = async (project: { projectId: number; address: string }) => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    try {
+      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, project.projectId, role, token);
+      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
+      setProjectMenuOpen(false);
+    } catch (err) {
+      console.error("Error assigning user to project:", err);
+    }
   };
+  
 
   const handleSave = () => {
     onClose();
   };
 
-  const unlinkedAddresses: string[] = generateMockProjects()
-    .map((project) => project.address)
-    .filter((address) => !addresses.includes(address));
+  const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
+  .filter((project) => !addresses.includes(project.address))
+  .map((project) => ({
+    projectId: Number(project.projectId),
+    address: project.address,
+  }));
+
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
@@ -162,8 +208,8 @@ function UserInfoModal({
 
           {isProjectMenuOpen && (
             <ProjectAddressMenu
-              unlinkedAddresses={unlinkedAddresses}
-              onSelectAddress={handleAddressSelect}
+              unlinkedProjects={unlinkedProjects}
+              onSelectProject={handleProjectSelect}
             />
           )}
 
