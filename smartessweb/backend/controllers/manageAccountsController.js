@@ -269,3 +269,43 @@ exports.getOrgProjects = async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+exports.assignOrgUserToProject = async (req, res) => {
+    try {
+      const token = req.token;
+
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+  
+      const { user_id, org_id, proj_id, org_user_type } = req.body;
+  
+      if (!user_id || !org_id || !proj_id || !org_user_type) {
+        return res.status(400).json({ error: 'user_id, org_id, proj_id, and org_user_type are required.' });
+      }
+  
+      const { data, error: insertError } = await supabase
+        .from('org_user')
+        .insert([
+          {
+            user_id,
+            org_id,
+            proj_id,
+            org_user_type
+          }
+        ]);
+  
+      if (insertError) {
+        console.error('Insert Error:', insertError);
+        return res.status(500).json({ error: 'Failed to assign user to project.' });
+      }
+  
+      res.status(200).json({ message: 'User successfully assigned to project.' });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error.' });
+    }
+  };
+  
