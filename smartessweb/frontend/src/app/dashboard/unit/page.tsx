@@ -77,6 +77,7 @@ const UnitPage = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1); // Reset to the first page on a new search
   };
 
   const handleFilterChange = (filterValue: string) => {
