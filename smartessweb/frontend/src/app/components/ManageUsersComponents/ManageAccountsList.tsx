@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import UserInfoModal from "../ManageUsersComponents/UserInfoModal";
 interface ManageAccountsListProps {
+  uid: number;
   address: string;
   userName: string;
   permission: "admin" | "basic" | "master";
@@ -12,6 +13,7 @@ interface ManageAccountsListProps {
 }
 
 const ManageAccountsList = ({
+  uid,
   address,
   userName,
   permission,
@@ -72,6 +74,7 @@ const ManageAccountsList = ({
 
       {/* User Details Modal */}
       <UserInfoModal
+        uid={uid}
         open={isModalOpen}
         onClose={handleCloseModal}
         userName={userName}
