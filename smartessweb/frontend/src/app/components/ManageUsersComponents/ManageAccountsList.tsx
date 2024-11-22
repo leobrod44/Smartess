@@ -8,6 +8,7 @@ interface ManageAccountsListProps {
   permission: "admin" | "basic" | "master";
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
+  currentOrg: number | undefined;
 }
 
 const ManageAccountsList = ({
@@ -16,6 +17,7 @@ const ManageAccountsList = ({
   permission,
   currentUserRole,
   addresses, // Destructure addresses
+  currentOrg
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -76,6 +78,7 @@ const ManageAccountsList = ({
         role={permission}
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
+        currentOrg={currentOrg}
         onDeleteUser={() => {
           // Logic to delete the user, e.g., making an API call
           console.log("User deleted");
