@@ -7,7 +7,7 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import { Project, generateMockProjects } from "../../mockData";
+import { Project } from "../../mockData";
 import { manageAccountsApi } from "@/api/page";
 import router from "next/router";
 
@@ -63,7 +63,7 @@ function UserInfoModal({
     };
 
     fetchOrgProjectsData();
-  } , [addresses] );
+  } , [addresses, currentOrg] );
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
