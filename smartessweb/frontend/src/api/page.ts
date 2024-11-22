@@ -91,5 +91,25 @@ export const orgUsersApi = {
     }
 
     return data;
+  },
+
+  getOrgProjects: async (currentOrg: number | undefined, token: string): Promise<{ orgProjects: Project[] }> => {
+    console.log("Current organization:----------", currentOrg);
+    const response = await fetch(`${API_URL}/manage-accounts/get-org-projects`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ currentOrg }), 
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch project data');
+    }
+
+    return data;
   }
 };
