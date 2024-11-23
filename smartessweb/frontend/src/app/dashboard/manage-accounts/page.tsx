@@ -188,7 +188,7 @@ const consolidateUsers = (
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  
+
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     page: number
@@ -205,10 +205,6 @@ const consolidateUsers = (
     console.log("Add user clicked!");
   };
 
-  const handleAccountsListClose = (uid: number, updatedAddresses: string[]) => {
-    console.log(`Modal closed for user ${uid} with updated addresses:`, updatedAddresses);
-    // MODIFY THIS TO UPDATE CURRENT ITEMS AND RE RENDER THE PAGE
-  };
 
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
@@ -259,7 +255,6 @@ const consolidateUsers = (
               currentUserRole={currentUser?.role || "basic"}
               addresses={addresses || []}
               currentOrg={currentOrg}
-              onAccountsListClose={handleAccountsListClose}
             />
           );
         })}

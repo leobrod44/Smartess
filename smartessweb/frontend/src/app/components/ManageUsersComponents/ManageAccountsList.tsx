@@ -10,7 +10,6 @@ interface ManageAccountsListProps {
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
   currentOrg: number | undefined;
-  onAccountsListClose: (uid: number, updatedAddresses: string[]) => void;
 }
 
 const ManageAccountsList = ({
@@ -21,7 +20,6 @@ const ManageAccountsList = ({
   currentUserRole,
   addresses, // Destructure addresses
   currentOrg,
-  onAccountsListClose,
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
@@ -43,8 +41,7 @@ const ManageAccountsList = ({
     } else {
       setDisplayAddress(updatedAddresses[0]);
     }
-    onAccountsListClose(uid, updatedAddresses); // Notify the parent component
-    setModalOpen(false); // Close the modal after saving
+    setModalOpen(false);
   };
   const getColorClasses = () => {
     switch (permission) {
