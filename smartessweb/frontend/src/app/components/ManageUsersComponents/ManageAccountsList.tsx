@@ -3,21 +3,26 @@ import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import UserInfoModal from "../ManageUsersComponents/UserInfoModal";
 interface ManageAccountsListProps {
+  uid: number;
   address: string;
   userName: string;
   permission: "admin" | "basic" | "master";
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
+  currentOrg: number | undefined;
 }
 
 const ManageAccountsList = ({
-  address,
+  uid,
+  address: initialAddress,
   userName,
   permission,
   currentUserRole,
   addresses, // Destructure addresses
+  currentOrg,
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -27,6 +32,17 @@ const ManageAccountsList = ({
     setModalOpen(false);
   };
 
+  const handleModalSave = (updatedAddresses: string[]) => {
+    if (updatedAddresses.length > 1) {
+      const formattedAddress = `${updatedAddresses[0]} (+${
+        updatedAddresses.length - 1
+      } more)`;
+      setDisplayAddress(formattedAddress);
+    } else {
+      setDisplayAddress(updatedAddresses[0]);
+    }
+    setModalOpen(false);
+  };
   const getColorClasses = () => {
     switch (permission) {
       case "basic":
@@ -47,7 +63,7 @@ const ManageAccountsList = ({
         onClick={handleOpenModal}
       >
         <div className="flex-1">
-          <p>{address}</p>
+          <p>{displayAddress}</p> {/* Display the updated address */}
         </div>
         <div className="flex-1">
           <p>{userName}</p>
@@ -70,12 +86,15 @@ const ManageAccountsList = ({
 
       {/* User Details Modal */}
       <UserInfoModal
+        uid={uid}
         open={isModalOpen}
+        onSave={handleModalSave}
         onClose={handleCloseModal}
         userName={userName}
         role={permission}
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
+        currentOrg={currentOrg}
         onDeleteUser={() => {
           // Logic to delete the user, e.g., making an API call
           console.log("User deleted");
