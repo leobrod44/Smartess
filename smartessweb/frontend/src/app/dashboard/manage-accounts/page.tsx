@@ -9,10 +9,7 @@ import Pagination from "@mui/material/Pagination";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectContext } from "@/context/ProjectProvider";
-import { orgUsersApi } from "@/api/page";
-
-const itemsPerPage = 8;
-//const projects: Project[] = generateMockProjects();
+import { manageAccountsApi } from "@/api/page";
 
 /*  Mock current organization user data, this is different from the data 
     displayed on the page (all organization users) which you can find in the mockData.tsx
@@ -33,7 +30,9 @@ const ManageUsersPage = () => {
   const [individuals, setIndividuals] = useState<Individual[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
   const [projects, setProjects] = useState<Project[]>([]);
-  
+  const [currentOrg, setCurrentOrg] = useState<number | undefined>(undefined);
+  const itemsPerPage = 8;
+
   // Add roles to filter options
   const filterOptionsManageUsers = [
     "Address A-Z",
@@ -107,9 +106,9 @@ const consolidateUsers = (
       return;
     }
 
-    const fetchOrgUsers = async () => {
+    const fetchData = async () => {
       try {
-        const responseCurrentUser = await orgUsersApi.getCurrentUserApi(token);
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
         const tempCurrentUser = responseCurrentUser.currentUser;
         setCurrentUser({
           userId: tempCurrentUser.userId.toString(),
@@ -118,15 +117,18 @@ const consolidateUsers = (
         });
 
 
-        const responseOrgUsers = await orgUsersApi.getOrgUsersApi(token);
+        const responseOrgUsers = await manageAccountsApi.getOrgUsersApi(token);
         const fetchedOrgUsers = responseOrgUsers.orgUsers;
         setOrgUsers(fetchedOrgUsers);
+        if (fetchedOrgUsers) {
+          setCurrentOrg(fetchedOrgUsers[0].org_id);
+        }
 
-        const responseIndividuals = await orgUsersApi.getOrgIndividualsData(fetchedOrgUsers, token);
+        const responseIndividuals = await manageAccountsApi.getOrgIndividualsData(fetchedOrgUsers, token);
         const fetchedIndividuals = responseIndividuals.individuals;
         setIndividuals(fetchedIndividuals);
 
-        const responseProjects = await orgUsersApi.getOrgUsersProjects(fetchedOrgUsers, token);
+        const responseProjects = await manageAccountsApi.getOrgUsersProjects(fetchedOrgUsers, token);
         const fetchedProjects = responseProjects.projects;
         setProjects(fetchedProjects);
 
@@ -137,7 +139,7 @@ const consolidateUsers = (
       }
     };
 
-    fetchOrgUsers();
+    fetchData();
 
   }, [router]);
 
@@ -203,6 +205,7 @@ const consolidateUsers = (
     console.log("Add user clicked!");
   };
 
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="flex justify-end mb-4">
@@ -245,11 +248,13 @@ const consolidateUsers = (
           return (
             <ManageAccountsList
               key={user.individualId}
+              uid={user.individualId}
               address={addressString}
               userName={`${user.firstName} ${user.lastName}`}
               permission={user.role}
               currentUserRole={currentUser?.role || "basic"}
               addresses={addresses || []}
+              currentOrg={currentOrg}
             />
           );
         })}

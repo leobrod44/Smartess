@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,26 +7,34 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import { generateMockProjects } from "../../mockData";
+import { Project } from "../../mockData";
+import { manageAccountsApi } from "@/api/page";
+import router from "next/router";
 
 interface UserInfoModalProps {
+  uid: number;
   open: boolean;
   onClose: () => void;
   userName: string;
   role: "admin" | "basic" | "master";
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
+  currentOrg: number | undefined;
   onDeleteUser: () => void;
+  onSave: (addresses: string[]) => void;
 }
 
 function UserInfoModal({
+  uid,
   open,
   onClose,
   userName,
   role: initialRole,
   addresses: initialAddresses,
   currentUserRole,
+  currentOrg,
   onDeleteUser,
+  onSave
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -35,6 +43,30 @@ function UserInfoModal({
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
+  const [orgProjects, setOrgProjects] = useState<Project[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+
+  useEffect ( () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchOrgProjectsData = async () => {
+      try {
+        const responseOrgProjects = await manageAccountsApi.getOrgProjects(currentOrg, token);
+        const fetchedOrgProjects = responseOrgProjects.orgProjects;
+        setOrgProjects(fetchedOrgProjects);
+
+      } catch (err) {
+        console.error("Error fetching organization projects:", err);
+      }
+    };
+
+    fetchOrgProjectsData();
+  } , [addresses, currentOrg] );
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -77,18 +109,55 @@ function UserInfoModal({
     setProjectMenuOpen(!isProjectMenuOpen);
   };
 
-  const handleAddressSelect = (address: string) => {
-    setAddresses((prevAddresses) => [...prevAddresses, address]);
-    setProjectMenuOpen(false);
+  const handleProjectSelect = async (project: { projectId: number; address: string }) => {
+      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
+      
+      if (selectedProjectIds.includes(project.projectId)) {
+        setSelectedProjectIds(selectedProjectIds.filter((id) => id !== project.projectId));
+      } else {
+        setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
+      }
+
+      setProjectMenuOpen(false);
   };
 
-  const handleSave = () => {
-    onClose();
+  const assignOrgUserProject = async (
+    uid: number,
+    currentOrg: number | undefined,
+    projectIds: number[],
+    role: "admin" | "basic" | "master"
+  ) => {
+    const token = localStorage.getItem("token");
+  
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
+    try {
+      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectIds, role, token);
+    } catch (err) {
+      console.error("Error assigning user to project:", err);
+    }
   };
 
-  const unlinkedAddresses: string[] = generateMockProjects()
-    .map((project) => project.address)
-    .filter((address) => !addresses.includes(address));
+  const handleSave = async () => {
+    try {
+      await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
+      onClose();
+      onSave(addresses);
+    } catch (err) {
+      console.error("Error during save:", err);
+    }
+  };
+
+  const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
+  .filter((project) => !addresses.includes(project.address))
+  .map((project) => ({
+    projectId: Number(project.projectId),
+    address: project.address,
+  }));
+
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
@@ -162,8 +231,8 @@ function UserInfoModal({
 
           {isProjectMenuOpen && (
             <ProjectAddressMenu
-              unlinkedAddresses={unlinkedAddresses}
-              onSelectAddress={handleAddressSelect}
+              unlinkedProjects={unlinkedProjects}
+              onSelectProject={handleProjectSelect}
             />
           )}
 

@@ -3,13 +3,13 @@ import { Typography } from "@mui/material";
 import Searchbar from "../Searchbar";
 
 interface ProjectAddressMenuProps {
-  unlinkedAddresses: string[];
-  onSelectAddress: (address: string) => void;
+  unlinkedProjects: { projectId: number; address: string }[];
+  onSelectProject: (project: { projectId: number; address: string }) => void;
 }
 
 function ProjectAddressMenu({
-  unlinkedAddresses,
-  onSelectAddress,
+  unlinkedProjects,
+  onSelectProject,
 }: ProjectAddressMenuProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -19,9 +19,9 @@ function ProjectAddressMenu({
   };
 
   // Filter addresses based on the search query
-  const filteredAddresses = unlinkedAddresses.filter((address) =>
-    address.toLowerCase().includes(searchQuery)
-  );
+  const filteredAddresses = unlinkedProjects.filter((project) =>
+  project.address.toLowerCase().includes(searchQuery.toLowerCase())
+);
 
   return (
     <div className="mt-4 border rounded p-2 w-full mb-4">
@@ -31,13 +31,13 @@ function ProjectAddressMenu({
       {/* Filtered address list */}
       <div className="max-h-52 overflow-y-auto custom-scrollbar mt-2">
         {filteredAddresses.length > 0 ? (
-          filteredAddresses.map((address, index) => (
+          filteredAddresses.map((project, index) => (
             <div
               key={index}
-              onClick={() => onSelectAddress(address)}
+              onClick={() => onSelectProject(project)}
               className="cursor-pointer p-2 hover:bg-gray-100 rounded"
             >
-              {address}
+              {project.address}
             </div>
           ))
         ) : (

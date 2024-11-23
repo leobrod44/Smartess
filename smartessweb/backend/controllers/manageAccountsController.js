@@ -224,3 +224,94 @@ exports.getOrgUsersProjects = async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+exports.getOrgProjects = async (req, res) => {
+    try {
+        const token = req.token;
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { currentOrg } = req.body;
+
+        if (!currentOrg) {
+            return res.status(400).json({ error: 'Organization ID (org_id) is required.' });
+        }
+
+        const { data: projectData, error: queryError } = await supabase
+            .from('project')
+            .select('proj_id, address, admin_users_count, hub_users_count, pending_tickets_count')
+            .eq('org_id', currentOrg);
+
+        if (queryError) {
+            console.error('Query Error:', queryError);
+            return res.status(500).json({ error: 'Failed to fetch projects.' });
+        }
+
+        if (!projectData || projectData.length === 0) {
+            return res.status(404).json({ error: 'No projects found for the provided organization ID.' });
+        }
+
+        const projects = projectData.map(project => ({
+            projectId: project.proj_id.toString(),
+            address: project.address,
+            adminUsersCount: project.admin_users_count,
+            hubUsersCount: project.hub_users_count,
+            pendingTicketsCount: project.pending_tickets_count,
+        }));
+
+        res.json({ orgProjects: projects });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+exports.assignOrgUserToProject = async (req, res) => {
+    try {
+      const token = req.token;
+
+      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+      if (authError) {
+        return res.status(401).json({ error: 'Invalid token' });
+      }
+  
+      const { user_id, org_id, proj_ids, org_user_type } = req.body;
+  
+      if (!user_id || !org_id || !proj_ids || !org_user_type) {
+        return res.status(400).json({ error: 'user_id, org_id, proj_id, and org_user_type are required.' });
+      }
+  
+      const insertPromises = proj_ids.map(proj_id => 
+        supabase
+          .from('org_user')
+          .insert([
+            {
+              user_id,
+              org_id,
+              proj_id, 
+              org_user_type
+            }
+          ])
+      );
+  
+      const results = await Promise.all(insertPromises);
+  
+      const insertError = results.find(result => result.error);
+      if (insertError) {
+        console.error('Insert Error:', insertError.error);
+        return res.status(500).json({ error: 'Failed to assign user to project(s).' });
+      }
+  
+  
+      res.status(200).json({ message: 'User successfully assigned to project.' });
+  
+    } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Internal server error.' });
+    }
+  };
+  
