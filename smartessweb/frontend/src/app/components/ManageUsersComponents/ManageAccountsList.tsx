@@ -62,13 +62,13 @@ const ManageAccountsList = ({
         className="account-card border p-4 rounded shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200"
         onClick={handleOpenModal}
       >
-        <div className="flex-1">
+        <div className="flex-1 pr-4">
           <p>{displayAddress}</p> {/* Display the updated address */}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 pr-4">
           <p>{userName}</p>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 pr-4">
           <div
             className={`w-[78px] h-8 px-5 rounded-[20px] flex items-center justify-center ${getColorClasses()}`}
           >
