@@ -15,15 +15,16 @@ interface ManageAccountsListProps {
 
 const ManageAccountsList = ({
   uid,
-  address,
+  address: initialAddress,
   userName,
   permission,
   currentUserRole,
   addresses, // Destructure addresses
   currentOrg,
-  onAccountsListClose
+  onAccountsListClose,
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -34,9 +35,17 @@ const ManageAccountsList = ({
   };
 
   const handleModalSave = (updatedAddresses: string[]) => {
-    onAccountsListClose(uid, updatedAddresses);
+    if (updatedAddresses.length > 1) {
+      const formattedAddress = `${updatedAddresses[0]} (+${
+        updatedAddresses.length - 1
+      } more)`;
+      setDisplayAddress(formattedAddress);
+    } else {
+      setDisplayAddress(updatedAddresses[0]);
+    }
+    onAccountsListClose(uid, updatedAddresses); // Notify the parent component
+    setModalOpen(false); // Close the modal after saving
   };
-
   const getColorClasses = () => {
     switch (permission) {
       case "basic":
@@ -57,7 +66,7 @@ const ManageAccountsList = ({
         onClick={handleOpenModal}
       >
         <div className="flex-1">
-          <p>{address}</p>
+          <p>{displayAddress}</p> {/* Display the updated address */}
         </div>
         <div className="flex-1">
           <p>{userName}</p>
