@@ -21,6 +21,7 @@ interface UserInfoModalProps {
   currentUserRole: "admin" | "basic" | "master";
   currentOrg: number | undefined;
   onDeleteUser: () => void;
+  onSave: (addresses: string[]) => void;
 }
 
 function UserInfoModal({
@@ -33,6 +34,7 @@ function UserInfoModal({
   currentUserRole,
   currentOrg,
   onDeleteUser,
+  onSave
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -43,6 +45,7 @@ function UserInfoModal({
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(undefined);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
 
   useEffect ( () => {
     const token = localStorage.getItem("token");
@@ -109,6 +112,7 @@ function UserInfoModal({
 
   const handleProjectSelect = async (project: { projectId: number; address: string }) => {
       setAddresses((prevAddresses) => [...prevAddresses, project.address]);
+      setSelectedProjectIds((prevSelectedProjectIds) => [...prevSelectedProjectIds, project.projectId]);
       setSelectedProjectId(project.projectId);
       setProjectMenuOpen(false);
   };
@@ -132,12 +136,12 @@ function UserInfoModal({
       console.error("Error assigning user to project:", err);
     }
   };
-  
 
   const handleSave = async () => {
     try {
       await assignOrgUserProject(uid, currentOrg, selectedProjectId, role);
       onClose();
+      onSave(addresses);
     } catch (err) {
       console.error("Error during save:", err);
     }

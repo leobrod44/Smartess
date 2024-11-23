@@ -33,7 +33,6 @@ const ManageUsersPage = () => {
   const [currentOrg, setCurrentOrg] = useState<number | undefined>(undefined);
   const itemsPerPage = 8;
 
-  
   // Add roles to filter options
   const filterOptionsManageUsers = [
     "Address A-Z",
@@ -189,7 +188,7 @@ const consolidateUsers = (
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
+  
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     page: number
@@ -204,6 +203,11 @@ const consolidateUsers = (
 
   const handleAddUserClick = () => {
     console.log("Add user clicked!");
+  };
+
+  const handleAccountsListClose = (uid: number, updatedAddresses: string[]) => {
+    console.log(`Modal closed for user ${uid} with updated addresses:`, updatedAddresses);
+    // MODIFY THIS TO UPDATE CURRENT ITEMS AND RE RENDER THE PAGE
   };
 
   return (
@@ -255,6 +259,7 @@ const consolidateUsers = (
               currentUserRole={currentUser?.role || "basic"}
               addresses={addresses || []}
               currentOrg={currentOrg}
+              onAccountsListClose={handleAccountsListClose}
             />
           );
         })}

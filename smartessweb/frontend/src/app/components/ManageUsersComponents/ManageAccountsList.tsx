@@ -10,6 +10,7 @@ interface ManageAccountsListProps {
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
   currentOrg: number | undefined;
+  onAccountsListClose: (uid: number, updatedAddresses: string[]) => void;
 }
 
 const ManageAccountsList = ({
@@ -19,7 +20,8 @@ const ManageAccountsList = ({
   permission,
   currentUserRole,
   addresses, // Destructure addresses
-  currentOrg
+  currentOrg,
+  onAccountsListClose
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -29,6 +31,10 @@ const ManageAccountsList = ({
 
   const handleCloseModal = () => {
     setModalOpen(false);
+  };
+
+  const handleModalSave = (updatedAddresses: string[]) => {
+    onAccountsListClose(uid, updatedAddresses);
   };
 
   const getColorClasses = () => {
@@ -76,6 +82,7 @@ const ManageAccountsList = ({
       <UserInfoModal
         uid={uid}
         open={isModalOpen}
+        onSave={handleModalSave}
         onClose={handleCloseModal}
         userName={userName}
         role={permission}
