@@ -45,7 +45,6 @@ function UserInfoModal({
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(undefined);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
 
   useEffect ( () => {
     const token = localStorage.getItem("token");
@@ -112,7 +111,6 @@ function UserInfoModal({
 
   const handleProjectSelect = async (project: { projectId: number; address: string }) => {
       setAddresses((prevAddresses) => [...prevAddresses, project.address]);
-      setSelectedProjectIds((prevSelectedProjectIds) => [...prevSelectedProjectIds, project.projectId]);
       setSelectedProjectId(project.projectId);
       setProjectMenuOpen(false);
   };
