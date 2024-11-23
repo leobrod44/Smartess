@@ -42,6 +42,7 @@ function UserInfoModal({
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(undefined);
 
   useEffect ( () => {
     const token = localStorage.getItem("token");
@@ -107,25 +108,39 @@ function UserInfoModal({
   };
 
   const handleProjectSelect = async (project: { projectId: number; address: string }) => {
+      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
+      setSelectedProjectId(project.projectId);
+      setProjectMenuOpen(false);
+  };
+
+  const assignOrgUserProject = async (
+    uid: number,
+    currentOrg: number | undefined,
+    projectId: number | undefined,
+    role: "admin" | "basic" | "master"
+  ) => {
     const token = localStorage.getItem("token");
   
     if (!token) {
       router.push("/sign-in");
       return;
     }
-
+  
     try {
-      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, project.projectId, role, token);
-      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
-      setProjectMenuOpen(false);
+      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectId, role, token);
     } catch (err) {
       console.error("Error assigning user to project:", err);
     }
   };
   
 
-  const handleSave = () => {
-    onClose();
+  const handleSave = async () => {
+    try {
+      await assignOrgUserProject(uid, currentOrg, selectedProjectId, role);
+      onClose();
+    } catch (err) {
+      console.error("Error during save:", err);
+    }
   };
 
   const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
