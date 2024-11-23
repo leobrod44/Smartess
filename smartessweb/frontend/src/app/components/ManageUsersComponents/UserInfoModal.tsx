@@ -44,7 +44,7 @@ function UserInfoModal({
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | undefined>(undefined);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
 
   useEffect ( () => {
     const token = localStorage.getItem("token");
@@ -111,14 +111,20 @@ function UserInfoModal({
 
   const handleProjectSelect = async (project: { projectId: number; address: string }) => {
       setAddresses((prevAddresses) => [...prevAddresses, project.address]);
-      setSelectedProjectId(project.projectId);
+      
+      if (selectedProjectIds.includes(project.projectId)) {
+        setSelectedProjectIds(selectedProjectIds.filter((id) => id !== project.projectId));
+      } else {
+        setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
+      }
+
       setProjectMenuOpen(false);
   };
 
   const assignOrgUserProject = async (
     uid: number,
     currentOrg: number | undefined,
-    projectId: number | undefined,
+    projectIds: number[],
     role: "admin" | "basic" | "master"
   ) => {
     const token = localStorage.getItem("token");
@@ -129,7 +135,7 @@ function UserInfoModal({
     }
   
     try {
-      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectId, role, token);
+      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectIds, role, token);
     } catch (err) {
       console.error("Error assigning user to project:", err);
     }
@@ -137,7 +143,7 @@ function UserInfoModal({
 
   const handleSave = async () => {
     try {
-      await assignOrgUserProject(uid, currentOrg, selectedProjectId, role);
+      await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
       onClose();
       onSave(addresses);
     } catch (err) {

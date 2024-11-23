@@ -112,7 +112,7 @@ export const manageAccountsApi = {
     return data;
   },
 
-  assignOrgUserToProject: async (user_id: number, org_id: number | undefined, proj_id: number | undefined, org_user_type: string, token: string): Promise<void> => {
+  assignOrgUserToProject: async (user_id: number, org_id: number | undefined, proj_ids: number[], org_user_type: string, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/assign-org-user-to-project`, {
       method: 'POST', 
       headers: {
@@ -122,7 +122,7 @@ export const manageAccountsApi = {
       body: JSON.stringify({
         user_id,
         org_id,
-        proj_id,
+        proj_ids,
         org_user_type
       }),
     });

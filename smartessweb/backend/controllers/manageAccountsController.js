@@ -279,27 +279,33 @@ exports.assignOrgUserToProject = async (req, res) => {
         return res.status(401).json({ error: 'Invalid token' });
       }
   
-      const { user_id, org_id, proj_id, org_user_type } = req.body;
+      const { user_id, org_id, proj_ids, org_user_type } = req.body;
   
-      if (!user_id || !org_id || !proj_id || !org_user_type) {
+      if (!user_id || !org_id || !proj_ids || !org_user_type) {
         return res.status(400).json({ error: 'user_id, org_id, proj_id, and org_user_type are required.' });
       }
   
-      const { data, error: insertError } = await supabase
-        .from('org_user')
-        .insert([
-          {
-            user_id,
-            org_id,
-            proj_id,
-            org_user_type
-          }
-        ]);
+      const insertPromises = proj_ids.map(proj_id => 
+        supabase
+          .from('org_user')
+          .insert([
+            {
+              user_id,
+              org_id,
+              proj_id, 
+              org_user_type
+            }
+          ])
+      );
   
+      const results = await Promise.all(insertPromises);
+  
+      const insertError = results.find(result => result.error);
       if (insertError) {
-        console.error('Insert Error:', insertError);
-        return res.status(500).json({ error: 'Failed to assign user to project.' });
+        console.error('Insert Error:', insertError.error);
+        return res.status(500).json({ error: 'Failed to assign user to project(s).' });
       }
+  
   
       res.status(200).json({ message: 'User successfully assigned to project.' });
   
