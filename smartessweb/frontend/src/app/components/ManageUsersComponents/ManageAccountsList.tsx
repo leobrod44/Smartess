@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import UserInfoModal from "../ManageUsersComponents/UserInfoModal";
+import router from "next/router";
+import { manageAccountsApi } from "@/api/page";
+
 interface ManageAccountsListProps {
   uid: number;
   address: string;
@@ -10,6 +13,7 @@ interface ManageAccountsListProps {
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
   currentOrg: number | undefined;
+  onUserDeleted?: (uid: number) => void;
 }
 
 const ManageAccountsList = ({
@@ -20,9 +24,11 @@ const ManageAccountsList = ({
   currentUserRole,
   addresses, // Destructure addresses
   currentOrg,
+  onUserDeleted
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
+  const token = localStorage.getItem("token");
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -30,6 +36,24 @@ const ManageAccountsList = ({
 
   const handleCloseModal = () => {
     setModalOpen(false);
+  };
+
+  const deleteOrgUser = async (
+    uid: number
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
+    try {
+      await manageAccountsApi.deleteOrgUser(uid, currentOrg, token);
+      if (onUserDeleted) {
+        onUserDeleted(uid);
+      }
+    } catch (err) {
+      console.error("Error assigning user to project:", err);
+    }
   };
 
   const handleModalSave = (updatedAddresses: string[]) => {
@@ -95,8 +119,8 @@ const ManageAccountsList = ({
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
         currentOrg={currentOrg}
-        onDeleteUser={() => {
-          // Logic to delete the user, e.g., making an API call
+        onDeleteUser={(uid) => {
+          deleteOrgUser(uid);
           console.log("User deleted");
         }}
       />
