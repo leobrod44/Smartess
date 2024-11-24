@@ -354,6 +354,7 @@ exports.removeOrgUserFromProject = async (req, res) => {
     }
 };
 
+
 exports.deleteOrgUser = async (req, res) => {
     try {
       const token = req.token;
@@ -394,6 +395,45 @@ exports.deleteOrgUser = async (req, res) => {
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+exports.changeOrgUserRole = async (req, res) => {
+    try {
+
+        const token = req.token;
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+        const { user_id, org_id, role } = req.body;
+    
+        if (!user_id || !org_id || !role) {
+            return res.status(400).json({ error: 'user_id, org_id and role are required.' });
+        }
+    
+        const query = supabase
+            .from('org_user')
+            .update({ org_user_type: role })
+            .eq('user_id', user_id);
+    
+        if (org_id !== undefined) {
+            query.eq('org_id', org_id);
+        }
+    
+        const { error: updateError } = await query;
+    
+        if (updateError) {
+            console.error('Update Error:', updateError);
+            return res.status(500).json({ error: 'Failed to update user role.' });
+        }
+    
+        res.status(200).json({ message: 'User role successfully updated.' });
+    } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error.' });
     }
   };
   

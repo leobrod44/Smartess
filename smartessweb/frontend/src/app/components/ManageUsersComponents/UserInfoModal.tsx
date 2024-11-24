@@ -46,9 +46,9 @@ function UserInfoModal({
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [projectIdsToDelete, setProjectIdsToDelete] = useState<number[]>([]);
+  const token = localStorage.getItem("token");
 
   useEffect ( () => {
-    const token = localStorage.getItem("token");
 
     if (!token) {
       router.push("/sign-in");
@@ -150,6 +150,10 @@ function UserInfoModal({
         await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
       }
       
+      if (role !== initialRole) {
+        await changeUserRole(uid, currentOrg, role);
+      }
+      
       onClose();
       onSave(addresses);
     } catch (err) {
@@ -163,10 +167,6 @@ function UserInfoModal({
     projectIds: number[],
     role: "admin" | "basic" | "master"
   ) => {
-    const token = localStorage.getItem("token");
-
-    console.log("adding projects", projectIds);
-  
     if (!token) {
       router.push("/sign-in");
       return;
@@ -184,10 +184,6 @@ function UserInfoModal({
     currentOrg: number | undefined,
     projectIds: number[]
   ) => {
-    const token = localStorage.getItem("token");
-  
-    console.log("removing projects", projectIds);
-
     if (!token) {
       router.push("/sign-in");
       return;
@@ -199,6 +195,23 @@ function UserInfoModal({
       console.error("Error removing user from project:", err);
     }
   };
+
+  const changeUserRole = async (
+    uid: number,
+    currentOrg: number | undefined,
+    role: "admin" | "basic" | "master"
+    ) => {
+      if (!token) {
+        router.push("/sign-in");
+        return;
+      }
+    
+      try {
+        await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
+      } catch (err) {
+        console.error("Error changing organization user's role:", err);
+      }
+  }
 
   const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
   .filter((project) => !addresses.includes(project.address))
