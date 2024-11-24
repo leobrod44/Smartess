@@ -157,5 +157,28 @@ export const manageAccountsApi = {
     }
 
     return data;
+  },
+
+  changeOrgUserRole: async (user_id: number, org_id: number | undefined, role: string, token: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/manage-accounts/change-org-user-role`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id,
+        org_id,
+        role
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to change organization user role');
+    }
+
+    return data;
   }
 };
