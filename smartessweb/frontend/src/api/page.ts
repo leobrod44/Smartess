@@ -130,7 +130,30 @@ export const manageAccountsApi = {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || 'Failed to fetch project data');
+      throw new Error(data.error || 'Failed to assign project to user');
+    }
+
+    return data;
+  },
+
+  removeOrgUserFromProject: async (user_id: number, org_id: number | undefined, proj_ids: number[], token: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/manage-accounts/remove-org-user-from-project`, {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id,
+        org_id,
+        proj_ids
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to remove project from user');
     }
 
     return data;
