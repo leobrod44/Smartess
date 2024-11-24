@@ -313,5 +313,43 @@ exports.assignOrgUserToProject = async (req, res) => {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal server error.' });
     }
-  };
+};
   
+exports.removeOrgUserFromProject = async (req, res) => {
+    try {
+        const token = req.token;
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { user_id, org_id, proj_ids } = req.body;
+
+        if (!user_id || !org_id || !proj_ids || !Array.isArray(proj_ids)) {
+            return res.status(400).json({ error: 'user_id, org_id, and proj_ids (array) are required.' });
+        }
+
+        const deletePromises = proj_ids.map(proj_id =>
+            supabase
+                .from('org_user')
+                .delete()
+                .eq('user_id', user_id)
+                .eq('org_id', org_id)
+                .eq('proj_id', proj_id)
+        );
+
+        const results = await Promise.all(deletePromises);
+
+        const deleteError = results.find(result => result.error);
+        if (deleteError) {
+            console.error('Delete Error:', deleteError.error);
+            return res.status(500).json({ error: 'Failed to remove user from project(s).' });
+        }
+
+        res.status(200).json({ message: 'User successfully removed from project(s).' });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+};
