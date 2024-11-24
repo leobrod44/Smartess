@@ -20,7 +20,7 @@ interface UserInfoModalProps {
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
   currentOrg: number | undefined;
-  onDeleteUser: () => void;
+  onDeleteUser: (uid: number) => void;
   onSave: (addresses: string[]) => void;
 }
 
@@ -94,7 +94,8 @@ function UserInfoModal({
 
   const handleConfirmDelete = () => {
     if (isUserDeletion) {
-      onDeleteUser(); // Handle user deletion
+      onDeleteUser(uid); // Handle user deletion
+      onClose();
     } else if (addressToDelete) {
       const updatedAddresses = addresses.filter(
         (addr) => addr !== addressToDelete
