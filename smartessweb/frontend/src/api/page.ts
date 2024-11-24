@@ -158,10 +158,10 @@ export const manageAccountsApi = {
 
     return data;
   },
-
+  
   changeOrgUserRole: async (user_id: number, org_id: number | undefined, role: string, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/change-org-user-role`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ export const manageAccountsApi = {
       body: JSON.stringify({
         user_id,
         org_id,
-        role
+        role,
       }),
     });
 
@@ -177,6 +177,28 @@ export const manageAccountsApi = {
 
     if (!response.ok) {
       throw new Error(data.error || 'Failed to change organization user role');
+    }
+
+    return data;
+  },
+  
+  deleteOrgUser: async (user_id: number, org_id: number | undefined, token: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/manage-accounts/delete-org-user`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id,
+        org_id,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to remove user from organization');
     }
 
     return data;
