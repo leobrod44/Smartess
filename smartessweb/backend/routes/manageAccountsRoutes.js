@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCurrentUser, getOrgUsers, getOrgIndividualsData, getOrgUsersProjects, getOrgProjects, assignOrgUserToProject, removeOrgUserFromProject } = require('../controllers/manageAccountsController');
+const { getCurrentUser, getOrgUsers, getOrgIndividualsData, getOrgUsersProjects, getOrgProjects, assignOrgUserToProject, removeOrgUserFromProject, deleteOrgUser } = require('../controllers/manageAccountsController');
 const { verifyToken } = require('../middleware/middleware');
 const router = express.Router();
 
@@ -10,5 +10,6 @@ router.post('/get-org-users-projects', verifyToken, getOrgUsersProjects);
 router.post('/get-org-projects', verifyToken, getOrgProjects);
 router.post('/assign-org-user-to-project', verifyToken, assignOrgUserToProject);
 router.post('/remove-org-user-from-project', verifyToken, removeOrgUserFromProject);
+router.post('/delete-org_user', verifyToken, deleteOrgUser);
 
 module.exports = router;
