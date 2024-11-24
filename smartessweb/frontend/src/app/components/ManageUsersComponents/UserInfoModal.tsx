@@ -45,6 +45,7 @@ function UserInfoModal({
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+  const [projectIdsToDelete, setProjectIdsToDelete] = useState<number[]>([]);
 
   useEffect ( () => {
     const token = localStorage.getItem("token");
@@ -85,10 +86,12 @@ function UserInfoModal({
     setIsUserDeletion(false);
     setDeletePopupOpen(true);
   };
+
   const handleDeleteUserClick = () => {
     setIsUserDeletion(true); // Set to true for user deletion
     setDeletePopupOpen(true);
   };
+
   const handleConfirmDelete = () => {
     if (isUserDeletion) {
       onDeleteUser(); // Handle user deletion
@@ -96,6 +99,11 @@ function UserInfoModal({
       const updatedAddresses = addresses.filter(
         (addr) => addr !== addressToDelete
       );
+
+      const project = orgProjects.find((proj) => proj.address === addressToDelete);
+      if (project) {
+        setProjectIdsToDelete((prevIds) => [...prevIds, Number(project.projectId)]);
+      }
       setAddresses(updatedAddresses);
     }
     setDeletePopupOpen(false);
@@ -121,6 +129,33 @@ function UserInfoModal({
       setProjectMenuOpen(false);
   };
 
+  const handleSave = async () => {
+    try {
+      // remove matching IDs from both arrays in case a user adds a project then removes it 
+      const filteredSelectedProjectIds = selectedProjectIds.filter(
+        (id) => !projectIdsToDelete.includes(id)
+      );
+      const filteredProjectIdsToDelete = projectIdsToDelete.filter(
+        (id) => !selectedProjectIds.includes(id)
+      );
+
+      // update the states with filtered arrays
+      setSelectedProjectIds(filteredSelectedProjectIds);
+      setProjectIdsToDelete(filteredProjectIdsToDelete);
+
+      if (JSON.stringify(filteredSelectedProjectIds) !== JSON.stringify(filteredProjectIdsToDelete)) {
+        console.log("calling apis")
+        await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
+        await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
+      }
+      
+      onClose();
+      onSave(addresses);
+    } catch (err) {
+      console.error("Error during save:", err);
+    }
+  };
+
   const assignOrgUserProject = async (
     uid: number,
     currentOrg: number | undefined,
@@ -128,6 +163,8 @@ function UserInfoModal({
     role: "admin" | "basic" | "master"
   ) => {
     const token = localStorage.getItem("token");
+
+    console.log("adding projects", projectIds);
   
     if (!token) {
       router.push("/sign-in");
@@ -141,13 +178,24 @@ function UserInfoModal({
     }
   };
 
-  const handleSave = async () => {
+  const removeOrgUserProject = async (
+    uid: number,
+    currentOrg: number | undefined,
+    projectIds: number[]
+  ) => {
+    const token = localStorage.getItem("token");
+  
+    console.log("removing projects", projectIds);
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
     try {
-      await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
-      onClose();
-      onSave(addresses);
+      await manageAccountsApi.removeOrgUserFromProject(uid, currentOrg, projectIds, token);
     } catch (err) {
-      console.error("Error during save:", err);
+      console.error("Error removing user from project:", err);
     }
   };
 
