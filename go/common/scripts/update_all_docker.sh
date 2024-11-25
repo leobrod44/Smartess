@@ -7,6 +7,8 @@ directories=(
     "$PROJECT_ROOT"                      # Root of the project
     "$PROJECT_ROOT/go/cmd/mock_mongo_server"   # mock_mongo_server directory
     "$PROJECT_ROOT/go/cmd/hub"            # hub directory
+    "$PROJECT_ROOT/go/cmd/mockhub"        # mockhub directory
+
 )
 PROJECT_ROOT=$(dirname "$(realpath "$0")")/../../..
 # Loop through each directory and run the Docker Compose commands
