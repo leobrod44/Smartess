@@ -2,22 +2,33 @@
 import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import UserInfoModal from "../ManageUsersComponents/UserInfoModal";
+import router from "next/router";
+import { manageAccountsApi } from "@/api/page";
+
 interface ManageAccountsListProps {
+  uid: number;
   address: string;
   userName: string;
   permission: "admin" | "basic" | "master";
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
+  currentOrg: number | undefined;
+  onUserDeleted?: (uid: number) => void;
 }
 
 const ManageAccountsList = ({
-  address,
+  uid,
+  address: initialAddress,
   userName,
   permission,
   currentUserRole,
   addresses, // Destructure addresses
+  currentOrg,
+  onUserDeleted
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
+  const token = localStorage.getItem("token");
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -27,6 +38,35 @@ const ManageAccountsList = ({
     setModalOpen(false);
   };
 
+  const deleteOrgUser = async (
+    uid: number
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
+    try {
+      await manageAccountsApi.deleteOrgUser(uid, currentOrg, token);
+      if (onUserDeleted) {
+        onUserDeleted(uid);
+      }
+    } catch (err) {
+      console.error("Error assigning user to project:", err);
+    }
+  };
+
+  const handleModalSave = (updatedAddresses: string[]) => {
+    if (updatedAddresses.length > 1) {
+      const formattedAddress = `${updatedAddresses[0]} (+${
+        updatedAddresses.length - 1
+      } more)`;
+      setDisplayAddress(formattedAddress);
+    } else {
+      setDisplayAddress(updatedAddresses[0]);
+    }
+    setModalOpen(false);
+  };
   const getColorClasses = () => {
     switch (permission) {
       case "basic":
@@ -46,13 +86,13 @@ const ManageAccountsList = ({
         className="account-card border p-4 rounded shadow-sm flex items-center justify-between cursor-pointer hover:bg-gray-100 hover:shadow-md transition-all duration-200"
         onClick={handleOpenModal}
       >
-        <div className="flex-1">
-          <p>{address}</p>
+        <div className="flex-1 pr-4">
+          <p>{displayAddress}</p> {/* Display the updated address */}
         </div>
-        <div className="flex-1">
+        <div className="flex-1 pr-4">
           <p>{userName}</p>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 pr-4">
           <div
             className={`w-[78px] h-8 px-5 rounded-[20px] flex items-center justify-center ${getColorClasses()}`}
           >
@@ -70,14 +110,17 @@ const ManageAccountsList = ({
 
       {/* User Details Modal */}
       <UserInfoModal
+        uid={uid}
         open={isModalOpen}
+        onSave={handleModalSave}
         onClose={handleCloseModal}
         userName={userName}
         role={permission}
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
-        onDeleteUser={() => {
-          // Logic to delete the user, e.g., making an API call
+        currentOrg={currentOrg}
+        onDeleteUser={(uid) => {
+          deleteOrgUser(uid);
           console.log("User deleted");
         }}
       />

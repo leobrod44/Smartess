@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
@@ -7,26 +7,34 @@ import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import { generateMockProjects } from "../../mockData";
+import { Project } from "../../mockData";
+import { manageAccountsApi } from "@/api/page";
+import router from "next/router";
 
 interface UserInfoModalProps {
+  uid: number;
   open: boolean;
   onClose: () => void;
   userName: string;
   role: "admin" | "basic" | "master";
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
-  onDeleteUser: () => void;
+  currentOrg: number | undefined;
+  onDeleteUser: (uid: number) => void;
+  onSave: (addresses: string[]) => void;
 }
 
 function UserInfoModal({
+  uid,
   open,
   onClose,
   userName,
   role: initialRole,
   addresses: initialAddresses,
   currentUserRole,
+  currentOrg,
   onDeleteUser,
+  onSave
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -35,6 +43,31 @@ function UserInfoModal({
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
+  const [orgProjects, setOrgProjects] = useState<Project[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
+  const [projectIdsToDelete, setProjectIdsToDelete] = useState<number[]>([]);
+  const token = localStorage.getItem("token");
+
+  useEffect ( () => {
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchOrgProjectsData = async () => {
+      try {
+        const responseOrgProjects = await manageAccountsApi.getOrgProjects(currentOrg, token);
+        const fetchedOrgProjects = responseOrgProjects.orgProjects;
+        setOrgProjects(fetchedOrgProjects);
+
+      } catch (err) {
+        console.error("Error fetching organization projects:", err);
+      }
+    };
+
+    fetchOrgProjectsData();
+  } , [addresses, currentOrg] );
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -53,17 +86,25 @@ function UserInfoModal({
     setIsUserDeletion(false);
     setDeletePopupOpen(true);
   };
+
   const handleDeleteUserClick = () => {
     setIsUserDeletion(true); // Set to true for user deletion
     setDeletePopupOpen(true);
   };
+
   const handleConfirmDelete = () => {
     if (isUserDeletion) {
-      onDeleteUser(); // Handle user deletion
+      onDeleteUser(uid); // Handle user deletion
+      onClose();
     } else if (addressToDelete) {
       const updatedAddresses = addresses.filter(
         (addr) => addr !== addressToDelete
       );
+
+      const project = orgProjects.find((proj) => proj.address === addressToDelete);
+      if (project) {
+        setProjectIdsToDelete((prevIds) => [...prevIds, Number(project.projectId)]);
+      }
       setAddresses(updatedAddresses);
     }
     setDeletePopupOpen(false);
@@ -77,18 +118,108 @@ function UserInfoModal({
     setProjectMenuOpen(!isProjectMenuOpen);
   };
 
-  const handleAddressSelect = (address: string) => {
-    setAddresses((prevAddresses) => [...prevAddresses, address]);
-    setProjectMenuOpen(false);
+  const handleProjectSelect = async (project: { projectId: number; address: string }) => {
+      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
+      
+      if (selectedProjectIds.includes(project.projectId)) {
+        setSelectedProjectIds(selectedProjectIds.filter((id) => id !== project.projectId));
+      } else {
+        setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
+      }
+
+      setProjectMenuOpen(false);
   };
 
-  const handleSave = () => {
-    onClose();
+  const handleSave = async () => {
+    try {
+      // remove matching IDs from both arrays in case a user adds a project then removes it 
+      const filteredSelectedProjectIds = selectedProjectIds.filter(
+        (id) => !projectIdsToDelete.includes(id)
+      );
+      const filteredProjectIdsToDelete = projectIdsToDelete.filter(
+        (id) => !selectedProjectIds.includes(id)
+      );
+
+      // update the states with filtered arrays
+      setSelectedProjectIds(filteredSelectedProjectIds);
+      setProjectIdsToDelete(filteredProjectIdsToDelete);
+
+      if (JSON.stringify(filteredSelectedProjectIds) !== JSON.stringify(filteredProjectIdsToDelete)) {
+        console.log("calling apis")
+        await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
+        await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
+      }
+      
+      if (role !== initialRole) {
+        await changeUserRole(uid, currentOrg, role);
+      }
+      
+      onClose();
+      onSave(addresses);
+    } catch (err) {
+      console.error("Error during save:", err);
+    }
   };
 
-  const unlinkedAddresses: string[] = generateMockProjects()
-    .map((project) => project.address)
-    .filter((address) => !addresses.includes(address));
+  const assignOrgUserProject = async (
+    uid: number,
+    currentOrg: number | undefined,
+    projectIds: number[],
+    role: "admin" | "basic" | "master"
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
+    try {
+      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectIds, role, token);
+    } catch (err) {
+      console.error("Error assigning user to project:", err);
+    }
+  };
+
+  const removeOrgUserProject = async (
+    uid: number,
+    currentOrg: number | undefined,
+    projectIds: number[]
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+  
+    try {
+      await manageAccountsApi.removeOrgUserFromProject(uid, currentOrg, projectIds, token);
+    } catch (err) {
+      console.error("Error removing user from project:", err);
+    }
+  };
+
+  const changeUserRole = async (
+    uid: number,
+    currentOrg: number | undefined,
+    role: "admin" | "basic" | "master"
+    ) => {
+      if (!token) {
+        router.push("/sign-in");
+        return;
+      }
+    
+      try {
+        await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
+      } catch (err) {
+        console.error("Error changing organization user's role:", err);
+      }
+  }
+
+  const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
+  .filter((project) => !addresses.includes(project.address))
+  .map((project) => ({
+    projectId: Number(project.projectId),
+    address: project.address,
+  }));
+
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
@@ -162,8 +293,8 @@ function UserInfoModal({
 
           {isProjectMenuOpen && (
             <ProjectAddressMenu
-              unlinkedAddresses={unlinkedAddresses}
-              onSelectAddress={handleAddressSelect}
+              unlinkedProjects={unlinkedProjects}
+              onSelectProject={handleProjectSelect}
             />
           )}
 

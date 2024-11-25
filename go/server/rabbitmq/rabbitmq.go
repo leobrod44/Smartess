@@ -3,8 +3,14 @@ package rabbitmq
 import (
 	"Smartess/go/common/logging"
 	common_rabbitmq "Smartess/go/common/rabbitmq"
+	"context"
 	"errors"
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
+	"os"
+	"time"
 
 	"github.com/streadway/amqp"
 	"go.uber.org/zap"
@@ -22,6 +28,8 @@ func Init() (RabbitMQServer, error) {
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
+
+	mongoClient := initMongoDB()
 
 	instance, err := common_rabbitmq.Init("/app/config/queues.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
 	if err != nil {
@@ -91,7 +99,7 @@ func Init() (RabbitMQServer, error) {
 			routingKeysBinded = append(routingKeysBinded, "")
 		}
 		for _, routingKey := range routingKeysBinded {
-			handler, err := setHandler(queue, routingKey)
+			handler, err := setHandler(queue, routingKey, mongoClient)
 			if err != nil {
 				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 			}
@@ -138,14 +146,14 @@ func (r *RabbitMQServer) Start() {
 }
 
 // TODO Consider migrating fully to exchanges here...
-func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, error) {
+func setHandler(queue amqp.Queue, optionalRoutingKey string, mongoClient *mongo.Client) (MessageHandler, error) {
 
 	if optionalRoutingKey != "" {
-		return &TopicMessageHandler{RoutingKey: optionalRoutingKey}, nil
+		return &TopicMessageHandler{RoutingKey: optionalRoutingKey, mongoClient: mongoClient}, nil
 	}
 	switch queue.Name {
 	case "mongo-messages":
-		return &MongoMessageHandler{}, nil
+		return &MongoMessageHandler{mongoClient}, nil
 	case "hub-info-logs":
 		return &HubLogHandler{logLevel: 0}, nil
 	case "hub-warn-logs":
@@ -153,7 +161,7 @@ func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, er
 	case "hub-error-logs":
 		return &HubLogHandler{logLevel: 2}, nil
 	case "alerts":
-		return &AlertHandler{}, nil
+		return &AlertHandler{mongoClient}, nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
 	}
@@ -162,4 +170,25 @@ func setHandler(queue amqp.Queue, optionalRoutingKey string) (MessageHandler, er
 func (r *RabbitMQServer) Close() {
 	r.instance.Channel.Close()
 	r.instance.Conn.Close()
+}
+
+// TODO RYAN CONTEXT.TODO()
+func initMongoDB() *mongo.Client {
+	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
+
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
+
+	// Ping the database to verify connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx, nil); err != nil {
+		log.Fatalf("Failed to ping MongoDB: %v", err)
+	}
+
+	log.Println("Connected to MongoDB")
+	return client
 }

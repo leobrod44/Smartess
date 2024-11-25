@@ -5,14 +5,24 @@ export interface HubUser {
 
   lastName: string;
 
+  email: string;
+
+  telephone: string;
+
   role: "admin" | "basic";
 }
 
 export interface OrgUser {
-  user_id: number; 
+  user_id: number;
   org_id: number;
   proj_id: number;
   org_user_type: string;
+}
+
+export interface CurrentUser {
+  userId: string;
+  role: "master" | "admin" | "basic";
+  address: string[];
 }
 
 export interface TicketsType {
@@ -55,8 +65,8 @@ export interface Project {
 
 // New interface for project-specific individuals
 export interface Individual {
-
-  individualId: string; // Unique ID for project-specific users
+  
+  individualId: number; // Unique ID for project-specific users
 
   firstName: string;
 
@@ -263,13 +273,41 @@ export const generateMockUnits = (): Unit[] => [
 // Function to generate mock users
 
 const generateMockUsers = (): HubUser[] => [
-  { tokenId: "2", firstName: "Mary", lastName: "Johnson", role: "basic" },
+  {
+    tokenId: "2",
+    firstName: "Mary",
+    lastName: "Johnson",
+    email: "maryJ@gmail.com",
+    telephone: "5145552343",
+    role: "basic",
+  },
 
-  { tokenId: "3", firstName: "Ken", lastName: "Long", role: "basic" },
+  {
+    tokenId: "3",
+    firstName: "Ken",
+    lastName: "Long",
+    email: "ken.long@gmail.com",
+    telephone: "5147735323",
+    role: "basic",
+  },
 
-  { tokenId: "4", firstName: "Michalo", lastName: "Jam", role: "admin" },
+  {
+    tokenId: "4",
+    firstName: "Michalo",
+    lastName: "Jam",
+    email: "M.jam@gmail.com",
+    telephone: "5144385243",
+    role: "admin",
+  },
 
-  { tokenId: "5", firstName: "Sierra", lastName: "McKnight", role: "basic" },
+  {
+    tokenId: "5",
+    firstName: "Sierra",
+    lastName: "McKnight",
+    email: "mcknightS@gmail.com",
+    telephone: "4389763424",
+    role: "basic",
+  },
 ];
 
 // Function to generate mock tickets
@@ -528,24 +566,52 @@ const generateMockOwner2 = (): Owner => ({
 // Second Function to generate mock users, simply to test searchbar
 
 const generateMockUsers2 = (): HubUser[] => [
-  { tokenId: "6", firstName: "BILL", lastName: "Bong", role: "basic" },
+  {
+    tokenId: "6",
+    firstName: "BILL",
+    lastName: "Bong",
+    email: "billbong@gmail.com",
+    telephone: "6349873562",
+    role: "basic",
+  },
 
-  { tokenId: "7", firstName: "Penny", lastName: "Wise", role: "basic" },
+  {
+    tokenId: "7",
+    firstName: "Penny",
+    lastName: "Wise",
+    email: "Pwise@gmail.com",
+    telephone: "5129874623",
+    role: "basic",
+  },
 
-  { tokenId: "8", firstName: "Michalo", lastName: "Jam", role: "admin" },
+  {
+    tokenId: "8",
+    firstName: "Michalo",
+    lastName: "Jam",
+    email: "M.jam@gmail.com",
+    telephone: "5144385243",
+    role: "admin",
+  },
 
-  { tokenId: "9", firstName: "Sierra", lastName: "Mist", role: "basic" },
+  {
+    tokenId: "9",
+    firstName: "Sierra",
+    lastName: "Mist",
+    email: "mcknightS@gmail.com",
+    telephone: "4389763424",
+    role: "basic",
+  },
 ];
 
 const generateMockProjectUsers = (): Individual[] => [
   {
-    individualId: "ind-1",
+    individualId: 1,
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
   },
   {
-    individualId: "ind-2",
+    individualId: 2,
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
@@ -561,13 +627,13 @@ const generateMockProjectUsers = (): Individual[] => [
 // Function to generate mock project users for the second project
 const generateMockProjectUsers2 = (): Individual[] => [
   {
-    individualId: "ind-3",
+    individualId: 3,
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
   },
   {
-    individualId: "ind-4",
+    individualId: 4,
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
@@ -576,13 +642,13 @@ const generateMockProjectUsers2 = (): Individual[] => [
 
 const generateMockProjectUsers3 = (): Individual[] => [
   {
-    individualId: "ind-5",
+    individualId: 5,
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
   },
   {
-    individualId: "ind-6",
+    individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
