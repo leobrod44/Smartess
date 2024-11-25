@@ -40,10 +40,10 @@ const AssignUserModalComponent = ({
     setCurrentPage(1);
   };
 
-  const filteredUsers = availableUsers.filter(({ firstName, lastName }) => {
+  const filteredUsers = availableUsers.filter(({ firstName, lastName, individualId }) => {
     const fullName = `${firstName} ${lastName}`.toLowerCase();
     const query = searchQuery.toLowerCase();
-    return fullName.includes(query);
+    return fullName.includes(query)|| individualId.toLowerCase().includes(query);
   });
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
