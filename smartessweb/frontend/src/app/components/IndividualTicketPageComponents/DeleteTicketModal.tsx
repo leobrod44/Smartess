@@ -1,3 +1,5 @@
+import CloseIcon from "@mui/icons-material/Close";
+
 const DeleteTicketModal = ({
   onBack,
   onDeleteTicket,
@@ -7,7 +9,11 @@ const DeleteTicketModal = ({
 }) => {
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className=" relative bg-white rounded-xl shadow-lg p-8">
+      <CloseIcon
+          className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300"
+          onClick={onBack}
+        />
         <div className="text-[#254752] text-s font-sequel-sans-black mb-4">
           Are you sure you want to delete this ticket?
         </div>
