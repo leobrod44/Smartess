@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import CondensedUserComponent from "./CondensedUserComponent";
 import { Individual } from "@/app/mockData";
