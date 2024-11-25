@@ -9,10 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.uber.org/zap"
-	"log"
-	"os"
 	"strings"
 	"time"
 )
@@ -66,7 +63,9 @@ func (h *HubLogHandler) Handle(msg amqp.Delivery, logger *zap.Logger) { //(err e
 	//return nil
 }
 
-type AlertHandler struct{}
+type AlertHandler struct {
+	mongoClient *mongo.Client
+}
 
 func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	var alert structures.Alert
@@ -77,7 +76,6 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 			zap.String("msg", string(msg.Body)),
 		)
 	}
-	//TODO @ryan: send alert to Mongo
 	logger.Info("alert",
 		zap.String("hub_id", alert.HubIP),
 		zap.String("device_id", alert.DeviceID),
@@ -86,8 +84,8 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		zap.String("time_fired", alert.TimeStamp.String()),
 	)
 
-	ConnectToMongo()
-	collection := mongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
+	//ConnectToMongo() RYAN
+	collection := h.mongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
 	_, err = collection.InsertOne(context.TODO(), bson.D{
 		{"_id", primitive.NewObjectID()},
 		{"hub_id", alert.HubIP},
@@ -102,29 +100,12 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 
 }
 
-var mongoClient *mongo.Client
-
-func ConnectToMongo() {
-	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
-
-	var err error
-	mongoClient, err = mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-
-	// Check the connection
-	err = mongoClient.Ping(context.TODO(), nil)
-	if err != nil {
-		log.Fatalf("Failed to ping MongoDB: %v", err)
-	}
-	fmt.Println("Connected to MongoDB!")
+type MongoMessageHandler struct {
+	mongoClient *mongo.Client
 }
 
-type MongoMessageHandler struct{}
-
 func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
-	ConnectToMongo()
+	//ConnectToMongo()
 	// Process the message here
 	var message structures.TestMongoMessage
 	err := json.Unmarshal(msg.Body, &message)
@@ -133,7 +114,7 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	}
 
 	// Insert the message into MongoDB
-	collection := mongoClient.Database("TestDB1").Collection("test")
+	collection := h.mongoClient.Database("TestDB1").Collection("test")
 	_, err = collection.InsertOne(context.TODO(), bson.D{
 		{"_id", primitive.NewObjectID()},
 		{"content", message.Data},
@@ -145,7 +126,8 @@ func (h *MongoMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 }
 
 type TopicMessageHandler struct {
-	RoutingKey string `json:"routing_key"`
+	RoutingKey  string `json:"routing_key"`
+	mongoClient *mongo.Client
 }
 type TopicMessageContent struct {
 	Message string `json:"message"`
@@ -175,8 +157,8 @@ func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		//if err != nil {
 		//	log.Fatalf("Error marshalling BSON: %v", err)
 		//}
-		ConnectToMongo()
-		collection := mongoClient.Database("TestDB1").Collection("test")
+		//ConnectToMongo()
+		collection := h.mongoClient.Database("TestDB1").Collection("test")
 		_, err = collection.InsertOne(context.TODO(), bson.D{
 			{"_id", primitive.NewObjectID()},
 			{"content", eventMsg.Message},
