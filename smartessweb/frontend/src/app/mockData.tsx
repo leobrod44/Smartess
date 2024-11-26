@@ -616,12 +616,12 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
-  /*   {
-    individualId: "ind-3",
+    {
+    individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
-  }, */
+  }, 
 ];
 
 // Function to generate mock project users for the second project
@@ -638,6 +638,7 @@ const generateMockProjectUsers2 = (): Individual[] => [
     lastName: "Prince",
     role: "admin",
   },
+
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [

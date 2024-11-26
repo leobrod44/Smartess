@@ -11,6 +11,7 @@ interface ManageTicketProps {
 function ManageTicketAssignment({ ticket }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const MAX_USERS = 3;
 
   // get a list of users that are part of the proj that this ticket is in, but not assigned to the ticket. these are available users
   //since i cant do that right now, i will hardcode some users that arent assigned
@@ -29,20 +30,35 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
     setIsModalOpen(false);
   };
 
-  const handleAssignUser = (selectedUsers: Individual[]) => {
+const handleAssignUser = (selectedUsers: Individual[]) => {
     try {
-      selectedUsers.forEach((user) => {
-        // Assign user logic here
-        showToastSuccess(
-          `Assigned ${user.firstName} ${user.lastName} successfully!`
+      if (assignedUsers.length + selectedUsers.length > MAX_USERS) {
+        showToastError(
+          `Cannot assign more than ${MAX_USERS} users to this ticket.`
         );
+        return;
+      }
+
+      // Simulate assigning users
+      selectedUsers.forEach((user) => {
+        showToastSuccess(`Assigned ${user.firstName} ${user.lastName} successfully!`);
       });
+
+      // Logic to update the ticket with newly assigned users
+      ticket.assigned_employees.push(...selectedUsers);
+      setIsModalOpen(false);
+
+      // Refresh available users (mocked here)
+      setAvailableUsers(
+        availableUsers.filter(
+          (user) => !selectedUsers.some((selected) => selected.individualId === user.individualId)
+        )
+      );
     } catch (error) {
       showToastError("There was an error while assigning the user(s).");
       console.error(error);
     }
   };
-
   return (
     <>
       {ticket.status === "closed" ? (
@@ -97,7 +113,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
               <AssignedUser key={index} Individual={Individual} />
             ))}
 
-            {assignedUsers.length < 3 && (
+            {assignedUsers.length <  MAX_USERS &&  (
               <div className="flex justify-center mt-3">
                 <button
                   className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
