@@ -64,7 +64,7 @@ type EventData struct {
 	NewState State  `json:"new_state"`
 }
 
-type State struct {
+type State struct { //TODO: SHOULD BE RENAMED TO EVENT?
 	EntityID    string                 `json:"entity_id"`
 	State       string                 `json:"state"`
 	Attributes  map[string]interface{} `json:"attributes"`   // Added to capture dynamic attributes
