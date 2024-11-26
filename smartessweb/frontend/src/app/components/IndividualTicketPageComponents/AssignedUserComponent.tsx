@@ -1,11 +1,27 @@
 import { Individual } from "@/app/mockData";
-import React from "react";
-
+import React, { useState } from "react";
+import UnassignConfirmModal from "./UnassignConfirmModal";
 interface AssignedUserProps {
   Individual: Individual;
 }
 
 function AssignedUser({ Individual }: AssignedUserProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleUnassignClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleBack = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleUnassignTicket = () => {
+    console.log(`User ${Individual.individualId} unassigned.`);
+    setIsModalOpen(false);
+    // Implement additional unassign logic here if necessary
+  };
+
   return (
     <div className="w-full px-3 py-3 my-5 rounded-[5px] border border-[#266472]/40 items-center inline-flex justify-between">
       <div className=" text-[#266472] text-xs font-['Sequel Sans'] ">
@@ -13,11 +29,13 @@ function AssignedUser({ Individual }: AssignedUserProps) {
       </div>
 
       <div className=" text-[#266472] text-xs font-['Sequel Sans'] ">
-        {Individual.firstName} {" "}
-        {Individual.lastName}
+        {Individual.firstName} {Individual.lastName}
       </div>
 
-      <button className="px-4 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-xs font-['Sequel Sans']">
+      <button
+        className="px-4 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-xs font-['Sequel Sans']"
+        onClick={handleUnassignClick}
+      >
         Unassign
       </button>
 
@@ -28,6 +46,13 @@ function AssignedUser({ Individual }: AssignedUserProps) {
       <div className=" text-[#a6634f] text-xs font-sequel-sans-black ">
         UNRESOLVED
       </div>
+      {isModalOpen && (
+        <UnassignConfirmModal
+          fullName={`${Individual.firstName} ${Individual.lastName}`}
+          onBack={handleBack}
+          onUnassignTicket={handleUnassignTicket}
+        />
+      )}
     </div>
   );
 }
