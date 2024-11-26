@@ -1,6 +1,8 @@
 import { Individual } from "@/app/mockData";
 import React, { useState } from "react";
 import UnassignConfirmModal from "./UnassignConfirmModal";
+import { showToastSuccess, showToastError } from "@/app/components/Toast";
+
 interface AssignedUserProps {
   Individual: Individual;
 }
@@ -17,9 +19,21 @@ function AssignedUser({ Individual }: AssignedUserProps) {
   };
 
   const handleUnassignTicket = () => {
-    console.log(`User ${Individual.individualId} unassigned.`);
-    setIsModalOpen(false);
-    // Implement additional unassign logic here if necessary
+    try {
+      console.log(`User ${Individual.individualId} unassigned.`);
+      setIsModalOpen(false);
+
+      showToastSuccess(
+        `${Individual.firstName} ${Individual.lastName} has been unassigned.`
+      );
+
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "Could not unassign the user. Please try again later."
+      );
+    }
   };
 
   return (
