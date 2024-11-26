@@ -99,6 +99,23 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
+  const handleUnassignUser = (userId: number) => {
+    try {
+      // Remove the user from assigned_employees
+      const updatedAssignedUsers = assignedUsers.filter(
+        (user) => user.individualId !== userId
+      );
+
+      ticket.assigned_employees = updatedAssignedUsers; // Update ticket assignment
+
+      showToastSuccess("User has been unassigned.");
+      onStatusUpdate("pending"); // Update status to "pending" after unassigning
+    } catch (error) {
+      showToastError("There was an error unassigning the user.");
+      console.error(error);
+    }
+  };
+
   return (
     <>
       {ticket.status === "closed" ? (
@@ -150,7 +167,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             </div>
 
             {ticket.assigned_employees.map((Individual, index) => (
-              <AssignedUser key={index} Individual={Individual} />
+              <AssignedUser
+                key={index}
+                Individual={Individual}
+                onUnassignClick={handleUnassignUser}
+              />
             ))}
 
             {assignedUsers.length < MAX_USERS && (

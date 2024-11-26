@@ -5,9 +5,10 @@ import { showToastSuccess, showToastError } from "@/app/components/Toast";
 
 interface AssignedUserProps {
   Individual: Individual;
+  onUnassignClick: (userId: number) => void;
 }
 
-function AssignedUser({ Individual }: AssignedUserProps) {
+function AssignedUser({ Individual, onUnassignClick }: AssignedUserProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleUnassignClick = () => {
@@ -22,6 +23,7 @@ function AssignedUser({ Individual }: AssignedUserProps) {
     try {
       console.log(`User ${Individual.individualId} unassigned.`);
       setIsModalOpen(false);
+      onUnassignClick(Individual.individualId);
 
       showToastSuccess(
         `${Individual.firstName} ${Individual.lastName} has been unassigned.`
