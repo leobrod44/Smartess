@@ -7,8 +7,11 @@ import BackArrowButton from "@/app/components/BackArrowBtn";
 import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
 import CloseTicketModal from "@/app/components/IndividualTicketPageComponents/CloseTicketModal";
 import DeleteTicketModal from "@/app/components/IndividualTicketPageComponents/DeleteTicketModal";
+import { showToastError, showToastSuccess } from "@/app/components/Toast";
+import { useRouter } from "next/navigation";
 
 const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
+  const router = useRouter();
   const { ticketId } = params;
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
@@ -33,26 +36,50 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
     setSelectedTicket(foundTicket);
   }, [ticketId]);
 
-  // Handlers for CloseTicketModal
-  const handleOpenCloseModal = () => {
-    console.log("Close ticket Button Clicked");
-    setIsCloseModalOpen(true);
-  };
-  const handleCloseCloseModal = () => setIsCloseModalOpen(false);
+  // Handlers for the open and closed states of the close modal
+  const handleOpenCloseTicketModal = () => setIsCloseModalOpen(true);
+  const handleCloseCloseTicketModal = () => setIsCloseModalOpen(false);
+
+  //handles actually closing the ticket..... logic should be added here
   const handleConfirmCloseTicket = () => {
-    console.log("Ticket closed");
     setIsCloseModalOpen(false);
+    try {
+      showToastSuccess("Ticket Closed successfully");
+      // Change the status of ticket to closed and unassign everyone
+      if (selectedTicket) {
+        setSelectedTicket({
+          ...selectedTicket,
+          status: "closed",
+        });
+      }
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "Could not close the ticket. Please try again later."
+      );
+    }
   };
 
-  // Handlers for DeleteTicketModal
-  const handleOpenDeleteModal = () => {
-    console.log("Delete ticket Button Clicked");
-    setIsDeleteModalOpen(true);
-  };
+  // Handlers for the open and closed states of the delete modal
+  const handleOpenDeleteModal = () => setIsDeleteModalOpen(true);
   const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
+
+  //handles actually deleting the ticket..... logic should be added here
   const handleConfirmDeleteTicket = () => {
-    console.log("Ticket deleted");
     setIsDeleteModalOpen(false);
+    try {
+      showToastSuccess("Ticket Deleted successfully");
+      setTimeout(() => {
+        router.push("../ticket");
+      }, 500);
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "Could not delete the ticket. Please try again later."
+      );
+    }
   };
 
   return (
@@ -75,7 +102,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
             <div className="flex justify-center gap-10 mt-8">
               <button
                 className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                onClick={handleOpenCloseModal}
+                onClick={handleOpenCloseTicketModal}
               >
                 Close Ticket
               </button>
@@ -89,7 +116,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
 
             {isCloseModalOpen && (
               <CloseTicketModal
-                onBack={handleCloseCloseModal}
+                onBack={handleCloseCloseTicketModal}
                 onCloseTicket={handleConfirmCloseTicket}
               />
             )}
