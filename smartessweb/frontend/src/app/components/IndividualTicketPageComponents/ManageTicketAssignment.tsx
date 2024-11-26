@@ -23,6 +23,13 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     setAvailableUsers(users);
   }, []);
 
+  useEffect(() => {
+    // Check the assigned users array each time the component updates.. if its empty change status to open
+    if (assignedUsers.length === 0) {
+      onStatusUpdate("open");
+    }
+  }, [assignedUsers, onStatusUpdate]);
+
   const handleAssignUserClick = () => {
     setIsModalOpen(true);
   };
