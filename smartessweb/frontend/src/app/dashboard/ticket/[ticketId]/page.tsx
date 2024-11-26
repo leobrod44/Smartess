@@ -99,15 +99,23 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
               Manage Ticket Assignment
             </div>
             <ManageTicketAssignment ticket={selectedTicket} />
+
             <div className="flex justify-center gap-10 mt-8">
+
+              {selectedTicket.status !== "closed" && (
+                <button
+                  className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                  onClick={handleOpenCloseTicketModal}
+                >
+                  Close Ticket
+                </button>
+              )}
+            </div>
+
+            {/* Centering the Delete button */}
+            <div className="flex justify-center mt-4">
               <button
-                className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                onClick={handleOpenCloseTicketModal}
-              >
-                Close Ticket
-              </button>
-              <button
-                className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                className="px-3 py-1 bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                 onClick={handleOpenDeleteModal}
               >
                 Delete Ticket
