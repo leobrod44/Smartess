@@ -59,6 +59,33 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
       console.error(error);
     }
   };
+
+  //assigning the current user to the ticket (mock function for now...)
+  const assignYourself = () => {
+    try {
+      // Simulate assigning yourself as the first user
+      const mockCurrentUser: Individual = {
+        individualId: 6, 
+        firstName: "Current", 
+        lastName: "User", 
+       role: "admin", 
+      };
+  
+      ticket.assigned_employees.push(mockCurrentUser);
+  
+      setAvailableUsers(
+        availableUsers.filter(
+          (user) => user.individualId !== mockCurrentUser.individualId
+        )
+      );
+  
+      showToastSuccess(`Assigned yourself successfully!`);
+    } catch (error) {
+      showToastError("There was an error assigning yourself to this ticket.");
+      console.error(error);
+    }
+  };
+
   return (
     <>
       {ticket.status === "closed" ? (
@@ -77,7 +104,7 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
               There are currently no users assigned to this ticket.{" "}
               <span
                 className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
-                onClick={() => console.log("Assign yourself clicked")}
+                onClick={assignYourself}
               >
                 Assign yourself
               </span>{" "}
