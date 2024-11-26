@@ -8,7 +8,7 @@ import Searchbar from "@/app/components/Searchbar";
 interface AssignUserModalProps {
   onClose: () => void;
   availableUsers: Individual[];
-  onAssignUser: (userId: string, isAssigned: boolean) => void;
+  onAssignUser: (userId: number, isAssigned: boolean) => void;
 }
 
 const AssignUserModalComponent = ({
@@ -30,7 +30,7 @@ const AssignUserModalComponent = ({
     setCurrentPage(page);
   };
 
-  const handleToggleAssign = (userId: string, newState: boolean) => {
+  const handleToggleAssign = (userId: number, newState: boolean) => {
     setAssignedUsers((prev) => ({ ...prev, [userId]: newState }));
     onAssignUser(userId, newState);
   };
@@ -43,7 +43,7 @@ const AssignUserModalComponent = ({
   const filteredUsers = availableUsers.filter(({ firstName, lastName, individualId }) => {
     const fullName = `${firstName} ${lastName}`.toLowerCase();
     const query = searchQuery.toLowerCase();
-    return fullName.includes(query)|| individualId.toLowerCase().includes(query);
+    return fullName.includes(query)|| individualId;
   });
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);

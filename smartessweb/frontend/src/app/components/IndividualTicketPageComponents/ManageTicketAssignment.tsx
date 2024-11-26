@@ -27,7 +27,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
     setIsModalOpen(false);
   };
 
-  const handleAssignUser = (userId: string, isAssigned: boolean) => {
+  const handleAssignUser = (userId: number, isAssigned: boolean) => {
     // Update assignment logic here
     console.log(
       `User ${userId} has been ${isAssigned ? "assigned" : "unassigned"}.`

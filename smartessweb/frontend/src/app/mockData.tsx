@@ -657,49 +657,49 @@ const generateMockProjectUsers3 = (): Individual[] => [
 
 export const mockUsersNotAssignedToTicker = (): Individual[] => [
   {
-    individualId: "ind-5",
+    individualId: 5,
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
   },
   {
-    individualId: "ind-6",
+    individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
   },
   {
-    individualId: "ind-12",
+    individualId: 12,
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",
   },
   {
-    individualId: "ind-7",
+    individualId: 7,
     firstName: "Kellie",
     lastName: "Bells",
     role: "admin",
   },
   {
-    individualId: "ind-8",
+    individualId: 8,
     firstName: "Kaitlyn",
     lastName: "Jingle",
     role: "admin",
   },
   {
-    individualId: "ind-9",
+    individualId: 9,
     firstName: "Timothy",
     lastName: "Brown",
     role: "admin",
   },
   {
-    individualId: "ind-10",
+    individualId: 10,
     firstName: "Bob",
     lastName: "Blinker",
     role: "admin",
   },
   {
-    individualId: "ind-11",
+    individualId: 11,
     firstName: "Sarah",
     lastName: "Michaels",
     role: "admin",
