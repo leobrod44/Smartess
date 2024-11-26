@@ -3,6 +3,7 @@ import { Individual, Ticket } from "../../mockData";
 import AssignedUser from "./AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
 import { mockUsersNotAssignedToTicker } from "../../mockData";
+import { showToastError, showToastSuccess } from "../Toast";
 interface ManageTicketProps {
   ticket: Ticket;
 }
@@ -12,8 +13,9 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // get a list of users that are part of the proj that this ticket is in, but not assigned to the ticket. these are available users
-  const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
   //since i cant do that right now, i will hardcode some users that arent assigned
+  const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
+
   useEffect(() => {
     const users = mockUsersNotAssignedToTicker(); // Call the function to get mock users
     setAvailableUsers(users);
@@ -27,11 +29,18 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
     setIsModalOpen(false);
   };
 
-  const handleAssignUser = (userId: number, isAssigned: boolean) => {
-    // Update assignment logic here
-    console.log(
-      `User ${userId} has been ${isAssigned ? "assigned" : "unassigned"}.`
-    );
+  const handleAssignUser = (selectedUsers: Individual[]) => {
+    try {
+      selectedUsers.forEach((user) => {
+        // Assign user logic here
+        showToastSuccess(
+          `Assigned ${user.firstName} ${user.lastName} successfully!`
+        );
+      });
+    } catch (error) {
+      showToastError("There was an error while assigning the user(s).");
+      console.error(error);
+    }
   };
 
   return (
@@ -105,7 +114,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
         <AssignUserModalComponent
           onClose={handleCloseModal}
           availableUsers={availableUsers}
-          onAssignUser={handleAssignUser}
+          onSave={handleAssignUser}
         />
       )}
     </>
