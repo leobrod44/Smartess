@@ -1,7 +1,6 @@
-'use client';
-
-import { useProjectContext } from '@/context/ProjectProvider';
-import { useEffect, useState } from 'react';
+"use client";
+import { useProjectContext } from "@/context/ProjectProvider";
+import { useEffect, useState } from "react";
 
 const ConsumptionPage = () => {
   const { selectedProjectId, selectedProjectAddress } = useProjectContext();
@@ -24,7 +23,7 @@ const ConsumptionPage = () => {
           <p>Project Address: {selectedProjectAddress}</p>
         </>
       ) : (
-        <p>No project selected.</p>
+        <p>No project selected</p>
       )}
     </div>
   );
