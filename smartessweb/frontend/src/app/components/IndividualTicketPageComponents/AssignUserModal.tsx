@@ -40,12 +40,15 @@ const AssignUserModalComponent = ({
     setCurrentPage(1);
   };
 
-  const filteredUsers = availableUsers.filter(({ firstName, lastName, individualId }) => {
-    const fullName = `${firstName} ${lastName}`.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return fullName.includes(query)|| individualId;
-  });
+  const filteredUsers = availableUsers.filter(
+    ({ firstName, lastName, individualId }) => {
+      const fullName = `${firstName} ${lastName}`.toLowerCase();
+      const query = searchQuery.toLowerCase();
+      const idMatch = individualId.toString().includes(query);
 
+      return fullName.includes(query) || idMatch;
+    }
+  );
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const currentItems = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
