@@ -9,7 +9,7 @@ interface ManageTicketProps {
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
 }
 
-function ManageTicketAssignment({ ticket, onStatusUpdate  }: ManageTicketProps) {
+function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_USERS = 3;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import IndividualTicket from "@/app/components/IndividualTicketPageComponents/IndividualTicket";
-import { generateMockProjects, Ticket } from "@/app/mockData"; 
+import { generateMockProjects, Ticket } from "@/app/mockData";
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
 import CloseTicketModal from "@/app/components/IndividualTicketPageComponents/CloseTicketModal";
@@ -81,13 +81,12 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
     }
   };
 
-
-   // Handler to update the ticket status when a user is assigned or unassigned
-   const handleStatusUpdate = (newStatus: "open" | "pending" | "closed") => {
+  // Handler to update the ticket status when a user is assigned or unassigned
+  const handleStatusUpdate = (newStatus: "open" | "pending" | "closed") => {
     if (selectedTicket) {
       setSelectedTicket({
         ...selectedTicket,
-        status: newStatus,  // Update the status based on user assignment
+        status: newStatus, // Update the status based on user assignment
       });
     }
   };
@@ -108,9 +107,10 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
             <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
               Manage Ticket Assignment
             </div>
-            <ManageTicketAssignment 
-            ticket={selectedTicket}
-            onStatusUpdate={handleStatusUpdate} />
+            <ManageTicketAssignment
+              ticket={selectedTicket}
+              onStatusUpdate={handleStatusUpdate}
+            />
 
             <div className="flex justify-center gap-10 mt-8">
               {selectedTicket.status !== "closed" && (
