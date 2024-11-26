@@ -131,6 +131,7 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
           onClose={handleCloseModal}
           availableUsers={availableUsers}
           onSave={handleAssignUser}
+          remainingSlots={MAX_USERS - assignedUsers.length} 
         />
       )}
     </>

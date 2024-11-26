@@ -4,17 +4,20 @@ import CondensedUserComponent from "./CondensedUserComponent";
 import { Individual } from "@/app/mockData";
 import Pagination from "@mui/material/Pagination";
 import Searchbar from "@/app/components/Searchbar";
+import { showToastError } from "../Toast";
 
 interface AssignUserModalProps {
   onClose: () => void;
   availableUsers: Individual[];
   onSave: (selectedUsers: Individual[]) => void;
+  remainingSlots: number;
 }
 
 const AssignUserModalComponent = ({
   onClose,
   availableUsers,
   onSave,
+  remainingSlots,
 }: AssignUserModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
@@ -31,6 +34,12 @@ const AssignUserModalComponent = ({
   };
 
   const handleToggleAssign = (userId: number, newState: boolean) => {
+    const selectedCount = Object.values(toggledUsers).filter(Boolean).length;
+
+    if (newState && selectedCount >= remainingSlots) {
+      showToastError(`You can only add up to ${remainingSlots} user(s).`);
+      return;
+    }
     setToggledUsers((prev) => ({ ...prev, [userId]: newState }));
   };
 
