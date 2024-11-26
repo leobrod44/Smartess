@@ -30,7 +30,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
     setIsModalOpen(false);
   };
 
-const handleAssignUser = (selectedUsers: Individual[]) => {
+  const handleAssignUser = (selectedUsers: Individual[]) => {
     try {
       if (assignedUsers.length + selectedUsers.length > MAX_USERS) {
         showToastError(
@@ -41,7 +41,9 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
 
       // Simulate assigning users
       selectedUsers.forEach((user) => {
-        showToastSuccess(`Assigned ${user.firstName} ${user.lastName} successfully!`);
+        showToastSuccess(
+          `Assigned ${user.firstName} ${user.lastName} successfully!`
+        );
       });
 
       // Logic to update the ticket with newly assigned users
@@ -51,7 +53,10 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
       // Refresh available users (mocked here)
       setAvailableUsers(
         availableUsers.filter(
-          (user) => !selectedUsers.some((selected) => selected.individualId === user.individualId)
+          (user) =>
+            !selectedUsers.some(
+              (selected) => selected.individualId === user.individualId
+            )
         )
       );
     } catch (error) {
@@ -65,20 +70,20 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
     try {
       // Simulate assigning yourself as the first user
       const mockCurrentUser: Individual = {
-        individualId: 6, 
-        firstName: "Current", 
-        lastName: "User", 
-       role: "admin", 
+        individualId: 6,
+        firstName: "Current",
+        lastName: "User",
+        role: "admin",
       };
-  
+
       ticket.assigned_employees.push(mockCurrentUser);
-  
+
       setAvailableUsers(
         availableUsers.filter(
           (user) => user.individualId !== mockCurrentUser.individualId
         )
       );
-  
+
       showToastSuccess(`Assigned yourself successfully!`);
     } catch (error) {
       showToastError("There was an error assigning yourself to this ticket.");
@@ -140,7 +145,7 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
               <AssignedUser key={index} Individual={Individual} />
             ))}
 
-            {assignedUsers.length <  MAX_USERS &&  (
+            {assignedUsers.length < MAX_USERS && (
               <div className="flex justify-center mt-3">
                 <button
                   className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
@@ -158,7 +163,7 @@ const handleAssignUser = (selectedUsers: Individual[]) => {
           onClose={handleCloseModal}
           availableUsers={availableUsers}
           onSave={handleAssignUser}
-          remainingSlots={MAX_USERS - assignedUsers.length} 
+          remainingSlots={MAX_USERS - assignedUsers.length}
         />
       )}
     </>

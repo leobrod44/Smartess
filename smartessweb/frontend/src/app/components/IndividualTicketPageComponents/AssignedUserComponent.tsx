@@ -26,7 +26,6 @@ function AssignedUser({ Individual }: AssignedUserProps) {
       showToastSuccess(
         `${Individual.firstName} ${Individual.lastName} has been unassigned.`
       );
-
     } catch (error) {
       showToastError(
         error instanceof Error

@@ -12,7 +12,6 @@ const CondensedUserComponent = ({
   isAssigned,
   onToggle,
 }: CondensedUserProps) => {
-
   const handleToggle = () => {
     const newState = !isAssigned;
     onToggle(newState); //notify parent of toggle
