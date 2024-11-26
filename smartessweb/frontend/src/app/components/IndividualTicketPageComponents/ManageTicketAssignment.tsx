@@ -6,9 +6,10 @@ import { mockUsersNotAssignedToTicker } from "../../mockData";
 import { showToastError, showToastSuccess } from "../Toast";
 interface ManageTicketProps {
   ticket: Ticket;
+  onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
 }
 
-function ManageTicketAssignment({ ticket }: ManageTicketProps) {
+function ManageTicketAssignment({ ticket, onStatusUpdate  }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_USERS = 3;
@@ -46,8 +47,8 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
         );
       });
 
-      // Logic to update the ticket with newly assigned users
       ticket.assigned_employees.push(...selectedUsers);
+      onStatusUpdate("pending");
       setIsModalOpen(false);
 
       // Refresh available users (mocked here)
@@ -83,7 +84,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
           (user) => user.individualId !== mockCurrentUser.individualId
         )
       );
-
+      onStatusUpdate("pending");
       showToastSuccess(`Assigned yourself successfully!`);
     } catch (error) {
       showToastError("There was an error assigning yourself to this ticket.");
