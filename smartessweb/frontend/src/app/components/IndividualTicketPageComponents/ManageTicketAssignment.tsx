@@ -1,13 +1,38 @@
-import React from "react";
-import { Ticket } from "../../mockData";
+import React, { useState, useEffect } from "react";
+import { Individual, Ticket } from "../../mockData";
 import AssignedUser from "./AssignedUserComponent";
-
+import AssignUserModalComponent from "./AssignUserModal";
+import { mockUsersNotAssignedToTicker } from "../../mockData";
 interface ManageTicketProps {
   ticket: Ticket;
 }
 
 function ManageTicketAssignment({ ticket }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // get a list of users that are part of the proj that this ticket is in, but not assigned to the ticket. these are available users
+  const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
+  //since i cant do that right now, i will hardcode some users that arent assigned
+  useEffect(() => {
+    const users = mockUsersNotAssignedToTicker(); // Call the function to get mock users
+    setAvailableUsers(users); 
+  }, []); 
+
+  const handleAssignUserClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleAssignUser = (userId: string, isAssigned: boolean) => {
+    // Update assignment logic here
+    console.log(
+      `User ${userId} has been ${isAssigned ? "assigned" : "unassigned"}.`
+    );
+  };
 
   return (
     <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
@@ -29,7 +54,7 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
           or{" "}
           <span
             className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
-            onClick={() => console.log("Assign another user clicked")}
+            onClick={handleAssignUserClick}
           >
             assign another user now
           </span>
@@ -51,12 +76,22 @@ function ManageTicketAssignment({ ticket }: ManageTicketProps) {
 
           {assignedUsers.length < 3 && (
             <div className="flex justify-center mt-3">
-              <button className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']">
+              <button
+                className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                onClick={handleAssignUserClick}
+              >
                 Assign User
               </button>
             </div>
           )}
         </>
+      )}
+      {isModalOpen && (
+        <AssignUserModalComponent
+          onClose={handleCloseModal}
+          availableUsers={availableUsers}
+          onAssignUser={handleAssignUser}
+        />
       )}
     </div>
   );

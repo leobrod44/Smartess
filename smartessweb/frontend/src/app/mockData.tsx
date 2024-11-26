@@ -65,9 +65,13 @@ export interface Project {
 
 // New interface for project-specific individuals
 export interface Individual {
+  
   individualId: number; // Unique ID for project-specific users
+
   firstName: string;
+
   lastName: string;
+
   role: "admin" | "basic" | "master";
 }
 
@@ -345,7 +349,7 @@ const generateMockTickets2 = (): Ticket[] => [
 
     type: "repair",
 
-    assigned_employees: generateMockProjectUsers(),
+    assigned_employees: generateMockProjectUsers2(),
   },
   {
     ticket_id: "t2",
@@ -372,7 +376,7 @@ const generateMockTickets2 = (): Ticket[] => [
     created_at: new Date("2024-11-11T10:15:00"),
 
     type: "other",
-    assigned_employees: generateMockProjectUsers2(),
+    assigned_employees: generateMockProjectUsers(),
   },
   {
     ticket_id: "t3",
@@ -647,6 +651,57 @@ const generateMockProjectUsers3 = (): Individual[] => [
     individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
+    role: "admin",
+  },
+];
+
+export const mockUsersNotAssignedToTicker = (): Individual[] => [
+  {
+    individualId: "ind-5",
+    firstName: "Sara",
+    lastName: "Johnson",
+    role: "master",
+  },
+  {
+    individualId: "ind-6",
+    firstName: "Billie",
+    lastName: "Eilish",
+    role: "admin",
+  },
+  {
+    individualId: "ind-12",
+    firstName: "Mark",
+    lastName: "Johns",
+    role: "admin",
+  },
+  {
+    individualId: "ind-7",
+    firstName: "Kellie",
+    lastName: "Bells",
+    role: "admin",
+  },
+  {
+    individualId: "ind-8",
+    firstName: "Kaitlyn",
+    lastName: "Jingle",
+    role: "admin",
+  },
+  {
+    individualId: "ind-9",
+    firstName: "Timothy",
+    lastName: "Brown",
+    role: "admin",
+  },
+  {
+    individualId: "ind-10",
+    firstName: "Bob",
+    lastName: "Blinker",
+    role: "admin",
+  },
+  {
+    individualId: "ind-11",
+    firstName: "Sarah",
+    lastName: "Michaels",
     role: "admin",
   },
 ];
