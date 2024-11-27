@@ -106,10 +106,10 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         (user) => user.individualId !== userId
       );
 
-      ticket.assigned_employees = updatedAssignedUsers; // Update ticket assignment
+      ticket.assigned_employees = updatedAssignedUsers; 
 
-      showToastSuccess("User has been unassigned.");
-      onStatusUpdate("pending"); // Update status to "pending" after unassigning
+
+      onStatusUpdate("pending"); 
     } catch (error) {
       showToastError("There was an error unassigning the user.");
       console.error(error);
