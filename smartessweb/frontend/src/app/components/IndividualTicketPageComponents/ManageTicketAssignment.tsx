@@ -13,11 +13,10 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_USERS = 3;
-
-  // get a list of users that are part of the proj that this ticket is in, but not assigned to the ticket. these are available users
-  //since i cant do that right now, i will hardcode some users that arent assigned
   const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
 
+  //Get a list of the users that are part of the proj that this ticket is in, but not assigned to the ticket. these are considered available users
+  //since i cant do that right now, i will hardcode some users that arent assigned
   useEffect(() => {
     const users = mockUsersNotAssignedToTicker(); // Call the function to get mock users
     setAvailableUsers(users);
@@ -30,7 +29,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   }, [assignedUsers, onStatusUpdate]);
 
-  const handleAssignUserClick = () => {
+  const handleOpenModal = () => {
     setIsModalOpen(true);
   };
 
@@ -58,7 +57,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
       onStatusUpdate("pending");
       setIsModalOpen(false);
 
-      // Refresh available users (mocked here)
+      // Refresh available users list by removing the users that were just added to the ticket (mocked)
       setAvailableUsers(
         availableUsers.filter(
           (user) =>
@@ -105,11 +104,20 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
       const updatedAssignedUsers = assignedUsers.filter(
         (user) => user.individualId !== userId
       );
+      ticket.assigned_employees = updatedAssignedUsers;
 
-      ticket.assigned_employees = updatedAssignedUsers; 
+      //add them back to the available employees
+      const unassignedUser = assignedUsers.find(
+        (user) => user.individualId === userId
+      );
 
-
-      onStatusUpdate("pending"); 
+      if (unassignedUser) {
+        setAvailableUsers((prevAvailableUsers) => [
+          ...prevAvailableUsers,
+          unassignedUser,
+        ]);
+      }
+      onStatusUpdate("pending");
     } catch (error) {
       showToastError("There was an error unassigning the user.");
       console.error(error);
@@ -141,7 +149,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
               or{" "}
               <span
                 className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
-                onClick={handleAssignUserClick}
+                onClick={handleOpenModal}
               >
                 assign another user now
               </span>
@@ -178,7 +186,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
               <div className="flex justify-center mt-3">
                 <button
                   className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                  onClick={handleAssignUserClick}
+                  onClick={handleOpenModal}
                 >
                   Assign User
                 </button>

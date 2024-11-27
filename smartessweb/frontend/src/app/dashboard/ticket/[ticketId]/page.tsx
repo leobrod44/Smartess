@@ -17,6 +17,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+
   useEffect(() => {
     // Fetch the specific ticket based on ticketId from mock data
     const projects = generateMockProjects();
