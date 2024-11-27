@@ -64,7 +64,7 @@ type EventData struct {
 	NewState State  `json:"new_state"`
 }
 
-type State struct { //TODO: SHOULD BE RENAMED TO EVENT?
+type State struct {
 	EntityID    string                 `json:"entity_id"`
 	State       string                 `json:"state"`
 	Attributes  map[string]interface{} `json:"attributes"`   // Added to capture dynamic attributes
@@ -73,6 +73,10 @@ type State struct { //TODO: SHOULD BE RENAMED TO EVENT?
 	Context     EventContext           `json:"context"`      // Added to include context information
 }
 
+// TODO: SHOULD MAKE A GENERIC "EVENT" HA ENTITY STRUCT, SIMILAR TO "State" BUT NOT THE SAME
+// https://developers.home-assistant.io/docs/dev_101_events/
+// https://developers.home-assistant.io/docs/dev_101_states/
+// https://developers.home-assistant.io/docs/core/entity/
 type EventContext struct {
 	ID       string `json:"id"`
 	ParentID string `json:"parent_id"`
