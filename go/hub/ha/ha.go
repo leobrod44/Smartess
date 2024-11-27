@@ -2,8 +2,7 @@ package ha
 
 import (
 	"Smartess/go/common/structures"
-	"encoding/json"
-	"fmt"
+	"Smartess/go/common/utils"
 	"time"
 )
 
@@ -31,14 +30,7 @@ type ConciseAttributes struct {
 	SupportedFeatures interface{} `json:"supported_features,omitempty"`
 }
 
-func parseConciseEvent(rawJSON string) (*ConciseEvent, error) {
-	var event ConciseEvent
-	err := json.Unmarshal([]byte(rawJSON), &event)
-	if err != nil {
-		return nil, fmt.Errorf("error parsing JSON: %v", err)
-	}
-	return &event, nil
-}
+// Converts any structures.State struct to a ConciseEvent struct.
 func ConvertEventToConciseEvent(event *structures.State) *ConciseEvent {
 	return &ConciseEvent{
 		Attributes:  *ConvertAttributesToConciseAttributes(event.Attributes),
@@ -49,18 +41,14 @@ func ConvertEventToConciseEvent(event *structures.State) *ConciseEvent {
 		State:       event.State,
 	}
 }
+
+// Converts any attributes []interface{} generic into a ConciseAttributes struct (Field type of ConciseEvent).
 func ConvertAttributesToConciseAttributes(attributes map[string]interface{}) *ConciseAttributes {
 
 	return &ConciseAttributes{
-		DeviceClass:       getStringPtr(attributes, "device_class"),
-		FriendlyName:      getStringPtr(attributes, "friendly_name"),
-		StateClass:        getStringPtr(attributes, "state_class"),
+		DeviceClass:       utils.GetStringPtrNilSafe(attributes, "device_class"),
+		FriendlyName:      utils.GetStringPtrNilSafe(attributes, "friendly_name"),
+		StateClass:        utils.GetStringPtrNilSafe(attributes, "state_class"),
 		SupportedFeatures: attributes["supported_features"],
 	}
-}
-func getStringPtr(attributes map[string]interface{}, key string) *string {
-	if value, ok := attributes[key].(string); ok {
-		return &value
-	}
-	return nil
 }
