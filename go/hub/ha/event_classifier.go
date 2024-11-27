@@ -37,7 +37,7 @@ func classifyConciseEvent(event *ConciseEvent) EventClassification {
 		classification.Tags = append(classification.Tags, formatTag(*event.Attributes.StateClass))
 	}
 
-	// Additional tags can be added here based on other attributes
+	//TODO: Additional tags can be added here based on other attributes + context conditionals
 
 	return classification
 }
