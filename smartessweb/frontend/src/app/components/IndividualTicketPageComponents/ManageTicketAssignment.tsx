@@ -4,6 +4,7 @@ import AssignedUser from "./AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
 import { mockUsersNotAssignedToTicker } from "../../mockData";
 import { showToastError, showToastSuccess } from "../Toast";
+import AssignedUserClosedTicket from "./AssignedUserClosedComponent";
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
@@ -127,9 +128,26 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   return (
     <>
       {ticket.status === "closed" ? (
-        <div className="px-1 text-[#254752] text-[16px] font-sequel-sans">
-          This ticket is closed and cannot have assigned users.
-        </div>
+         <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
+           <div className="text-[#254752] text-[20px] font-sequel-sans w-full  pt-6 flex items-center justify-between">
+             Users Previously Assigned to this ticket
+           </div>
+
+           <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
+             <div className="flex-1 text-left">ID</div>
+             <div className="flex-1 text-left">Name</div>
+             <div className="flex-1 text-center"> Contact </div>
+             <div className="flex-1 text-right mr-3">Resolved</div>
+           </div>
+
+           {ticket.assigned_employees.map((Individual, index) => (
+
+             <AssignedUserClosedTicket
+               key={index}
+               Individual={Individual}
+             />
+           ))}
+         </div> 
       ) : assignedUsers.length === 0 ? (
         <>
           <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
