@@ -127,28 +127,24 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
   return (
     <>
-      {ticket.status === "closed" ? (
-         <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
-           <div className="text-[#254752] text-[20px] font-sequel-sans w-full  pt-6 flex items-center justify-between">
-             Users Previously Assigned to this ticket
-           </div>
+      {ticket.status === "closed" ? ( //if ticket is closed, display this section with the previously assigned users
+        <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
+          <div className="text-[#254752] text-[20px] font-sequel-sans w-full  pt-6 flex items-center justify-between">
+            Users Previously Assigned to this ticket
+          </div>
 
-           <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
-             <div className="flex-1 text-left">ID</div>
-             <div className="flex-1 text-left">Name</div>
-             <div className="flex-1 text-center"> Contact </div>
-             <div className="flex-1 text-right mr-3">Resolved</div>
-           </div>
+          <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
+            <div className="flex-1 text-left">ID</div>
+            <div className="flex-1 text-left">Name</div>
+            <div className="flex-1 text-center"> Contact </div>
+            <div className="flex-1 text-right mr-3">Resolved</div>
+          </div>
 
-           {ticket.assigned_employees.map((Individual, index) => (
-
-             <AssignedUserClosedTicket
-               key={index}
-               Individual={Individual}
-             />
-           ))}
-         </div> 
-      ) : assignedUsers.length === 0 ? (
+          {ticket.assigned_employees.map((Individual, index) => (
+            <AssignedUserClosedTicket key={index} Individual={Individual} />
+          ))}
+        </div>
+      ) : assignedUsers.length === 0 ? ( //if ticket has no users assigned, display section to assign users
         <>
           <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
             <div className="w-full px-[13px] pt-6 flex items-center justify-between">
@@ -176,6 +172,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           </div>
         </>
       ) : (
+        //if ticket has some users assigned, display them
         <>
           <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
             <div className="text-[#254752] text-[20px] font-sequel-sans w-full px-[13px] pt-6 flex items-center justify-between">
