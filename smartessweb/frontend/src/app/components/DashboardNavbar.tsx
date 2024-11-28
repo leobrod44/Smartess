@@ -40,6 +40,7 @@ import AddressDropdown from "./DashboardComponents/AddressDropdown";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { projectApi } from "@/api/page";
 import { Project } from "../mockData";
+import { useUserTypeContext } from "@/context/UserTypeProvider";
 
 // TypeScript Interface
 interface UserInfo {
@@ -145,6 +146,7 @@ const DashboardNavbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
+  const { setUserType } = useUserTypeContext();
 
   const sidebarItems = [
     ...home,
@@ -212,6 +214,7 @@ const DashboardNavbar = () => {
     try {
       await authApi.logout();
       localStorage.removeItem("token");
+      setUserType("");
       showToastSuccess("Logged out successfully");
       setTimeout(() => {
         router.push("/");

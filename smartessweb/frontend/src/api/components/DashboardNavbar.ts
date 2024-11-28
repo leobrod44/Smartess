@@ -5,10 +5,6 @@ interface UserInfoResponse {
   last_name: string;
 }
 
-interface UserTypeResponse {
-  type: "string";
-}
-
 export const userApi = {
   getUserInfo: async (token: string): Promise<UserInfoResponse> => {
     const response = await fetch(`${API_URL}/users/get_user_name`, {
@@ -26,7 +22,7 @@ export const userApi = {
 
     return data;
   },
-  getUserType: async (token: string): Promise<UserTypeResponse> => {
+  getUserType: async (token: string): Promise<string> => {
     const response = await fetch(`${API_URL}/users/get_user_type`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -40,7 +36,7 @@ export const userApi = {
       throw new Error(data.error || "Failed to fetch user type");
     }
 
-    return data;
+    return data.type;
   },
 };
 
