@@ -4,6 +4,8 @@ import {
   Download as DownloadIcon,
   ThumbUp as ThumbUpIcon,
 } from "@mui/icons-material"; 
+import 'swiper/css';
+import ImageCarousel from './ImageCarousel';  
 
 interface AnnouncementComponentProps {
   title: string;
@@ -80,14 +82,20 @@ function AnnouncementComponent({
     setIsLiked((prev) => !prev);
   };
 
-  // Check if there is an image file in the attachments
+  /* // Check if there is an image file in the attachments
   const getImageFile = () => {
     console.log("Checking files array:", files);
     return files.find((file) => file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i));
   };
+ */
+ /*  const imageFile = getImageFile(); 
+  console.log("Image File Found:", imageFile); */
 
-  const imageFile = getImageFile(); 
-  console.log("Image File Found:", imageFile);
+
+ // Filter out image files from the files array
+ const imageFiles = files.filter((file) => file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i));
+
+
 
   return (
     <div className="w-full rounded-md px-3 pt-4 flex-col justify-start items-start gap-3 inline-flex shadow border-2 border-[#254752]/20 shadow-xl">
@@ -130,16 +138,25 @@ function AnnouncementComponent({
         )}
       </div>
 
-      {/* Display the image if one is found */}
-      {imageFile && (
+      {/* Display image carousel if there are multiple image files */}
+      {imageFiles.length > 1 ? (
         <div className="w-full flex justify-center my-3 px-3">
-          <img
-            src={imageFile.url}
-            alt={imageFile.name}
-            className="w-full shadow-lg object-contain"
-          />
+          <ImageCarousel files={imageFiles} />
         </div>
+      ) : (
+        // Display single image if only one image is found
+        imageFiles.length === 1 && (
+          <div className="w-full flex justify-center my-3 px-3">
+            <img
+              src={imageFiles[0].url}
+              alt={imageFiles[0].name}
+              className="w-full shadow-lg object-contain"
+            />
+          </div>
+        )
       )}
+
+     
 
       {files.length > 0 && (
         <div className="my-2 px-3">

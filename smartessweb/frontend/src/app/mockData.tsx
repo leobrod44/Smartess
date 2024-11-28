@@ -220,6 +220,25 @@ export const generateMockAnnouncements = (): Announcement[] => {
         },
       ]
     },
+    {
+      title: "150 Rue Peel",
+      date: new Date("2024-10-30"),
+      tag: "Project",
+      author: "Kenny Long",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
+      likes: 6,
+      files: [
+        {
+          name: "wide_image.gif",
+          url: "https://via.placeholder.com/1200x400",
+        },
+        {
+          name: "wide_image.gif",
+          url: "https://via.placeholder.com/1200x400",
+        },
+      ]
+    },
   ];
 };
 export const generateMockProjects = (): Project[] => {
