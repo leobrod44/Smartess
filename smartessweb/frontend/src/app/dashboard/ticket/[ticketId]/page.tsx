@@ -148,7 +148,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
               </>
             )}
 
-            <div className="flex justify-center gap-10 mt-8">
+            <div className="flex justify-center mt-auto gap-10 ">
               {currentUser &&
                 currentUser.role !== "basic" &&
                 selectedTicket.status !== "closed" && (
