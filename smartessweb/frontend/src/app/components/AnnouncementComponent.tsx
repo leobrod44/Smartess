@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@mui/material"; // Import Material UI Button
+import { Button } from "@mui/material"; 
 import {
   Download as DownloadIcon,
   ThumbUp as ThumbUpIcon,
-} from "@mui/icons-material"; // Import Material UI Download Icon
+} from "@mui/icons-material"; 
 
 interface AnnouncementComponentProps {
   title: string;
@@ -80,6 +80,15 @@ function AnnouncementComponent({
     setIsLiked((prev) => !prev);
   };
 
+  // Check if there is an image file in the attachments
+  const getImageFile = () => {
+    console.log("Checking files array:", files);
+    return files.find((file) => file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i));
+  };
+
+  const imageFile = getImageFile(); 
+  console.log("Image File Found:", imageFile);
+
   return (
     <div className="w-full rounded-md px-3 pt-4 flex-col justify-start items-start gap-3 inline-flex shadow border-2 border-[#254752]/20 shadow-xl">
       <div className="w-full justify-between items-center inline-flex">
@@ -121,16 +130,27 @@ function AnnouncementComponent({
         )}
       </div>
 
+      {/* Display the image if one is found */}
+      {imageFile && (
+        <div className="w-full flex justify-center my-3 px-3">
+          <img
+            src={imageFile.url}
+            alt={imageFile.name}
+            className="w-full shadow-lg object-contain"
+          />
+        </div>
+      )}
+
       {files.length > 0 && (
-        <div className="my-3 px-3">
-          <h4 className="text-black font-sequel-sans">Files:</h4>
+        <div className="my-2 px-3">
+          <h4 className="text-black text-sm font-sequel-sans">Files:</h4>
           <ul>
             {files.map((file) => (
               <li key={file.name}>
                 <a
                   href={file.url}
                   download={file.name}
-                  className="text-blue-600 hover:underline"
+                  className="text-blue-600 hover:underline text-sm hover:text-black transition-colors duration-300"
                 >
                   {file.name}
                 </a>

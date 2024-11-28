@@ -180,17 +180,44 @@ export const generateMockAnnouncements = (): Announcement[] => {
     },
 
     {
-      title: "New Building Project",
+      title: "Organization",
       date: new Date("2024-11-28"),
       tag: "Organization",
       author: "Kendall Roy",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
-      likes: 12,
+      likes: 1,
       files: [
         { name: "Project_Plan.pdf", url: "/files/Project_Plan.pdf" },
         { name: "Budget.xlsx", url: "/files/Budget.xlsx" },
         { name: "Presentation.pptx", url: "/files/Presentation.pptx" }
+      ]
+    },
+    {
+      title: "Organization",
+      date: new Date("2024-11-30"),
+      tag: "Organization",
+      author: "Michael Lengo",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
+      likes: 0,
+      files: [
+        { name: "dummy.jpg", url: "https://via.placeholder.com/300" },
+      ]
+    },
+    {
+      title: "150 Rue Peel",
+      date: new Date("2024-10-30"),
+      tag: "Project",
+      author: "Kenny Long",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
+      likes: 6,
+      files: [
+        {
+          name: "wide_image.gif",
+          url: "https://via.placeholder.com/1200x400",
+        },
       ]
     },
   ];
