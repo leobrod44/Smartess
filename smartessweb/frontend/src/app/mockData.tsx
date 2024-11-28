@@ -26,7 +26,7 @@ export interface CurrentUser {
 
   address: string[];
 
-  firstName:string;
+  firstName: string;
 
   lastName: string;
 }
@@ -71,7 +71,6 @@ export interface Project {
 
 // New interface for project-specific individuals
 export interface Individual {
-  
   individualId: number; // Unique ID for project-specific users
 
   firstName: string;
@@ -151,6 +150,43 @@ export interface Ticket {
 }
 // Function to generate mock projects
 
+export interface Announcement {
+  title: string;
+
+  date: Date;
+
+  tag: "Project" | "Organization";
+
+  author: string;
+
+  description: string;
+
+  likes: number;
+}
+
+export const generateMockAnnouncements = (): Announcement[] => {
+  return [
+    {
+      title: "1000 de la guachetiere",
+      date: new Date("2024-11-28"),
+      tag: "Project",
+      author: "Kendall Roy",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+      likes: 12,
+    },
+
+    {
+      title: "New Building Project",
+      date: new Date("2024-11-28"),
+      tag: "Project",
+      author: "Kendall Roy",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
+      likes: 12,
+    },
+  ];
+};
 export const generateMockProjects = (): Project[] => {
   return [
     {
@@ -622,12 +658,12 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
-    {
+  {
     individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
-  }, 
+  },
 ];
 
 // Function to generate mock project users for the second project
@@ -644,7 +680,6 @@ const generateMockProjectUsers2 = (): Individual[] => [
     lastName: "Prince",
     role: "admin",
   },
-
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
