@@ -21,8 +21,14 @@ export interface OrgUser {
 
 export interface CurrentUser {
   userId: string;
+
   role: "master" | "admin" | "basic";
+
   address: string[];
+
+  firstName:string;
+
+  lastName: string;
 }
 
 export interface TicketsType {
@@ -343,7 +349,7 @@ const generateMockTickets2 = (): Ticket[] => [
     description:
       "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
 
-    status: "open",
+    status: "pending",
 
     created_at: new Date("2024-10-31T10:15:00"),
 
@@ -616,12 +622,12 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
-  /*   {
-    individualId: "ind-3",
+    {
+    individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
-  }, */
+  }, 
 ];
 
 // Function to generate mock project users for the second project
@@ -638,6 +644,7 @@ const generateMockProjectUsers2 = (): Individual[] => [
     lastName: "Prince",
     role: "admin",
   },
+
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
@@ -657,49 +664,49 @@ const generateMockProjectUsers3 = (): Individual[] => [
 
 export const mockUsersNotAssignedToTicker = (): Individual[] => [
   {
-    individualId: "ind-5",
+    individualId: 5,
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
   },
   {
-    individualId: "ind-6",
+    individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
   },
   {
-    individualId: "ind-12",
+    individualId: 12,
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",
   },
   {
-    individualId: "ind-7",
+    individualId: 7,
     firstName: "Kellie",
     lastName: "Bells",
     role: "admin",
   },
   {
-    individualId: "ind-8",
+    individualId: 8,
     firstName: "Kaitlyn",
     lastName: "Jingle",
     role: "admin",
   },
   {
-    individualId: "ind-9",
+    individualId: 9,
     firstName: "Timothy",
     lastName: "Brown",
     role: "admin",
   },
   {
-    individualId: "ind-10",
+    individualId: 10,
     firstName: "Bob",
     lastName: "Blinker",
     role: "admin",
   },
   {
-    individualId: "ind-11",
+    individualId: 11,
     firstName: "Sarah",
     lastName: "Michaels",
     role: "admin",

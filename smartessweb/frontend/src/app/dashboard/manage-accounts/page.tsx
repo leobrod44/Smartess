@@ -114,6 +114,8 @@ const consolidateUsers = (
           userId: tempCurrentUser.userId.toString(),
           role: tempCurrentUser.role,
           address: tempCurrentUser.address,
+          firstName:tempCurrentUser.firstName,
+          lastName:tempCurrentUser.lastName,
         });
 
 

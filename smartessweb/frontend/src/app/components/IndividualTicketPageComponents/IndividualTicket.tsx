@@ -9,7 +9,6 @@ interface IndividualTicketProps {
 function IndividualTicket({ ticket }: IndividualTicketProps) {
   const [showFullText, setShowFullText] = useState(false);
   const [isTextShort, setIsTextShort] = useState(false);
-
   const formattedDate = ticket.created_at.toLocaleDateString();
 
   const textRef = useRef<HTMLDivElement | null>(null);
@@ -30,9 +29,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
     };
   }, [ticket.description]);
 
-  const handleToggle = () => {
-    setShowFullText((prev) => !prev);
-  };
+  const handleToggle = () => { setShowFullText((prev) => !prev);  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
