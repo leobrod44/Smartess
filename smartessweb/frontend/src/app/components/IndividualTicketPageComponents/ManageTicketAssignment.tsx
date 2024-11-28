@@ -24,11 +24,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   }, []);
 
   useEffect(() => {
-    // Check the assigned users array each time the component updates.. if its empty change status to open
-    if (assignedUsers.length === 0) {
+    // Check if there are no assigned users, and if the status isnt open. if so, change it to open
+    if (assignedUsers.length === 0 && ticket.status !== "open") {
       onStatusUpdate("open");
     }
-  }, [assignedUsers, onStatusUpdate]);
+  }, [assignedUsers, onStatusUpdate,ticket.status]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
