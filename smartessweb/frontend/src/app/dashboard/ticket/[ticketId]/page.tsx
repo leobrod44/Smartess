@@ -22,7 +22,6 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
   //get current logged in users role
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       router.push("/sign-in");
       return;
@@ -30,12 +29,16 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
 
     const fetchData = async () => {
       try {
-        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
+          token
+        );
         const tempCurrentUser = responseCurrentUser.currentUser;
         setCurrentUser({
           userId: tempCurrentUser.userId.toString(),
           role: tempCurrentUser.role,
           address: tempCurrentUser.address,
+          firstName:tempCurrentUser.firstName,
+          lastName:tempCurrentUser.lastName,
         });
       } catch (err) {
         console.error("Error fetching user role:", err);
@@ -43,11 +46,8 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
         //setLoading(false);
       }
     };
-
     fetchData();
-
   }, [router]);
-
 
   useEffect(() => {
     // Fetch the specific ticket based on ticketId from mock data
@@ -76,7 +76,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
     setIsCloseModalOpen(false);
     try {
       showToastSuccess("Ticket Closed successfully");
-      // Change the status of ticket to closed 
+      // Change the status of ticket to closed
       if (selectedTicket) {
         setSelectedTicket({
           ...selectedTicket,
@@ -136,29 +136,31 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
         {selectedTicket ? (
           <>
             <IndividualTicket ticket={selectedTicket} />
-            { currentUser && currentUser.role !== "basic" && (
+            {currentUser && currentUser.role !== "basic" && (
               <>
                 <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
                   Manage Ticket Assignment
                 </div>
                 <ManageTicketAssignment
                   ticket={selectedTicket}
-                  onStatusUpdate={handleStatusUpdate} 
+                  onStatusUpdate={handleStatusUpdate}
                 />
               </>
             )}
 
             <div className="flex justify-center gap-10 mt-8">
-              { currentUser && currentUser.role !== "basic" && selectedTicket.status !== "closed" && (
-                <button
-                  className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                  onClick={handleOpenCloseTicketModal}
-                >
-                  Close Ticket
-                </button>
-              )}
+              {currentUser &&
+                currentUser.role !== "basic" &&
+                selectedTicket.status !== "closed" && (
+                  <button
+                    className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                    onClick={handleOpenCloseTicketModal}
+                  >
+                    Close Ticket
+                  </button>
+                )}
 
-              {currentUser &&  currentUser.role !== "basic" ? (
+              {currentUser && currentUser.role !== "basic" ? (
                 <button
                   className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                   onClick={handleOpenDeleteModal}

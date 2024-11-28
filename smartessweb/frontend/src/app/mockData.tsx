@@ -21,8 +21,14 @@ export interface OrgUser {
 
 export interface CurrentUser {
   userId: string;
+
   role: "master" | "admin" | "basic";
+
   address: string[];
+
+  firstName:string;
+
+  lastName: string;
 }
 
 export interface TicketsType {
@@ -343,7 +349,7 @@ const generateMockTickets2 = (): Ticket[] => [
     description:
       "Some kids playing baseball broke my window. It has been a week that its boarded up with cardboard as i wait for you to send a repairman. It is really cold inside, please come and fix my window immediately",
 
-    status: "open",
+    status: "pending",
 
     created_at: new Date("2024-10-31T10:15:00"),
 
