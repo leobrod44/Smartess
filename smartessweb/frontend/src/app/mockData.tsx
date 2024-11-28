@@ -162,6 +162,8 @@ export interface Announcement {
   description: string;
 
   likes: number;
+  
+  files: { name: string; url: string }[];
 }
 
 export const generateMockAnnouncements = (): Announcement[] => {
@@ -174,16 +176,22 @@ export const generateMockAnnouncements = (): Announcement[] => {
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
       likes: 12,
+      files: []
     },
 
     {
       title: "New Building Project",
       date: new Date("2024-11-28"),
-      tag: "Project",
+      tag: "Organization",
       author: "Kendall Roy",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 12,
+      files: [
+        { name: "Project_Plan.pdf", url: "/files/Project_Plan.pdf" },
+        { name: "Budget.xlsx", url: "/files/Budget.xlsx" },
+        { name: "Presentation.pptx", url: "/files/Presentation.pptx" }
+      ]
     },
   ];
 };
