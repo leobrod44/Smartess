@@ -2,17 +2,52 @@
 
 import { useEffect, useState } from "react";
 import IndividualTicket from "@/app/components/IndividualTicketPageComponents/IndividualTicket";
-import { generateMockProjects, Ticket } from "@/app/mockData"; // Adjusted the import path for mockData
+import { generateMockProjects, Ticket, CurrentUser } from "@/app/mockData";
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import ManageTicketAssignment from "@/app/components/IndividualTicketPageComponents/ManageTicketAssignment";
-import CloseTicketModal from "@/app/components/IndividualTicketPageComponents/CloseTicketModal";
-import DeleteTicketModal from "@/app/components/IndividualTicketPageComponents/DeleteTicketModal";
+import CloseTicketModal from "@/app/components/IndividualTicketPageComponents/ConfirmationModals/CloseTicketModal";
+import DeleteTicketModal from "@/app/components/IndividualTicketPageComponents/ConfirmationModals/DeleteTicketModal";
+import { showToastError, showToastSuccess } from "@/app/components/Toast";
+import { useRouter } from "next/navigation";
+import { manageAccountsApi } from "@/api/page";
 
 const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
+  const router = useRouter();
   const { ticketId } = params;
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser>();
+
+  //get current logged in users role
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
+          token
+        );
+        const tempCurrentUser = responseCurrentUser.currentUser;
+        setCurrentUser({
+          userId: tempCurrentUser.userId.toString(),
+          role: tempCurrentUser.role,
+          address: tempCurrentUser.address,
+          firstName:tempCurrentUser.firstName,
+          lastName:tempCurrentUser.lastName,
+        });
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+      } finally {
+        //setLoading(false);
+      }
+    };
+    fetchData();
+  }, [router]);
 
   useEffect(() => {
     // Fetch the specific ticket based on ticketId from mock data
@@ -29,35 +64,68 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
       }
       if (foundTicket) break;
     }
-
     setSelectedTicket(foundTicket);
   }, [ticketId]);
 
-  // Handlers for CloseTicketModal
-  const handleOpenCloseModal = () => {
-    console.log("Close ticket Button Clicked");
-    setIsCloseModalOpen(true);
-  };
-  const handleCloseCloseModal = () => setIsCloseModalOpen(false);
+  // Handlers for the open and closed states of the close modal
+  const handleOpenCloseTicketModal = () => setIsCloseModalOpen(true);
+  const handleCloseCloseTicketModal = () => setIsCloseModalOpen(false);
+
+  //handles actually closing the ticket..... logic should be added here
   const handleConfirmCloseTicket = () => {
-    console.log("Ticket closed");
     setIsCloseModalOpen(false);
+    try {
+      showToastSuccess("Ticket Closed successfully");
+      // Change the status of ticket to closed
+      if (selectedTicket) {
+        setSelectedTicket({
+          ...selectedTicket,
+          status: "closed",
+        });
+      }
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "Could not close the ticket. Please try again later."
+      );
+    }
   };
 
-  // Handlers for DeleteTicketModal
-  const handleOpenDeleteModal = () => {
-    console.log("Delete ticket Button Clicked");
-    setIsDeleteModalOpen(true);
-  };
+  // Handlers for the open and closed states of the delete modal
+  const handleOpenDeleteModal = () => setIsDeleteModalOpen(true);
   const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
+
+  //handles actually deleting the ticket..... logic should be added here
   const handleConfirmDeleteTicket = () => {
-    console.log("Ticket deleted");
     setIsDeleteModalOpen(false);
+    try {
+      showToastSuccess("Ticket Deleted successfully");
+      setTimeout(() => {
+        router.push("../ticket");
+      }, 500);
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "Could not delete the ticket. Please try again later."
+      );
+    }
+  };
+
+  // Handler to update the ticket status when a user is assigned or unassigned
+  const handleStatusUpdate = (newStatus: "open" | "pending" | "closed") => {
+    if (selectedTicket) {
+      setSelectedTicket({
+        ...selectedTicket,
+        status: newStatus, // Update the status based on user assignment
+      });
+    }
   };
 
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
         <div className="flex items-center justify-between pb-4">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
             Ticket Information
@@ -68,28 +136,54 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
         {selectedTicket ? (
           <>
             <IndividualTicket ticket={selectedTicket} />
-            <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
-              Manage Ticket Assignment
-            </div>
-            <ManageTicketAssignment ticket={selectedTicket} />
-            <div className="flex justify-center gap-10 mt-8">
-              <button
-                className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                onClick={handleOpenCloseModal}
-              >
-                Close Ticket
-              </button>
-              <button
-                className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                onClick={handleOpenDeleteModal}
-              >
-                Delete Ticket
-              </button>
+            {currentUser && currentUser.role !== "basic" && (
+              <>
+                <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
+                  Manage Ticket Assignment
+                </div>
+                <ManageTicketAssignment
+                  ticket={selectedTicket}
+                  onStatusUpdate={handleStatusUpdate}
+                />
+              </>
+            )}
+
+            <div className="flex justify-center mt-auto gap-10 ">
+              {currentUser &&
+                currentUser.role !== "basic" &&
+                selectedTicket.status !== "closed" && (
+                  <button
+                    className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                    onClick={handleOpenCloseTicketModal}
+                  >
+                    Close Ticket
+                  </button>
+                )}
+
+              {currentUser && currentUser.role !== "basic" ? (
+                <button
+                  className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                  onClick={handleOpenDeleteModal}
+                >
+                  Delete Ticket
+                </button>
+              ) : (
+                selectedTicket.status === "closed" && (
+                  <div className="flex justify-center mt-4">
+                    <button
+                      className="px-3 py-1 bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                      onClick={handleOpenDeleteModal}
+                    >
+                      Delete Ticket
+                    </button>
+                  </div>
+                )
+              )}
             </div>
 
             {isCloseModalOpen && (
               <CloseTicketModal
-                onBack={handleCloseCloseModal}
+                onBack={handleCloseCloseTicketModal}
                 onCloseTicket={handleConfirmCloseTicket}
               />
             )}

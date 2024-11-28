@@ -1,27 +1,30 @@
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import CondensedUserComponent from "./CondensedUserComponent";
+import CondensedUserComponent from "./UserComponents/CondensedUserComponent";
 import { Individual } from "@/app/mockData";
 import Pagination from "@mui/material/Pagination";
 import Searchbar from "@/app/components/Searchbar";
+import { showToastError } from "../Toast";
 
 interface AssignUserModalProps {
   onClose: () => void;
   availableUsers: Individual[];
-  onAssignUser: (userId: string, isAssigned: boolean) => void;
+  onSave: (selectedUsers: Individual[]) => void;
+  remainingSlots: number;
 }
 
 const AssignUserModalComponent = ({
   onClose,
   availableUsers,
-  onAssignUser,
+  onSave,
+  remainingSlots,
 }: AssignUserModalProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
-  const [assignedUsers, setAssignedUsers] = useState<{
-    [key: string]: boolean;
-  }>({});
+  const [toggledUsers, setToggledUsers] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
@@ -30,9 +33,14 @@ const AssignUserModalComponent = ({
     setCurrentPage(page);
   };
 
-  const handleToggleAssign = (userId: string, newState: boolean) => {
-    setAssignedUsers((prev) => ({ ...prev, [userId]: newState }));
-    onAssignUser(userId, newState);
+  const handleToggleAssign = (userId: number, newState: boolean) => {
+    const selectedCount = Object.values(toggledUsers).filter(Boolean).length;
+
+    if (newState && selectedCount >= remainingSlots) {
+      showToastError(`You can only add up to ${remainingSlots} user(s).`);
+      return;
+    }
+    setToggledUsers((prev) => ({ ...prev, [userId]: newState }));
   };
 
   const handleSearch = (query: string) => {
@@ -40,17 +48,29 @@ const AssignUserModalComponent = ({
     setCurrentPage(1);
   };
 
-  const filteredUsers = availableUsers.filter(({ firstName, lastName, individualId }) => {
-    const fullName = `${firstName} ${lastName}`.toLowerCase();
-    const query = searchQuery.toLowerCase();
-    return fullName.includes(query)|| individualId.toLowerCase().includes(query);
-  });
+  const filteredUsers = availableUsers.filter(
+    ({ firstName, lastName, individualId }) => {
+      const fullName = `${firstName} ${lastName}`.toLowerCase();
+      const query = searchQuery.toLowerCase();
+      const idMatch = individualId.toString().includes(query);
+
+      return fullName.includes(query) || idMatch;
+    }
+  );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const currentItems = filteredUsers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleSave = () => {
+    const selectedUsers = availableUsers.filter(
+      (user) => toggledUsers[user.individualId]
+    );
+    onSave(selectedUsers); // Pass selected users to parent
+    onClose(); // Close the modal
+  };
 
   return (
     <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -82,7 +102,7 @@ const AssignUserModalComponent = ({
           <CondensedUserComponent
             key={user.individualId}
             Individual={user}
-            isAssigned={!!assignedUsers[user.individualId]}
+            isAssigned={!!toggledUsers[user.individualId]}
             onToggle={(newState) =>
               handleToggleAssign(user.individualId, newState)
             }
@@ -102,7 +122,7 @@ const AssignUserModalComponent = ({
         <div className="flex justify-center items-center mt-3 w-full">
           <button
             className="px-4 py-2 bg-[#266472] rounded-md text-center text-white text-s font-['Sequel Sans'] leading-tight tracking-tight hover:bg-[#14323b] transition duration-300"
-            onClick={onClose}
+            onClick={handleSave}
           >
             Save
           </button>
