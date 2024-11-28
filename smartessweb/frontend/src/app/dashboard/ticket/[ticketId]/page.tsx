@@ -17,6 +17,11 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
   const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+  //hardcoding the logged in user role for now
+  const role= "master";
+  //const role= "admin";
+  //const role= "basic";
+
 
   useEffect(() => {
     // Fetch the specific ticket based on ticketId from mock data
@@ -105,6 +110,9 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
         {selectedTicket ? (
           <>
             <IndividualTicket ticket={selectedTicket} />
+
+            {role !== "basic" &&  (
+              <>
             <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
               Manage Ticket Assignment
             </div>
@@ -112,35 +120,39 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
               ticket={selectedTicket}
               onStatusUpdate={handleStatusUpdate}
             />
+            </>
+            )}
 
-            <div className="flex justify-center gap-10 mt-8">
-              {selectedTicket.status !== "closed" && (
-                <button
-                  className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                  onClick={handleOpenCloseTicketModal}
-                >
-                  Close Ticket
-                </button>
-              )}
+<div className="flex justify-center gap-10 mt-8">
+      {role !== "basic" && selectedTicket.status !== "closed" && (
+        <button
+          className="px-3 py-1 items-center bg-[#4b7d8d] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+          onClick={handleOpenCloseTicketModal}
+        >
+          Close Ticket
+        </button>
+      )}
 
-              {selectedTicket.status !== "closed" ? (
-                <button
-                  className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                  onClick={handleOpenDeleteModal}
-                >
-                  Delete Ticket
-                </button>
-              ) : (
-                <div className="flex justify-center mt-4">
-                  <button
-                    className="px-3 py-1 bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
-                    onClick={handleOpenDeleteModal}
-                  >
-                    Delete Ticket
-                  </button>
-                </div>
-              )}
-            </div>
+      {role !== "basic" ? (
+        <button
+          className="px-3 py-1 items-center bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+          onClick={handleOpenDeleteModal}
+        >
+          Delete Ticket
+        </button>
+      ) : (
+        selectedTicket.status === "closed" && (
+          <div className="flex justify-center mt-4">
+            <button
+              className="px-3 py-1 bg-[#ff5449] rounded-md hover:bg-[#9b211b] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+              onClick={handleOpenDeleteModal}
+            >
+              Delete Ticket
+            </button>
+          </div>
+        )
+      )}
+    </div>
 
             {isCloseModalOpen && (
               <CloseTicketModal
