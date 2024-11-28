@@ -19,6 +19,12 @@ interface Ticket {
   date: string;
 }
 
+interface TicketAssignment {
+  userId: string;
+  ticketId: string;
+  isResolved: boolean;
+}
+
 const tickets: Ticket[] = [
   {
     ticketId: "t1",
@@ -295,6 +301,49 @@ const tickets: Ticket[] = [
     unit: "125",
     status: "Pending",
     date: "2024-10-22",
+  },
+];
+
+const ticketAssignments: TicketAssignment[] = [
+  {
+    userId: "1",
+    ticketId: "t1",
+    isResolved: false,
+  },
+  {
+    userId: "1",
+    ticketId: "t2",
+    isResolved: false,
+  },
+  {
+    userId: "1",
+    ticketId: "t3",
+    isResolved: false,
+  },
+  {
+    userId: "1",
+    ticketId: "t4",
+    isResolved: false,
+  },
+  {
+    userId: "2",
+    ticketId: "t5",
+    isResolved: false,
+  },
+  {
+    userId: "2",
+    ticketId: "t6",
+    isResolved: false,
+  },
+  {
+    userId: "2",
+    ticketId: "t7",
+    isResolved: false,
+  },
+  {
+    userId: "2",
+    ticketId: "t8",
+    isResolved: false,
   },
 ];
 
