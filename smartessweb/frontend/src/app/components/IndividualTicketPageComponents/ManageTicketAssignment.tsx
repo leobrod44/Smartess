@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Individual, Ticket } from "../../mockData";
-import AssignedUser from "./AssignedUserComponent";
+import AssignedUser from "./UserComponents/AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
 import { mockUsersNotAssignedToTicker } from "../../mockData";
 import { showToastError, showToastSuccess } from "../Toast";
-import AssignedUserClosedTicket from "./AssignedUserClosedComponent";
+import AssignedUserClosedTicket from "./UserComponents/AssignedUserClosedComponent";
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
@@ -28,7 +28,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     if (assignedUsers.length === 0 && ticket.status !== "open") {
       onStatusUpdate("open");
     }
-  }, [assignedUsers, onStatusUpdate,ticket.status]);
+  }, [assignedUsers, onStatusUpdate, ticket.status]);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);

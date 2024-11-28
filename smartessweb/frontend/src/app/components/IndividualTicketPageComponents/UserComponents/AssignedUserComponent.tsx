@@ -1,6 +1,6 @@
 import { Individual } from "@/app/mockData";
 import React, { useState } from "react";
-import UnassignConfirmModal from "./UnassignConfirmModal";
+import UnassignConfirmModal from "../ConfirmationModals/UnassignConfirmModal";
 import { showToastSuccess, showToastError } from "@/app/components/Toast";
 
 interface AssignedUserProps {

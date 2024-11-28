@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import CondensedUserComponent from "./CondensedUserComponent";
+import CondensedUserComponent from "./UserComponents/CondensedUserComponent";
 import { Individual } from "@/app/mockData";
 import Pagination from "@mui/material/Pagination";
 import Searchbar from "@/app/components/Searchbar";
