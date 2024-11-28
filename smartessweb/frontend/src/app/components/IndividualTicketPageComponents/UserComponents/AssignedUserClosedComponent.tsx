@@ -1,5 +1,5 @@
 import { Individual } from "@/app/mockData";
-import React, { useState } from "react";
+import React from "react";
 interface AssignedUserProps {
   Individual: Individual;
 }
