@@ -1,20 +1,54 @@
 import React, { useState, useEffect } from "react";
-import { Individual, Ticket } from "../../mockData";
+import { Individual, Ticket, CurrentUser } from "../../mockData";
 import AssignedUser from "./UserComponents/AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
 import { mockUsersNotAssignedToTicker } from "../../mockData";
 import { showToastError, showToastSuccess } from "../Toast";
 import AssignedUserClosedTicket from "./UserComponents/AssignedUserClosedComponent";
+import { useRouter } from "next/navigation";
+import { manageAccountsApi } from "@/api/page";
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
 }
 
 function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
+  const router = useRouter();
   const assignedUsers = ticket.assigned_employees;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_USERS = 3;
   const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
+  const [currentUser, setCurrentUser] = useState<CurrentUser>();
+
+  //get current logged in users role
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
+          token
+        );
+        const tempCurrentUser = responseCurrentUser.currentUser;
+        setCurrentUser({
+          userId: tempCurrentUser.userId.toString(),
+          role: tempCurrentUser.role,
+          address: tempCurrentUser.address,
+          firstName: tempCurrentUser.firstName,
+          lastName: tempCurrentUser.lastName,
+        });
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+      } finally {
+        //setLoading(false);
+      }
+    };
+    fetchData();
+  }, [router]);
 
   //Get a list of the users that are part of the proj that this ticket is in, but not assigned to the ticket. these are considered available users
   //since i cant do that right now, i will hardcode some users that arent assigned
@@ -73,26 +107,39 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
-  //assigning the current user to the ticket (mock function for now...)
+  //assigning the current user to the ticket 
   const assignYourself = () => {
     try {
-      // Simulate assigning yourself as the first user
-      const mockCurrentUser: Individual = {
-        individualId: 6,
-        firstName: "Current",
-        lastName: "User",
-        role: "admin",
+      //convert crrentUser to an individual..... have to do thisbecause current user
+      //and individual are different types..so i cant add the current user to the list of assigned employees
+      //since assigned employees are of  individual type...
+      //CURRENTLY FIRST AND LAST NAME ARE UNDEFINED
+
+      if (!currentUser) {
+        showToastError("Unable to assign yourself. User data is unavailable.");
+        return;
+      }
+
+      // Convert currentUser to Individual type
+      const currentUserAsIndividual: Individual = {
+        individualId: parseInt(currentUser.userId, 10), 
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        role: currentUser.role,
       };
 
-      ticket.assigned_employees.push(mockCurrentUser);
+      // Assign the current user
+      ticket.assigned_employees.push(currentUserAsIndividual);
 
-      setAvailableUsers(
-        availableUsers.filter(
-          (user) => user.individualId !== mockCurrentUser.individualId
+      // Update available users by filtering out the current user
+      setAvailableUsers((prevAvailableUsers) =>
+        prevAvailableUsers.filter(
+          (user) => user.individualId !== currentUserAsIndividual.individualId
         )
       );
+
       onStatusUpdate("pending");
-      showToastSuccess(`Assigned yourself successfully!`);
+      showToastSuccess("Assigned yourself successfully!");
     } catch (error) {
       showToastError("There was an error assigning yourself to this ticket.");
       console.error(error);
