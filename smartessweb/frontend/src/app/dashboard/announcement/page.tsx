@@ -12,7 +12,8 @@ const AnnouncementPage = () => {
       <div className="flex flex-col gap-4 mt-10 mx-10">
         {mockAnnouncements.map((announcement, index) => (
           <AnnouncementComponent
-            key={index} // Unique key for each element in the list
+            key={index}
+            keyword={announcement.keyword}
             title={announcement.title}
             date={announcement.date}
             tag={announcement.tag}

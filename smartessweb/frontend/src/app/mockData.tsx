@@ -153,6 +153,8 @@ export interface Ticket {
 export interface Announcement {
   title: string;
 
+  keyword: string;
+
   date: Date;
 
   tag: "Project" | "Organization";
@@ -162,7 +164,7 @@ export interface Announcement {
   description: string;
 
   likes: number;
-  
+
   files: { name: string; url: string }[];
 }
 
@@ -170,17 +172,19 @@ export const generateMockAnnouncements = (): Announcement[] => {
   return [
     {
       title: "1000 de la guachetiere",
+      keyword: "REPAIR",
       date: new Date("2024-11-28"),
       tag: "Project",
       author: "Kendall Roy",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
       likes: 12,
-      files: []
+      files: [],
     },
 
     {
       title: "Organization",
+      keyword: "GENERAL",
       date: new Date("2024-11-28"),
       tag: "Organization",
       author: "Kendall Roy",
@@ -190,23 +194,23 @@ export const generateMockAnnouncements = (): Announcement[] => {
       files: [
         { name: "Project_Plan.pdf", url: "/files/Project_Plan.pdf" },
         { name: "Budget.xlsx", url: "/files/Budget.xlsx" },
-        { name: "Presentation.pptx", url: "/files/Presentation.pptx" }
-      ]
+        { name: "Presentation.pptx", url: "/files/Presentation.pptx" },
+      ],
     },
     {
       title: "Organization",
+      keyword: "EMERGENCY",
       date: new Date("2024-11-30"),
       tag: "Organization",
       author: "Michael Lengo",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 0,
-      files: [
-        { name: "dummy.jpg", url: "https://via.placeholder.com/300" },
-      ]
+      files: [{ name: "dummy.jpg", url: "https://via.placeholder.com/300" }],
     },
     {
       title: "150 Rue Peel",
+      keyword: "RENOVATION",
       date: new Date("2024-10-30"),
       tag: "Project",
       author: "Kenny Long",
@@ -218,10 +222,11 @@ export const generateMockAnnouncements = (): Announcement[] => {
           name: "wide_image.gif",
           url: "https://via.placeholder.com/1200x400",
         },
-      ]
+      ],
     },
     {
       title: "150 Rue Peel",
+      keyword: "REPAIR",
       date: new Date("2024-10-30"),
       tag: "Project",
       author: "Kenny Long",
@@ -237,7 +242,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
           name: "wide_image.gif",
           url: "https://via.placeholder.com/1200x400",
         },
-      ]
+      ],
     },
   ];
 };

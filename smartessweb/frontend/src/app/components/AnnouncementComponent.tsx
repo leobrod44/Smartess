@@ -1,14 +1,15 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@mui/material"; 
+import { Button } from "@mui/material";
 import {
   Download as DownloadIcon,
   ThumbUp as ThumbUpIcon,
-} from "@mui/icons-material"; 
-import 'swiper/css';
-import ImageCarousel from './ImageCarousel';  
+} from "@mui/icons-material";
+import "swiper/css";
+import ImageCarousel from "./ImageCarousel";
 
 interface AnnouncementComponentProps {
   title: string;
+  keyword: string;
   date: Date;
   tag: "Project" | "Organization";
   author: string;
@@ -19,6 +20,7 @@ interface AnnouncementComponentProps {
 
 function AnnouncementComponent({
   title,
+  keyword,
   date,
   tag,
   author,
@@ -82,20 +84,9 @@ function AnnouncementComponent({
     setIsLiked((prev) => !prev);
   };
 
-  /* // Check if there is an image file in the attachments
-  const getImageFile = () => {
-    console.log("Checking files array:", files);
-    return files.find((file) => file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i));
-  };
- */
- /*  const imageFile = getImageFile(); 
-  console.log("Image File Found:", imageFile); */
-
-
- // Filter out image files from the files array
- const imageFiles = files.filter((file) => file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i));
-
-
+  const imageFiles = files.filter((file) =>
+    file.name.match(/\.(jpg|jpeg|png|gif|bmp)$/i)
+  );
 
   return (
     <div className="w-full rounded-md px-3 pt-4 flex-col justify-start items-start gap-3 inline-flex shadow border-2 border-[#254752]/20 shadow-xl">
@@ -106,16 +97,21 @@ function AnnouncementComponent({
         </div>
       </div>
 
-      <div className="justify-start items-start gap-2 inline-flex">
-        <div
-          className={`px-3 py-1 rounded-[10px] flex items-center justify-center ${
-            tag === "Project" ? "bg-[#729987]" : "bg-[#4B7D8D]"
-          }`}
-        >
-          <span className="text-white text-xs font-sequel-sans">{tag}</span>
+      <div className="w-full justify-between items-center inline-flex">
+        <div className="justify-start items-start gap-2 inline-flex">
+          <div
+            className={`px-3 py-1 rounded-[10px] flex items-center justify-center ${
+              tag === "Project" ? "bg-[#729987]" : "bg-[#4B7D8D]"
+            }`}
+          >
+            <span className="text-white text-xs font-sequel-sans">{tag}</span>
+          </div>
+          <div className="px-3 py-1 text-black text-xs font-sequel-sans">
+            {author}
+          </div>
         </div>
-        <div className="px-3 py-1 text-black text-xs font-sequel-sans">
-          {author}
+        <div className=" text-[#254752] text-md font-sequel-sans-black">
+          {keyword}
         </div>
       </div>
 
@@ -155,8 +151,6 @@ function AnnouncementComponent({
           </div>
         )
       )}
-
-     
 
       {files.length > 0 && (
         <div className="my-2 px-3">
