@@ -165,7 +165,6 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           unassignedUser,
         ]);
       }
-      onStatusUpdate("pending");
     } catch (error) {
       showToastError("There was an error unassigning the user.");
       console.error(error);
