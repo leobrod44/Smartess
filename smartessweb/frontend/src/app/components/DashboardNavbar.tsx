@@ -40,13 +40,7 @@ import AddressDropdown from "./DashboardComponents/AddressDropdown";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { projectApi } from "@/api/page";
 import { Project } from "../mockData";
-import { useUserTypeContext } from "@/context/UserTypeProvider";
-
-// TypeScript Interface
-interface UserInfo {
-  first_name: string;
-  last_name: string;
-}
+import { useUserContext } from "@/context/UserProvider";
 
 interface SidebarItem {
   name: string;
@@ -145,13 +139,19 @@ const DashboardNavbar = () => {
   const pathname = usePathname();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const { setSelectedProjectId, setSelectedProjectAddress } =
     useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const { setUserType } = useUserTypeContext();
+  const {
+    userFirstName,
+    userLastName,
+    setUserEmail,
+    setUserFirstName,
+    setUserLastName,
+    setUserType,
+  } = useUserContext();
 
   const sidebarItems = [
     ...home,
@@ -186,17 +186,6 @@ const DashboardNavbar = () => {
   };
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) return;
-        const data = await userApi.getUserInfo(token);
-        setUserInfo(data);
-      } catch (error) {
-        console.error("Error fetching user info:", error);
-      }
-    };
-
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem("token");
@@ -211,7 +200,6 @@ const DashboardNavbar = () => {
       }
     };
 
-    fetchUserInfo();
     fetchProjects();
   }, [router]);
 
@@ -219,6 +207,9 @@ const DashboardNavbar = () => {
     try {
       await authApi.logout();
       localStorage.removeItem("token");
+      setUserEmail("");
+      setUserFirstName("");
+      setUserLastName("");
       setUserType("");
       showToastSuccess("Logged out successfully");
       setTimeout(() => {
@@ -731,8 +722,8 @@ const DashboardNavbar = () => {
                         className="ml-4 text-sm font-semibold leading-6 text-gray-900"
                         aria-hidden="true"
                       >
-                        {userInfo
-                          ? `${userInfo.first_name} ${userInfo.last_name}`
+                        {userFirstName
+                          ? `${userFirstName} ${userLastName}`
                           : "Loading..."}
                       </span>
                       <ChevronDownIcon
@@ -751,7 +742,7 @@ const DashboardNavbar = () => {
                   >
                     <MenuItems className="absolute right-0 z-10 mt-2.5 w-40 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-gray-900/5 focus:outline-none">
                       <div className="flex items-center justify-center text-xs py-2">
-                        Hello {userInfo ? userInfo.first_name : "User"}!
+                        Hello {userFirstName ? userFirstName : "User"}!
                       </div>
                       <div className="border-b border-gray-300"></div>
                       {userNavigation.map((item) =>

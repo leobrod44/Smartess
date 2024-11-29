@@ -1,13 +1,15 @@
 import { API_URL } from "../api";
 
 interface UserInfoResponse {
+  email: string;
   first_name: string;
   last_name: string;
+  type: string;
 }
 
 export const userApi = {
   getUserInfo: async (token: string): Promise<UserInfoResponse> => {
-    const response = await fetch(`${API_URL}/users/get_user_name`, {
+    const response = await fetch(`${API_URL}/users/get_user`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -21,22 +23,6 @@ export const userApi = {
     }
 
     return data;
-  },
-  getUserType: async (token: string): Promise<string> => {
-    const response = await fetch(`${API_URL}/users/get_user_type`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to fetch user type");
-    }
-
-    return data.type;
   },
 };
 

@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "@/public/styles/globals.css";
 import { ReactNode } from "react";
-import { UserTypeProvider } from "@/context/UserTypeProvider";
+import { UserProvider } from "@/context/UserProvider";
 
 export const metadata = {
   title: "Smartess",
@@ -68,9 +68,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <body
         className={`${sequelSansMediumBody.variable} ${sequelSansBold.variable} ${sequelSansRomanBody.variable} ${sequelSansLightDisp.variable} ${sequelSansLightBody.variable} ${sequelSansBlackDisp.variable}`}
       >
-        <UserTypeProvider>
+        <UserProvider>
           <main>{children}</main>
-        </UserTypeProvider>
+        </UserProvider>
       </body>
     </html>
   );
