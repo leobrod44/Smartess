@@ -128,6 +128,11 @@ const information = [
 const userNavigation = [
   { name: "My Dashboard", href: "/dashboard", icon: DashboardOutlinedIcon },
   { name: "My Profile", href: "/dashboard/profile", icon: Person2OutlinedIcon },
+  {
+    name: "My Tickets",
+    href: "/dashboard/ticket/my-tickets",
+    icon: ConfirmationNumberOutlinedIcon,
+  },
   { name: "Sign Out", href: "/", icon: LogoutOutlinedIcon },
 ];
 

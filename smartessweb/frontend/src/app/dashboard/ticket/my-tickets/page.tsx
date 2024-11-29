@@ -19,6 +19,11 @@ interface Ticket {
   date: string;
 }
 
+interface AssignedTicket {
+  ticketId: string;
+  isResolved: boolean;
+}
+
 const tickets: Ticket[] = [
   {
     ticketId: "t1",
@@ -298,7 +303,15 @@ const tickets: Ticket[] = [
   },
 ];
 
-const TicketPage = () => {
+const AssignedTicket: AssignedTicket[] = [
+  { ticketId: "t1", isResolved: false },
+  { ticketId: "t5", isResolved: false },
+  { ticketId: "t10", isResolved: false },
+  { ticketId: "t15", isResolved: false },
+  { ticketId: "t20", isResolved: false },
+];
+
+const AssignedTicketPage = () => {
   const { selectedProjectId } = useProjectContext();
   const [query, setQuery] = useState("");
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
@@ -313,9 +326,15 @@ const TicketPage = () => {
   ];
 
   useEffect(() => {
+    const assignedTickets = tickets.filter((ticket) =>
+      AssignedTicket.some((assigned) => assigned.ticketId === ticket.ticketId)
+    );
+
     const projectTickets = selectedProjectId
-      ? tickets.filter((ticket) => ticket.projectId == selectedProjectId)
-      : tickets;
+      ? assignedTickets.filter(
+          (ticket) => ticket.projectId == selectedProjectId
+        )
+      : assignedTickets;
 
     setFilteredTickets(
       projectTickets.filter((ticket) =>
@@ -435,4 +454,4 @@ const TicketPage = () => {
   );
 };
 
-export default TicketPage;
+export default AssignedTicketPage;
