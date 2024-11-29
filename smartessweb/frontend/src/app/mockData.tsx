@@ -26,7 +26,7 @@ export interface CurrentUser {
 
   address: string[];
 
-  firstName:string;
+  firstName: string;
 
   lastName: string;
 }
@@ -71,7 +71,6 @@ export interface Project {
 
 // New interface for project-specific individuals
 export interface Individual {
-  
   individualId: number; // Unique ID for project-specific users
 
   firstName: string;
@@ -404,9 +403,9 @@ const generateMockTickets2 = (): Ticket[] => [
     description:
       "Im moving out in 2 weeks, i need to reserve the elevator 3 for the movers to be able to come in and out with my items.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dol sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ",
 
-    status: "open",
+    status: "closed",
 
-    created_at: new Date("2024-10-11T9:15:00"),
+    created_at: new Date("2024-10-11T10:15:00"),
 
     type: "other",
 
@@ -622,12 +621,12 @@ const generateMockProjectUsers = (): Individual[] => [
     lastName: "Johnson",
     role: "basic",
   },
-    {
+  {
     individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
-  }, 
+  },
 ];
 
 // Function to generate mock project users for the second project
@@ -644,7 +643,6 @@ const generateMockProjectUsers2 = (): Individual[] => [
     lastName: "Prince",
     role: "admin",
   },
-
 ];
 
 const generateMockProjectUsers3 = (): Individual[] => [
