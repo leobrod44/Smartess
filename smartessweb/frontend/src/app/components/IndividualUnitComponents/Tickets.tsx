@@ -7,7 +7,7 @@ interface TicketsProps {
 }
 
 const Tickets = ({ tickets }: TicketsProps) => {
-  const router = useRouter(); // Ensure `useRouter` is initialized properly
+  const router = useRouter();
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -16,19 +16,30 @@ const Tickets = ({ tickets }: TicketsProps) => {
       day: "numeric",
     });
   };
+
   const getStatusColorClasses = (status: "open" | "pending" | "closed") => {
     switch (status) {
       case "open":
-        return "bg-[#729987] text-white"; // Example color for 'open'
+        return "bg-[#729987] text-white";
       case "pending":
-        return "bg-[#A6634F] 729987 text-white"; // Example color for 'pending'
+        return "bg-[#A6634F] text-white";
       case "closed":
-        return "bg-[#CCCCCC] text-white"; // Example color for 'closed'
+        return "bg-[#CCCCCC] text-white";
+      default:
+        return "bg-gray-300 text-black";
     }
   };
+
   const handleNavigation = () => {
     router.push("/dashboard/ticket");
   };
+
+  // Sort tickets by most recent
+  const sortedTickets = [...tickets].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+
   return (
     <div>
       {/* Title */}
@@ -49,7 +60,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
 
       {/* Table Rows */}
       <div className="flex flex-col gap-6 max-h-[300px] overflow-y-auto custom-scrollbar px-2">
-        {tickets.map((ticket, index) => (
+        {sortedTickets.map((ticket, index) => (
           <div
             key={index}
             className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-2"
