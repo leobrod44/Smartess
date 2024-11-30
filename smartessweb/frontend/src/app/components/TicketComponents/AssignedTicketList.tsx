@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Pagination } from "@mui/material";
-import DeleteTicketModal from "./DeleteTicketModal";
+import ResolveTicketModal from "./ResolveTicketModal";
 
 interface Ticket {
   ticketId: string;
@@ -14,15 +13,10 @@ interface Ticket {
   unit: string;
   status: string;
   date: string;
+  isResolved: boolean;
 }
 
-const TicketList = ({
-  tickets,
-  userType,
-}: {
-  tickets: Ticket[];
-  userType: string;
-}) => {
+const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -35,14 +29,14 @@ const TicketList = ({
     setPage(value);
   };
 
-  const handleDeleteClick = (ticket: Ticket) => {
+  const handleResolveClick = (ticket: Ticket) => {
     setSelectedTicket(ticket);
     setModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
+  const handleResolveConfirm = () => {
     if (selectedTicket) {
-      console.log(`Deleting ticket: ${selectedTicket.ticketId}`);
+      console.log(`Marking resolved ticket`);
       setModalOpen(false);
     }
   };
@@ -53,15 +47,8 @@ const TicketList = ({
     startIndex + ticketsPerPage
   );
 
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case "Open":
-        return "bg-[#729987]";
-      case "Pending":
-        return "bg-[#A6634F]";
-      case "Closed":
-        return "bg-[#CCCCCC]";
-    }
+  const formatStatus = (isResolved: boolean) => {
+    return isResolved ? "bg-[#729987]" : "bg-[#A6634F]";
   };
 
   const formatDate = (dateStr: string) => {
@@ -76,12 +63,12 @@ const TicketList = ({
 
   return (
     <div className="mt-8 flow-root">
-      <DeleteTicketModal
+      <ResolveTicketModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
-        onDelete={handleDeleteConfirm}
+        onConfirm={handleResolveConfirm}
         ticketName={selectedTicket?.name || ""}
-        userType={userType}
+        isResolved={selectedTicket?.isResolved || false}
       />
       <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
@@ -160,11 +147,11 @@ const TicketList = ({
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
                     <span
-                      className={`inline-flex items-center px-4 py-1 rounded-full text-sm font-medium text-white ${formatStatus(
-                        ticket.status
+                      className={`inline-flex items-center justify-center min-w-[100px] h-[30px] rounded-full text-sm font-medium text-white ${formatStatus(
+                        ticket.isResolved
                       )}`}
                     >
-                      {ticket.status}
+                      {ticket.isResolved ? "Resolved" : "Unresolved"}
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-[#14323B]">
@@ -172,11 +159,16 @@ const TicketList = ({
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-3">
                     <button
-                      className="text-red-600 hover:text-red-900 disabled:cursor-not-allowed"
-                      aria-label="Delete ticket"
-                      onClick={() => handleDeleteClick(ticket)}
+                      onClick={() => handleResolveClick(ticket)}
+                      className={`inline-block w-32 py-2 rounded-md font-semibold text-xs ${
+                        ticket.isResolved
+                          ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
                     >
-                      <TrashIcon className="h-5 w-5 mx-auto" />
+                      {ticket.isResolved
+                        ? "Mark as Unresolved"
+                        : "Mark as Resolved"}
                     </button>
                   </td>
                 </tr>
@@ -198,4 +190,4 @@ const TicketList = ({
   );
 };
 
-export default TicketList;
+export default AssignedTicketList;

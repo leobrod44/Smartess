@@ -61,7 +61,6 @@ const SignInPage = () => {
       const data = await signInApi.signIn({ email, password });
       localStorage.setItem("token", data.token);
       const user = await userApi.getUserInfo(data.token);
-      console.log(user);
       setUserEmail(user.email);
       setUserFirstName(user.first_name);
       setUserLastName(user.last_name);
