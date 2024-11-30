@@ -6,7 +6,6 @@ import AssignedTicketList from "@/app/components/TicketComponents/AssignedTicket
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
-import { useUserContext } from "@/context/UserProvider";
 
 interface Ticket {
   ticketId: string;
@@ -85,7 +84,6 @@ const tickets: Ticket[] = [
 ];
 
 const AssignedTicketPage = () => {
-  const { userType } = useUserContext();
   const { selectedProjectId } = useProjectContext();
   const [query, setQuery] = useState("");
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
@@ -212,10 +210,7 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList
-        tickets={filteredTickets}
-        userType={userType}
-      />
+      <AssignedTicketList tickets={filteredTickets} />
     </div>
   );
 };

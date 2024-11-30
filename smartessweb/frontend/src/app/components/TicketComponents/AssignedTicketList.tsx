@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Pagination } from "@mui/material";
 import ResolveTicketModal from "./ResolveTicketModal";
+import { showToastSuccess } from "@/app/components/Toast";
 
 interface Ticket {
   ticketId: string;
@@ -36,7 +37,15 @@ const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
 
   const handleResolveConfirm = () => {
     if (selectedTicket) {
-      console.log(`Marking resolved ticket`);
+      if (selectedTicket.isResolved) {
+        showToastSuccess(
+          `Ticket ${selectedTicket.ticketId} has been marked as unresolved.`
+        );
+      } else {
+        showToastSuccess(
+          `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
+        );
+      }
       setModalOpen(false);
     }
   };
@@ -163,7 +172,7 @@ const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
                       className={`inline-block w-32 py-2 rounded-md font-semibold text-xs ${
                         ticket.isResolved
                           ? "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                          : "bg-blue-500 text-white hover:bg-blue-600"
+                          : "bg-[#266472] text-white hover:bg-[#254752]"
                       }`}
                     >
                       {ticket.isResolved

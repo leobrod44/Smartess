@@ -3,6 +3,7 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Pagination } from "@mui/material";
 import DeleteTicketModal from "./DeleteTicketModal";
+import { showToastSuccess } from "@/app/components/Toast";
 
 interface Ticket {
   ticketId: string;
@@ -44,6 +45,7 @@ const TicketList = ({
     if (selectedTicket) {
       console.log(`Deleting ticket: ${selectedTicket.ticketId}`);
       setModalOpen(false);
+      showToastSuccess(`Ticket ${selectedTicket.ticketId} has been deleted.`);
     }
   };
 
