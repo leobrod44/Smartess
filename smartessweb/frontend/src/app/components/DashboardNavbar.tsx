@@ -20,7 +20,7 @@ import dashboardLogo from "@/public/images/dashboardLogo.png";
 import Image from "next/image";
 import Link from "next/link";
 import Toast, { showToastError, showToastSuccess } from "../components/Toast";
-import { userApi, authApi } from "@/api/components/DashboardNavbar";
+import { authApi } from "@/api/components/DashboardNavbar";
 
 // Material UI icons
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
