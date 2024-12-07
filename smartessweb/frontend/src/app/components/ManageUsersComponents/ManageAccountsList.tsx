@@ -60,7 +60,7 @@ const ManageAccountsList = ({
     if (updatedAddresses.length > 1) {
       const formattedAddress = `${updatedAddresses[0]} (+${
         updatedAddresses.length - 1
-      } more)`;
+      } more)`; 
       setDisplayAddress(formattedAddress);
     } else {
       setDisplayAddress(updatedAddresses[0]);
@@ -87,7 +87,10 @@ const ManageAccountsList = ({
         onClick={handleOpenModal}
       >
         <div className="flex-1 pr-4">
-          <p>{displayAddress}</p> {/* Display the updated address */}
+          {displayAddress ? (
+            <p>{displayAddress}</p> ) : (
+            <p className="text-red-500 font-semibold">NO PROJECTS</p>
+            )}
         </div>
         <div className="flex-1 pr-4">
           <p>{userName}</p>
