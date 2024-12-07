@@ -100,21 +100,31 @@ exports.getOrgUsers = async (req, res) => {
         }
 
         // get all organizations and projects for the current user
-        const orgIds = orgUserData.map((org) => org.org_id);
-        const projIds = orgUserData.map((proj) => proj.proj_id);
-
+        const orgIds = [...new Set(orgUserData.map((org) => org.org_id))];  // Unique org_ids
+        const projIds = [...new Set(orgUserData.map((proj) => proj.proj_id))];  
         if (orgIds.length === 0) {
             return res.status(404).json({ error: 'No organizations found for this user.' });
         }
 
-        const { data: allOrgUsers, error: allOrgUsersError } = await supabase
+        const { data: nonNullProjData, error: nonNullProjError } = await supabase
+        .from('org_user')
+        .select('user_id, org_id, proj_id, org_user_type')
+        .in('org_id', orgIds)
+        .in('proj_id', projIds) 
+        .neq('user_id', userData.user_id);
+    
+        // Query for when proj_id is null
+        const { data: nullProjData, error: nullProjError } = await supabase
             .from('org_user')
             .select('user_id, org_id, proj_id, org_user_type')
             .in('org_id', orgIds)
-            .in('proj_id', projIds)
+            .is('proj_id', null)  // Check specifically for null
             .neq('user_id', userData.user_id);
+        
+        // Combine the results
+        const allOrgUsers = [...nonNullProjData, ...nullProjData];
 
-        if (allOrgUsersError) {
+        if (nonNullProjError || nullProjError) {
             return res.status(500).json({ error: 'Failed to fetch organization users.' });
         }
 
@@ -193,7 +203,7 @@ exports.getOrgUsersProjects = async (req, res) => {
             return res.status(400).json({ error: 'No organization users provided.' });
         }
 
-        const uniqueProjIds = [...new Set(fetchedOrgUsers.map(user => user.proj_id))];
+        const uniqueProjIds = [...new Set(fetchedOrgUsers.map(user => user.proj_id))].filter(id => id !== null);
 
         const { data: projectData, error: queryError } = await supabase
             .from('project')
@@ -272,48 +282,103 @@ exports.getOrgProjects = async (req, res) => {
 
 exports.assignOrgUserToProject = async (req, res) => {
     try {
-      const token = req.token;
+        const token = req.token;
 
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      if (authError) {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
-  
-      const { user_id, org_id, proj_ids, org_user_type } = req.body;
-  
-      if (!user_id || !org_id || !proj_ids || !org_user_type) {
-        return res.status(400).json({ error: 'user_id, org_id, proj_id, and org_user_type are required.' });
-      }
-  
-      const insertPromises = proj_ids.map(proj_id => 
-        supabase
-          .from('org_user')
-          .insert([
-            {
-              user_id,
-              org_id,
-              proj_id, 
-              org_user_type
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        const { user_id, org_id, proj_ids, org_user_type } = req.body;
+
+        if (!user_id || !org_id || !proj_ids || !Array.isArray(proj_ids) || !org_user_type) {
+            return res.status(400).json({ error: 'user_id, org_id, proj_ids (array), and org_user_type are required.' });
+        }
+
+        // Check the number of rows for this user and org
+        const { data: rows, error: fetchError } = await supabase
+            .from('org_user')
+            .select('*')
+            .eq('user_id', user_id)
+            .eq('org_id', org_id);
+
+        if (fetchError) {
+            console.error('Fetch Error:', fetchError);
+            return res.status(500).json({ error: 'Failed to fetch org_user data.' });
+        }
+
+        if (rows.length === 1) {
+            // If only one row exists, update its proj_id with the first element of proj_ids
+            const { error: updateError } = await supabase
+                .from('org_user')
+                .update({ proj_id: proj_ids[0] })
+                .eq('user_id', user_id)
+                .eq('org_id', org_id);
+
+            if (updateError) {
+                console.error('Update Error:', updateError);
+                return res.status(500).json({ error: 'Failed to update existing org_user row.' });
             }
-          ])
-      );
-  
-      const results = await Promise.all(insertPromises);
-  
-      const insertError = results.find(result => result.error);
-      if (insertError) {
-        console.error('Insert Error:', insertError.error);
-        return res.status(500).json({ error: 'Failed to assign user to project(s).' });
-      }
-  
-  
-      res.status(200).json({ message: 'User successfully assigned to project.' });
-  
+
+            // If there are more proj_ids, insert new rows for the rest
+            if (proj_ids.length > 1) {
+                const additionalProjIds = proj_ids.slice(1);
+
+                const insertPromises = additionalProjIds.map(proj_id =>
+                    supabase
+                        .from('org_user')
+                        .insert([
+                            {
+                                user_id,
+                                org_id,
+                                proj_id,
+                                org_user_type
+                            }
+                        ])
+                );
+
+                const results = await Promise.all(insertPromises);
+
+                const insertError = results.find(result => result.error);
+                if (insertError) {
+                    console.error('Insert Error:', insertError.error);
+                    return res.status(500).json({ error: 'Failed to assign user to additional project(s).' });
+                }
+            }
+
+            return res.status(200).json({ message: 'User successfully updated and assigned to additional project(s) if applicable.' });
+        }
+
+        // If more than one row exists, proceed with inserting new rows
+        const insertPromises = proj_ids.map(proj_id =>
+            supabase
+                .from('org_user')
+                .insert([
+                    {
+                        user_id,
+                        org_id,
+                        proj_id,
+                        org_user_type
+                    }
+                ])
+        );
+
+        const results = await Promise.all(insertPromises);
+
+        const insertError = results.find(result => result.error);
+        if (insertError) {
+            console.error('Insert Error:', insertError.error);
+            return res.status(500).json({ error: 'Failed to assign user to project(s).' });
+        }
+
+        res.status(200).json({ message: 'User successfully assigned to project(s).' });
+
     } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error.' });
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
   
 exports.removeOrgUserFromProject = async (req, res) => {
     try {
@@ -328,6 +393,64 @@ exports.removeOrgUserFromProject = async (req, res) => {
 
         if (!user_id || !org_id || !proj_ids || !Array.isArray(proj_ids)) {
             return res.status(400).json({ error: 'user_id, org_id, and proj_ids (array) are required.' });
+        }
+
+        // Check the number of rows left for this user and org
+        const { data: rows, error: fetchError } = await supabase
+            .from('org_user')
+            .select('*')
+            .eq('user_id', user_id)
+            .eq('org_id', org_id);
+
+        if (fetchError) {
+            console.error('Fetch Error:', fetchError);
+            return res.status(500).json({ error: 'Failed to fetch org_user data.' });
+        }
+
+        const totalRows = rows.length;
+
+        if (totalRows === proj_ids.length) {
+            // Delete all but one row, and set the last row's proj_id to null
+            const rowToKeep = rows[0];
+            
+            if (!rowToKeep) {
+                return res.status(400).json({ error: 'Invalid proj_ids provided.' });
+            }
+
+            // Delete all rows matching proj_ids except the one to keep
+            const deletePromises = proj_ids
+                .filter(proj_id => proj_id !== rowToKeep.proj_id)
+                .map(proj_id =>
+                    supabase
+                        .from('org_user')
+                        .delete()
+                        .eq('user_id', user_id)
+                        .eq('org_id', org_id)
+                        .eq('proj_id', proj_id)
+                );
+
+            const deleteResults = await Promise.all(deletePromises);
+            const deleteError = deleteResults.find(result => result.error);
+
+            if (deleteError) {
+                console.error('Delete Error:', deleteError.error);
+                return res.status(500).json({ error: 'Failed to remove user from project(s).' });
+            }
+
+            // Update the remaining row to set proj_id to null
+            const { error: updateError } = await supabase
+                .from('org_user')
+                .update({ proj_id: null })
+                .eq('user_id', user_id)
+                .eq('org_id', org_id)
+                .eq('proj_id', rowToKeep.proj_id);
+
+            if (updateError) {
+                console.error('Update Error:', updateError);
+                return res.status(500).json({ error: 'Failed to update remaining org_user proj_id to null.' });
+            }
+
+            return res.status(200).json({ message: 'User successfully removed from projects and last proj_id set to null.' });
         }
 
         const deletePromises = proj_ids.map(proj_id =>
