@@ -33,16 +33,14 @@ const ResolveTicketModal = ({
           {isResolved ? "unresolved" : "resolved"}?
         </p>
         <div className="flex justify-around">
-          {/* Cancel Button */}
           <button
-            className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
+            className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
             onClick={onClose}
           >
             Cancel
           </button>
-          {/* Confirm Button */}
           <button
-            className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
+            className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
             onClick={onConfirm}
           >
             Confirm
