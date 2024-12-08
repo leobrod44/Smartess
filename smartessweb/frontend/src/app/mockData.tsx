@@ -15,7 +15,7 @@ export interface HubUser {
 export interface OrgUser {
   user_id: number;
   org_id: number;
-  proj_id: number;
+  proj_id: number | null;
   org_user_type: string;
 }
 
