@@ -144,6 +144,9 @@ function UserInfoModal({
       setSelectedProjectIds(filteredSelectedProjectIds);
       setProjectIdsToDelete(filteredProjectIdsToDelete);
 
+      console.log("filteredSelectedProjectIds", filteredSelectedProjectIds);
+      console.log("filteredProjectIdsToDelete", filteredProjectIdsToDelete);
+
       if (JSON.stringify(filteredSelectedProjectIds) !== JSON.stringify(filteredProjectIdsToDelete)) {
         console.log("calling apis")
         await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
