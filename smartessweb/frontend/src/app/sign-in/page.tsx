@@ -9,6 +9,8 @@ import Logo from "../../public/images/logo.png";
 import { IconButton } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useUserContext } from "@/context/UserProvider";
+import { userApi } from "@/api/components/DashboardNavbar";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -16,6 +18,9 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const { setUserEmail, setUserFirstName, setUserLastName, setUserType } =
+    useUserContext();
 
   const validateEmail = (email: string) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,6 +60,11 @@ const SignInPage = () => {
     try {
       const data = await signInApi.signIn({ email, password });
       localStorage.setItem("token", data.token);
+      const user = await userApi.getUserInfo(data.token);
+      setUserEmail(user.email);
+      setUserFirstName(user.first_name);
+      setUserLastName(user.last_name);
+      setUserType(user.type);
       showToastSuccess("Login successful!");
       setTimeout(() => {
         router.push("/dashboard");
