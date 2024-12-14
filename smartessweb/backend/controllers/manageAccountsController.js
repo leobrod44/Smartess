@@ -707,11 +707,21 @@ exports.changeOrgUserRole = async (req, res) => {
             query.eq('org_id', org_id);
         }
     
-        const { error: updateError } = await query;
+        const { error: updateOrgUserError } = await query;
     
-        if (updateError) {
-            console.error('Update Error:', updateError);
+        if (updateOrgUserError) {
+            console.error('Update Error:', updateOrgUserError);
             return res.status(500).json({ error: 'Failed to update user role.' });
+        }
+
+        const { error: updateUserError } = await supabase
+            .from('user')
+            .update({ type: role })
+            .eq('user_id', user_id);
+
+        if (updateUserError) {
+            console.error('Update User Error:', updateUserError);
+            return res.status(500).json({ error: 'Failed to update user type in user table.' });
         }
     
         res.status(200).json({ message: 'User role successfully updated.' });
