@@ -309,9 +309,28 @@ exports.assignOrgUserToProject = async (req, res) => {
 
         if (rows.length === 1) {
             // If only one row exists, update its proj_id with the first element of proj_ids
+            const firstProjId = proj_ids[0];
+
+            // // Increment admin_users_count if org_user_type is admin
+            if (org_user_type === 'admin') {
+                const { data: project, error: fetchProjectError } = await supabase
+                    .from('project')
+                    .select('admin_users_count')
+                    .eq('proj_id', firstProjId)
+                    .single();
+
+                if (!fetchProjectError && project) {
+                    const newCount = (project.admin_users_count || 0) + 1;
+                    await supabase
+                        .from('project')
+                        .update({ admin_users_count: newCount })
+                        .eq('proj_id', firstProjId);
+                }
+            }
+
             const { error: updateError } = await supabase
                 .from('org_user')
-                .update({ proj_id: proj_ids[0] })
+                .update({ proj_id: firstProjId })
                 .eq('user_id', user_id)
                 .eq('org_id', org_id);
 
@@ -324,8 +343,25 @@ exports.assignOrgUserToProject = async (req, res) => {
             if (proj_ids.length > 1) {
                 const additionalProjIds = proj_ids.slice(1);
 
-                const insertPromises = additionalProjIds.map(proj_id =>
-                    supabase
+                const insertPromises = additionalProjIds.map(async proj_id => {
+                    // Increment admin_users_count if org_user_type is admin
+                    if (org_user_type === 'admin') {
+                        const { data: project, error: fetchProjectError } = await supabase
+                            .from('project')
+                            .select('admin_users_count')
+                            .eq('proj_id', proj_id)
+                            .single();
+
+                        if (!fetchProjectError && project) {
+                            const newCount = (project.admin_users_count || 0) + 1;
+                            await supabase
+                                .from('project')
+                                .update({ admin_users_count: newCount })
+                                .eq('proj_id', proj_id);
+                        }
+                    }
+
+                    return supabase
                         .from('org_user')
                         .insert([
                             {
@@ -334,8 +370,8 @@ exports.assignOrgUserToProject = async (req, res) => {
                                 proj_id,
                                 org_user_type
                             }
-                        ])
-                );
+                        ]);
+                });
 
                 const results = await Promise.all(insertPromises);
 
@@ -350,8 +386,25 @@ exports.assignOrgUserToProject = async (req, res) => {
         }
 
         // If more than one row exists, proceed with inserting new rows
-        const insertPromises = proj_ids.map(proj_id =>
-            supabase
+        const insertPromises = proj_ids.map(async proj_id => {
+            // Increment admin_users_count if org_user_type is admin
+            if (org_user_type === 'admin') {
+                const { data: project, error: fetchProjectError } = await supabase
+                    .from('project')
+                    .select('admin_users_count')
+                    .eq('proj_id', proj_id)
+                    .single();
+
+                if (!fetchProjectError && project) {
+                    const newCount = (project.admin_users_count || 0) + 1;
+                    await supabase
+                        .from('project')
+                        .update({ admin_users_count: newCount })
+                        .eq('proj_id', proj_id);
+                }
+            }
+
+            return supabase
                 .from('org_user')
                 .insert([
                     {
@@ -360,8 +413,8 @@ exports.assignOrgUserToProject = async (req, res) => {
                         proj_id,
                         org_user_type
                     }
-                ])
-        );
+                ]);
+        });
 
         const results = await Promise.all(insertPromises);
 
@@ -379,7 +432,7 @@ exports.assignOrgUserToProject = async (req, res) => {
     }
 };
 
-  
+
 exports.removeOrgUserFromProject = async (req, res) => {
     try {
         const token = req.token;
@@ -394,6 +447,20 @@ exports.removeOrgUserFromProject = async (req, res) => {
         if (!user_id || !org_id || !proj_ids || !Array.isArray(proj_ids)) {
             return res.status(400).json({ error: 'user_id, org_id, and proj_ids (array) are required.' });
         }
+
+        // fetch the user's type from the user table
+        const { data: userData, error: fetchUserError } = await supabase
+            .from('user')
+            .select('type')
+            .eq('user_id', user_id)
+            .single();
+
+        if (fetchUserError || !userData) {
+            console.error('Fetch User Error:', fetchUserError);
+            return res.status(500).json({ error: 'Failed to fetch user type.' });
+        }
+
+        const user_type = userData.type;
 
         // Check the number of rows left for this user and org
         const { data: rows, error: fetchError } = await supabase
@@ -412,7 +479,7 @@ exports.removeOrgUserFromProject = async (req, res) => {
         if (totalRows === proj_ids.length) {
             // Delete all but one row, and set the last row's proj_id to null
             const rowToKeep = rows[0];
-            
+
             if (!rowToKeep) {
                 return res.status(400).json({ error: 'Invalid proj_ids provided.' });
             }
@@ -420,14 +487,31 @@ exports.removeOrgUserFromProject = async (req, res) => {
             // Delete all rows matching proj_ids except the one to keep
             const deletePromises = proj_ids
                 .filter(proj_id => proj_id !== rowToKeep.proj_id)
-                .map(proj_id =>
-                    supabase
+                .map(async proj_id => {
+                    // Decrease admin count if user is admin
+                    if (user_type === 'admin') {
+                        const { data: project, error: fetchProjectError } = await supabase
+                            .from('project')
+                            .select('admin_users_count')
+                            .eq('proj_id', proj_id)
+                            .single();
+
+                        if (!fetchProjectError && project) {
+                            const newCount = (project.admin_users_count || 0) - 1;
+                            await supabase
+                                .from('project')
+                                .update({ admin_users_count: newCount })
+                                .eq('proj_id', proj_id);
+                        }
+                    }
+
+                    return supabase
                         .from('org_user')
                         .delete()
                         .eq('user_id', user_id)
                         .eq('org_id', org_id)
-                        .eq('proj_id', proj_id)
-                );
+                        .eq('proj_id', proj_id);
+                });
 
             const deleteResults = await Promise.all(deletePromises);
             const deleteError = deleteResults.find(result => result.error);
@@ -453,14 +537,32 @@ exports.removeOrgUserFromProject = async (req, res) => {
             return res.status(200).json({ message: 'User successfully removed from projects and last proj_id set to null.' });
         }
 
-        const deletePromises = proj_ids.map(proj_id =>
-            supabase
+        // Delete only the provided proj_ids
+        const deletePromises = proj_ids.map(async proj_id => {
+            // Decrease admin count if user is admin
+            if (user_type === 'admin') {
+                const { data: project, error: fetchProjectError } = await supabase
+                    .from('project')
+                    .select('admin_users_count')
+                    .eq('proj_id', proj_id)
+                    .single();
+
+                if (!fetchProjectError && project) {
+                    const newCount = (project.admin_users_count || 0) - 1;
+                    await supabase
+                        .from('project')
+                        .update({ admin_users_count: newCount })
+                        .eq('proj_id', proj_id);
+                }
+            }
+
+            return supabase
                 .from('org_user')
                 .delete()
                 .eq('user_id', user_id)
                 .eq('org_id', org_id)
-                .eq('proj_id', proj_id)
-        );
+                .eq('proj_id', proj_id);
+        });
 
         const results = await Promise.all(deletePromises);
 
@@ -480,46 +582,105 @@ exports.removeOrgUserFromProject = async (req, res) => {
 
 exports.deleteOrgUser = async (req, res) => {
     try {
-      const token = req.token;
-  
-      const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      if (authError) {
-        return res.status(401).json({ error: 'Invalid token' });
-      }
-  
-      const { user_id, org_id } = req.body;
-  
-      if (!user_id || !org_id) {
-        return res.status(400).json({ error: 'user_id and org_id is required.' });
-      }
-  
-      const { error: deleteOrgUserError } = await supabase
-          .from('org_user')
-          .delete()
-          .eq('user_id', user_id)
-          .eq('org_id', org_id);
+        const token = req.token;
 
-      if (deleteOrgUserError) {
-          console.error('Delete OrgUser Error:', deleteOrgUserError);
-          return res.status(500).json({ error: 'Failed to remove user from the organization.' });
-      }
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
 
-      const { error: deleteUserError } = await supabase
-          .from('user')
-          .delete()
-          .eq('user_id', user_id);
+        const { user_id, org_id } = req.body;
 
-      if (deleteUserError) {
-          console.error('Delete User Error:', deleteUserError);
-          return res.status(500).json({ error: 'Failed to delete user from the system.' });
-      }
+        if (!user_id || !org_id) {
+            return res.status(400).json({ error: 'user_id and org_id are required.' });
+        }
 
-      res.status(200).json({ message: 'User successfully removed from the organization and system.' });
+        // get user type from the user table using user_id
+        const { data: userData, error: fetchUserError } = await supabase
+            .from('user')
+            .select('type')
+            .eq('user_id', user_id);
+
+        if (fetchUserError || !userData || userData.length === 0) {
+            console.error('Fetch User Error:', fetchUserError);
+            return res.status(500).json({ error: 'Failed to retrieve user type.' });
+        }
+
+        const user_type = userData[0].type;
+
+        // get all proj_id's for this user in the org_user table
+        const { data: projIdsData, error: fetchProjIdsError } = await supabase
+            .from('org_user')
+            .select('proj_id')
+            .eq('user_id', user_id)
+            .eq('org_id', org_id);
+
+        if (fetchProjIdsError || !projIdsData) {
+            console.error('Fetch ProjIds Error:', fetchProjIdsError);
+            return res.status(500).json({ error: 'Failed to retrieve project IDs.' });
+        }
+
+        const projIds = projIdsData.map(row => row.proj_id);
+        console.log(user_type, projIds.length)
+
+        // if user is admin, decrement admin_users_count in projects table for all proj_ids, ignore if proj_ids contains null
+        if (user_type === 'admin' && projIds.length > 0 && !projIds.includes(null)) {
+            // retrieve current admin_users_count for each proj_id
+            const { data: projects, error: fetchProjectsError } = await supabase
+                .from('project')
+                .select('proj_id, admin_users_count')
+                .in('proj_id', projIds);
+        
+            if (fetchProjectsError || !projects) {
+                console.error('Fetch Projects Error:', fetchProjectsError);
+                return res.status(500).json({ error: 'Failed to fetch projects for admin count update.' });
+            }
+        
+            // loop through projects and update admin_users_count
+            for (const project of projects) {
+                const newCount = (project.admin_users_count || 0) - 1; // ensure no undefined or null values
+                const { error: updateCountError } = await supabase
+                    .from('project')
+                    .update({ admin_users_count: newCount })
+                    .eq('proj_id', project.proj_id);
+        
+                if (updateCountError) {
+                    console.error(`Failed to update admin count for project ${project.proj_id}:`, updateCountError);
+                    return res.status(500).json({ error: 'Failed to update admin count in projects.' });
+                }
+            }
+        }
+        
+        // delete the user from the org_user table
+        const { error: deleteOrgUserError } = await supabase
+            .from('org_user')
+            .delete()
+            .eq('user_id', user_id)
+            .eq('org_id', org_id);
+
+        if (deleteOrgUserError) {
+            console.error('Delete OrgUser Error:', deleteOrgUserError);
+            return res.status(500).json({ error: 'Failed to remove user from the organization.' });
+        }
+
+        // delete the user from the user table
+        const { error: deleteUserError } = await supabase
+            .from('user')
+            .delete()
+            .eq('user_id', user_id);
+
+        if (deleteUserError) {
+            console.error('Delete User Error:', deleteUserError);
+            return res.status(500).json({ error: 'Failed to delete user from the system.' });
+        }
+
+        res.status(200).json({ message: 'User successfully removed from the organization and system.' });
     } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Internal server error.' });
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
 
 exports.changeOrgUserRole = async (req, res) => {
     try {
