@@ -52,7 +52,7 @@ const ManageAccountsList = ({
         onUserDeleted(uid);
       }
     } catch (err) {
-      console.error("Error assigning user to project:", err);
+      console.error("Error deleting org user:", err);
     }
   };
 
