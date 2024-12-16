@@ -1,3 +1,3 @@
 export const API_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://localhost:3001/api'
+  ? 'https://smartess.onrender.com/api'
   : 'http://localhost:3000/api';
