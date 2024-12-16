@@ -15,7 +15,7 @@ RUN cd frontend && npm install
 # Copy project files
 COPY smartessweb/ ./
 
-# Expose ports (3000 for backend, 3001 for frontend)
+# Expose ports (3001 for frontend, 3000 for backend)
 EXPOSE 3000 3001
 
 # Start both frontend and backend using the dev script from package.json

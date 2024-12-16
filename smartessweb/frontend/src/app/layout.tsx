@@ -46,20 +46,11 @@ const sequelSansBlackDisp = localFont({
   variable: "--font-sequel-sans-black-disp",
 });
 
-export {
-  sequelSansBlackDisp,
-  sequelSansBold,
-  sequelSansLightBody,
-  sequelSansLightDisp,
-  sequelSansMediumBody,
-  sequelSansRomanBody,
-};
-
 interface MainLayoutProps {
   children: ReactNode;
 }
 
-const MainLayout = ({ children }: MainLayoutProps) => {
+export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <html
       lang="en"
@@ -74,6 +65,4 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </body>
     </html>
   );
-};
-
-export default MainLayout;
+}
