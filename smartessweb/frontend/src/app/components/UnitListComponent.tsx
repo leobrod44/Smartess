@@ -16,7 +16,7 @@ const UnitComponent = ({
   projectAddress: string;
 }) => {
   const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
-  const [alerts, setAlerts] = useState<Alert[]>(unit.alerts || []);
+  const [alerts] = useState<Alert[]>(unit.alerts || []);
 
   const router = useRouter();
   const [tickets] = useState<TicketsType>(
