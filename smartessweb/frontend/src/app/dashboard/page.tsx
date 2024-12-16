@@ -96,10 +96,10 @@ const DashboardPage = () => {
         newFilteredProjects.sort((a, b) => b.units.length - a.units.length);
         break;
       case "Most Hub Users":
-        newFilteredProjects.sort((a, b) => b.hubUsers - a.hubUsers);
+        newFilteredProjects.sort((a, b) => b.hubUsersCount - a.hubUsersCount);
         break;
       case "Most Pending Tickets":
-        newFilteredProjects.sort((a, b) => b.pendingTickets - a.pendingTickets);
+        newFilteredProjects.sort((a, b) => b.pendingTicketsCount - a.pendingTicketsCount);
         break;
       default:
         break;
