@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
-import ActiveAlert from "./UnitComponents/ActiveAlerts";
 import Alerts from "../components/UnitComponents/Alerts";
 
 import { HubUser, TicketsType, Owner, Unit, Alert } from "../mockData";
