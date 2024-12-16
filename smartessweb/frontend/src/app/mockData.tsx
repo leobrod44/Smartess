@@ -437,7 +437,7 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Smoke Alarm Activated",
 
-    timestamp: new Date("2024-10-31T10:15:00"),
+    timestamp: new Date("2024-12-15T14:30:00"),
 
     resolved: false,
 
@@ -453,7 +453,7 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Water Leak Detected",
 
-    timestamp: new Date("2024-10-31T11:00:00"),
+    timestamp: new Date("2024-03-02T11:12:00"),
 
     resolved: false,
 
@@ -469,7 +469,7 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Thermostat > 25°C",
 
-    timestamp: new Date("2024-10-31T12:30:00"),
+    timestamp: new Date("2024-04-10T10:49"),
 
     resolved: true,
 
@@ -485,7 +485,7 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "No Battery In Device",
 
-    timestamp: new Date("2024-10-31T09:45:00"),
+    timestamp: new Date("2024-08-11T10:15:00"),
 
     resolved: false,
 
