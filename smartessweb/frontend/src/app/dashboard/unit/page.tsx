@@ -6,7 +6,7 @@ import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useState, useEffect } from "react";
-import { generateMockProjects, Project } from "../../mockData";
+import { Project } from "../../mockData";
 import { unitsApi } from "@/api/page";
 import { useRouter } from "next/navigation";
 
@@ -15,7 +15,6 @@ const unitsPerPage = 3;
 const UnitPage = () => {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  //const [projects] = useState<Project[]>(generateMockProjects());
   const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
