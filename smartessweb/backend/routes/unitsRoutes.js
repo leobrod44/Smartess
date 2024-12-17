@@ -1,8 +1,8 @@
 const express = require('express');
-const {  } = require('../controllers/unitsController');
+const { getUserProjects} = require('../controllers/unitsController');
 const { verifyToken } = require('../middleware/middleware');
 const router = express.Router();
 
-//router.get('/get-current-user', verifyToken, getCurrentUser);
+router.get('/get-user-projects', verifyToken, getUserProjects);
 
 module.exports = router;
