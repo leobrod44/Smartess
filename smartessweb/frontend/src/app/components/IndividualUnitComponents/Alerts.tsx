@@ -59,7 +59,8 @@ const Alert = ({ alerts }: AlertProps) => {
               <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
               {alert.message}
               <div className="text-[#14323B] font-semibold">Type:</div>
-              {alert.icon}
+              {/* Image not loading here */}
+              <img src={alert.icon}></img>
               <div className="text-[#14323B] font-semibold">Date:</div>{" "}
               {formatDate(alert.timestamp)}
               <div className="text-[#14323B] font-semibold">Time:</div>{" "}
@@ -69,7 +70,11 @@ const Alert = ({ alerts }: AlertProps) => {
             {/* Table view for medium and larger screens */}
             <div className="hidden md:block">{alert.id}</div>
             <div className="hidden md:block">{alert.message}</div>
-            <div className="hidden md:block">{alert.icon}</div>
+
+            {/* Image not loading here */}
+            <div className="hidden md:block">
+              <img src={alert.icon}></img>
+            </div>
             <div className="hidden md:block">{formatDate(alert.timestamp)}</div>
             <div className="hidden md:block">{formatTime(alert.timestamp)}</div>
           </div>
