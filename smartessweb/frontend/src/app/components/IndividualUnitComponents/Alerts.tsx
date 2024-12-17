@@ -1,4 +1,10 @@
 "use client";
+
+import Battery20Icon from "@mui/icons-material/Battery20";
+import WaterDamageIcon from "@mui/icons-material/WaterDamage";
+import ThermostatIcon from "@mui/icons-material/Thermostat";
+import UpcomingIcon from "@mui/icons-material/Upcoming";
+
 import type { Alert } from "../../mockData";
 
 interface AlertProps {
@@ -58,9 +64,12 @@ const Alert = ({ alerts }: AlertProps) => {
               {alert.id}
               <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
               {alert.message}
-              <div className="text-[#14323B] font-semibold">Type:</div>
-              {/* Image not loading here */}
-              <img src={alert.icon}></img>
+              <div className="hidden md:block flex justify-center items-center">
+                {alert.message === "Smoke Alarm Activated" && <UpcomingIcon />}
+                {alert.message === "Water Leak Detected" && <WaterDamageIcon />}
+                {alert.message === "Thermostat > 25°C" && <ThermostatIcon />}
+                {alert.message === "No Battery In Device" && <Battery20Icon />}
+              </div>
               <div className="text-[#14323B] font-semibold">Date:</div>{" "}
               {formatDate(alert.timestamp)}
               <div className="text-[#14323B] font-semibold">Time:</div>{" "}
@@ -72,8 +81,11 @@ const Alert = ({ alerts }: AlertProps) => {
             <div className="hidden md:block">{alert.message}</div>
 
             {/* Image not loading here */}
-            <div className="hidden md:block">
-              <img src={alert.icon}></img>
+            <div className="hidden md:block flex justify-center items-center">
+              {alert.message === "Smoke Alarm Activated" && <UpcomingIcon />}
+              {alert.message === "Water Leak Detected" && <WaterDamageIcon />}
+              {alert.message === "Thermostat > 25°C" && <ThermostatIcon />}
+              {alert.message === "No Battery In Device" && <Battery20Icon />}
             </div>
             <div className="hidden md:block">{formatDate(alert.timestamp)}</div>
             <div className="hidden md:block">{formatTime(alert.timestamp)}</div>
