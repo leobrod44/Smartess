@@ -16,15 +16,13 @@ const UnitComponent = ({
 }) => {
   const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
   const router = useRouter();
-  const [tickets] = useState<TicketsType>(
-    unit.tickets || {
-      total: 0,
-      open: 0,
-      pending: 0,
-      closed: 0,
-    }
-  );
-
+  const [tickets] = useState<TicketsType>({
+    total: unit.tickets?.total || 0,
+    open: unit.tickets?.open || 0,
+    pending: unit.tickets?.pending || 0,
+    closed: unit.tickets?.closed || 0,
+  });
+  
   // Count active and closed alerts based on resolved status
   const activeAlerts = unit.alerts.reduce(
     (a, alert) => {
