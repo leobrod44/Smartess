@@ -441,7 +441,7 @@ const generateMockAlerts = (): Alert[] => [
 
     resolved: false,
 
-    icon: "/images/smoke-alarm-icon.png", // // image path
+    icon: "smoke-alarm-icon-url",
   },
 
   {
@@ -457,7 +457,7 @@ const generateMockAlerts = (): Alert[] => [
 
     resolved: false,
 
-    icon: "/images/water-leak-icon.png", //// image path
+    icon: "water-leak-icon-url", // Replace with actual icon URL or class
   },
 
   {
@@ -473,7 +473,7 @@ const generateMockAlerts = (): Alert[] => [
 
     resolved: true,
 
-    icon: "/images/thermostat-icon.png", // // image path
+    icon: "thermostat-icon-url", // Replace with actual icon URL or class
   },
 
   {
@@ -489,7 +489,7 @@ const generateMockAlerts = (): Alert[] => [
 
     resolved: false,
 
-    icon: "/images/battery-icon.png", // image path
+    icon: "battery-icon-url", // Replace with actual icon URL or class
   },
 
   // Add more alerts as needed...
