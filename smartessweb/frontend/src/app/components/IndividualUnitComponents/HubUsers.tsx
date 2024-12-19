@@ -1,11 +1,34 @@
+"use client";
+import React, { useState } from "react";
 import { HubUser } from "../../mockData";
 import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteConfirmation from "../ManageUsersComponents/DeleteConfirmation";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
 }
 
 const HubUsers = ({ hubUsers }: HubUsersProps) => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<HubUser | null>(null);
+
+  const handleDeleteClick = (user: HubUser) => {
+    setSelectedUser(user);
+    setIsPopupOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log(
+      `Deleted user: ${selectedUser?.firstName} ${selectedUser?.lastName}`
+    );
+    setIsPopupOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsPopupOpen(false);
+    setSelectedUser(null);
+  };
   return (
     <div className="relative">
       {/* Title */}
@@ -46,8 +69,11 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                 </button>
               </p>
               <div className="text-[#14323B] font-semibold">Actions:</div>
-              <button className="mt-2">
-                <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
+              <button>
+                <DeleteIcon
+                  onClick={() => handleDeleteClick(user)}
+                  className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer"
+                />
               </button>
             </div>
 
@@ -70,13 +96,21 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
               </button>
             </div>
             <div className="hidden md:flex items-center justify-center">
-              <button>
+              <button onClick={() => handleDeleteClick(user)}>
                 <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
               </button>
             </div>
           </div>
         ))}
       </div>
+      {isPopupOpen && selectedUser && (
+        <DeleteConfirmation
+          userName={`${selectedUser.firstName} ${selectedUser.lastName}`}
+          isUserDeletion={true}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 };
