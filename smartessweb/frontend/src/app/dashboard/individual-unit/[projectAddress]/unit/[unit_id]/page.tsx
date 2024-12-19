@@ -2,6 +2,7 @@ import { generateMockProjects, Unit } from "../../../../../mockData";
 import HubOwner from "@/app/components/IndividualUnitComponents/HubOwner";
 import HubUsers from "@/app/components/IndividualUnitComponents/HubUsers";
 import Tickets from "@/app/components/IndividualUnitComponents/Tickets";
+import Alerts from "@/app/components/IndividualUnitComponents/Alerts";
 import BackArrowButton from "@/app/components/BackArrowBtn";
 
 export default function UnitPage({
@@ -53,6 +54,12 @@ export default function UnitPage({
         <div className=" my-4 rounded-lg bg-[#4b7d8d] p-2">
           <div className="bg-white rounded-lg p-4">
             <HubUsers hubUsers={unit.hubUsers} />
+          </div>
+        </div>
+
+        <div className=" my-4 rounded-lg bg-[#4b7d8d] p-2">
+          <div className="bg-white rounded-lg p-4">
+            <Alerts alerts={unit.alerts} />
           </div>
         </div>
 
