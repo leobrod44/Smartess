@@ -28,7 +28,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
         {hubUsers.map((user, index) => (
           <div
             key={index}
-            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-2 px-2"
+            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-4 px-2"
           >
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center">
@@ -52,19 +52,24 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
             </div>
 
             {/* Table view for medium and larger screens */}
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center justify-center">
               {user.firstName} {user.lastName}
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center justify-center">
               {user.telephone || "Not Provided"}
             </div>
-            <div className="hidden md:block">{user.email}</div>
-            <div className="hidden md:flex justify-center">
+            <div
+              className="hidden md:flex items-center justify-center  "
+              title={user.email} // Show full email on hover
+            >
+              {user.email}
+            </div>
+            <div className="hidden md:flex items-center justify-center">
               <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                 Contact
               </button>
             </div>
-            <div className="hidden md:flex justify-center">
+            <div className="hidden md:flex items-center justify-center">
               <button>
                 <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
               </button>
