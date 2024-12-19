@@ -54,7 +54,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
             className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-4 px-2"
           >
             {/* Stacked view for small screens */}
-            <div className="md:hidden text-center">
+            <div className="md:hidden text-center rounded-lg border p-2">
               <div className="text-[#14323B] font-semibold">User:</div>{" "}
               {user.firstName} {user.lastName}
               <div className="text-[#14323B] font-semibold">
