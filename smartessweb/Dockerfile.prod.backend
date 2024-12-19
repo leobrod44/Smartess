@@ -1,0 +1,18 @@
+# Dockerfile.prod.backend
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files for server only
+COPY smartessweb/package*.json ./
+
+# Install production dependencies only
+RUN npm install --production
+
+# Copy server files
+COPY smartessweb/backend/ ./backend/
+
+EXPOSE 3001
+
+# Start server only
+CMD ["node", "backend/server.js"]
