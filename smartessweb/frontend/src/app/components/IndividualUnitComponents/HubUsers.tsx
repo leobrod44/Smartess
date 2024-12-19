@@ -1,4 +1,5 @@
 import { HubUser } from "../../mockData";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
@@ -13,11 +14,12 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       </div>
 
       {/* Table Headers */}
-      <div className="hidden md:grid md:grid-cols-4 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
+      <div className="hidden md:grid md:grid-cols-5 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
         <div>User</div>
         <div>Telephone</div>
         <div>Email</div>
         <div>Contact</div>
+        <div>Actions</div>
       </div>
       {/* Separator Line */}
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
@@ -26,7 +28,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
         {hubUsers.map((user, index) => (
           <div
             key={index}
-            className="md:grid md:grid-cols-4 w-full text-center text-black text-sm gap-2 px-2"
+            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-2 px-2"
           >
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center">
@@ -43,6 +45,10 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                   Contact
                 </button>
               </p>
+              <div className="text-[#14323B] font-semibold">Actions:</div>
+              <button className="mt-2">
+                <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
+              </button>
             </div>
 
             {/* Table view for medium and larger screens */}
@@ -58,14 +64,13 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                 Contact
               </button>
             </div>
+            <div className="hidden md:flex justify-center">
+              <button>
+                <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
+              </button>
+            </div>
           </div>
         ))}
-      </div>
-
-      <div className="flex justify-center">
-        <button className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
-          Manage All Users
-        </button>
       </div>
     </div>
   );
