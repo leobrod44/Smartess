@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
-import ActiveAlert from "./UnitComponents/ActiveAlerts";
-import { HubUser, TicketsType, Owner, Unit } from "../mockData";
+import Alerts from "../components/UnitComponents/Alerts";
+
+import { HubUser, TicketsType, Owner, Unit, Alert } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -15,6 +16,8 @@ const UnitComponent = ({
   projectAddress: string;
 }) => {
   const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
+  const [alerts] = useState<Alert[]>(unit.alerts || []);
+
   const router = useRouter();
   const [tickets] = useState<TicketsType>(
     unit.tickets || {
@@ -23,19 +26,6 @@ const UnitComponent = ({
       pending: 0,
       closed: 0,
     }
-  );
-
-  // Count active and closed alerts based on resolved status
-  const activeAlerts = unit.alerts.reduce(
-    (a, alert) => {
-      if (alert.resolved) {
-        a.closed += 1;
-      } else {
-        a.active += 1;
-      }
-      return a;
-    },
-    { active: 0, closed: 0 }
   );
 
   const [owner] = useState<Owner>(
@@ -73,7 +63,7 @@ const UnitComponent = ({
             <HubUsers hubUsers={hubUsers} />
           </div>
           <div className="flex-1">
-            <ActiveAlert activeAlerts={activeAlerts} />
+            <Alerts alerts={alerts} />
           </div>
 
           <div className="flex-1 md:min-w-[150px]">
