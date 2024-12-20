@@ -1,10 +1,34 @@
+"use client";
+import React, { useState } from "react";
 import { HubUser } from "../../mockData";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteConfirmation from "../ManageUsersComponents/DeleteConfirmation";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
 }
 
 const HubUsers = ({ hubUsers }: HubUsersProps) => {
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<HubUser | null>(null);
+
+  const handleDeleteClick = (user: HubUser) => {
+    setSelectedUser(user);
+    setIsPopupOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    console.log(
+      `Deleted user: ${selectedUser?.firstName} ${selectedUser?.lastName}`
+    );
+    setIsPopupOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsPopupOpen(false);
+    setSelectedUser(null);
+  };
   return (
     <div className="relative">
       {/* Title */}
@@ -13,11 +37,12 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       </div>
 
       {/* Table Headers */}
-      <div className="hidden md:grid md:grid-cols-4 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
+      <div className="hidden md:grid md:grid-cols-5 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
         <div>User</div>
         <div>Telephone</div>
         <div>Email</div>
         <div>Contact</div>
+        <div>Actions</div>
       </div>
       {/* Separator Line */}
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
@@ -26,10 +51,10 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
         {hubUsers.map((user, index) => (
           <div
             key={index}
-            className="md:grid md:grid-cols-4 w-full text-center text-black text-sm gap-2 px-2"
+            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-4 px-2"
           >
             {/* Stacked view for small screens */}
-            <div className="md:hidden text-center">
+            <div className="md:hidden text-center rounded-lg border p-2">
               <div className="text-[#14323B] font-semibold">User:</div>{" "}
               {user.firstName} {user.lastName}
               <div className="text-[#14323B] font-semibold">
@@ -43,30 +68,49 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                   Contact
                 </button>
               </p>
+              <div className="text-[#14323B] font-semibold">Actions:</div>
+              <button>
+                <DeleteIcon
+                  onClick={() => handleDeleteClick(user)}
+                  className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer"
+                />
+              </button>
             </div>
 
             {/* Table view for medium and larger screens */}
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center justify-center">
               {user.firstName} {user.lastName}
             </div>
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center justify-center">
               {user.telephone || "Not Provided"}
             </div>
-            <div className="hidden md:block">{user.email}</div>
-            <div className="hidden md:flex justify-center">
+            <div
+              className="hidden md:flex items-center justify-center  "
+              title={user.email} // Show full email on hover
+            >
+              {user.email}
+            </div>
+            <div className="hidden md:flex items-center justify-center">
               <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
                 Contact
+              </button>
+            </div>
+            <div className="hidden md:flex items-center justify-center">
+              <button onClick={() => handleDeleteClick(user)}>
+                <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
               </button>
             </div>
           </div>
         ))}
       </div>
-
-      <div className="flex justify-center">
-        <button className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
-          Manage All Users
-        </button>
-      </div>
+      {isPopupOpen && selectedUser && (
+        <DeleteConfirmation
+          userName={`${selectedUser.firstName} ${selectedUser.lastName}`}
+          isUserDeletion={true}
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDelete}
+        />
+      )}
     </div>
   );
 };
