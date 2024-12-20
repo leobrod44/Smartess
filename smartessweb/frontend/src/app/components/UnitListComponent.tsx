@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
-import ActiveAlert from "./UnitComponents/ActiveAlerts";
-import { HubUser, TicketsType, Owner, Unit } from "../mockData";
+import Alerts from "../components/UnitComponents/Alerts";
+
+import { HubUser, TicketsType, Owner, Unit, Alert } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -15,7 +16,10 @@ const UnitComponent = ({
   projectAddress: string;
 }) => {
   const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
+  const [alerts] = useState<Alert[]>(unit.alerts || []);
+
   const router = useRouter();
+
   const [tickets] = useState<TicketsType>({
     total: unit.tickets?.total || 0,
     open: unit.tickets?.open || 0,
@@ -71,7 +75,7 @@ const UnitComponent = ({
             <HubUsers hubUsers={hubUsers} />
           </div>
           <div className="flex-1">
-            <ActiveAlert activeAlerts={activeAlerts} />
+            <Alerts alerts={alerts} />
           </div>
 
           <div className="flex-1 md:min-w-[150px]">
