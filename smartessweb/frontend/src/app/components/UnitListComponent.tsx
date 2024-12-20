@@ -28,17 +28,17 @@ const UnitComponent = ({
   });
   
   // Count active and closed alerts based on resolved status
-  const activeAlerts = unit.alerts.reduce(
-    (a, alert) => {
-      if (alert.resolved) {
-        a.closed += 1;
-      } else {
-        a.active += 1;
-      }
-      return a;
-    },
-    { active: 0, closed: 0 }
-  );
+  // const activeAlerts = unit.alerts.reduce(
+  //   (a, alert) => {
+  //     if (alert.resolved) {
+  //       a.closed += 1;
+  //     } else {
+  //       a.active += 1;
+  //     }
+  //     return a;
+  //   },
+  //   { active: 0, closed: 0 }
+  // );
 
   const [owner] = useState<Owner>(
     unit.owner || {
