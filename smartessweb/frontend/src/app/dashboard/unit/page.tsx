@@ -72,11 +72,11 @@ const UnitPage = () => {
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
-          : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          : String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
