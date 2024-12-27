@@ -58,11 +58,11 @@ const UnitComponent = ({
 
   return (
     <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-      <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
-        <div className="text-[#4B7D8D] font-sequel-sans-black text-center text-2xl p-2">
+      <div className="bg-[#fff] rounded-[7px] w-full mb-2">
+        <div className="text-[#4B7D8D] text-xxl text-center text-2xl pt-8">
           {projectAddress}
         </div>
-        <div className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+        <div className="text-[#729987] text-xl text-center p-2 ">
           Unit {unit.unitNumber}
         </div>
 
@@ -88,7 +88,7 @@ const UnitComponent = ({
         <div className="flex justify-center p-6">
           <div>
             <button
-              className="bg-[#4b7d8d] w-40 h-12 rounded-[10px] text-white text-md font-sequel-sans-black hover:bg-[#1f505e] transition duration-300"
+              className="bg-[#266472] rounded-md hover:bg-[#1f505e] w-40 h-10 text-white text-md hover:bg-[#1f505e] transition duration-300"
               onClick={handleViewUnit}
             >
               View Unit
