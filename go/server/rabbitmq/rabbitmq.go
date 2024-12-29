@@ -210,7 +210,6 @@ func (r *RabbitMQServer) Close() {
 	r.instance.Conn.Close()
 }
 
-// TODO RYAN CONTEXT.TODO()
 func initMongoDB() *mongo.Client {
 	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
 
