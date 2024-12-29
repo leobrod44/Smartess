@@ -45,17 +45,41 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 	}
 
 	// Declare the topic exchange
+	//err = instance.Channel.ExchangeDeclare(
+	//	common_rabbitmq.Test0TopicExchangeName, // name of the exchange
+	//	"topic",                                // type of exchange
+	//	true,                                   // durable
+	//	false,                                  // auto-deleted
+	//	false,                                  // internal
+	//	false,                                  // no-wait
+	//	nil,                                    // arguments
+	//)
+	//if err != nil {
+	//	return SmartessHub{}, fmt.Errorf("Failed to declare topic exchange: %v", err)
+	//}
 	err = instance.Channel.ExchangeDeclare(
-		common_rabbitmq.Test0TopicExchangeName, // name of the exchange
-		"topic",                                // type of exchange
-		true,                                   // durable
-		false,                                  // auto-deleted
-		false,                                  // internal
-		false,                                  // no-wait
-		nil,                                    // arguments
+		common_rabbitmq.Test0AlertRoutingKey, // name of the exchange
+		"topic",                              // type of exchange
+		true,                                 // durable
+		false,                                // auto-deleted
+		false,                                // internal
+		false,                                // no-wait
+		nil,
 	)
 	if err != nil {
-		return SmartessHub{}, fmt.Errorf("Failed to declare topic exchange: %v", err)
+		return SmartessHub{}, fmt.Errorf("Failed to declare alert topic exchange: %v", err)
+	}
+	err = instance.Channel.ExchangeDeclare(
+		common_rabbitmq.Test0VideoStreamingRoutingKey, // name of the exchange
+		"direct", // type of exchange
+		true,     // durable
+		false,    // auto-deleted
+		false,    // internal
+		false,    // no-wait
+		nil,      // arguments
+	)
+	if err != nil {
+		return SmartessHub{}, fmt.Errorf("Failed to declare direct video streaming exchange: %v", err)
 	}
 
 	var webhookConn *websocket.Conn
@@ -300,22 +324,63 @@ func (client *SmartessHub) PublishTopicMessages() error {
 		log.Fatalf("Failed to load test messages: %v\n", err)
 	}
 
+	// todo CURRENTLY choosing which exchnage to publish to is done by contains, but should be changed to maybe regex???? the internal * # does not work here
+	exchanges := []struct {
+		Name        string
+		Type        string
+		RoutingKeys []string
+	}{
+		{
+			Name:        common_rabbitmq.Test0AlertRoutingKey, // Alert exchange
+			Type:        "topic",
+			RoutingKeys: []string{"alerts", "notifications", "storemongo"},
+		},
+		{
+			Name:        common_rabbitmq.Test0VideoStreamingRoutingKey, // Video exchange
+			Type:        "direct",
+			RoutingKeys: []string{"video.stream", "video.monitor"},
+		},
+	}
+
+	// Iterate over the messages
 	for _, msg := range messages {
+		var exchangeName string
+		// Find the matching exchange for the message's routing key
+		for _, exchange := range exchanges {
+			for _, key := range exchange.RoutingKeys {
+				// Check if routing key matches any of the patterns (simple example, could be extended for pattern matching)
+				if strings.Contains(msg.RoutingKey, key) {
+					exchangeName = exchange.Name
+					break
+				}
+			}
+			if exchangeName != "" {
+				break
+			}
+		}
+
+		// If no exchange found for the routing key, log an error
+		if exchangeName == "" {
+			log.Printf("No matching exchange found for routing key %s\n", msg.RoutingKey)
+			return fmt.Errorf("no matching exchange found for routing key %s", msg.RoutingKey)
+		}
+
+		// Publish the message to the selected exchange
 		err := client.instance.Channel.Publish(
-			common_rabbitmq.Test0TopicExchangeName, // exchange
-			msg.RoutingKey,                         // routing key
-			false,                                  // mandatory
-			false,                                  // immediate
+			exchangeName,   // Selected exchange
+			msg.RoutingKey, // Routing key
+			false,          // mandatory
+			false,          // immediate
 			amqp.Publishing{
 				ContentType: "application/json",
 				Body:        []byte(msg.Content),
 			})
 
 		if err != nil {
-			log.Printf("Failed to publish message with routing key %s: %v\n", msg.RoutingKey, err)
+			log.Printf("Failed to publish message to exchange %s with routing key %s: %v\n", exchangeName, msg.RoutingKey, err)
 			return err
 		} else {
-			log.Printf("Published message with routing key %s\n", msg.RoutingKey)
+			log.Printf("Published message to exchange %s with routing key %s\n", exchangeName, msg.RoutingKey)
 		}
 	}
 	return nil
