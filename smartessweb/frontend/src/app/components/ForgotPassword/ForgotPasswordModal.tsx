@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import Toast, { showToastError, showToastSuccess } from "../Toast";
+import { showToastError, showToastSuccess } from "../Toast";
 
 const ForgotPasswordModal = ({
   isOpen,
@@ -35,7 +35,7 @@ const ForgotPasswordModal = ({
       return;
     }
 
-    showToastSuccess("Reset Email has been sent");
+    showToastSuccess("Reset email has been sent");
     onReset(email); // Call the onReset function
     setEmail(""); // Clear the input after reset
   };
