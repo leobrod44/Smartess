@@ -11,6 +11,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useUserContext } from "@/context/UserProvider";
 import { userApi } from "@/api/components/DashboardNavbar";
+import ForgotPasswordModal from "../components/ForgotPassword/ForgotPasswordModal";
 
 const SignInPage = () => {
   const router = useRouter();
@@ -18,6 +19,22 @@ const SignInPage = () => {
   const [password, setPassword] = useState("");
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [isForgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setForgotPasswordOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setForgotPasswordOpen(false);
+  };
+
+  const handlePassworReset = () => {
+    // For Debugging
+    console.log("Password reset initiated!");
+    setForgotPasswordOpen(false);
+  };
 
   const { setUserEmail, setUserFirstName, setUserLastName, setUserType } =
     useUserContext();
@@ -160,11 +177,17 @@ const SignInPage = () => {
         {/* Forgot password link */}
         <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-10 w-full">
           <a
-            href="/forgot-password/path"
-            className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap"
+            className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
+            onClick={handleOpenModal}
           >
             Forgot your password?
           </a>
+          {/* Forgot Password Modal Component */}
+          <ForgotPasswordModal
+            isOpen={isForgotPasswordOpen}
+            onClose={handleCloseModal}
+            onReset={handlePassworReset}
+          />
         </div>
 
         {/* Login button */}
