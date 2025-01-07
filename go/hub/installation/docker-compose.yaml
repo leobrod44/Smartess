@@ -1,0 +1,42 @@
+version: '3.0'
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ${HOME}/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    # devices:
+    #    - "/dev/serial/by-id/${ZIGBEE_STICK}:/dev/zigbee"
+
+#TODO zwave setup with zibee stick
+
+#   zwave-js-ui:
+#     container_name: zwave-js-ui
+#     image: zwavejs/zwave-js-ui:latest
+#     restart: always
+#     tty: true
+#     stop_signal: SIGINT
+#     environment:
+#       - SESSION_SECRET=mysupersecretkey
+#       - ZWAVEJS_EXTERNAL_CONFIG=/usr/src/app/store/.config-db
+#       - TZ=America/Montreal
+#     networks:
+#       - zwave
+#     devices:
+#       - '/dev/serial/by-id/${ZWAVE_STICK}:/dev/zwave'
+#     volumes:
+#       - ${HOME}/smartess/zwave-config:/usr/src/app/store
+#     ports:
+#       - "8091:8091" # port for web interface
+#       - "3001:3001" # port for Z-Wave JS websocket server
+# networks:
+#   zwave:
+# volumes:
+#   zwave-config:
+#     name: zwave-config

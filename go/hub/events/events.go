@@ -1,4 +1,4 @@
-package hub
+package events
 
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
@@ -20,45 +20,16 @@ import (
 	"github.com/streadway/amqp"
 )
 
-/*
-a.k.a RabbitMQHub;
-rabbitmq client holds config (queues &exchanges)
-the connection (socket,phys,ip)
-and channel(s) to rabbitmq instance
-*/
-type SmartessHub struct {
+type EventHandler struct {
 	instance    *common_rabbitmq.RabbitMQInstance
 	webhookConn *websocket.Conn
 	Logger      *logs.Logger
 }
 
-func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
-
-	logger, err := logs.NewRabbitMQLogger()
-	if err != nil {
-		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ logger: " + err.Error())
-	}
-
-	instance, err := common_rabbitmq.Init("/app/config/queues.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
-	if err != nil {
-		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
-	}
-
-	// Declare the topic exchange
-	err = instance.Channel.ExchangeDeclare(
-		common_rabbitmq.Test0TopicExchangeName, // name of the exchange
-		"topic",                                // type of exchange
-		true,                                   // durable
-		false,                                  // auto-deleted
-		false,                                  // internal
-		false,                                  // no-wait
-		nil,                                    // arguments
-	)
-	if err != nil {
-		return SmartessHub{}, fmt.Errorf("Failed to declare topic exchange: %v", err)
-	}
+func Init(selectedHub structures.HubTypeEnum, logger *logs.Logger, instance *common_rabbitmq.RabbitMQInstance) (EventHandler, error) {
 
 	var webhookConn *websocket.Conn
+	var err error
 	switch selectedHub {
 	case structures.MONGO_MOCK_HUB:
 		webhookConn, err = connectTestMongoWebhook(logger)
@@ -67,30 +38,30 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 	case structures.HA_NORMAL_HUB:
 		webhookConn, err = connectWebhook(logger)
 	default:
-		return SmartessHub{}, fmt.Errorf("Invalid Hub Type: %s", selectedHub)
+		return EventHandler{}, fmt.Errorf("Invalid Hub Type: %s", selectedHub)
 	}
 
 	if err != nil {
-		return SmartessHub{}, errors.New("Failed to connect to WebSocket: " + err.Error())
+		return EventHandler{}, errors.New("Failed to connect to WebSocket: " + err.Error())
 	}
 
-	return SmartessHub{
+	return EventHandler{
 		instance:    instance,
 		Logger:      logger,
 		webhookConn: webhookConn,
 	}, nil
 }
 
-func (r *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
+func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
+	fmt.Print("Starting event handler")
 	iterCnt := 0
 	for {
-
 		msgType, message, err := r.webhookConn.ReadMessage()
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to read message from WebSocket: %v", err))
 			continue
 		}
-		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s\n", strconv.Itoa(msgType), message))
+		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s", strconv.Itoa(msgType), message))
 
 		if selectedHub == structures.MONGO_MOCK_HUB {
 			err = r.PublishMongo(message)
@@ -108,15 +79,16 @@ func (r *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
 				r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
 				continue
 			}
-			r.Logger.Info(fmt.Sprintf("Received event: %s", event.Event.EventType))
 		}
 		if iterCnt == 0 {
 			err = r.PublishTopicMessages()
+			r.Logger.Info(fmt.Sprintf("Published messages to RabbitMQ"))
 			if err != nil {
 				r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
 			}
 		}
 		iterCnt++
+		r.Logger.Info(fmt.Sprintf("Iteration count: %d", iterCnt))
 
 	}
 }
@@ -157,7 +129,7 @@ func connectWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (client *SmartessHub) Publish(queueName string, message []byte) error {
+func (client *EventHandler) Publish(queueName string, message []byte) error {
 	return client.instance.Channel.Publish(
 		"",        // exchange
 		queueName, //key
@@ -168,7 +140,7 @@ func (client *SmartessHub) Publish(queueName string, message []byte) error {
 			Body:        []byte(message),
 		})
 }
-func (client *SmartessHub) Close() {
+func (client *EventHandler) Close() {
 	client.instance.Channel.Close()
 	client.instance.Conn.Close()
 	client.webhookConn.Close()
@@ -231,7 +203,7 @@ func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) { // 
 	return conn, nil
 }
 
-func (client *SmartessHub) PublishMongo(message []byte) error { // This is here to simulate a connection to rpi
+func (client *EventHandler) PublishMongo(message []byte) error { // This is here to simulate a connection to rpi
 	return client.instance.Channel.Publish(
 		"", // exchange
 		"mongo-messages",
@@ -244,12 +216,12 @@ func (client *SmartessHub) PublishMongo(message []byte) error { // This is here 
 }
 
 // TODO generalize
-func (r *SmartessHub) checkPublishAlert(message *ha.WebhookMessage) (bool, error) {
+func (r *EventHandler) checkPublishAlert(message *ha.WebhookMessage) (bool, error) {
 
 	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
 		return false, nil
 	}
-	r.Logger.InternalLogger.Info(fmt.Sprintf("Received message %v", message))
+	r.Logger.Info(fmt.Sprintf("Received message %v", message))
 
 	alert := structures.Alert{
 		HubIP:     os.Getenv("HUB_IP"),
@@ -258,14 +230,14 @@ func (r *SmartessHub) checkPublishAlert(message *ha.WebhookMessage) (bool, error
 		State:     message.Event.Data.NewState.State,
 		TimeStamp: message.Event.Data.NewState.LastChanged,
 	}
-	r.Logger.InternalLogger.Info(fmt.Sprintf("Sent alert for %s", alert))
+	r.Logger.Info(fmt.Sprintf("Sent alert for %s", alert))
 
 	alertJson, err := json.Marshal(alert)
 
 	if err != nil {
 		return false, errors.New("failed to marshal alert")
 	}
-	r.Logger.InternalLogger.Info(fmt.Sprintf("Json alert %s", alertJson))
+	r.Logger.Info(fmt.Sprintf("Json alert %s", alertJson))
 	return true, r.Publish(
 		"alerts",
 		alertJson,
@@ -292,7 +264,7 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 
 	return messages, nil
 }
-func (client *SmartessHub) PublishTopicMessages() error {
+func (client *EventHandler) PublishTopicMessages() error {
 	var messages []TopicMessage
 	var err error
 	messages, err = loadTopicMessages("/app/config/test_topic_messages.json")
