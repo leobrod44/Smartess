@@ -31,8 +31,6 @@ const SignInPage = () => {
   };
 
   const handlePassworReset = () => {
-    // For Debugging
-    console.log("Password reset initiated!");
     setForgotPasswordOpen(false);
   };
 
