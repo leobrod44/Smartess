@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  
+
   smartess-hub:
     container_name: smartess-hub
     build:
@@ -11,8 +11,8 @@ services:
       - ./logs:/app/logs
       - ../../common/configs:/app/config
     environment:
-      - HUB_IP=192.168.0.15:8123 
-      - WEBHOOK_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwZDgxMGJmMTgwYzI0ZjI2Yjc5NmE4YzhhMDNjN2Y5YiIsImlhdCI6MTcyOTYzNDk0OCwiZXhwIjoyMDQ0OTk0OTQ4fQ.CIIseEXFTDVVTX3qv0LJ5Tl9KGEfdabY0NuwTl1XB2I 
+      - HUB_IP=192.168.0.21:8123 
+      - WEBHOOK_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1ZGFlZGMzODRmZGY0OWU3YjAyOTM2MWE1ZGFhNjYyZiIsImlhdCI6MTczNjI4MTgxNSwiZXhwIjoyMDUxNjQxODE1fQ.KYckZ1q7eQ25fZwTtnQq8zrSLH5tnYCQCtW6bgxKqcw
       - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/
     networks:
       - smartess_network
