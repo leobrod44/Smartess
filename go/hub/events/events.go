@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/url"
 	"os"
@@ -257,9 +257,14 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	// Closure (non parameter) needed to close local instance of file descritor after loadTopicMessages returns
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			log.Printf("failed to close file: %v", cerr)
+		}
+	}()
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}

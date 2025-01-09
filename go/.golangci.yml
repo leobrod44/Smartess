@@ -37,3 +37,6 @@ linters-settings: # NB: errcheck is disabled for logger functions since our logg
       - (*Smartess/go/hub/logger.Logger).Info
       - (*Smartess/go/hub/logger.Logger).Warn
       - (*Smartess/go/hub/logger.Logger).Fatal
+      - (*github.com/gorilla/websocket.Conn).Close
+      - (*github.com/streadway/amqp.Channel).Close
+      - (*github.com/streadway/amqp.Connection).Close
