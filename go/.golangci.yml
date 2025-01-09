@@ -5,9 +5,6 @@ linters:
     - staticcheck
     - gosimple
     - unused
-    #- structcheck
-    #- varcheck
-    #- deadcode
     - ineffassign
     - gofmt
     - goimports
