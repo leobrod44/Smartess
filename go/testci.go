@@ -76,7 +76,7 @@ func main() {
 	_ = fmt.Sprintf("This is a test: %s", greeting)
 
 	// Incorrect defer usage
-	defer fmt.Println(    "This will not run if there's an error above")
+	defer fmt.Println(    "This will not run if there's an error above"   )
 
 	// Incorrect error handling
 	if err != nil {
