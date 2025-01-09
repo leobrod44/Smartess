@@ -14,7 +14,7 @@ type Person struct {
 
 func main() {
 	// Unused variable
-	var unusedVar int
+	var _ int
 
 	// Incorrect JSON handling
 	jsonStr := `{"name": "John", "age": "thirty"}`
