@@ -82,7 +82,7 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 		}
 		if iterCnt == 0 {
 			err = r.PublishTopicMessages()
-			r.Logger.Info(fmt.Sprintf("Published messages to RabbitMQ"))
+			r.Logger.Info("Published messages to RabbitMQ")
 			if err != nil {
 				r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
 			}
