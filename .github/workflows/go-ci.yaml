@@ -29,6 +29,18 @@ jobs:
         run: |
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
 
+      - name: Clean module cache
+        run: go clean -modcache
+
+      - name: Verify dependencies
+        run: go mod tidy
+
+      - name: Rebuild vendor directory
+        run: go mod vendor
+
+      - name: Verify modules
+        run: go mod verify
+
       - name: Run golangci-lint
         run: golangci-lint run ./go/...
 
