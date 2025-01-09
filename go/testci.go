@@ -45,6 +45,7 @@ func main() {
 		false,
 		nil,
 	)
+
 	//if err != nil {
 	//	log.Println("Failed to declare a queue")
 	//}

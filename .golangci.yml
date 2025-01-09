@@ -1,0 +1,28 @@
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - ineffassign
+    - gofmt
+    - goimports
+
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: vendor # Check workflows/go-ci.yaml for module validation and vendoring
+#  skip-dirs-use-default: true
+  skip-dirs:
+    - /usr/local/go/src
+    - /opt/hostedtoolcache/go
+    - C:/Program Files/Go/src
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
