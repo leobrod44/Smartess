@@ -15,6 +15,7 @@ linters:
 run:
   timeout: 5m
   tests: true
+  modules-download-mode: vendor
 
 issues:
   exclude-use-default: false
