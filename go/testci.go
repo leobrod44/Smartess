@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"github.com/streadway/amqp"
+	"log"
 )
 
 type Person struct {
@@ -60,7 +60,7 @@ func main() {
 			Body:        []byte(body),
 		})
 	if err != nil {
-		log.Println("Failed to publish a message")
+		log.Println("                 Failed to publish a message")
 	}
 
 	// Incorrect variable naming
@@ -76,7 +76,7 @@ func main() {
 	_ = fmt.Sprintf("This is a test: %s", greeting)
 
 	// Incorrect defer usage
-	defer fmt.Println(    "This will not run if there's an error above"   )
+	defer fmt.Println("This will not run if there's an error above")
 
 	// Incorrect error handling
 	if err != nil {
