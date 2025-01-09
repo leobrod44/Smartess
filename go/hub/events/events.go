@@ -141,9 +141,15 @@ func (client *EventHandler) Publish(queueName string, message []byte) error {
 		})
 }
 func (client *EventHandler) Close() {
-	client.instance.Channel.Close()
-	client.instance.Conn.Close()
-	client.webhookConn.Close()
+	closeWithErrorLog := func(closeFunc func() error, errMsg string) {
+		if err := closeFunc(); err != nil {
+			client.Logger.Error(fmt.Sprintf("%s: %v", errMsg, err))
+		}
+	}
+	closeWithErrorLog(client.instance.Channel.Close, "Failed to close RabbitMQ Instance channel(s)")
+	closeWithErrorLog(client.instance.Conn.Close, "Failed to close RabbitMQ Instance actual connection")
+	closeWithErrorLog(client.webhookConn.Close, "Failed to close WebSocket connection")
+
 }
 
 func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
