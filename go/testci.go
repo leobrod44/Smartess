@@ -45,9 +45,9 @@ func main() {
 		false,
 		nil,
 	)
-	if err != nil {
-		log.Println("Failed to declare a queue")
-	}
+	//if err != nil {
+	//	log.Println("Failed to declare a queue")
+	//}
 
 	body := "Hello World!"
 	err = ch.Publish(

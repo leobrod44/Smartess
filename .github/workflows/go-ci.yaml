@@ -36,7 +36,7 @@ jobs:
         run: go mod tidy
 
       - name: Rebuild vendor directory
-        run: go mod vendor
+        run: go work vendor #If not in workspace mode, use go mod vendor
 
       - name: Verify modules
         run: go mod verify
