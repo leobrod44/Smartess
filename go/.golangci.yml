@@ -5,9 +5,9 @@ linters:
     - staticcheck
     - gosimple
     - unused
-    - structcheck
-    - varcheck
-    - deadcode
+    #- structcheck
+    #- varcheck
+    #- deadcode
     - ineffassign
     - gofmt
     - goimports
@@ -15,7 +15,7 @@ linters:
 run:
   timeout: 5m
   tests: true
-  modules-download-mode: vendor
+  modules-download-mode: vendor # Check workflows/go-ci.yaml for module validation and vendoring
 
 issues:
   exclude-use-default: false
