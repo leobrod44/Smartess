@@ -71,7 +71,7 @@ func main() {
 
 	// Inefficient string concatenation
 	greeting := "Hello, " + p.Name + "!"
-	// ads  asdasdasaaaaaaaaaaaaaaaa
+	// ads  asdasdasaaaaaasd aaaaaa   aaaaa
 	// Unused import
 	_ = fmt.Sprintf("This is a test: %s", greeting)
 
