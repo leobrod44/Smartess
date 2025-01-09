@@ -27,7 +27,7 @@ jobs:
 
       - name: Install golangci-lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.63.4
 
       - name: Clean module cache
         run: go clean -modcache
@@ -42,7 +42,7 @@ jobs:
         run: go mod verify
 
       - name: Run golangci-lint
-        run: golangci-lint run ./...
+        run: golangci-lint run ./go/...
 
       - name: Run go fmt
         run: go fmt ./go/...

@@ -16,7 +16,11 @@ run:
   timeout: 5m
   tests: true
   modules-download-mode: vendor # Check workflows/go-ci.yaml for module validation and vendoring
-
+#  skip-dirs-use-default: true
+  skip-dirs:
+    - /usr/local/go/src
+    - /opt/hostedtoolcache/go
+    - C:/Program Files/Go/src
 issues:
   exclude-use-default: false
   max-issues-per-linter: 0
