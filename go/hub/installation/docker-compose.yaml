@@ -11,6 +11,21 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: host
+
+
+# version: '3.0'
+
+# services:
+#   homeassistant:
+#     container_name: homeassistant
+#     image: "ghcr.io/home-assistant/home-assistant:stable"
+#     volumes:
+#       - ${HOME}/config:/config
+#       - /etc/localtime:/etc/localtime:ro
+#       - /run/dbus:/run/dbus:ro
+#     restart: unless-stopped
+#     privileged: true
+#     network_mode: host
     # devices:
     #    - "/dev/serial/by-id/${ZIGBEE_STICK}:/dev/zigbee"
 
