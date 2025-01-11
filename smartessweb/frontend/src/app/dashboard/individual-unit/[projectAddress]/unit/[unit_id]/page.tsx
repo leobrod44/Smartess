@@ -1,6 +1,6 @@
 "use client";
 
-import { generateMockProjects, Unit } from "../../../../../mockData";
+import { Unit } from "../../../../../mockData";
 import HubOwner from "@/app/components/IndividualUnitComponents/HubOwner";
 import HubUsers from "@/app/components/IndividualUnitComponents/HubUsers";
 import Tickets from "@/app/components/IndividualUnitComponents/Tickets";
