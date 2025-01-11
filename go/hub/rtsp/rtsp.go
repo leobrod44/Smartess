@@ -6,41 +6,57 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"time"
 
 	"github.com/bluenviron/gortsplib/v4"
-	"github.com/bluenviron/gortsplib/v4/pkg/base"
+	"gopkg.in/yaml.v3"
 )
 
 type RtspProcessor struct {
 	instance *common_rabbitmq.RabbitMQInstance
 	client   *gortsplib.Client
-	streams  []base.URL
+	cameras  Cameras
 	Logger   *logs.Logger
 }
 
+type CameraConfig struct {
+	Name        string `yaml:"name"`
+	Username    string `yaml:"username"`
+	Password    string `yaml:"password"`
+	Host        string `yaml:"host"`
+	Path        string `yaml:"path"`
+	SegmentTime int    `yaml:"segment_time"`
+}
+
+type Cameras struct {
+	CameraConfigs []CameraConfig `yaml:"cameras"`
+}
+
 func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (RtspProcessor, error) {
-	c := gortsplib.Client{}
 
-	urls := []string{
-		"rtsp://tapoadmin:tapoadmin@192.168.0.19:554/stream1",
+	dir := "/app/config/hub/cameras.yaml"
+
+	var cameras Cameras
+	data, err := ioutil.ReadFile(dir)
+	if err != nil {
+		return RtspProcessor{}, fmt.Errorf("failed to read file: %v", err)
 	}
 
-	var baseUrls []base.URL
-	for _, url := range urls {
-		baseUrl, err := base.ParseURL(url)
-		if err != nil {
-			log.Fatalf("Error parsing URL: %v", err)
-		}
-		baseUrls = append(baseUrls, *baseUrl)
+	// Unmarshal the YAML data into the CameraConfig struct
+	err = yaml.Unmarshal(data, &cameras)
+	if err != nil {
+		return RtspProcessor{}, fmt.Errorf("failed to unmarshal yaml: %v", err)
 	}
+
+	// Return the initialized RtspProcessor
 	return RtspProcessor{
 		instance: instance,
-		client:   &c,
-		streams:  baseUrls,
+		client:   &gortsplib.Client{},
+		cameras:  cameras,
 		Logger:   logger,
 	}, nil
 }
@@ -124,24 +140,14 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 //		}
 //	}
 func (rtsp *RtspProcessor) Start() {
-	for _, stream := range rtsp.streams {
-		// FFmpeg command for compression and segmentation
-		username := stream.User.Username()
-		password, _ := stream.User.Password()
-		host := stream.Host
-		path := stream.Path
-		streamURL := "rtsp://" + username + ":" + password + "@" + host + path
+	for _, camera := range rtsp.cameras.CameraConfigs {
+		streamURL := "rtsp://" + camera.Username + ":" + camera.Password + "@" + camera.Host + "/" + camera.Path
 		log.Printf("Starting stream URL: %v", streamURL)
-
-		// Prepare the temporary directory for storing segments
-		tmpDir := "/tmp/data" // Or any preferred directory
-
+		tmpDir := "/tmp/data" + camera.Name
 		err := os.MkdirAll(tmpDir, 0755)
 		if err != nil {
 			log.Fatalf("Error creating temporary directory: %v", err)
 		}
-
-		// Modify the FFmpeg command with additional options
 		cmd := exec.Command("ffmpeg",
 			"-rtsp_transport", "tcp", // Use TCP for RTSP transport
 			"-i", streamURL, // Input RTSP stream
@@ -162,18 +168,15 @@ func (rtsp *RtspProcessor) Start() {
 
 		log.Printf("FFmpeg command: %v", cmd.String())
 
-		// Create a buffer to read FFmpeg's stdout (for debugging)
 		ffmpegOutput := &bytes.Buffer{}
 		cmd.Stdout = ffmpegOutput
-		cmd.Stderr = ffmpegOutput // Capture errors for debugging
+		cmd.Stderr = ffmpegOutput
 
-		// Start FFmpeg
 		err = cmd.Start()
 		if err != nil {
-			log.Fatalf("Error starting FFmpeg for stream %s: %v", stream.String(), err)
+			log.Fatalf("Error starting FFmpeg for stream %s: %v", camera.Name, err)
 		}
 
-		// Goroutine to monitor the temporary directory for new segment files
 		go func() {
 			for {
 				// Watch the temporary directory for new segments
@@ -182,7 +185,6 @@ func (rtsp *RtspProcessor) Start() {
 					log.Printf("Error reading directory %v: %v", tmpDir, err)
 					return
 				}
-
 				// Process each segment file
 				for _, file := range files {
 					if file.IsDir() {

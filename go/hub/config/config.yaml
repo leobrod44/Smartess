@@ -6,6 +6,4 @@ hub:
         status: "ON"
       }
     ]
-  cameras:
-    - name: "tapo C200"
-      rtsp_url: "rtsp://tapoadmin:tapoadmin@192.168.0.19:554/stream1"
+  
