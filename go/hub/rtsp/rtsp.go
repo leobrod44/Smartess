@@ -5,14 +5,15 @@ import (
 	logs "Smartess/go/hub/logger"
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"time"
 
 	"github.com/bluenviron/gortsplib/v4"
+	"github.com/streadway/amqp"
 	"gopkg.in/yaml.v3"
 )
 
@@ -79,7 +80,7 @@ func (rtsp *RtspProcessor) Start() {
 			"-preset", "fast", // Use fast preset for encoding
 			"-crf", "23", // Control quality (lower = better)
 			"-f", "segment", // Enable segmentation
-			"-segment_time", "10", // Segment into 10-second chunks
+			"-segment_time", strconv.Itoa(camera.SegmentTime), // Segment duration
 			"-reset_timestamps", "1", // Reset timestamps for each segment
 			"-segment_format", "mp4", // Output format
 			"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
@@ -99,59 +100,43 @@ func (rtsp *RtspProcessor) Start() {
 			log.Fatalf("Error starting FFmpeg for stream %s: %v", camera.Name, err)
 		}
 
-		go func() {
+		go func(tmpDir string) {
 			for {
-				// Watch the temporary directory for new segments
 				files, err := os.ReadDir(tmpDir)
 				if err != nil {
 					log.Printf("Error reading directory %v: %v", tmpDir, err)
 					return
 				}
-				// Process each segment file
+
 				for _, file := range files {
 					if file.IsDir() {
 						continue
 					}
 					if file.Name() != "segments.m3u8" {
-						// Handle segment file
 						segmentFilePath := fmt.Sprintf("%s/%s", tmpDir, file.Name())
 						log.Printf("New segment file created: %s", segmentFilePath)
 
-						// Open the segment file for reading
-						segmentFile, err := os.Open(segmentFilePath)
+						segmentFileContent, err := os.ReadFile(segmentFilePath)
 						if err != nil {
-							log.Printf("Error opening segment file %v: %v", segmentFilePath, err)
+							log.Printf("Error reading segment file %v: %v", segmentFilePath, err)
 							continue
 						}
-
-						// Process segment bytes efficiently in larger chunks
-						buf := make([]byte, 8192) // Reading 8KB at a time for better efficiency
-						for {
-							n, err := segmentFile.Read(buf)
-							if err == io.EOF {
-								break
-							}
-							if err != nil {
-								log.Printf("Error reading segment file %v: %v", segmentFilePath, err)
-								break
-							}
-							// Print the segment data (or process it as needed)
-							log.Printf("Segment content: %s", string(buf[:n]))
-						}
-						segmentFile.Close()
+						err = rtsp.instance.Channel.Publish(
+							"video_exchange", // Default exchange
+							"camera1",        // Routing key (queue name)
+							false,            // Mandatory
+							false,            // Immediate
+							amqp.Publishing{
+								ContentType: "application/octet-stream", // Type of the content
+								Body:        segmentFileContent,         // Content (segment file data)
+							})
+						rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
 					}
 				}
 
-				// Sleep for a short interval before checking again
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(time.Duration(camera.SegmentTime) * time.Second)
 			}
-		}()
-
-		// Wait for the FFmpeg command to finish
-		err = cmd.Wait()
-		if err != nil {
-			log.Fatalf("FFmpeg command failed: %v", err)
-		}
+		}(tmpDir)
 	}
 }
 
