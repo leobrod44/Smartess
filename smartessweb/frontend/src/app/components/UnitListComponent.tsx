@@ -39,7 +39,7 @@ const UnitComponent = ({
   const handleViewUnit = () => {
     // Navigate to the unit details page with the dynamic route
     router.push(
-      `../dashboard/individual-unit/${projectAddress}/unit/${unit.unit_id}`
+      `../dashboard/individual-unit/${projectAddress}/unit/${unit.unitNumber}`
     );
   };
 
