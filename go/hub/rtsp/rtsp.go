@@ -47,13 +47,10 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 		return RtspProcessor{}, fmt.Errorf("failed to read file: %v", err)
 	}
 
-	// Unmarshal the YAML data into the CameraConfig struct
 	err = yaml.Unmarshal(data, &cameras)
 	if err != nil {
 		return RtspProcessor{}, fmt.Errorf("failed to unmarshal yaml: %v", err)
 	}
-
-	// Return the initialized RtspProcessor
 	return RtspProcessor{
 		instance: instance,
 		client:   &gortsplib.Client{},
