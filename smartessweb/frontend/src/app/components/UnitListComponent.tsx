@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import HubOwner from "./UnitComponents/HubOwner";
 import HubUsers from "./UnitComponents/HubUsers";
 import Tickets from "./UnitComponents/Tickets";
-import ActiveAlert from "./UnitComponents/ActiveAlerts";
-import { HubUser, TicketsType, Owner, Unit } from "../mockData";
+import Alerts from "../components/UnitComponents/Alerts";
+
+import { HubUser, TicketsType, Owner, Unit, Alert } from "../mockData";
 
 const UnitComponent = ({
   unit,
@@ -15,28 +16,16 @@ const UnitComponent = ({
   projectAddress: string;
 }) => {
   const [hubUsers] = useState<HubUser[]>(unit.hubUsers || []);
-  const router = useRouter();
-  const [tickets] = useState<TicketsType>(
-    unit.tickets || {
-      total: 0,
-      open: 0,
-      pending: 0,
-      closed: 0,
-    }
-  );
+  const [alerts] = useState<Alert[]>(unit.alerts || []);
 
-  // Count active and closed alerts based on resolved status
-  const activeAlerts = unit.alerts.reduce(
-    (a, alert) => {
-      if (alert.resolved) {
-        a.closed += 1;
-      } else {
-        a.active += 1;
-      }
-      return a;
-    },
-    { active: 0, closed: 0 }
-  );
+  const router = useRouter();
+
+  const [tickets] = useState<TicketsType>({
+    total: unit.tickets?.total || 0,
+    open: unit.tickets?.open || 0,
+    pending: unit.tickets?.pending || 0,
+    closed: unit.tickets?.closed || 0,
+  });
 
   const [owner] = useState<Owner>(
     unit.owner || {
@@ -56,11 +45,11 @@ const UnitComponent = ({
 
   return (
     <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-      <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
-        <div className="text-[#4B7D8D] font-sequel-sans-black text-center text-2xl p-2">
+      <div className="bg-[#fff] rounded-[7px] w-full mb-2">
+        <div className="text-[#4B7D8D] text-xxl text-center text-2xl pt-8">
           {projectAddress}
         </div>
-        <div className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+        <div className="text-[#729987] text-xl text-center p-2 ">
           Unit {unit.unitNumber}
         </div>
 
@@ -73,7 +62,7 @@ const UnitComponent = ({
             <HubUsers hubUsers={hubUsers} />
           </div>
           <div className="flex-1">
-            <ActiveAlert activeAlerts={activeAlerts} />
+            <Alerts alerts={alerts} />
           </div>
 
           <div className="flex-1 md:min-w-[150px]">
@@ -86,7 +75,7 @@ const UnitComponent = ({
         <div className="flex justify-center p-6">
           <div>
             <button
-              className="bg-[#4b7d8d] w-40 h-12 rounded-[10px] text-white text-md font-sequel-sans-black hover:bg-[#1f505e] transition duration-300"
+              className="bg-[#266472] rounded-md hover:bg-[#1f505e] w-40 h-10 text-white text-md hover:bg-[#1f505e] transition duration-300"
               onClick={handleViewUnit}
             >
               View Unit

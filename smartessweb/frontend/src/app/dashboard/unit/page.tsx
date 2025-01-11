@@ -6,12 +6,16 @@ import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useState, useEffect } from "react";
-import { generateMockProjects, Project } from "../../mockData";
+import { Project } from "../../mockData";
+import { unitsApi } from "@/api/page";
+import { useRouter } from "next/navigation";
+
 const unitsPerPage = 3;
 
 const UnitPage = () => {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
-  const [projects] = useState<Project[]>(generateMockProjects());
+  const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
@@ -20,8 +24,22 @@ const UnitPage = () => {
   const filterOptionsUnits = ["Most Pending Tickets"];
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchData = async () => {
+      const responseProjects = await unitsApi.getUserProjects(token);
+      const fetchedProjects = responseProjects.projects;
+      setProjects(fetchedProjects);
+    }
+
+    fetchData();
     setIsMounted(true);
-  }, []);
+  }, [router]);
 
   if (!isMounted) {
     return <p>Loading...</p>;
@@ -32,7 +50,7 @@ const UnitPage = () => {
     project.units.map((unit) => ({
       ...unit,
       projectAddress: project.address,
-      pendingTickets: unit.ticket[2],
+      pendingTickets: unit.tickets.pending,
     }))
   );
 
@@ -54,11 +72,11 @@ const UnitPage = () => {
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
-          : unit.unitNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          : String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||

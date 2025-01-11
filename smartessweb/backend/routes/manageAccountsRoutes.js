@@ -11,7 +11,7 @@ router.post('/get-org-projects', verifyToken, getOrgProjects);
 router.post('/assign-org-user-to-project', verifyToken, assignOrgUserToProject);
 router.post('/remove-org-user-from-project', verifyToken, removeOrgUserFromProject);
 router.post('/change-org-user-role', verifyToken, changeOrgUserRole);
-router.post('/delete-org_user', verifyToken, deleteOrgUser);
+router.post('/delete-org-user', verifyToken, deleteOrgUser);
 
 
 module.exports = router;
