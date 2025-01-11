@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
+
 	"os"
 	"os/exec"
 	"strconv"
@@ -62,11 +62,11 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 func (rtsp *RtspProcessor) Start() {
 	for _, camera := range rtsp.cameras.CameraConfigs {
 		streamURL := "rtsp://" + camera.Username + ":" + camera.Password + "@" + camera.Host + "/" + camera.Path
-		log.Printf("Starting stream URL: %v", streamURL)
+		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
 		tmpDir := "/tmp/data" + camera.Name
 		err := os.MkdirAll(tmpDir, 0755)
 		if err != nil {
-			log.Fatalf("Error creating temporary directory: %v", err)
+			rtsp.Logger.Error(fmt.Sprintf("Error creating directory %v: %v", tmpDir, err))
 		}
 		cmd := exec.Command("ffmpeg",
 			"-rtsp_transport", "tcp", // Use TCP for RTSP transport
@@ -86,7 +86,7 @@ func (rtsp *RtspProcessor) Start() {
 			"-segment_list_flags", "+live", // Make it a live playlist
 			fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir)) // Segment output
 
-		log.Printf("FFmpeg command: %v", cmd.String())
+		rtsp.Logger.Info(fmt.Sprintf("Starting FFmpeg for stream %s", camera.Name))
 
 		ffmpegOutput := &bytes.Buffer{}
 		cmd.Stdout = ffmpegOutput
@@ -94,14 +94,14 @@ func (rtsp *RtspProcessor) Start() {
 
 		err = cmd.Start()
 		if err != nil {
-			log.Fatalf("Error starting FFmpeg for stream %s: %v", camera.Name, err)
+			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
 
 		go func(tmpDir string) {
 			for {
 				files, err := os.ReadDir(tmpDir)
 				if err != nil {
-					log.Printf("Error reading directory %v: %v", tmpDir, err)
+					rtsp.Logger.Error(fmt.Sprintf("Error reading directory %v: %v", tmpDir, err))
 					return
 				}
 
@@ -111,11 +111,10 @@ func (rtsp *RtspProcessor) Start() {
 					}
 					if file.Name() != "segments.m3u8" {
 						segmentFilePath := fmt.Sprintf("%s/%s", tmpDir, file.Name())
-						log.Printf("New segment file created: %s", segmentFilePath)
 
 						segmentFileContent, err := os.ReadFile(segmentFilePath)
 						if err != nil {
-							log.Printf("Error reading segment file %v: %v", segmentFilePath, err)
+							rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
 							continue
 						}
 						err = rtsp.instance.Channel.Publish(
@@ -127,11 +126,19 @@ func (rtsp *RtspProcessor) Start() {
 								ContentType: "application/octet-stream", // Type of the content
 								Body:        segmentFileContent,         // Content (segment file data)
 							})
+						if err != nil {
+							rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
+						}
+						err = os.Remove(segmentFilePath)
+						if err != nil {
+							rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
+							continue
+						}
 						rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
 					}
 				}
 
-				time.Sleep(time.Duration(camera.SegmentTime) * time.Second)
+				time.Sleep(time.Duration(camera.SegmentTime))
 			}
 		}(tmpDir)
 	}
