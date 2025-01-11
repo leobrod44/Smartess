@@ -37,7 +37,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
   // Sort tickets by most recent
   const sortedTickets = [...tickets].sort(
     (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      new Date(b.created_at).getDate() - new Date(a.created_at).getDate()
   );
 
   return (
@@ -70,7 +70,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
               <div className="text-[#14323B] font-semibold">Id:</div>
               {ticket.ticket_id}
               <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
-              {ticket.title}
+              {ticket.description}
               <div className="text-[#14323B] font-semibold">Type:</div>{" "}
               {ticket.type}
               <div className="text-[#14323B] font-semibold">Status:</div>
@@ -89,7 +89,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
 
             {/* Table view for medium and larger screens */}
             <div className="hidden md:block">{ticket.ticket_id}</div>
-            <div className="hidden md:block">{ticket.title}</div>
+            <div className="hidden md:block">{ticket.description}</div>
             <div className="hidden md:block">{ticket.type}</div>
             <div
               className={`hidden md:block w-[78px] h-6 rounded-[20px] mx-auto text-center ${getStatusColorClasses(
