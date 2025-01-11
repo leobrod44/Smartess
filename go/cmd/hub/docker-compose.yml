@@ -10,6 +10,7 @@ services:
     volumes:
       - ./logs:/app/logs
       - ../../common/configs:/app/config
+      - ./data:/tmp/data
     environment:
       - HUB_IP=192.168.0.21:8123 
       - WEBHOOK_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI1ZGFlZGMzODRmZGY0OWU3YjAyOTM2MWE1ZGFhNjYyZiIsImlhdCI6MTczNjI4MTgxNSwiZXhwIjoyMDUxNjQxODE1fQ.KYckZ1q7eQ25fZwTtnQq8zrSLH5tnYCQCtW6bgxKqcw

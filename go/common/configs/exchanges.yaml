@@ -50,6 +50,11 @@ exchanges:
       - queue: dead_letter_queue
         routing_key: "dlx"
 
+  - name: video_exchange
+    type: topic
+    durable: true
+    auto_delete: false
+
 queues:
   - name: system_wide_updates
     durable: true
