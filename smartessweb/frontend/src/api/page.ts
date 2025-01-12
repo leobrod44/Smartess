@@ -1,5 +1,5 @@
 import { API_URL } from "./api";
-import { Project, OrgUser, Individual, CurrentUser } from "@/app/mockData";
+import { Project, OrgUser, Individual, CurrentUser, Unit } from "@/app/mockData";
 
 export const projectApi = {
   getUserProjects: async (token: string): Promise<{ projects: Project[] }> => {
@@ -218,6 +218,29 @@ export const unitsApi = {
 
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch projects');
+    }
+
+    return data;
+  }
+}
+
+export const individualUnitApi = {
+  getIndividualUnit: async ( unit_id: string, token: string): Promise<{ unit: Unit }> => {
+    const response = await fetch(`${API_URL}/individual-unit/get-individual-unit`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        unit_id
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch unit');
     }
 
     return data;

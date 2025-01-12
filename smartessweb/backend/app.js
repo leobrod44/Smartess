@@ -18,6 +18,7 @@ const hubRoutes = require('./routes/hubRoutes');
 const widgetRoutes = require('./routes/widgetRoutes');
 const manageAccountsRoutes = require('./routes/manageAccountsRoutes');
 const unitsRoutes = require('./routes/unitsRoutes');
+const individualUnitRoutes = require('./routes/individualUnitRoutes');
 
 //Add path here
 app.use('/api/auth', authRoutes);
@@ -28,5 +29,6 @@ app.use('/api/hubs', hubRoutes);
 app.use('/api/widgets', widgetRoutes);
 app.use('/api/manage-accounts', manageAccountsRoutes);
 app.use('/api/units', unitsRoutes);
+app.use('/api/individual-unit', individualUnitRoutes);
 
 module.exports = app;
