@@ -5,7 +5,7 @@ import {
   ThumbUp as ThumbUpIcon,
 } from "@mui/icons-material";
 import "swiper/css";
-import ImageCarousel from "./ImageCarousel";
+import ImageCarousel from "../ImageCarousel";
 
 interface AnnouncementComponentProps {
   title: string;
