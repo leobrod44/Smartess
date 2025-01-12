@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/url"
 	"os"
@@ -82,7 +82,7 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 		}
 		if iterCnt == 0 {
 			err = r.PublishTopicMessages()
-			r.Logger.Info(fmt.Sprintf("Published messages to RabbitMQ"))
+			r.Logger.Info("Published messages to RabbitMQ")
 			if err != nil {
 				r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
 			}
@@ -141,9 +141,15 @@ func (client *EventHandler) Publish(queueName string, message []byte) error {
 		})
 }
 func (client *EventHandler) Close() {
-	client.instance.Channel.Close()
-	client.instance.Conn.Close()
-	client.webhookConn.Close()
+	closeWithErrorLog := func(closeFunc func() error, errMsg string) {
+		if err := closeFunc(); err != nil {
+			client.Logger.Error(fmt.Sprintf("%s: %v", errMsg, err))
+		}
+	}
+	closeWithErrorLog(client.instance.Channel.Close, "Failed to close RabbitMQ Instance channel(s)")
+	closeWithErrorLog(client.instance.Conn.Close, "Failed to close RabbitMQ Instance actual connection")
+	closeWithErrorLog(client.webhookConn.Close, "Failed to close WebSocket connection")
+
 }
 
 func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
@@ -251,9 +257,14 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	// Closure (non parameter) needed to close local instance of file descritor after loadTopicMessages returns
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			log.Printf("failed to close file: %v", cerr)
+		}
+	}()
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
