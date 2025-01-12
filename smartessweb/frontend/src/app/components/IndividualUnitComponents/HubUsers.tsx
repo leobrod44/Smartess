@@ -1,16 +1,21 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HubUser } from "../../mockData";
+import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteConfirmation from "../ManageUsersComponents/DeleteConfirmation";
+import { individualUnitApi } from "@/api/page";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
 }
 
 const HubUsers = ({ hubUsers }: HubUsersProps) => {
+  const router = useRouter();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<HubUser | null>(null);
+  const token = localStorage.getItem("token");
+  const [activeHubUsers, setActiveHubUsers] = useState<HubUser[]>(hubUsers);
 
   const handleDeleteClick = (user: HubUser) => {
     setSelectedUser(user);
@@ -18,11 +23,26 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
   };
 
   const handleConfirmDelete = () => {
-    console.log(
-      `Deleted user: ${selectedUser?.firstName} ${selectedUser?.lastName}`
-    );
+    removeUserFromHub(selectedUser);
     setIsPopupOpen(false);
     setSelectedUser(null);
+  };
+
+  const removeUserFromHub = async (user: HubUser | null) => {
+    try {
+      if (!token) {
+        router.push("/sign-in");
+        return;
+      }
+
+      await individualUnitApi.removeUserFromHub(user?.tokenId, token);
+
+    } catch (err) {
+      console.error("Error removing user:", err);
+    } 
+    if (user) {
+      setActiveHubUsers((prevUsers) => prevUsers.filter((hubUser) => hubUser.tokenId !== user.tokenId));
+    }
   };
 
   const handleCancelDelete = () => {
@@ -48,7 +68,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
 
       <div className="flex flex-col gap-6 overflow-y-auto max-h-[300px] custom-scrollbar scrollbar-thumb-[#4b7d8d] scrollbar-track-gray-200">
-        {hubUsers.map((user, index) => (
+        {activeHubUsers.map((user, index) => (
           <div
             key={index}
             className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-4 px-2"
