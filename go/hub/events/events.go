@@ -88,7 +88,6 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 			}
 		}
 		iterCnt++
-		r.Logger.Info(fmt.Sprintf("Iteration count: %d", iterCnt))
 
 	}
 }
