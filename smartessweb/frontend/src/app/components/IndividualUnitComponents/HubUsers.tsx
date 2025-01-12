@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { HubUser } from "../../mockData";
 import { useRouter } from "next/navigation";
 import DeleteIcon from "@mui/icons-material/Delete";
