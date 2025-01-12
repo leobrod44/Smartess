@@ -88,6 +88,12 @@ Any scripts, configs, utilities specifically related to the Hub service \
    . WebSocket... hub app ports, hub IP; Networking, phys con, virtual chans, hosts, RabbitMQ Dialer \
    . Different Connection setups and webhooks: production or dev Hub is RPI/HA, dev or test Hub is mockups \
    . [WIP] Token, Authentification, security, data/connection integrity, 
+
+   . Hardware installation scripts and docs \
+   . RTSP video streaming feature (core networking and logic) \
+   . Unified event system (General handling of RPI hub side IoT events/alerts) \
+   . Home assistant Hub daemon logic, configs, utils, etc... \
+
 ## server/
 Any scripts, configs, utilities specifically related to the Backend service \
   .RabbitMQServer (RabbitMQInstance, logger, consumers, exchanges, bindings) Init() and Start() \
@@ -142,6 +148,7 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 +---common
 |   +---configs
 |   |       queues.yaml
+|   |       exchanges.yaml
 |   |
 |   +---logging
 |   |       logging.go
@@ -151,14 +158,14 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |   |       queues.go
 |   |       exchanges.go
 |   |       rabbitmq.go
-|   |
+|   +---scripts
 |   |
 |   \---structures
 |           structures.go
-|          ....
+|           enums.go
 |
 +---hub
-|   |   hub.go
+|   |   hub_daemon.go  (Formerly hub.go)
 |   |
 |   +---config
 |   |       config.yaml
@@ -166,6 +173,14 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |   +---ha
 |   |       ha.go
 |   |       ....
+|   |
+|   +---events (General handling of RPI hub side IoT events/alerts; Now Unified even system)
+|   |
+|   |
+|   +---installation (Hub Hardwares installation doc and scripts
+|   |
+|   +---rtsp (New Video streaming feature; core networking and logic)
+|   |
 |   |
 |   \---logger
 |           logger.go

@@ -69,11 +69,22 @@ func TestSmartessHubWithDocker(t *testing.T) {
 	// Monitor the log file for the expected log message
 	expectedLog := "MOCKlight.MOCKliving_room" // Update this with the expected log message
 	logFilePath := "../cmd/hub/logs/server.log"
-	go monitorLogFile(t, logFilePath, expectedLog)
+	// Unbuffered error/fatal channel
+	// Instead of doing Fail or Fatalf here within a non-testing goroutine
+	errCh := make(chan error)
+	go monitorLogFile(t, errCh, logFilePath, expectedLog)
 
 	// Sleep for a while to allow events to be generated
 	t.Log("Waiting for events to be processed...")
 	time.Sleep(10 * time.Second)
+
+	select {
+	case errt := <-errCh:
+		if errt != nil {
+			t.Fatal(errt)
+		}
+	default:
+	}
 }
 
 func waitForServices(t *testing.T, dir string) error {
@@ -89,12 +100,19 @@ func waitForServices(t *testing.T, dir string) error {
 	return fmt.Errorf("services did not start in time")
 }
 
-func monitorLogFile(t *testing.T, logFilePath string, expectedLog string) {
+func monitorLogFile(t *testing.T, errCh chan<- error, logFilePath, expectedLog string) {
 	file, err := os.Open(logFilePath)
+
 	if err != nil {
-		t.Fatalf("Failed to open log file: %v", err)
+		errCh <- fmt.Errorf("Failed to open log file: %v", err)
+		return
 	}
-	defer file.Close()
+	defer func() {
+		err := file.Close()
+		if err != nil {
+			errCh <- fmt.Errorf("Failed to close log file: %v", err)
+		}
+	}()
 
 	reader := bufio.NewReader(file)
 
@@ -108,6 +126,7 @@ func monitorLogFile(t *testing.T, logFilePath string, expectedLog string) {
 
 		if strings.Contains(line, expectedLog) {
 			t.Logf("Found expected log: %s", line)
+			errCh <- nil
 			return
 		}
 	}
