@@ -36,20 +36,6 @@ func Init() (RabbitMQServer, error) {
 		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
 
-	// RYAN NOW
-	// Declare the topic exchange for alerts
-	//err = instance.Channel.ExchangeDeclare(
-	//	common_rabbitmq.Test0TopicExchangeName, // name of the exchange
-	//	"topic",                                // type of exchange
-	//	true,                                   // durable
-	//	false,                                  // auto-deleted
-	//	false,                                  // internal
-	//	false,                                  // no-wait
-	//	nil,
-	//)
-	//if err != nil {
-	//	logger.Fatal("Failed to declare alert topic exchange", zap.Error(err))
-	//}
 	// Declare the topic exchange for alerts
 	err = instance.Channel.ExchangeDeclare(
 		common_rabbitmq.Test0AlertRoutingKey, // name of the exchange
@@ -116,23 +102,7 @@ func Init() (RabbitMQServer, error) {
 				}
 			}
 		}
-		//for _, binding := range instance.Config.Exchanges[0].QueueBindings {
-		//	if binding.Queue == queue.Name {
-		//		err = instance.Channel.QueueBind(
-		//			queue.Name,                             // queue name
-		//			binding.RoutingKey,                     // routing key
-		//			common_rabbitmq.Test0TopicExchangeName, // exchange name
-		//			false,
-		//			nil,
-		//		)
-		//		if err != nil {
-		//			return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
-		//				common_rabbitmq.Test0TopicExchangeName, binding.RoutingKey, err)
-		//		}
-		//		routingKeysBinded = append(routingKeysBinded, binding.RoutingKey)
-		//
-		//	}
-		//}
+
 		if len(routingKeysBinded) == 0 {
 			routingKeysBinded = append(routingKeysBinded, "")
 		}
