@@ -106,7 +106,6 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
-    env_file: smartessweb/.env
     depends_on:
       - rabbitmq
     networks:
