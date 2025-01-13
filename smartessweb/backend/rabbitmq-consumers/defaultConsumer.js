@@ -69,8 +69,8 @@ class RabbitMQService {
     for (const queue of this.queues) {
       this.channel.consume(queue.name, async (msg) => {
         if (msg !== null) {
-          console.log(`Received message from ${queue}: ${msg.content.toString()}`);
-          await this.handleMessage(queue, msg);
+          console.log(`Received message from ${queue.name}: ${msg.content.toString()}`);
+          await this.handleMessage(queue.name, msg);
           this.channel.ack(msg);
         }
       });
@@ -95,7 +95,8 @@ class RabbitMQService {
               device_id: log.device.toString(), 
               message: log.message.toString(), 
               description: log.state.toString(), 
-              hub_ip: log.hub_ip.toString() 
+              hub_ip: log.hub_ip.toString(),
+              hub_id: "1"
             }
           ]);
 

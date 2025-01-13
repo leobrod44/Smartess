@@ -3,6 +3,7 @@ require('dotenv').config();
 const app = require('./app');
 const port = process.env.PORT || 3001;
 
+/* 
 const RabbitMQService = require('./rabbitmq-consumers/defaultConsumer.js'); 
 const rabbitMQService = new RabbitMQService();
 
@@ -17,7 +18,8 @@ async function startRabbitMQService() {
   }
 }
 
-startRabbitMQService();
+startRabbitMQService(); 
+*/
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
