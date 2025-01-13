@@ -10,6 +10,7 @@ interface HubUsersProps {
   hubUsers: HubUser[];
   currentUserRole: "master" | "admin" | "basic";
 }
+
 const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
   const router = useRouter();
   const [isPopupOpen, setIsPopupOpen] = useState(false);

@@ -1,4 +1,5 @@
 const express = require('express');
+
 const { getCurrentUser, getIndividualUnit, removeUserFromHub} = require('../controllers/individualUnitContoller');
 const { verifyToken } = require('../middleware/middleware');
 const router = express.Router();
