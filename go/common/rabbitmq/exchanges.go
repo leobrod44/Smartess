@@ -1,8 +1,6 @@
 package rabbitmq
 
 const (
-	Test0TopicExchangeName        = "smartess_topic_exchange"
-	Test0NotificationRoutingKey   = "smartess.notification"
 	Test0AlertRoutingKey          = "smartess.alert"
 	Test0VideoStreamingRoutingKey = "smartess.videostream"
 )

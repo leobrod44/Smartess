@@ -281,7 +281,7 @@ func (client *EventHandler) PublishTopicMessages() error {
 		{
 			Name:        common_rabbitmq.Test0AlertRoutingKey, // Alert exchange
 			Type:        "topic",
-			RoutingKeys: []string{"alerts", "notifications", "storemongo"},
+			RoutingKeys: []string{"alerts"},
 		},
 		{
 			Name:        common_rabbitmq.Test0VideoStreamingRoutingKey, // Video exchange

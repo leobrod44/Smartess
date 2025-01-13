@@ -8,18 +8,6 @@
     "content": "{\"message\": \"System alert at normal threshold\"}"
   },
   {
-    "routing_key": "user123.notifications.update.success",
-    "content": "{\"message\": \"User 123 update successful\"}"
-  },
-  {
-    "routing_key": "user123.notifications.update.failure",
-    "content": "{\"message\": \"User 123 update failed\"}"
-  },
-  {
-    "routing_key": "admin123.notifications.critical.lowmemory",
-    "content": "{\"message\": \"Critical low memory alert for admin 123\"}"
-  },
-  {
     "routing_key": "system.alerts.critical.diskspace",
     "content": "{\"message\": \"Critical disk space alert for system\"}"
   },
@@ -28,20 +16,35 @@
     "content": "{\"message\": \"High level alert from hub 99\"}"
   },
   {
-    "routing_key": "user456.notifications.critical.diskfailure",
-    "content": "{\"message\": \"Critical disk failure notification for user 456\"}"
-  },
-  {
-    "routing_key": "client789.storemongo.create",
-    "content": "{\"message\": \"Create operation stored in MongoDB for client 789\"}"
-  },
-  {
-    "routing_key": "client789.storemongo.update",
-    "content": "{\"message\": \"Update operation stored in MongoDB for client 789\"}"
-  },
-  {
     "routing_key": "video.stream",
     "content": "{\"message\": \"VIDEO STREAM SEGMENT\"}"
+  },
+  {
+    "routing_key": "normal.alerts.test",
+    "content": "{\"message\": \"normal alert\"}"
+  },
+  {
+    "routing_key": "system.alerts.test",
+    "content": "{\"message\": \"system alert\"}"
+  },
+  {
+    "routing_key": "notification.alerts.test",
+    "content": "{\"message\": \"notification alert\"}"
+  },
+  {
+    "routing_key": "audio.alerts.test",
+    "content": "{\"message\": \"audio alert\"}"
+  },
+  {
+    "routing_key": "visual.alerts.test",
+    "content": "{\"message\": \"visual alert\"}"
+  },
+  {
+    "routing_key": "log.alerts.test",
+    "content": "{\"message\": \"log alert\"}"
+  },
+  {
+    "routing_key": "actionable.alerts.test",
+    "content": "{\"message\": \"actionable alert\"}"
   }
-
 ]
