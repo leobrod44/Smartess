@@ -38,10 +38,5 @@
   {
     "routing_key": "client789.storemongo.update",
     "content": "{\"message\": \"Update operation stored in MongoDB for client 789\"}"
-  },
-  {
-    "routing_key": "video.stream",
-    "content": "{\"message\": \"VIDEO STREAM SEGMENT\"}"
   }
-
 ]
