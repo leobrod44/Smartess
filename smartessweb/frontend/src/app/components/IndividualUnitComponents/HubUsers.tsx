@@ -8,9 +8,10 @@ import { individualUnitApi } from "@/api/page";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
+  currentUserRole: "master" | "admin" | "basic";
 }
 
-const HubUsers = ({ hubUsers }: HubUsersProps) => {
+const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
   const router = useRouter();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<HubUser | null>(null);
@@ -49,6 +50,9 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
     setIsPopupOpen(false);
     setSelectedUser(null);
   };
+
+  const gridColsClass = currentUserRole === "basic" ? "md:grid-cols-4" : "md:grid-cols-5";
+
   return (
     <div className="relative">
       {/* Title */}
@@ -57,12 +61,12 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
       </div>
 
       {/* Table Headers */}
-      <div className="hidden md:grid md:grid-cols-5 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
+      <div className={`hidden md:grid ${gridColsClass} w-full text-center text-[#14323B] font-semibold text-sm mb-2`}>
         <div>User</div>
         <div>Telephone</div>
         <div>Email</div>
         <div>Contact</div>
-        <div>Actions</div>
+        {(currentUserRole === "master" || currentUserRole === "admin") ? (<div>Actions</div> ) : null}
       </div>
       {/* Separator Line */}
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
@@ -71,7 +75,7 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
         {activeHubUsers.map((user, index) => (
           <div
             key={index}
-            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-4 px-2"
+            className={`md:grid ${gridColsClass} w-full text-center text-black text-sm gap-4 px-2`}
           >
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center rounded-lg border p-2">
@@ -88,14 +92,19 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
                   Contact
                 </button>
               </p>
-              <div className="text-[#14323B] font-semibold">Actions:</div>
-              <button>
-                <DeleteIcon
-                  onClick={() => handleDeleteClick(user)}
-                  className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer"
-                />
-              </button>
+              {(currentUserRole === "master" || currentUserRole === "admin") ? (
+                <div>
+                  <div className="text-[#14323B] font-semibold">Actions:</div>
+                    <button>
+                      <DeleteIcon
+                        onClick={() => handleDeleteClick(user)}
+                        className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer"
+                      />
+                    </button>
+                </div>
+              ) : null}
             </div>
+              
 
             {/* Table view for medium and larger screens */}
             <div className="hidden md:flex items-center justify-center">
@@ -116,9 +125,11 @@ const HubUsers = ({ hubUsers }: HubUsersProps) => {
               </button>
             </div>
             <div className="hidden md:flex items-center justify-center">
-              <button onClick={() => handleDeleteClick(user)}>
-                <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
-              </button>
+              {currentUserRole === "master" || currentUserRole === "admin" ? (
+                <button onClick={() => handleDeleteClick(user)}>
+                  <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
+                </button>
+              ) : null}
             </div>
           </div>
         ))}
