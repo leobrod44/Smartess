@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -82,12 +82,13 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 		}
 		if iterCnt == 0 {
 			err = r.PublishTopicMessages()
-			r.Logger.Info("Published messages to RabbitMQ")
+			r.Logger.Info(fmt.Sprintf("Published messages to RabbitMQ"))
 			if err != nil {
 				r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
 			}
 		}
 		iterCnt++
+		r.Logger.Info(fmt.Sprintf("Iteration count: %d", iterCnt))
 
 	}
 }
@@ -140,15 +141,9 @@ func (client *EventHandler) Publish(queueName string, message []byte) error {
 		})
 }
 func (client *EventHandler) Close() {
-	closeWithErrorLog := func(closeFunc func() error, errMsg string) {
-		if err := closeFunc(); err != nil {
-			client.Logger.Error(fmt.Sprintf("%s: %v", errMsg, err))
-		}
-	}
-	closeWithErrorLog(client.instance.Channel.Close, "Failed to close RabbitMQ Instance channel(s)")
-	closeWithErrorLog(client.instance.Conn.Close, "Failed to close RabbitMQ Instance actual connection")
-	closeWithErrorLog(client.webhookConn.Close, "Failed to close WebSocket connection")
-
+	client.instance.Channel.Close()
+	client.instance.Conn.Close()
+	client.webhookConn.Close()
 }
 
 func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
@@ -256,14 +251,9 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Closure (non parameter) needed to close local instance of file descritor after loadTopicMessages returns
-	defer func() {
-		if cerr := file.Close(); cerr != nil {
-			log.Printf("failed to close file: %v", cerr)
-		}
-	}()
+	defer file.Close()
 
-	data, err := io.ReadAll(file)
+	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
@@ -282,62 +272,22 @@ func (client *EventHandler) PublishTopicMessages() error {
 		log.Fatalf("Failed to load test messages: %v\n", err)
 	}
 
-	// todo CURRENTLY choosing which exchnage to publish to is done by contains, but should be changed to maybe regex???? the internal * # does not work here
-	exchanges := []struct {
-		Name        string
-		Type        string
-		RoutingKeys []string
-	}{
-		{
-			Name:        common_rabbitmq.Test0AlertRoutingKey, // Alert exchange
-			Type:        "topic",
-			RoutingKeys: []string{"alerts", "notifications", "storemongo"},
-		},
-		{
-			Name:        common_rabbitmq.Test0VideoStreamingRoutingKey, // Video exchange
-			Type:        "direct",
-			RoutingKeys: []string{"video.stream", "video.monitor"},
-		},
-	}
-
-	// Iterate over the messages
 	for _, msg := range messages {
-		var exchangeName string
-		// Find the matching exchange for the message's routing key
-		for _, exchange := range exchanges {
-			for _, key := range exchange.RoutingKeys {
-				// Check if routing key matches any of the patterns (simple example, could be extended for pattern matching)
-				if strings.Contains(msg.RoutingKey, key) {
-					exchangeName = exchange.Name
-					break
-				}
-			}
-			if exchangeName != "" {
-				break
-			}
-		}
-
-		// If no exchange found for the routing key, log an error
-		if exchangeName == "" {
-			log.Printf("No matching exchange found for routing key %s\n", msg.RoutingKey)
-			return fmt.Errorf("no matching exchange found for routing key %s", msg.RoutingKey)
-		}
-
 		err := client.instance.Channel.Publish(
-			exchangeName,   // Selected exchange
-			msg.RoutingKey, // Routing key
-			false,          // mandatory
-			false,          // immediate                                 // immediate
+			common_rabbitmq.Test0TopicExchangeName, // exchange
+			msg.RoutingKey,                         // routing key
+			false,                                  // mandatory
+			false,                                  // immediate
 			amqp.Publishing{
 				ContentType: "application/json",
 				Body:        []byte(msg.Content),
 			})
 
 		if err != nil {
-			log.Printf("Failed to publish message to exchange %s with routing key %s: %v\n", exchangeName, msg.RoutingKey, err)
+			log.Printf("Failed to publish message with routing key %s: %v\n", msg.RoutingKey, err)
 			return err
 		} else {
-			log.Printf("Published message to exchange %s with routing key %s\n", exchangeName, msg.RoutingKey)
+			log.Printf("Published message with routing key %s\n", msg.RoutingKey)
 		}
 	}
 	return nil

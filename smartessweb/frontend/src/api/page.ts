@@ -244,26 +244,5 @@ export const individualUnitApi = {
     }
 
     return data;
-  },
-
-  removeUserFromHub: async ( user_id: string | undefined, token: string): Promise<void> => {
-    const response = await fetch(`${API_URL}/individual-unit/remove-user-from-hub`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        user_id
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to remove user from hub');
-    }
-
-    return data;
   }
 }
