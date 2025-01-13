@@ -45,7 +45,7 @@ useEffect(() => {
   };
 
   fetchUnit();
-}, [router]);
+}, [router, projectAddress, unit_id]);
 
 if (loading) {
   return (

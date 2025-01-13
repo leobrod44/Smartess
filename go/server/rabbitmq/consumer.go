@@ -4,14 +4,14 @@ import (
 	"Smartess/go/common/structures"
 	"context"
 	"encoding/json"
-	"fmt"
+	"strings"
+	"time"
+
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
-	"strings"
-	"time"
 )
 
 type QueueConsumer struct {
@@ -144,12 +144,13 @@ func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		)
 	}
 	//fmt.Printf("[topic] UNMARSHALLED OBJ STATE: %v \n\r", eventMsg)
-	handled_timestamp := fmt.Sprintf("%s", time.Now().Format(time.RFC3339Nano))
+	// fmt.Sprintf("timenow:%s", time.Now().Format(time.RFC3339Nano))
+	handledTimestamp := time.Now().Format(time.RFC3339Nano)
 
 	logger.Info("topic_message_event",
 		zap.String("content", eventMsg.Message),
 		zap.String("routing_key", h.RoutingKey),
-		zap.String("handled_timestamp", handled_timestamp),
+		zap.String("handled_timestamp", handledTimestamp),
 	)
 
 	if strings.Contains(h.RoutingKey, "storemongo") {
@@ -162,7 +163,7 @@ func (h *TopicMessageHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		_, err = collection.InsertOne(context.TODO(), bson.D{
 			{"_id", primitive.NewObjectID()},
 			{"content", eventMsg.Message},
-			{"timestamp", handled_timestamp},
+			{"timestamp", handledTimestamp},
 		})
 		if err != nil {
 			logger.Error("Failed to insert message into MongoDB", zap.Error(err))
