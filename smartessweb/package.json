@@ -20,6 +20,7 @@
     "@heroicons/react": "^2.1.5",
     "@mui/icons-material": "^6.1.6",
     "@supabase/supabase-js": "^2.45.4",
+    "amqplib": "^0.10.5",
     "concurrently": "^9.0.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
