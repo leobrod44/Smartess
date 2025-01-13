@@ -16,7 +16,7 @@ class RabbitMQService {
     try {
       let config = {
         protocol: 'amqp',
-        hostname: 'localhost',
+        hostname: 'rabbitmq',
         port: 5672,
         username: 'admin',
         password: 'admin',
@@ -26,7 +26,7 @@ class RabbitMQService {
         vhost: '/',
       };
 
-      this.connection = await createConnection(config);
+      this.connection = await this.createConnection(config);
       this.channel = await this.connection.createChannel();
       console.log('Connected to RabbitMQ from Smartess backend');
     } catch (err) {
@@ -55,7 +55,7 @@ class RabbitMQService {
 
       for (const queue of this.queues) {
         await this.channel.assertQueue(queue.name, { durable: true });
-        await this.channel.bindQueue(queue.name, 'test_topic_exchange', queue.routingKey);
+        await this.channel.bindQueue(queue.name, 'smartess_topic_exchange', queue.routingKey);
       }
 
       console.log('Exchanges and queues set up successfully');
