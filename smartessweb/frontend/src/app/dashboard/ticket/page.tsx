@@ -7,7 +7,6 @@ import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
 import { useUserContext } from "@/context/UserProvider";
-import { ticketsListApi, APITicketList} from "@/api/dashboard/ticket/page";
 
 interface Ticket {
   ticketId: string;
@@ -21,96 +20,303 @@ interface Ticket {
   date: string;
 }
 
-const filterOptionsTicket = [
-  "Ticket A-Z",
-  "Status",
-  "Most Recent",
-  "Least Recent",
-  "Most Important",
-  "Least Important",
+const tickets: Ticket[] = [
+  {
+    ticketId: "t1",
+    projectId: "1",
+    unitId: "101",
+    name: "TICKET-001",
+    description:
+      "Fix broken window dsfsfsfsfsfsfsfsfsfsfsfsfsffsanananananananandsdsdsdsdsdsananan",
+    type: "Repair",
+    unit: "101",
+    status: "Open",
+    date: "2024-11-15",
+  },
+  {
+    ticketId: "t2",
+    projectId: "1",
+    unitId: "102",
+    name: "TICKET-002",
+    description: "Upgrade kitchen appliances",
+    type: "Other",
+    unit: "102",
+    status: "Pending",
+    date: "2024-11-14",
+  },
+  {
+    ticketId: "t3",
+    projectId: "1",
+    unitId: "103",
+    name: "TICKET-003",
+    description: "Repaint walls after tenant move-out",
+    type: "Repair",
+    unit: "103",
+    status: "Closed",
+    date: "2024-11-13",
+  },
+  {
+    ticketId: "t4",
+    projectId: "2",
+    unitId: "104",
+    name: "TICKET-004",
+    description: "Repair leaky faucet in bathroom",
+    type: "Repair",
+    unit: "104",
+    status: "Open",
+    date: "2024-11-12",
+  },
+  {
+    ticketId: "t5",
+    projectId: "2",
+    unitId: "105",
+    name: "TICKET-005",
+    description: "Install new security cameras",
+    type: "Other",
+    unit: "105",
+    status: "Pending",
+    date: "2024-11-11",
+  },
+  {
+    ticketId: "t6",
+    projectId: "4",
+    unitId: "106",
+    name: "TICKET-006",
+    description: "Enhance landscaping",
+    type: "Other",
+    unit: "106",
+    status: "Pending",
+    date: "2024-11-10",
+  },
+  {
+    ticketId: "t7",
+    projectId: "4",
+    unitId: "107",
+    name: "TICKET-007",
+    description: "Conduct pest control",
+    type: "Alert",
+    unit: "107",
+    status: "Open",
+    date: "2024-11-09",
+  },
+  {
+    ticketId: "t8",
+    projectId: "3",
+    unitId: "108",
+    name: "TICKET-008",
+    description: "Replace broken AC unit",
+    type: "Repair",
+    unit: "108",
+    status: "Open",
+    date: "2024-11-08",
+  },
+  {
+    ticketId: "t9",
+    projectId: "1",
+    unitId: "109",
+    name: "TICKET-009",
+    description: "Fix damaged carpet in hallway",
+    type: "Repair",
+    unit: "109",
+    status: "Pending",
+    date: "2024-11-07",
+  },
+  {
+    ticketId: "t10",
+    projectId: "3",
+    unitId: "110",
+    name: "TICKET-010",
+    description: "Inspect fire alarm system",
+    type: "Alert",
+    unit: "110",
+    status: "Open",
+    date: "2024-11-06",
+  },
+  {
+    ticketId: "t11",
+    projectId: "2",
+    unitId: "111",
+    name: "TICKET-011",
+    description: "Repair broken staircase railing",
+    type: "Repair",
+    unit: "111",
+    status: "Pending",
+    date: "2024-11-05",
+  },
+  {
+    ticketId: "t12",
+    projectId: "3",
+    unitId: "112",
+    name: "TICKET-012",
+    description: "Fix garage door malfunction",
+    type: "Repair",
+    unit: "112",
+    status: "Closed",
+    date: "2024-11-04",
+  },
+  {
+    ticketId: "t13",
+    projectId: "4",
+    unitId: "113",
+    name: "TICKET-013",
+    description: "Install energy-efficient lighting",
+    type: "Repair",
+    unit: "113",
+    status: "Open",
+    date: "2024-11-03",
+  },
+  {
+    ticketId: "t14",
+    projectId: "5",
+    unitId: "114",
+    name: "TICKET-014",
+    description: "Conduct annual HVAC maintenance",
+    type: "Other",
+    unit: "114",
+    status: "Open",
+    date: "2024-11-02",
+  },
+  {
+    ticketId: "t15",
+    projectId: "1",
+    unitId: "115",
+    name: "TICKET-015",
+    description: "Repair damaged roof shingles",
+    type: "Repair",
+    unit: "115",
+    status: "Pending",
+    date: "2024-11-01",
+  },
+  {
+    ticketId: "t16",
+    projectId: "2",
+    unitId: "116",
+    name: "TICKET-016",
+    description: "Upgrade lobby with new seating",
+    type: "Other",
+    unit: "116",
+    status: "Pending",
+    date: "2024-10-31",
+  },
+  {
+    ticketId: "t17",
+    projectId: "3",
+    unitId: "117",
+    name: "TICKET-017",
+    description: "Paint exterior walls",
+    type: "Repair",
+    unit: "117",
+    status: "Pending",
+    date: "2024-10-30",
+  },
+  {
+    ticketId: "t18",
+    projectId: "5",
+    unitId: "118",
+    name: "TICKET-018",
+    description: "Fix damaged mailbox",
+    type: "Repair",
+    unit: "118",
+    status: "Open",
+    date: "2024-10-29",
+  },
+  {
+    ticketId: "t19",
+    projectId: "4",
+    unitId: "119",
+    name: "TICKET-019",
+    description: "Clean gutters",
+    type: "Other",
+    unit: "119",
+    status: "Closed",
+    date: "2024-10-28",
+  },
+  {
+    ticketId: "t20",
+    projectId: "1",
+    unitId: "120",
+    name: "TICKET-020",
+    description: "Replace broken light bulbs in hallway",
+    type: "Repair",
+    unit: "120",
+    status: "Open",
+    date: "2024-10-27",
+  },
+  {
+    ticketId: "t21",
+    projectId: "2",
+    unitId: "121",
+    name: "TICKET-021",
+    description: "Install new fencing around pool",
+    type: "Other",
+    unit: "121",
+    status: "Pending",
+    date: "2024-10-26",
+  },
+  {
+    ticketId: "t22",
+    projectId: "3",
+    unitId: "122",
+    name: "TICKET-022",
+    description: "Repair cracked driveway",
+    type: "Repair",
+    unit: "122",
+    status: "Closed",
+    date: "2024-10-25",
+  },
+  {
+    ticketId: "t23",
+    projectId: "4",
+    unitId: "123",
+    name: "TICKET-023",
+    description: "Remove graffiti from exterior walls",
+    type: "Other",
+    unit: "123",
+    status: "Open",
+    date: "2024-10-24",
+  },
+  {
+    ticketId: "t24",
+    projectId: "5",
+    unitId: "124",
+    name: "TICKET-024",
+    description: "Conduct electrical system inspection",
+    type: "Other",
+    unit: "124",
+    status: "Open",
+    date: "2024-10-23",
+  },
+  {
+    ticketId: "t25",
+    projectId: "1",
+    unitId: "125",
+    name: "TICKET-025",
+    description: "Replace carpet in common areas",
+    type: "Repair",
+    unit: "125",
+    status: "Pending",
+    date: "2024-10-22",
+  },
 ];
-
-// Function to transform type string to correct cases
-const transformType = (type: string): "Alert" | "Repair" | "Other" => {
-  const lowercaseType = type.toLowerCase();
-  switch (lowercaseType) {
-    case 'alert':
-      return 'Alert';
-    case 'repair':
-      return 'Repair';
-    case 'other':
-      return 'Other';
-    default:
-      return 'Other';
-  }
-};
-
-// Function to transform status string to correct cases
-const transformStatus = (status: string): "Open" | "Pending" | "Closed" => {
-  const lowercaseStatus = status.toLowerCase();
-  switch (lowercaseStatus) {
-    case 'open':
-      return 'Open';
-    case 'pending':
-      return 'Pending';
-    case 'closed':
-      return 'Closed';
-    default:
-      return 'Open';
-  }
-};
-
-// Function to transform API ticket to component ticket format
-const transformTicket = (apiTicketList: APITicketList): Ticket => ({
-  ticketId: apiTicketList.ticket_id,
-  projectId: apiTicketList.proj_id,
-  unitId: apiTicketList.unit_id,
-  name: apiTicketList.name,
-  description: apiTicketList.description,
-  type: transformType(apiTicketList.type),
-  unit: apiTicketList.unit || 'N/A',
-  status: transformStatus(apiTicketList.status),
-  date: apiTicketList.created_at
-});
 
 const TicketPage = () => {
   const { userType } = useUserContext();
   const { selectedProjectId } = useProjectContext();
   const [query, setQuery] = useState("");
-  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch tickets from API
-  useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error('No token found');
-        }
+  const filterOptionsTicket = [
+    "Ticket A-Z",
+    "Status",
+    "Most Recent",
+    "Least Recent",
+    "Most Important",
+    "Least Important",
+  ];
 
-        const data = await ticketsListApi.getTickets(token);
-        const transformedTickets = data.tickets.map(transformTicket);
-        setTickets(transformedTickets);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch tickets');
-        console.error('Error fetching tickets:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTickets();
-  }, []);
-  
-  // Filter tickets based on search and selected project
   useEffect(() => {
     const projectTickets = selectedProjectId
-      ? tickets.filter((ticket) => ticket.projectId === selectedProjectId)
+      ? tickets.filter((ticket) => ticket.projectId == selectedProjectId)
       : tickets;
 
     setFilteredTickets(
@@ -124,12 +330,10 @@ const TicketPage = () => {
           ticket.unit,
           ticket.status,
           ticket.date,
-        ].some((field) => 
-          field?.toString().toLowerCase().includes(query.toLowerCase())
-        )
+        ].some((field) => field.toLowerCase().includes(query.toLowerCase()))
       )
     );
-  }, [selectedProjectId, query, tickets]);
+  }, [selectedProjectId, query]);
 
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery);
@@ -189,25 +393,6 @@ const TicketPage = () => {
     }
     setFilteredTickets(newFilteredTickets);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-red-500 text-center">
-          <p className="text-xl font-semibold">Error loading tickets</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
