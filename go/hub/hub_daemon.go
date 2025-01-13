@@ -36,16 +36,28 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 
 	// Declare the topic exchange
 	err = instance.Channel.ExchangeDeclare(
-		common_rabbitmq.Test0TopicExchangeName, // name of the exchange
-		"topic",                                // type of exchange
-		true,                                   // durable
-		false,                                  // auto-deleted
-		false,                                  // internal
-		false,                                  // no-wait
-		nil,                                    // arguments
+		common_rabbitmq.Test0AlertRoutingKey, // name of the exchange
+		"topic",                              // type of exchange
+		true,                                 // durable
+		false,                                // auto-deleted
+		false,                                // internal
+		false,                                // no-wait
+		nil,
 	)
 	if err != nil {
-		return SmartessHub{}, fmt.Errorf("Failed to declare topic exchange: %v", err)
+		return SmartessHub{}, fmt.Errorf("Failed to declare alert topic exchange: %v", err)
+	}
+	err = instance.Channel.ExchangeDeclare(
+		common_rabbitmq.Test0VideoStreamingRoutingKey, // name of the exchange
+		"direct", // type of exchange
+		true,     // durable
+		false,    // auto-deleted
+		false,    // internal
+		false,    // no-wait
+		nil,      // arguments
+	)
+	if err != nil {
+		return SmartessHub{}, fmt.Errorf("Failed to declare direct video streaming exchange: %v", err)
 	}
 	logger.Info("Declared topic exchange")
 	rtsp_processor, err := rtsp.Init(instance, logger)
