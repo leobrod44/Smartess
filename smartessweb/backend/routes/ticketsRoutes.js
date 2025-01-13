@@ -1,8 +1,8 @@
 const express = require('express');
-const { getIndividualUnit} = require('../controllers/individualUnitContoller');
+const { getTickets } = require('../controllers/ticketsController');
 const { verifyToken } = require('../middleware/middleware');
 const router = express.Router();
 
-router.post('/get-individual-unit', verifyToken, getIndividualUnit);
+router.get('/get-tickets', verifyToken, getTickets);
 
 module.exports = router;

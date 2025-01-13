@@ -64,7 +64,6 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-
   - name: notifications_critical
     max_size: 100
     passive: false
@@ -73,44 +72,8 @@ queues:
     exclusive: false
     no_wait: false
     arguments: {}
-
-  - name: videostream
-    max_size: 100
-    passive: false
-    durable: true
-    auto_delete: false
-    exclusive: false
-    no_wait: false
-    arguments: { }
-
 exchanges:
-#  - name: smartess_topic_exchange
-#    type: topic
-#    durable: true
-#    auto_delete: false
-#    bindings:
-#      - queue: alerts
-#        routing_key: "#.alerts.*"
-#      - queue: system_alerts
-#        routing_key: "system.alerts.*"
-#      - queue: notifications
-#        routing_key: "#.notifications.*"
-#      - queue: notifications_critical
-#        routing_key: "#.notifications.critical.*"
-#      - queue: mongo-messages
-#        routing_key: "*.storemongo.*"
-#  - name: hub_logs
-#    type: topic
-#    durable: true
-#    auto_delete: false
-#    bindings:
-#      - queue: hub-warn-logs
-#        routing_key: "#.warn.#"
-#      - queue: hub-error-logs
-#        routing_key: "#.error.#"
-#      - queue: hub-info-logs
-#        routing_key: "#.info.#"
-  - name: smartess.alert
+  - name: smartess_topic_exchange
     type: topic
     durable: true
     auto_delete: false
@@ -125,11 +88,14 @@ exchanges:
         routing_key: "#.notifications.critical.*"
       - queue: mongo-messages
         routing_key: "*.storemongo.*"
-
-  - name: smartess.videostream
-    type: direct
-    durable: true
-    auto_delete: false
-    bindings:
-      - queue: videostream
-        routing_key: "video.stream"
+#  - name: hub_logs
+#    type: topic
+#    durable: true
+#    auto_delete: false
+#    bindings:
+#      - queue: hub-warn-logs
+#        routing_key: "#.warn.#"
+#      - queue: hub-error-logs
+#        routing_key: "#.error.#"
+#      - queue: hub-info-logs
+#        routing_key: "#.info.#"

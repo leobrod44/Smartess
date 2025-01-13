@@ -85,11 +85,9 @@ exports.getIndividualUnit = async (req, res) => {
             assigned_employees: [],
           }));
 
-        // Remove the owner from hubUsersData
-        const filteredHubUsersData = hubUsersData.filter(user => user.hub_user_type !== 'owner');
 
         // Fetch all hub users for the current hub
-        const hubUsers = await Promise.all(filteredHubUsersData.map(async (hubUser) => {
+        const hubUsers = await Promise.all(hubUsersData.map(async (hubUser) => {
             const { data: userData, error: userError } = await supabase
                 .from('user')
                 .select('user_id, first_name, last_name, email')
@@ -120,34 +118,6 @@ exports.getIndividualUnit = async (req, res) => {
         };
 
         res.json({ unit });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Internal server error.' });
-    }
-};
-
-exports.removeUserFromHub = async (req, res) => {
-    try {    
-        const token = req.token;
-        const { user_id } = req.body;
-
-        // Validate token and get user information
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-
-        if (authError) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-
-        const { error: deleteError } = await supabase
-            .from('hub_user')
-            .delete()
-            .eq('user_id', user_id);
-
-        if (deleteError) {
-            return res.status(500).json({ error: 'Failed to remove user from hub.' });
-        }
-
-        res.status(200).json({ message: 'User successfully removed from the hub.' });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error.' });

@@ -120,6 +120,7 @@ services:
       - NODE_ENV=production
     networks:
       - smartess_network
+
 # make sure to use docker network create smartess_network for first time use
 networks:
   smartess_network:
