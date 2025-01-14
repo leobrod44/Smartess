@@ -252,14 +252,14 @@ function UserInfoModal({
           onClick={onClose}
           className="absolute top-2 right-2 text-[#30525E]"
         >
-          <CloseIcon />
+          <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
         </IconButton>
 
         <div className="flex flex-col items-center justify-center">
           <Typography
             variant="h6"
             id="user-details-modal"
-            className="text-[#30525E] font-sequel-sans-medium text-lg mb-2 pb-4"
+            className="text-[#254752] text-s font-sequel-sans-black mb-4"
           >
             {userName}
           </Typography>
@@ -298,7 +298,7 @@ function UserInfoModal({
           <div className="flex items-center w-full">
             <Typography
               variant="body1"
-              className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium text-left w-full pl-2"
+              className="mb-1 text-[#30525E] text-lg font-sequel-sans-black mb-4 text-left w-full pl-2"
             >
               <strong>Projects</strong>
             </Typography>
@@ -338,26 +338,26 @@ function UserInfoModal({
         </div>
 
         {/* Custom Save and Delete Buttons */}
-        <div className="flex justify-center gap-4 mt-8">
-          {/* Save button for both admin and master */}
-          {(currentUserRole === "master" || currentUserRole === "admin") && (
-            <div
-              onClick={handleSave}
-              className="w-[150px] h-[25px] px-[25px] py-5 bg-[#266472] rounded-[30px] border-2 border-[#266472] justify-center items-center gap-2.5 inline-flex cursor-pointer"
-            >
-              <div className="text-center text-white text-2xl font-['Sequel Sans']">
-                Save
-              </div>
-            </div>
-          )}
+        <div className="flex justify-around mt-6">
           {/* Delete button only for master */}
           {currentUserRole === "master" && (
             <div
               onClick={handleDeleteUserClick}
-              className="w-[150px] h-[25px] px-[25px] py-5 bg-red-600 rounded-[30px] border-2 border-red-600 justify-center items-center gap-2.5 inline-flex cursor-pointer"
+              className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
             >
-              <div className="text-center text-white text-2xl font-['Sequel Sans']">
+              <div className="text-center text-white text-lg font-['Sequel Sans']">
                 Delete
+              </div>
+            </div>
+          )}
+          {/* Save button for both admin and master */}
+          {(currentUserRole === "master" || currentUserRole === "admin") && (
+            <div
+              onClick={handleSave}
+              className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
+            >
+              <div className="text-center text-white text-lg font-['Sequel Sans']">
+                Save
               </div>
             </div>
           )}
