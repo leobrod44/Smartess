@@ -247,7 +247,7 @@ function UserInfoModal({
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
-      <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[80vh]">
+      <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white border border-gray-300 rounded-lg shadow-lg p-10 overflow-y-auto max-h-[90vh]">
         <IconButton
           onClick={onClose}
           className="absolute top-2 right-2 text-[#30525E]"
@@ -268,16 +268,18 @@ function UserInfoModal({
             <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
               Role
             </p>
-            <div className="flex-1 pl-12">
+            <div className="flex-1 ">
               {isEditingRole ? (
-                <RoleEditForm
-                  currentRole={role}
-                  onRoleChange={handleRoleChange}
-                  onSave={handleSaveRoleChange}
-                />
+                <div className="flex flex-col space-y-2 items-center">
+                  <RoleEditForm
+                    currentRole={role}
+                    onRoleChange={handleRoleChange}
+                    onSave={handleSaveRoleChange}
+                  />
+                </div>
               ) : (
-                <div className="pl-12">
-                  <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
+                <div className="flex justify-center items-center">
+                  <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
                     {role}
                   </span>
                 </div>
@@ -343,7 +345,7 @@ function UserInfoModal({
           {currentUserRole === "master" && (
             <div
               onClick={handleDeleteUserClick}
-              className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
+              className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
             >
               <div className="text-center text-white text-lg font-['Sequel Sans']">
                 Delete
@@ -354,7 +356,7 @@ function UserInfoModal({
           {(currentUserRole === "master" || currentUserRole === "admin") && (
             <div
               onClick={handleSave}
-              className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
+              className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
             >
               <div className="text-center text-white text-lg font-['Sequel Sans']">
                 Save
