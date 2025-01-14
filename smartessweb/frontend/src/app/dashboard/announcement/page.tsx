@@ -63,7 +63,10 @@ const AnnouncementPage = () => {
       const descriptionMatch = announcement.description
         .toLowerCase()
         .includes(query.toLowerCase());
-      return titleMatch || keywordMatch || authorMatch || descriptionMatch;
+      const tagMatch=announcement.tag
+      .toLowerCase()
+      .includes(query.toLowerCase());
+      return titleMatch || keywordMatch || authorMatch || descriptionMatch || tagMatch;
     });
     setFilteredAnnouncements(filtered);
     setCurrentPage(1);
@@ -127,7 +130,7 @@ const AnnouncementPage = () => {
         <div className="flex flex-col gap-4 mt-10 ">
           {currentAnnouncements.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-              <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
+              <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
                 <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
                   No results found.
                   <br />
