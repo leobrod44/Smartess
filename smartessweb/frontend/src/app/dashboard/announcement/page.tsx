@@ -27,7 +27,7 @@ const AnnouncementPage = () => {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
-  const filterOptions = ["Most Likes", "Tag: Project", "Tag: Organization"];
+  const filterOptions = ["Most Likes", "Project Level", "Organization Level"];
 
   //setting up the skeleton for getting the announcements from backens
   useEffect(() => {
