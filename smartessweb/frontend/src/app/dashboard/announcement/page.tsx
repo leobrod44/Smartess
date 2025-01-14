@@ -7,7 +7,10 @@ import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 
 const AnnouncementPage = () => {
-  const mockAnnouncements = generateMockAnnouncements();
+  //sort the announcements we get by date to ensure that they are presented from most recent- oldest
+  const mockAnnouncements = generateMockAnnouncements().sort(
+    (a, b) => b.date.getTime() - a.date.getTime()
+  );
   const [announcements, setAnnouncements] =
     useState<Announcement[]>(mockAnnouncements);
   const [filteredAnnouncements, setFilteredAnnouncements] =
@@ -17,7 +20,6 @@ const AnnouncementPage = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const filterOptions = [
-    "Newest",
     "Most Likes",
     "Tag: Project",
     "Tag: Organization",
@@ -46,9 +48,6 @@ const AnnouncementPage = () => {
     let sortedAnnouncements = [...filteredAnnouncements];
 
     switch (filterValue) {
-      case "Newest":
-        sortedAnnouncements.sort((a, b) => b.date.getTime() - a.date.getTime());
-        break;
       case "Most Likes":
         sortedAnnouncements.sort((a, b) => b.likes - a.likes);
         break;
