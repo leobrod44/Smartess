@@ -1,4 +1,5 @@
 import React from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface DeleteConfirmationPopupProps {
   addressToDelete?: string | null;
@@ -16,28 +17,34 @@ function DeleteConfirmationPopup({
   onCancel,
 }: DeleteConfirmationPopupProps) {
   return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border-2 border-red-500 rounded-lg shadow-lg p-6 z-30">
-      <p className="text-center text-black mb-4">
-        {isUserDeletion
-          ? `Are you sure you want to delete ${userName}?`
-          : `Are you sure you want to delete "${addressToDelete}" from ${userName}?`}
-      </p>
-      <div className="flex justify-center gap-4">
-        <div
-          onClick={onConfirm}
-          className="w-[113px] h-[25px] px-[25px] py-5 bg-[#b3261e] rounded-[30px] border-2 border-[#b3261e] justify-center items-center gap-2.5 inline-flex cursor-pointer hover:bg-[#9b211b] hover:border-[#9b211b] transition-colors"
-        >
-          <div className="text-center text-white text-2xl font-['Sequel Sans']">
-            Delete
-          </div>
-        </div>
-        <div
+    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative bg-white rounded-xl shadow-lg p-8">
+        <CloseIcon
+          className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300"
           onClick={onCancel}
-          className="w-[113px] h-[25px] px-[25px] py-5 bg-[#cccccc] rounded-[30px] border-2 border-[#cccccc] justify-center items-center gap-2.5 inline-flex cursor-pointer hover:bg-[#b3b3b3] hover:border-[#b3b3b3] transition-colors"
-        >
-          <div className="text-center text-white text-2xl font-['Sequel Sans']">
+        />
+        <div className="text-[#254752] text-s font-sequel-sans-black mb-4 text-center">
+          {isUserDeletion
+            ? `Are you sure you want to delete ${userName}?`
+            : `Are you sure you want to delete "${addressToDelete}" from ${userName}?`}
+        </div>
+        <div className="text-[#254752] text-xs mb-5 text-center">
+          Deleting this will permanently remove its contents.
+        </div>
+
+        <div className="flex justify-around">
+          <button
+            className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
+            onClick={onConfirm}
+          >
+            Delete
+          </button>
+          <button
+            className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
+            onClick={onCancel}
+          >
             Cancel
-          </div>
+          </button>
         </div>
       </div>
     </div>
