@@ -34,7 +34,7 @@ function UserInfoModal({
   currentUserRole,
   currentOrg,
   onDeleteUser,
-  onSave
+  onSave,
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -48,8 +48,7 @@ function UserInfoModal({
   const [projectIdsToDelete, setProjectIdsToDelete] = useState<number[]>([]);
   const token = localStorage.getItem("token");
 
-  useEffect ( () => {
-
+  useEffect(() => {
     if (!token) {
       router.push("/sign-in");
       return;
@@ -57,17 +56,19 @@ function UserInfoModal({
 
     const fetchOrgProjectsData = async () => {
       try {
-        const responseOrgProjects = await manageAccountsApi.getOrgProjects(currentOrg, token);
+        const responseOrgProjects = await manageAccountsApi.getOrgProjects(
+          currentOrg,
+          token
+        );
         const fetchedOrgProjects = responseOrgProjects.orgProjects;
         setOrgProjects(fetchedOrgProjects);
-
       } catch (err) {
         console.error("Error fetching organization projects:", err);
       }
     };
 
     fetchOrgProjectsData();
-  } , [addresses, currentOrg] );
+  }, [addresses, currentOrg]);
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -101,9 +102,14 @@ function UserInfoModal({
         (addr) => addr !== addressToDelete
       );
 
-      const project = orgProjects.find((proj) => proj.address === addressToDelete);
+      const project = orgProjects.find(
+        (proj) => proj.address === addressToDelete
+      );
       if (project) {
-        setProjectIdsToDelete((prevIds) => [...prevIds, Number(project.projectId)]);
+        setProjectIdsToDelete((prevIds) => [
+          ...prevIds,
+          Number(project.projectId),
+        ]);
       }
       setAddresses(updatedAddresses);
     }
@@ -118,21 +124,26 @@ function UserInfoModal({
     setProjectMenuOpen(!isProjectMenuOpen);
   };
 
-  const handleProjectSelect = async (project: { projectId: number; address: string }) => {
-      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
-      
-      if (selectedProjectIds.includes(project.projectId)) {
-        setSelectedProjectIds(selectedProjectIds.filter((id) => id !== project.projectId));
-      } else {
-        setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
-      }
+  const handleProjectSelect = async (project: {
+    projectId: number;
+    address: string;
+  }) => {
+    setAddresses((prevAddresses) => [...prevAddresses, project.address]);
 
-      setProjectMenuOpen(false);
+    if (selectedProjectIds.includes(project.projectId)) {
+      setSelectedProjectIds(
+        selectedProjectIds.filter((id) => id !== project.projectId)
+      );
+    } else {
+      setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
+    }
+
+    setProjectMenuOpen(false);
   };
 
   const handleSave = async () => {
     try {
-      // remove matching IDs from both arrays in case a user adds a project then removes it 
+      // remove matching IDs from both arrays in case a user adds a project then removes it
       const filteredSelectedProjectIds = selectedProjectIds.filter(
         (id) => !projectIdsToDelete.includes(id)
       );
@@ -144,16 +155,19 @@ function UserInfoModal({
       setSelectedProjectIds(filteredSelectedProjectIds);
       setProjectIdsToDelete(filteredProjectIdsToDelete);
 
-      if (JSON.stringify(filteredSelectedProjectIds) !== JSON.stringify(filteredProjectIdsToDelete)) {
-        console.log("calling apis")
+      if (
+        JSON.stringify(filteredSelectedProjectIds) !==
+        JSON.stringify(filteredProjectIdsToDelete)
+      ) {
+        console.log("calling apis");
         await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
         await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
       }
-      
+
       if (role !== initialRole) {
         await changeUserRole(uid, currentOrg, role);
       }
-      
+
       onClose();
       onSave(addresses);
     } catch (err) {
@@ -171,9 +185,15 @@ function UserInfoModal({
       router.push("/sign-in");
       return;
     }
-  
+
     try {
-      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectIds, role, token);
+      await manageAccountsApi.assignOrgUserToProject(
+        uid,
+        currentOrg,
+        projectIds,
+        role,
+        token
+      );
     } catch (err) {
       console.error("Error assigning user to project:", err);
     }
@@ -188,9 +208,14 @@ function UserInfoModal({
       router.push("/sign-in");
       return;
     }
-  
+
     try {
-      await manageAccountsApi.removeOrgUserFromProject(uid, currentOrg, projectIds, token);
+      await manageAccountsApi.removeOrgUserFromProject(
+        uid,
+        currentOrg,
+        projectIds,
+        token
+      );
     } catch (err) {
       console.error("Error removing user from project:", err);
     }
@@ -200,26 +225,25 @@ function UserInfoModal({
     uid: number,
     currentOrg: number | undefined,
     role: "admin" | "basic" | "master"
-    ) => {
-      if (!token) {
-        router.push("/sign-in");
-        return;
-      }
-    
-      try {
-        await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
-      } catch (err) {
-        console.error("Error changing organization user's role:", err);
-      }
-  }
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    try {
+      await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
+    } catch (err) {
+      console.error("Error changing organization user's role:", err);
+    }
+  };
 
   const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
-  .filter((project) => !addresses.includes(project.address))
-  .map((project) => ({
-    projectId: Number(project.projectId),
-    address: project.address,
-  }));
-
+    .filter((project) => !addresses.includes(project.address))
+    .map((project) => ({
+      projectId: Number(project.projectId),
+      address: project.address,
+    }));
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
@@ -232,12 +256,6 @@ function UserInfoModal({
         </IconButton>
 
         <div className="flex flex-col items-center justify-center">
-          <img
-            src="path_to_profile_picture.jpg"
-            alt="Profile Picture"
-            className="w-24 h-24 rounded-full border-2 border-black mb-2"
-          />
-
           <Typography
             variant="h6"
             id="user-details-modal"
