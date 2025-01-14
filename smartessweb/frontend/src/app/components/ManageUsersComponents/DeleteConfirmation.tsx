@@ -29,7 +29,7 @@ function DeleteConfirmationPopup({
             : `Are you sure you want to delete "${addressToDelete}" from ${userName}?`}
         </div>
         <div className="text-[#254752] text-xs mb-5 text-center">
-          Deleting this will permanently remove its contents.
+          This is a permanent action!
         </div>
 
         <div className="flex justify-around">
