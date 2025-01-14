@@ -13,7 +13,7 @@ const AnnouncementPage = () => {
   const mockAnnouncements = generateMockAnnouncements().sort(
     (a, b) => b.date.getTime() - a.date.getTime()
   );
-  const [announcements, setAnnouncements] =
+  const [announcements] = //add setAnnouncements here, removed for CI
     useState<Announcement[]>(mockAnnouncements);
   const [filteredAnnouncements, setFilteredAnnouncements] =
     useState<Announcement[]>(mockAnnouncements);
@@ -136,7 +136,7 @@ const AnnouncementPage = () => {
               </div>
             </div>
           ) : (
-            currentAnnouncements.map((announcement, index) => (
+            currentAnnouncements.map((announcement) => (
               <AnnouncementComponent
                 key={announcement.id}
                 keyword={announcement.keyword}
