@@ -17,6 +17,7 @@ const AnnouncementPage = () => {
     useState<Announcement[]>(mockAnnouncements);
   const [filteredAnnouncements, setFilteredAnnouncements] =
     useState<Announcement[]>(mockAnnouncements);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -49,7 +50,7 @@ const AnnouncementPage = () => {
   }
 
   const handleSearch = (query: string) => {
-    const filtered = announcements.filter((announcement) => {
+    const filtered = mockAnnouncements.filter((announcement) => {
       const titleMatch = announcement.title
         .toLowerCase()
         .includes(query.toLowerCase());
@@ -69,17 +70,19 @@ const AnnouncementPage = () => {
   };
 
   const handleFilterChange = (filterValue: string) => {
-    let sortedAnnouncements = [...filteredAnnouncements];
+    let sortedAnnouncements = [...announcements];
 
     switch (filterValue) {
       case "Most Likes":
         sortedAnnouncements.sort((a, b) => (b.likes || 0) - (a.likes || 0));
         break;
       case "Tag: Project":
-        sortedAnnouncements = announcements.filter((a) => a.tag === "Project");
+        sortedAnnouncements = sortedAnnouncements.filter(
+          (a) => a.tag === "Project"
+        );
         break;
       case "Tag: Organization":
-        sortedAnnouncements = announcements.filter(
+        sortedAnnouncements = sortedAnnouncements.filter(
           (a) => a.tag === "Organization"
         );
         break;
@@ -98,7 +101,6 @@ const AnnouncementPage = () => {
     currentPage * announcementsPerPage
   );
 
-  // Handle page change
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     page: number
@@ -136,7 +138,7 @@ const AnnouncementPage = () => {
           ) : (
             currentAnnouncements.map((announcement, index) => (
               <AnnouncementComponent
-                key={index}
+                key={announcement.id}
                 keyword={announcement.keyword}
                 title={announcement.title}
                 date={announcement.date}
