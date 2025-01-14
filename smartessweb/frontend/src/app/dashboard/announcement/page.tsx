@@ -76,12 +76,12 @@ const AnnouncementPage = () => {
       case "Most Likes":
         sortedAnnouncements.sort((a, b) => (b.likes || 0) - (a.likes || 0));
         break;
-      case "Tag: Project":
+      case "Project Level":
         sortedAnnouncements = sortedAnnouncements.filter(
           (a) => a.tag === "Project"
         );
         break;
-      case "Tag: Organization":
+      case "Organization Level":
         sortedAnnouncements = sortedAnnouncements.filter(
           (a) => a.tag === "Organization"
         );
