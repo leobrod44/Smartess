@@ -128,9 +128,11 @@ exports.getUserProjects = async (req, res) => {
                     pending: tickets?.filter(t => t.status === 'pending').length || 0,
                     closed: tickets?.filter(t => t.status === 'closed').length || 0
                 };
+
+                const filteredHubUsersData = hubUsers.filter(user => user.hub_user_type !== 'owner');
         
                 // Fetch user data for each user_id associated with the hub
-                const users = await Promise.all(hubUsers.map(async (hubUser) => {
+                const users = await Promise.all(filteredHubUsersData.map(async (hubUser) => {
                     const { data: userData, error: userError } = await supabase
                         .from('user')
                         .select('user_id, first_name, last_name, email')
