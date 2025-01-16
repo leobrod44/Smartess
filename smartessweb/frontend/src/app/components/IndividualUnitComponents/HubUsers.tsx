@@ -84,7 +84,9 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
               <div className="text-[#14323B] font-semibold">
                 Telephone:
               </div>{" "}
-              {user.telephone || "Not Provided"}
+                {user.telephone
+                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(3, 6)}-${user.telephone.slice(6)}`
+                : "Not Provided"}
               <div className="text-[#14323B] font-semibold">Email:</div>{" "}
               {user.email}
               <p>
@@ -111,7 +113,9 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
               {user.firstName} {user.lastName}
             </div>
             <div className="hidden md:flex items-center justify-center">
-              {user.telephone || "Not Provided"}
+              {user.telephone
+                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(3, 6)}-${user.telephone.slice(6)}`
+                : "Not Provided"}
             </div>
             <div
               className="hidden md:flex items-center justify-center  "
