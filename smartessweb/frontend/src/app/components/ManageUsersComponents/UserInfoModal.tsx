@@ -34,7 +34,7 @@ function UserInfoModal({
   currentUserRole,
   currentOrg,
   onDeleteUser,
-  onSave
+  onSave,
 }: UserInfoModalProps) {
   const [role, setRole] = useState<"admin" | "basic" | "master">(initialRole);
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
@@ -48,8 +48,7 @@ function UserInfoModal({
   const [projectIdsToDelete, setProjectIdsToDelete] = useState<number[]>([]);
   const token = localStorage.getItem("token");
 
-  useEffect ( () => {
-
+  useEffect(() => {
     if (!token) {
       router.push("/sign-in");
       return;
@@ -57,17 +56,19 @@ function UserInfoModal({
 
     const fetchOrgProjectsData = async () => {
       try {
-        const responseOrgProjects = await manageAccountsApi.getOrgProjects(currentOrg, token);
+        const responseOrgProjects = await manageAccountsApi.getOrgProjects(
+          currentOrg,
+          token
+        );
         const fetchedOrgProjects = responseOrgProjects.orgProjects;
         setOrgProjects(fetchedOrgProjects);
-
       } catch (err) {
         console.error("Error fetching organization projects:", err);
       }
     };
 
     fetchOrgProjectsData();
-  } , [addresses, currentOrg] );
+  }, [addresses, currentOrg]);
 
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
@@ -101,9 +102,14 @@ function UserInfoModal({
         (addr) => addr !== addressToDelete
       );
 
-      const project = orgProjects.find((proj) => proj.address === addressToDelete);
+      const project = orgProjects.find(
+        (proj) => proj.address === addressToDelete
+      );
       if (project) {
-        setProjectIdsToDelete((prevIds) => [...prevIds, Number(project.projectId)]);
+        setProjectIdsToDelete((prevIds) => [
+          ...prevIds,
+          Number(project.projectId),
+        ]);
       }
       setAddresses(updatedAddresses);
     }
@@ -118,21 +124,26 @@ function UserInfoModal({
     setProjectMenuOpen(!isProjectMenuOpen);
   };
 
-  const handleProjectSelect = async (project: { projectId: number; address: string }) => {
-      setAddresses((prevAddresses) => [...prevAddresses, project.address]);
-      
-      if (selectedProjectIds.includes(project.projectId)) {
-        setSelectedProjectIds(selectedProjectIds.filter((id) => id !== project.projectId));
-      } else {
-        setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
-      }
+  const handleProjectSelect = async (project: {
+    projectId: number;
+    address: string;
+  }) => {
+    setAddresses((prevAddresses) => [...prevAddresses, project.address]);
 
-      setProjectMenuOpen(false);
+    if (selectedProjectIds.includes(project.projectId)) {
+      setSelectedProjectIds(
+        selectedProjectIds.filter((id) => id !== project.projectId)
+      );
+    } else {
+      setSelectedProjectIds((prevIds) => [...prevIds, project.projectId]);
+    }
+
+    setProjectMenuOpen(false);
   };
 
   const handleSave = async () => {
     try {
-      // remove matching IDs from both arrays in case a user adds a project then removes it 
+      // remove matching IDs from both arrays in case a user adds a project then removes it
       const filteredSelectedProjectIds = selectedProjectIds.filter(
         (id) => !projectIdsToDelete.includes(id)
       );
@@ -144,16 +155,19 @@ function UserInfoModal({
       setSelectedProjectIds(filteredSelectedProjectIds);
       setProjectIdsToDelete(filteredProjectIdsToDelete);
 
-      if (JSON.stringify(filteredSelectedProjectIds) !== JSON.stringify(filteredProjectIdsToDelete)) {
-        console.log("calling apis")
+      if (
+        JSON.stringify(filteredSelectedProjectIds) !==
+        JSON.stringify(filteredProjectIdsToDelete)
+      ) {
+        console.log("calling apis");
         await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
         await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
       }
-      
+
       if (role !== initialRole) {
         await changeUserRole(uid, currentOrg, role);
       }
-      
+
       onClose();
       onSave(addresses);
     } catch (err) {
@@ -171,9 +185,15 @@ function UserInfoModal({
       router.push("/sign-in");
       return;
     }
-  
+
     try {
-      await manageAccountsApi.assignOrgUserToProject(uid, currentOrg, projectIds, role, token);
+      await manageAccountsApi.assignOrgUserToProject(
+        uid,
+        currentOrg,
+        projectIds,
+        role,
+        token
+      );
     } catch (err) {
       console.error("Error assigning user to project:", err);
     }
@@ -188,9 +208,14 @@ function UserInfoModal({
       router.push("/sign-in");
       return;
     }
-  
+
     try {
-      await manageAccountsApi.removeOrgUserFromProject(uid, currentOrg, projectIds, token);
+      await manageAccountsApi.removeOrgUserFromProject(
+        uid,
+        currentOrg,
+        projectIds,
+        token
+      );
     } catch (err) {
       console.error("Error removing user from project:", err);
     }
@@ -200,160 +225,157 @@ function UserInfoModal({
     uid: number,
     currentOrg: number | undefined,
     role: "admin" | "basic" | "master"
-    ) => {
-      if (!token) {
-        router.push("/sign-in");
-        return;
-      }
-    
-      try {
-        await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
-      } catch (err) {
-        console.error("Error changing organization user's role:", err);
-      }
-  }
+  ) => {
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    try {
+      await manageAccountsApi.changeOrgUserRole(uid, currentOrg, role, token);
+    } catch (err) {
+      console.error("Error changing organization user's role:", err);
+    }
+  };
 
   const unlinkedProjects: { projectId: number; address: string }[] = orgProjects
-  .filter((project) => !addresses.includes(project.address))
-  .map((project) => ({
-    projectId: Number(project.projectId),
-    address: project.address,
-  }));
-
+    .filter((project) => !addresses.includes(project.address))
+    .map((project) => ({
+      projectId: Number(project.projectId),
+      address: project.address,
+    }));
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
-      <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4/5 max-w-md bg-white border border-gray-300 rounded-lg shadow-lg p-6 overflow-y-auto max-h-[80vh]">
-        <IconButton
-          onClick={onClose}
-          className="absolute top-2 right-2 text-[#30525E]"
-        >
-          <CloseIcon />
-        </IconButton>
-
-        <div className="flex flex-col items-center justify-center">
-          <img
-            src="path_to_profile_picture.jpg"
-            alt="Profile Picture"
-            className="w-24 h-24 rounded-full border-2 border-black mb-2"
-          />
-
-          <Typography
-            variant="h6"
-            id="user-details-modal"
-            className="text-[#30525E] font-sequel-sans-medium text-lg mb-2 pb-4"
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
+        <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
+          <IconButton
+            onClick={onClose}
+            className="absolute top-2 right-2 text-[#30525E]"
           >
-            {userName}
-          </Typography>
+            <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
+          </IconButton>
 
-          <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
-            <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
-              Role
-            </p>
-            <div className="flex-1 pl-12">
-              {isEditingRole ? (
-                <RoleEditForm
-                  currentRole={role}
-                  onRoleChange={handleRoleChange}
-                  onSave={handleSaveRoleChange}
-                />
-              ) : (
-                <div className="pl-12">
-                  <span className="inline-block px-8 py-1 border border-[#30525E] rounded-full">
-                    {role}
-                  </span>
-                </div>
-              )}
+          <div className="flex flex-col items-center justify-center">
+            <Typography
+              variant="h6"
+              id="user-details-modal"
+              className="text-[#254752] text-s font-sequel-sans-black mb-4"
+            >
+              {userName}
+            </Typography>
+
+            <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
+              <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
+                Role
+              </p>
+              <div className="flex-1 ">
+                {isEditingRole ? (
+                  <div className="flex flex-col space-y-2 items-center">
+                    <RoleEditForm
+                      currentRole={role}
+                      onRoleChange={handleRoleChange}
+                      onSave={handleSaveRoleChange}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center">
+                    <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
+                      {role}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {(currentUserRole === "master" || currentUserRole === "admin") &&
+                !isEditingRole &&
+                role !== "master" && (
+                  <IconButton
+                    className="ml-4 text-[#30525E] relative z-10"
+                    onClick={handleEditRoleClick}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
             </div>
-            {(currentUserRole === "master" || currentUserRole === "admin") &&
-              !isEditingRole &&
-              role !== "master" && (
-                <IconButton
-                  className="ml-4 text-[#30525E] relative z-10"
-                  onClick={handleEditRoleClick}
-                >
-                  <EditIcon />
+
+            <div className="flex items-center w-full">
+              <Typography
+                variant="body1"
+                className="mb-1 text-[#30525E] text-lg font-sequel-sans-black mb-4 text-left w-full pl-2"
+              >
+                <strong>Projects</strong>
+              </Typography>
+              {currentUserRole === "master" && (
+                <IconButton className="text-[#30525E]" onClick={handleAddClick}>
+                  <AddIcon />
                 </IconButton>
               )}
+            </div>
+
+            {isProjectMenuOpen && (
+              <ProjectAddressMenu
+                unlinkedProjects={unlinkedProjects}
+                onSelectProject={handleProjectSelect}
+              />
+            )}
+
+            {/* Project Address Cards */}
+            <div className="flex flex-col gap-2 w-full mt-4">
+              {addresses.map((address, index) => (
+                <div
+                  key={index}
+                  className="account-card border p-2 rounded shadow-md flex items-center justify-between"
+                >
+                  <p className="flex-1">{address}</p>
+                  {currentUserRole === "master" && (
+                    <IconButton
+                      className="text-red-600"
+                      onClick={() => handleDeleteClick(address)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center w-full">
-            <Typography
-              variant="body1"
-              className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium text-left w-full pl-2"
-            >
-              <strong>Projects</strong>
-            </Typography>
+          {/* Custom Save and Delete Buttons */}
+          <div className="flex justify-around mt-6">
+            {/* Delete button only for master */}
             {currentUserRole === "master" && (
-              <IconButton className="text-[#30525E]" onClick={handleAddClick}>
-                <AddIcon />
-              </IconButton>
+              <div
+                onClick={handleDeleteUserClick}
+                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
+              >
+                <div className="text-center text-white text-lg font-['Sequel Sans']">
+                  Delete
+                </div>
+              </div>
+            )}
+            {/* Save button for both admin and master */}
+            {(currentUserRole === "master" || currentUserRole === "admin") && (
+              <div
+                onClick={handleSave}
+                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
+              >
+                <div className="text-center text-white text-lg font-['Sequel Sans']">
+                  Save
+                </div>
+              </div>
             )}
           </div>
 
-          {isProjectMenuOpen && (
-            <ProjectAddressMenu
-              unlinkedProjects={unlinkedProjects}
-              onSelectProject={handleProjectSelect}
+          {isDeletePopupOpen && (
+            <DeleteConfirmationPopup
+              addressToDelete={addressToDelete}
+              userName={userName}
+              onConfirm={handleConfirmDelete}
+              isUserDeletion={isUserDeletion}
+              onCancel={handleCancelDelete}
             />
           )}
-
-          {/* Project Address Cards */}
-          <div className="flex flex-col gap-2 w-full mt-4">
-            {addresses.map((address, index) => (
-              <div
-                key={index}
-                className="account-card border p-2 rounded shadow-md flex items-center justify-between"
-              >
-                <p className="flex-1">{address}</p>
-                {currentUserRole === "master" && (
-                  <IconButton
-                    className="text-red-600"
-                    onClick={() => handleDeleteClick(address)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
-
-        {/* Custom Save and Delete Buttons */}
-        <div className="flex justify-center gap-4 mt-8">
-          {/* Save button for both admin and master */}
-          {(currentUserRole === "master" || currentUserRole === "admin") && (
-            <div
-              onClick={handleSave}
-              className="w-[150px] h-[25px] px-[25px] py-5 bg-[#266472] rounded-[30px] border-2 border-[#266472] justify-center items-center gap-2.5 inline-flex cursor-pointer"
-            >
-              <div className="text-center text-white text-2xl font-['Sequel Sans']">
-                Save
-              </div>
-            </div>
-          )}
-          {/* Delete button only for master */}
-          {currentUserRole === "master" && (
-            <div
-              onClick={handleDeleteUserClick}
-              className="w-[150px] h-[25px] px-[25px] py-5 bg-red-600 rounded-[30px] border-2 border-red-600 justify-center items-center gap-2.5 inline-flex cursor-pointer"
-            >
-              <div className="text-center text-white text-2xl font-['Sequel Sans']">
-                Delete
-              </div>
-            </div>
-          )}
-        </div>
-
-        {isDeletePopupOpen && (
-          <DeleteConfirmationPopup
-            addressToDelete={addressToDelete}
-            userName={userName}
-            onConfirm={handleConfirmDelete}
-            isUserDeletion={isUserDeletion}
-            onCancel={handleCancelDelete}
-          />
-        )}
       </div>
     </Modal>
   );
