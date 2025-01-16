@@ -68,9 +68,9 @@ const ResetPasswordPage = () => {
           className="flex flex-row items-center justify-center"
           onSubmit={handleSubmit}
         >
-          <section className="p-40">
+          <section className="">
             <div>
-              <h1 className="text-4xl text-[#30525E] pt-10 font-sequel-sans font-extrabold text-center">
+              <h1 className="text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold text-center">
                 Reset Password
               </h1>
             </div>
