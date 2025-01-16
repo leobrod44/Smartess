@@ -151,6 +151,8 @@ export interface Ticket {
 // Function to generate mock projects
 
 export interface Announcement {
+  id:string;
+
   title: string;
 
   keyword: string;
@@ -171,6 +173,7 @@ export interface Announcement {
 export const generateMockAnnouncements = (): Announcement[] => {
   return [
     {
+      id:"1",
       title: "1000 de la guachetiere",
       keyword: "REPAIR",
       date: new Date("2024-11-28"),
@@ -183,11 +186,12 @@ export const generateMockAnnouncements = (): Announcement[] => {
     },
 
     {
+       id:"2",
       title: "Organization",
       keyword: "GENERAL",
       date: new Date("2024-11-28"),
       tag: "Organization",
-      author: "Kendall Roy",
+      author: "Logan Roy",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 1,
@@ -198,6 +202,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
       ],
     },
     {
+      id:"3",
       title: "Organization",
       keyword: "EMERGENCY",
       date: new Date("2024-11-30"),
@@ -206,43 +211,57 @@ export const generateMockAnnouncements = (): Announcement[] => {
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 0,
-      files: [{ name: "dummy.jpg", url: "https://via.placeholder.com/300" }],
+      files: [{ name: "dummy.jpg", url: "https://placehold.co/100" }],
     },
     {
+      id:"4",
       title: "150 Rue Peel",
       keyword: "RENOVATION",
       date: new Date("2024-10-30"),
       tag: "Project",
       author: "Kenny Long",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
+        " Hello Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 6,
       files: [
         {
           name: "wide_image.gif",
-          url: "https://via.placeholder.com/1200x400",
+          url: "https://placehold.co/1200x400",
         },
       ],
     },
     {
+      id:"5",
       title: "150 Rue Peel",
       keyword: "REPAIR",
       date: new Date("2024-10-30"),
       tag: "Project",
-      author: "Kenny Long",
+      author: "Siobhan Roy",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit.",
       likes: 6,
       files: [
         {
           name: "wide_image.gif",
-          url: "https://via.placeholder.com/1200x400",
+          url: "https://placehold.co/1200x400",
         },
         {
-          name: "wide_image.gif",
-          url: "https://via.placeholder.com/1200x400",
+          name: "wide2_image.gif",
+          url: "https://placehold.co/1200x400",
         },
       ],
+    },
+    {
+      id:"6",
+      title: "1000 de la guachetiere",
+      keyword: "REPAIR",
+      date: new Date("2024-12-12"),
+      tag: "Project",
+      author: "Kiara Lee",
+      description:
+        "IMPORTANT ANNOUNCEMENT!! PLEASE READ :Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis aute irure dolor in reprehenderit. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum",
+      likes: 5,
+      files: [],
     },
   ];
 };
