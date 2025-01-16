@@ -5,7 +5,6 @@ import (
 	logs "Smartess/go/hub/logger"
 	"bytes"
 	"fmt"
-	"io/ioutil"
 
 	"os"
 	"os/exec"
@@ -42,7 +41,7 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 	dir := "/app/config/hub/cameras.yaml"
 
 	var cameras Cameras
-	data, err := ioutil.ReadFile(dir)
+	data, err := os.ReadFile(dir)
 	if err != nil {
 		return RtspProcessor{}, fmt.Errorf("failed to read file: %v", err)
 	}
