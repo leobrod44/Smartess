@@ -32,7 +32,9 @@ const HubOwner = ({
             <div className="text-[#14323B] font-semibold">User:</div>{" "}
             {owner.firstName} {owner.lastName}
             <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
-            {owner.telephone || "Not Provided"}
+            {owner.telephone
+              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(3, 6)}-${owner.telephone.slice(6)}`
+              : "Not Provided"}
             <div className="text-[#14323B] font-semibold">Email:</div>{" "}
             {owner.email}
             <p>
@@ -47,7 +49,9 @@ const HubOwner = ({
             {owner.firstName} {owner.lastName}
           </div>
           <div className="hidden md:block">
-            {owner.telephone || "Not Provided"}
+            {owner.telephone
+              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(3, 6)}-${owner.telephone.slice(6)}`
+              : "Not Provided"}
           </div>
           <div className="hidden md:block">{owner.email}</div>
           <div className="hidden md:flex justify-center">
