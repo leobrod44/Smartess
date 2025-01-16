@@ -34,7 +34,7 @@ queues:
 # =================================
 # ALERT QUEUES
 # =================================
-  - name: alerts
+  - name: information_alerts
     max_size: 100
     passive: false
     durable: true
@@ -43,7 +43,7 @@ queues:
     no_wait: false
     arguments: {}
 
-  - name: system_alerts
+  - name: warning_alerts
     max_size: 100
     passive: false
     durable: true
@@ -52,43 +52,7 @@ queues:
     no_wait: false
     arguments: { }
 
-  - name: notification_alerts
-    max_size: 100
-    passive: false
-    durable: true
-    auto_delete: false
-    exclusive: false
-    no_wait: false
-    arguments: { }
-
-  - name: audio_alerts
-    max_size: 100
-    passive: false
-    durable: true
-    auto_delete: false
-    exclusive: false
-    no_wait: false
-    arguments: { }
-
-  - name: visual_alerts
-    max_size: 100
-    passive: false
-    durable: true
-    auto_delete: false
-    exclusive: false
-    no_wait: false
-    arguments: { }
-
-  - name: log_alerts
-    max_size: 100
-    passive: false
-    durable: true
-    auto_delete: false
-    exclusive: false
-    no_wait: false
-    arguments: { }
-
-  - name: actionable_alerts
+  - name: critical_alerts
     max_size: 100
     passive: false
     durable: true
@@ -146,20 +110,12 @@ exchanges:
     durable: true
     auto_delete: false
     bindings:
-      - queue: alerts
-        routing_key: "#.alerts.*"
-      - queue: system_alerts
-        routing_key: "system.alerts.*"
-      - queue: notification_alerts
-        routing_key: "notification.alerts.*"
-      - queue: audio_alerts
-        routing_key: "audio.alerts.*"
-      - queue: visual_alerts
-        routing_key: "visual.alerts.*"
-      - queue: log_alerts
-        routing_key: "log.alerts.*"
-      - queue: actionable_alerts
-        routing_key: "actionable.alerts.*"
+      - queue: information_alerts
+        routing_key: "information.alerts.*"
+      - queue: warning_alerts
+        routing_key: "warning.alerts.*"
+      - queue: critical_alerts
+        routing_key: "critical.alerts.*"
 
   - name: smartess.videostream
     type: direct
@@ -198,3 +154,101 @@ exchanges:
 #        routing_key: "#.error.#"
 #      - queue: hub-info-logs
 #        routing_key: "#.info.#"
+#
+#
+#      - queue: system_alerts
+#        routing_key: "system.alerts.*"
+#      - queue: notification_alerts
+#        routing_key: "notification.alerts.*"
+#      - queue: audio_alerts
+#        routing_key: "audio.alerts.*"
+#      - queue: visual_alerts
+#        routing_key: "visual.alerts.*"
+#      - queue: log_alerts
+#        routing_key: "log.alerts.*"
+#      - queue: actionable_alerts
+#        routing_key: "actionable.alerts.*"
+#
+#
+#      - name: system_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#      - name: notification_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#      - name: audio_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#      - name: visual_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#      - name: log_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#      - name: actionable_alerts
+#        max_size: 100
+#        passive: false
+#        durable: true
+#        auto_delete: false
+#        exclusive: false
+#        no_wait: false
+#        arguments: { }
+#
+#  {
+#    "routing_key": "normal.alerts.test",
+#    "content": "{\"message\": \"normal alert\"}"
+#  },
+#  {
+#    "routing_key": "system.alerts.test",
+#    "content": "{\"message\": \"system alert\"}"
+#  },
+#  {
+#    "routing_key": "notification.alerts.test",
+#    "content": "{\"message\": \"notification alert\"}"
+#  },
+#  {
+#    "routing_key": "audio.alerts.test",
+#    "content": "{\"message\": \"audio alert\"}"
+#  },
+#  {
+#    "routing_key": "visual.alerts.test",
+#    "content": "{\"message\": \"visual alert\"}"
+#  },
+#  {
+#    "routing_key": "log.alerts.test",
+#    "content": "{\"message\": \"log alert\"}"
+#  },
+#  {
+#    "routing_key": "actionable.alerts.test",
+#    "content": "{\"message\": \"actionable alert\"}"
+#  }
