@@ -247,133 +247,135 @@ function UserInfoModal({
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
-      <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white border border-gray-300 rounded-lg shadow-lg p-10 overflow-y-auto max-h-[90vh]">
-        <IconButton
-          onClick={onClose}
-          className="absolute top-2 right-2 text-[#30525E]"
-        >
-          <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
-        </IconButton>
-
-        <div className="flex flex-col items-center justify-center">
-          <Typography
-            variant="h6"
-            id="user-details-modal"
-            className="text-[#254752] text-s font-sequel-sans-black mb-4"
+      <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
+        <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
+          <IconButton
+            onClick={onClose}
+            className="absolute top-2 right-2 text-[#30525E]"
           >
-            {userName}
-          </Typography>
+            <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
+          </IconButton>
 
-          <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
-            <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
-              Role
-            </p>
-            <div className="flex-1 ">
-              {isEditingRole ? (
-                <div className="flex flex-col space-y-2 items-center">
-                  <RoleEditForm
-                    currentRole={role}
-                    onRoleChange={handleRoleChange}
-                    onSave={handleSaveRoleChange}
-                  />
-                </div>
-              ) : (
-                <div className="flex justify-center items-center">
-                  <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
-                    {role}
-                  </span>
-                </div>
-              )}
+          <div className="flex flex-col items-center justify-center">
+            <Typography
+              variant="h6"
+              id="user-details-modal"
+              className="text-[#254752] text-s font-sequel-sans-black mb-4"
+            >
+              {userName}
+            </Typography>
+
+            <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
+              <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
+                Role
+              </p>
+              <div className="flex-1 ">
+                {isEditingRole ? (
+                  <div className="flex flex-col space-y-2 items-center">
+                    <RoleEditForm
+                      currentRole={role}
+                      onRoleChange={handleRoleChange}
+                      onSave={handleSaveRoleChange}
+                    />
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center">
+                    <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
+                      {role}
+                    </span>
+                  </div>
+                )}
+              </div>
+              {(currentUserRole === "master" || currentUserRole === "admin") &&
+                !isEditingRole &&
+                role !== "master" && (
+                  <IconButton
+                    className="ml-4 text-[#30525E] relative z-10"
+                    onClick={handleEditRoleClick}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                )}
             </div>
-            {(currentUserRole === "master" || currentUserRole === "admin") &&
-              !isEditingRole &&
-              role !== "master" && (
-                <IconButton
-                  className="ml-4 text-[#30525E] relative z-10"
-                  onClick={handleEditRoleClick}
-                >
-                  <EditIcon />
+
+            <div className="flex items-center w-full">
+              <Typography
+                variant="body1"
+                className="mb-1 text-[#30525E] text-lg font-sequel-sans-black mb-4 text-left w-full pl-2"
+              >
+                <strong>Projects</strong>
+              </Typography>
+              {currentUserRole === "master" && (
+                <IconButton className="text-[#30525E]" onClick={handleAddClick}>
+                  <AddIcon />
                 </IconButton>
               )}
+            </div>
+
+            {isProjectMenuOpen && (
+              <ProjectAddressMenu
+                unlinkedProjects={unlinkedProjects}
+                onSelectProject={handleProjectSelect}
+              />
+            )}
+
+            {/* Project Address Cards */}
+            <div className="flex flex-col gap-2 w-full mt-4">
+              {addresses.map((address, index) => (
+                <div
+                  key={index}
+                  className="account-card border p-2 rounded shadow-md flex items-center justify-between"
+                >
+                  <p className="flex-1">{address}</p>
+                  {currentUserRole === "master" && (
+                    <IconButton
+                      className="text-red-600"
+                      onClick={() => handleDeleteClick(address)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex items-center w-full">
-            <Typography
-              variant="body1"
-              className="mb-1 text-[#30525E] text-lg font-sequel-sans-black mb-4 text-left w-full pl-2"
-            >
-              <strong>Projects</strong>
-            </Typography>
+          {/* Custom Save and Delete Buttons */}
+          <div className="flex justify-around mt-6">
+            {/* Delete button only for master */}
             {currentUserRole === "master" && (
-              <IconButton className="text-[#30525E]" onClick={handleAddClick}>
-                <AddIcon />
-              </IconButton>
+              <div
+                onClick={handleDeleteUserClick}
+                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
+              >
+                <div className="text-center text-white text-lg font-['Sequel Sans']">
+                  Delete
+                </div>
+              </div>
+            )}
+            {/* Save button for both admin and master */}
+            {(currentUserRole === "master" || currentUserRole === "admin") && (
+              <div
+                onClick={handleSave}
+                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
+              >
+                <div className="text-center text-white text-lg font-['Sequel Sans']">
+                  Save
+                </div>
+              </div>
             )}
           </div>
 
-          {isProjectMenuOpen && (
-            <ProjectAddressMenu
-              unlinkedProjects={unlinkedProjects}
-              onSelectProject={handleProjectSelect}
+          {isDeletePopupOpen && (
+            <DeleteConfirmationPopup
+              addressToDelete={addressToDelete}
+              userName={userName}
+              onConfirm={handleConfirmDelete}
+              isUserDeletion={isUserDeletion}
+              onCancel={handleCancelDelete}
             />
           )}
-
-          {/* Project Address Cards */}
-          <div className="flex flex-col gap-2 w-full mt-4">
-            {addresses.map((address, index) => (
-              <div
-                key={index}
-                className="account-card border p-2 rounded shadow-md flex items-center justify-between"
-              >
-                <p className="flex-1">{address}</p>
-                {currentUserRole === "master" && (
-                  <IconButton
-                    className="text-red-600"
-                    onClick={() => handleDeleteClick(address)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
-
-        {/* Custom Save and Delete Buttons */}
-        <div className="flex justify-around mt-6">
-          {/* Delete button only for master */}
-          {currentUserRole === "master" && (
-            <div
-              onClick={handleDeleteUserClick}
-              className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
-            >
-              <div className="text-center text-white text-lg font-['Sequel Sans']">
-                Delete
-              </div>
-            </div>
-          )}
-          {/* Save button for both admin and master */}
-          {(currentUserRole === "master" || currentUserRole === "admin") && (
-            <div
-              onClick={handleSave}
-              className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
-            >
-              <div className="text-center text-white text-lg font-['Sequel Sans']">
-                Save
-              </div>
-            </div>
-          )}
-        </div>
-
-        {isDeletePopupOpen && (
-          <DeleteConfirmationPopup
-            addressToDelete={addressToDelete}
-            userName={userName}
-            onConfirm={handleConfirmDelete}
-            isUserDeletion={isUserDeletion}
-            onCancel={handleCancelDelete}
-          />
-        )}
       </div>
     </Modal>
   );
