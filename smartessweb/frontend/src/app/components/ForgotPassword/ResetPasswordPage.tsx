@@ -5,6 +5,7 @@ import Link from "next/link";
 import logo from "@/public/images/logo.png";
 import Toast, { showToastError, showToastSuccess } from "../Toast";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { IconButton } from "@mui/material";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
@@ -12,8 +13,9 @@ import Visibility from "@mui/icons-material/Visibility";
 const ResetPasswordPage = () => {
   const [newPassword, setnewPassword] = useState("");
   const [confirmNewPassword, setconfirmNewPassword] = useState("");
-
   const [showNewPassword, setshowNewPassword] = useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,6 +40,7 @@ const ResetPasswordPage = () => {
     }
 
     showToastSuccess("Password reset successful!");
+    router.push("/");
   };
 
   return (
