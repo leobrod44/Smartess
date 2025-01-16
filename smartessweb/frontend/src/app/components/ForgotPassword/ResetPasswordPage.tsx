@@ -78,7 +78,7 @@ const ResetPasswordPage = () => {
             <div>
               <h3 className="text-sm text-[red] pt-5 pb-5 font-sequel-sans-regular text-center">
                 Must be 8 characters long, include one capital letter, <br />
-                and one special character
+                and one special character.
               </h3>
             </div>
 
