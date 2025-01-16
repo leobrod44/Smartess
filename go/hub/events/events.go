@@ -57,6 +57,7 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 	iterCnt := 0
 	for {
 		msgType, message, err := r.webhookConn.ReadMessage()
+		// TODO RYAN GET KEY FROM MSG AND SEND TO PUBLISHTOPICMESSAGE
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to read message from WebSocket: %v", err))
 			continue
@@ -267,6 +268,7 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 func (client *EventHandler) PublishTopicMessages() error {
 	var messages []TopicMessage
 	var err error
+	// TODO RYAN test messages for now
 	messages, err = loadTopicMessages("/app/config/test_topic_messages.json")
 	if err != nil {
 		log.Fatalf("Failed to load test messages: %v\n", err)

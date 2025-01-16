@@ -36,14 +36,61 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		// Respond to "subscribe_events" with a mock message
 		if string(msg) == `{"id": 1, "type": "subscribe_events"}` {
-			mockResponse := fmt.Sprintf(`{"event": "mock_mongo_event", "data": "Hello MongoDB! Message number: %d", "timestamp": "%s"}`,
-				1, time.Now().Format(time.RFC3339))
-			err = conn.WriteMessage(msgType, []byte(mockResponse))
+			// MOCK ALERT INFORMATION
+			mockResponse1 := fmt.Sprintf(`{
+			  "entity_id": "light.living_room",
+			  "state": "on",
+			  "attributes": {
+				"friendly_name": "Living Room Light",
+				"brightness": 255
+			  },
+			  "last_changed": "%s"
+			}`, time.Now().Format(time.RFC3339))
+
+			err = conn.WriteMessage(msgType, []byte(mockResponse1))
 			if err != nil {
-				log.Println("Error sending message:", err)
+				log.Println("Error sending message1:", err)
 				break
 			}
-			log.Println("Sent mock event data to client")
+			log.Println("Sent mock event data1 to client")
+
+			// MOCK ALERT WARNING
+			mockResponse2 := fmt.Sprintf(`{
+			  "entity_id": "sensor.front_door_battery",
+			  "state": "15",
+			  "attributes": {
+				"friendly_name": "Front Door Sensor Battery",
+				"unit_of_measurement": "%%",
+				"battery_level": 15
+			  },
+			  "last_changed": "%s"
+			}`, time.Now().Format(time.RFC3339))
+
+			err = conn.WriteMessage(msgType, []byte(mockResponse2))
+			if err != nil {
+				log.Println("Error sending message1:", err)
+				break
+			}
+			log.Println("Sent mock event data1 to client")
+
+			// MOCK ALERT CRITICAL
+			mockResponse3 := fmt.Sprintf(`{
+			  "entity_id": "binary_sensor.smoke_detector",
+			  "state": "on",
+			  "attributes": {
+				"friendly_name": "Kitchen Smoke Detector",
+				"smoke_detected": true,
+				"battery_level": 80
+			  },
+			  "last_changed": "%s"
+			}`, time.Now().Format(time.RFC3339))
+
+			err = conn.WriteMessage(msgType, []byte(mockResponse3))
+			if err != nil {
+				log.Println("Error sending message1:", err)
+				break
+			}
+			log.Println("Sent mock event data1 to client")
 		}
 	}
 }
