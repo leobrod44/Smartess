@@ -15,7 +15,6 @@ type RabbitMQInstance struct {
 }
 
 type RabbitMQConfig struct {
-	Queues    []QueueConfig    `yaml:"queues"`
 	Exchanges []ExchangeConfig `yaml:"exchanges"`
 }
 

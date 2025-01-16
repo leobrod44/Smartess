@@ -1,0 +1,30 @@
+exchanges:
+  - name: alerts
+    type: topic
+    durable: true
+    auto_delete: false
+    bindings:
+      - queue: alerts.warning
+        routing_key: "alerts.warning.*"
+      - queue: alerts.critical
+        routing_key: "alerts.critical.*"
+
+  - name: videostream
+    type: topic
+    durable: true
+    auto_delete: false
+    bindings:
+      - queue: videostream.hubid
+        routing_key: "videostream.hubid.*"
+  
+  - name: logs
+    type: topic
+    durable: true
+    auto_delete: false
+    bindings:
+      - queue: logs.warn
+        routing_key: "logs.warn.*"
+      - queue: logs.error
+        routing_key: "logs.error.*"
+      - queue: logs.info
+        routing_key: "logs.info.*"

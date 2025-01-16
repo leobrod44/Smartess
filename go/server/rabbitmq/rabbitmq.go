@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"Smartess/go/common/logging"
 	common_rabbitmq "Smartess/go/common/rabbitmq"
+	"Smartess/go/server/rabbitmq/handlers"
 	"context"
 	"errors"
 	"fmt"
@@ -13,14 +14,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/streadway/amqp"
 	"go.uber.org/zap"
 )
 
 type RabbitMQServer struct {
 	instance  *common_rabbitmq.RabbitMQInstance
 	Logger    *zap.Logger
-	consumers []QueueConsumer
+	consumers []handlers.QueueConsumer
 }
 
 func Init() (RabbitMQServer, error) {
@@ -30,90 +30,50 @@ func Init() (RabbitMQServer, error) {
 		return RabbitMQServer{}, errors.New("Failed to initialize logger: " + err.Error())
 	}
 
+	//TODO remove mongo and change to supabase, also set as param rather than var passing
+
 	mongoClient := initMongoDB()
 
-	instance, err := common_rabbitmq.Init("/app/config/queues.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
+	instance, err := common_rabbitmq.Init("/app/config/config.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
 
-	// Declare the topic exchange for alerts
-	err = instance.Channel.ExchangeDeclare(
-		common_rabbitmq.Test0AlertRoutingKey, // name of the exchange
-		"topic",                              // type of exchange
-		true,                                 // durable
-		false,                                // auto-deleted
-		false,                                // internal
-		false,                                // no-wait
-		nil,
-	)
-	if err != nil {
-		logger.Fatal("Failed to declare alert topic exchange", zap.Error(err))
-	}
-	err = instance.Channel.ExchangeDeclare(
-		common_rabbitmq.Test0VideoStreamingRoutingKey, // name of the exchange
-		"direct", // type of exchange
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
-	if err != nil {
-		logger.Fatal("Failed to declare direct video streaming exchange", zap.Error(err))
-	}
+	var consumers []handlers.QueueConsumer
 
-	var consumers []QueueConsumer
-
-	//TODO add marshals struct, or check if necessary
-	for _, queueConfig := range instance.Config.Queues {
-		queue, err := instance.Channel.QueueDeclare(
-			queueConfig.Queue,      // name of the queue
-			queueConfig.Durable,    // durable
-			queueConfig.AutoDelete, // delete when unused
-			queueConfig.Exclusive,  // exclusive
-			queueConfig.NoWait,     // no-wait
-			queueConfig.Arguments,  // arguments
-		)
-		if err != nil {
-			instance.Channel.Close()
-			instance.Conn.Close() // Close connection if there's an error
-			logger.Fatal("Failed to declare queue", zap.String("queue", queueConfig.Queue), zap.Error(err))
-		}
-
-		var routingKeysBinded []string
-		//todo: Now only one exchange is setup, but eventually go through all exchanges
-		// added 2 exchanges
-		for _, exchanges := range instance.Config.Exchanges {
-			for _, binding := range exchanges.QueueBindings {
-				if binding.Queue == queue.Name {
-					err = instance.Channel.QueueBind(
-						queue.Name,         // queue name
-						binding.RoutingKey, // routing key
-						exchanges.Name,     // exchange name
-						false,
-						nil,
-					)
-					if err != nil {
-						return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
-							exchanges.Name, binding.RoutingKey, err)
-					}
-					routingKeysBinded = append(routingKeysBinded, binding.RoutingKey)
-
-				}
+	for _, exchangeConfig := range instance.Config.Exchanges {
+		for _, queueConfig := range exchangeConfig.QueueBindings {
+			queue, err := instance.Channel.QueueDeclare(
+				queueConfig.Queue,      // name of the queue
+				queueConfig.Durable,    // durable
+				queueConfig.AutoDelete, // delete when unused
+				queueConfig.Exclusive,  // exclusive
+				queueConfig.NoWait,     // no-wait
+				queueConfig.Arguments,  // arguments
+			)
+			if err != nil {
+				instance.Channel.Close()
+				instance.Conn.Close() // Close connection if there's an error
+				logger.Fatal("Failed to declare queue", zap.String("queue", queueConfig.Queue), zap.Error(err))
 			}
-		}
-
-		if len(routingKeysBinded) == 0 {
-			routingKeysBinded = append(routingKeysBinded, "")
-		}
-		for _, routingKey := range routingKeysBinded {
-			handler, err := setHandler(queue, routingKey, mongoClient)
+			err = instance.Channel.QueueBind(
+				queue.Name,             // queue name
+				queueConfig.RoutingKey, // routing key
+				exchangeConfig.Name,    // exchange name
+				false,
+				nil,
+			)
+			if err != nil {
+				return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
+					exchangeConfig.Name, queueConfig.RoutingKey, err)
+			}
+			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient)
 			if err != nil {
 				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 			}
-			consumer := QueueConsumer{rabbitmqQueue: queue, messageHandler: handler}
+			consumer := handlers.QueueConsumer{RabbitmqQueue: queue, MessageHandler: handler}
 			consumers = append(consumers, consumer)
+
 		}
 	}
 
@@ -123,14 +83,15 @@ func Init() (RabbitMQServer, error) {
 		Logger:    logger,
 		consumers: consumers,
 	}, nil
+
 }
 
 // Start starts the RabbitMQ server and begins processing messages from the queues.
 func (r *RabbitMQServer) Start() {
 	for _, smartessQueue := range r.consumers {
-		go func(queueConsumer QueueConsumer) {
+		go func(queueConsumer handlers.QueueConsumer) {
 			msgs, err := r.instance.Channel.Consume(
-				queueConsumer.rabbitmqQueue.Name, // Queue name
+				queueConsumer.RabbitmqQueue.Name, // Queue name
 				"",                               // Consumer
 				true,                             // Auto-acknowledge
 				false,                            // Exclusive
@@ -143,7 +104,7 @@ func (r *RabbitMQServer) Start() {
 					zap.Error(err))
 			}
 			for msg := range msgs {
-				queueConsumer.messageHandler.Handle(msg, r.Logger)
+				queueConsumer.MessageHandler.Handle(msg, r.Logger)
 
 			}
 		}(smartessQueue)
@@ -154,25 +115,16 @@ func (r *RabbitMQServer) Start() {
 	select {}
 }
 
-// TODO Consider migrating fully to exchanges here...
-func setHandler(queue amqp.Queue, optionalRoutingKey string, mongoClient *mongo.Client) (MessageHandler, error) {
-
-	if optionalRoutingKey != "" {
-		return &TopicMessageHandler{RoutingKey: optionalRoutingKey, mongoClient: mongoClient}, nil
-	}
-	switch queue.Name {
-	case "mongo-messages":
-		return &MongoMessageHandler{mongoClient}, nil
-	case "hub-info-logs":
-		return &HubLogHandler{logLevel: 0}, nil
-	case "hub-warn-logs":
-		return &HubLogHandler{logLevel: 1}, nil
-	case "hub-error-logs":
-		return &HubLogHandler{logLevel: 2}, nil
+func setHandler(exchange string, queue string, mongoClient *mongo.Client) (handlers.MessageHandler, error) {
+	switch exchange {
+	case "logs":
+		return handlers.NewHubLogHandler(queue), nil
 	case "alerts":
-		return &AlertHandler{mongoClient}, nil
+		return handlers.NewAlertHandler(mongoClient), nil
+	case "videostream":
+		return handlers.NewVideoHandler(), nil
 	default:
-		return nil, fmt.Errorf("no handler found for queue: %s", queue.Name)
+		return nil, fmt.Errorf("no handler found for queue: %s", queue)
 	}
 }
 
