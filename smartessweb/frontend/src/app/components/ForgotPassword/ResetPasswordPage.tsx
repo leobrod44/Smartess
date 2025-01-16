@@ -82,7 +82,7 @@ const ResetPasswordPage = () => {
               </h3>
             </div>
 
-            <div className="flex flex-col w-full items-center pb-2">
+            <div className="flex flex-col w-full  pb-2">
               <div className="flex flex-col text-sm text-[#52525C]">
                 <div className="relative w-96">
                   <label
@@ -99,13 +99,6 @@ const ResetPasswordPage = () => {
                     value={newPassword}
                     onChange={(e) => setnewPassword(e.target.value)}
                   />
-                  <IconButton
-                    type="button"
-                    onClick={() => setshowNewPassword(!showNewPassword)}
-                    className="absolute text-[#266472] top-2 right-2"
-                  >
-                    {showNewPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
                 </div>
                 <label htmlFor="confirm-password" className="pb-4 pt-4">
                   Confirm New Password
@@ -118,6 +111,15 @@ const ResetPasswordPage = () => {
                   value={confirmNewPassword}
                   onChange={(e) => setconfirmNewPassword(e.target.value)}
                 />
+              </div>
+              <div className="flex justify-start pt-2">
+                <IconButton
+                  type="button"
+                  onClick={() => setshowNewPassword(!showNewPassword)}
+                  className="text-[#266472]"
+                >
+                  {showNewPassword ? <Visibility /> : <VisibilityOff />}
+                </IconButton>
               </div>
             </div>
 
