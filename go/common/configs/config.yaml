@@ -3,28 +3,82 @@ exchanges:
     type: topic
     durable: true
     auto_delete: false
+    description: "Exchange for alert notifications"
     bindings:
       - queue: alerts.warning
         routing_key: "alerts.warning.*"
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}
+
       - queue: alerts.critical
         routing_key: "alerts.critical.*"
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}
 
   - name: videostream
     type: topic
     durable: true
     auto_delete: false
+    description: "Exchange for video streaming"
     bindings:
       - queue: videostream.hubid
         routing_key: "videostream.hubid.*"
-  
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}
+
   - name: logs
-    type: topic
+    type: direct
     durable: true
     auto_delete: false
+    description: "Exchange for log messages"
     bindings:
       - queue: logs.warn
-        routing_key: "logs.warn.*"
+        routing_key: logs.warn
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}
+
       - queue: logs.error
-        routing_key: "logs.error.*"
+        routing_key: logs.error
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}
+
       - queue: logs.info
-        routing_key: "logs.info.*"
+        routing_key: logs.info
+        type: queue
+        max_size: 0
+        passive: false
+        durable: true
+        auto_delete: false
+        exclusive: false
+        no_wait: false
+        arguments: {}

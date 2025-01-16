@@ -34,7 +34,7 @@ func Init() (RabbitMQServer, error) {
 
 	mongoClient := initMongoDB()
 
-	instance, err := common_rabbitmq.Init("/app/config/config.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
+	instance, err := common_rabbitmq.Init("/app/config/config.yaml")
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
@@ -42,6 +42,20 @@ func Init() (RabbitMQServer, error) {
 	var consumers []handlers.QueueConsumer
 
 	for _, exchangeConfig := range instance.Config.Exchanges {
+		logger.Info("Exchange: ", zap.Any("exchange", exchangeConfig))
+		err = instance.Channel.ExchangeDeclare(
+			exchangeConfig.Name,         // name
+			exchangeConfig.ExchangeType, // type
+			exchangeConfig.Durable,      // durable
+			exchangeConfig.AutoDelete,   // auto-deleted
+			false,                       // internal
+			false,                       // no-wait
+			nil,
+		)
+		if err != nil {
+			logger.Fatal("Failed to declare alert topic exchange", zap.Error(err))
+		}
+
 		for _, queueConfig := range exchangeConfig.QueueBindings {
 			queue, err := instance.Channel.QueueDeclare(
 				queueConfig.Queue,      // name of the queue
@@ -76,6 +90,7 @@ func Init() (RabbitMQServer, error) {
 
 		}
 	}
+	logger.Info("consumers: ", zap.Any("consumers", consumers))
 
 	// Return RabbitMQServer with consumers
 	return RabbitMQServer{
@@ -90,6 +105,7 @@ func Init() (RabbitMQServer, error) {
 func (r *RabbitMQServer) Start() {
 	for _, smartessQueue := range r.consumers {
 		go func(queueConsumer handlers.QueueConsumer) {
+			r.Logger.Info("Starting consumer", zap.String("queue", queueConsumer.RabbitmqQueue.Name))
 			msgs, err := r.instance.Channel.Consume(
 				queueConsumer.RabbitmqQueue.Name, // Queue name
 				"",                               // Consumer
@@ -104,6 +120,7 @@ func (r *RabbitMQServer) Start() {
 					zap.Error(err))
 			}
 			for msg := range msgs {
+				r.Logger.Info("Received message", zap.String("routing_key", msg.RoutingKey), zap.String("message_body", string(msg.Body)))
 				queueConsumer.MessageHandler.Handle(msg, r.Logger)
 
 			}

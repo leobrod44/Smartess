@@ -26,13 +26,23 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 			zap.String("msg", string(msg.Body)),
 		)
 	}
-	logger.Info("alert",
-		zap.String("hub_id", alert.HubIP),
-		zap.String("device_id", alert.DeviceID),
-		zap.String("state", alert.State),
-		zap.String("message", alert.Message),
-		zap.String("time_fired", alert.TimeStamp.String()),
-	)
+
+	switch alert.Type {
+	case structures.AlertTypeSmoke:
+		logger.Info("Smoke alert")
+	case structures.AlertTypeWater:
+		logger.Info("Water alert")
+	case structures.AlertTypeTemperature:
+		logger.Info("Temperature alert")
+	case structures.AlertTypeBatteryLow:
+		logger.Info("Battery low alert")
+	case structures.AlertTypeMotion:
+		logger.Info("Motion alert")
+	case structures.AlertTypeDoorOpen:
+		logger.Info("Door open alert")
+	default:
+		logger.Info("Unknown alert type")
+	}
 
 	// collection := h.MongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
 	// _, err = collection.InsertOne(context.TODO(), bson.D{
