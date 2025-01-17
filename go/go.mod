@@ -5,8 +5,6 @@ go 1.23
 require (
 	github.com/bluenviron/gortsplib/v4 v4.11.2
 	github.com/gorilla/websocket v1.5.3
-	github.com/pion/rtcp v1.2.14
-	github.com/pion/rtp v1.8.7-0.20240429002300-bc5124c9d0d0
 	github.com/streadway/amqp v1.1.0
 	go.mongodb.org/mongo-driver v1.17.1
 	go.uber.org/zap v1.27.0
@@ -20,6 +18,8 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/pion/randutil v0.1.0 // indirect
+	github.com/pion/rtcp v1.2.14 // indirect
+	github.com/pion/rtp v1.8.7-0.20240429002300-bc5124c9d0d0 // indirect
 	github.com/pion/sdp/v3 v3.0.9 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

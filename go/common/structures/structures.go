@@ -81,6 +81,7 @@ type EventContext struct {
 }
 
 type Alert struct {
+	Type      string    `json:"type"`
 	HubIP     string    `json:"hub_ip"`
 	DeviceID  string    `json:"device"`
 	State     string    `json:"state"`
