@@ -24,7 +24,7 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ logger: " + err.Error())
 	}
 
-	instance, err := common_rabbitmq.Init("/app/config/queues.yaml") //todo test with exchanges.yaml vs queues.yaml common/config files... merge or not ?
+	instance, err := common_rabbitmq.Init("/app/config/config.yaml")
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
