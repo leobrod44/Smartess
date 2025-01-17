@@ -102,102 +102,105 @@ const StartProjectPage = () => {
 
   return (
     <>
-      <LandingNavbar />
-      <Toast />
-      <main>
-        <section className="flex flex-col items-center justify-center">
-          <div>
-            <h1 className="text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold">
-              Start Your Project
-            </h1>
-          </div>
-
-          <div>
-            <h3 className="text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular">
-              Please fill in required information
-            </h3>
-          </div>
-        </section>
-
-        <form
-          className="flex flex-col items-center justify-center"
-          onSubmit={handleSubmit}
-        >
-          <section className="flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular">
-            {/* Left hand side card for user input */}
-            <div className="flex flex-col text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
-              <label className="pb-2 pt-2">Business name</label>
-              <input
-                type="text"
-                className="border border-gray-400 rounded-lg  px-3 py-1 w-80"
-                placeholder="Required"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-              />
-              <label className="pb-2 pt-2">Name</label>
-              <input
-                type="text"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-
-              <label className="pb-2 pt-2">Last name</label>
-              <input
-                type="text"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-              />
-
-              <label className="pb-2 pt-2">Telephone Number</label>
-              <input
-                type="tel"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
-                value={telephoneNumber}
-                onChange={(e) => setTelephoneNumber(e.target.value)}
-              />
-              <label className="pb-2 pt-2">Email</label>
-              <input
-                type="email"
-                className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                placeholder="Required"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-
-            {/* Right hand side card for user input */}
-            <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
-              <label className="pb-2 pt-2">Additional information</label>
-              <textarea
-                placeholder=""
-                className="border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-full  w-80"
-                name="Description"
-                rows={10}
-                cols={20}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </section>
-
-          {/* Start your project button */}
-          <section>
-            <div className="pb-10">
-              <button
-                type="submit"
-                className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300"
-              >
+      <div className="flex flex-col min-h-screen">
+        <LandingNavbar />
+        <Toast />
+        <main className="flex-grow">
+          <section className="flex flex-col items-center justify-center">
+            <div>
+              <h1 className="text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold">
                 Start Your Project
-              </button>
+              </h1>
+            </div>
+
+            <div>
+              <h3 className="text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular">
+                Please fill in required information
+              </h3>
             </div>
           </section>
-        </form>
-      </main>
+
+          <form
+            className="flex flex-col items-center justify-center"
+            onSubmit={handleSubmit}
+          >
+            <section className="flex flex-col justify-center md:flex-row mb-10 font-sequel-sans-regular">
+              {/* Left hand side card for user input */}
+              <div className="flex flex-col text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
+                <label className="pb-2 pt-2">Business name</label>
+                <input
+                  type="text"
+                  className="border border-gray-400 rounded-lg  px-3 py-1 w-80"
+                  placeholder="Required"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                />
+                <label className="pb-2 pt-2">Name</label>
+                <input
+                  type="text"
+                  className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
+                  placeholder="Required"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+
+                <label className="pb-2 pt-2">Last name</label>
+                <input
+                  type="text"
+                  className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
+                  placeholder="Required"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+
+                <label className="pb-2 pt-2">Telephone Number</label>
+                <input
+                  type="tel"
+                  className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
+                  placeholder="Required"
+                  value={telephoneNumber}
+                  onChange={(e) => setTelephoneNumber(e.target.value)}
+                />
+                <label className="pb-2 pt-2">Email</label>
+                <input
+                  type="email"
+                  className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
+                  placeholder="Required"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              {/* Right hand side card for user input */}
+              <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
+                <label className="pb-2 pt-2">Additional information</label>
+                <textarea
+                  placeholder=""
+                  className="border border-gray-400 rounded-lg  px-2 py-1.5 resize-none h-full  w-80"
+                  name="Description"
+                  rows={10}
+                  cols={20}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
+            </section>
+
+            {/* Start your project button */}
+            <section>
+              <div className="pb-10">
+                <button
+                  type="submit"
+                  className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300"
+                >
+                  Start Your Project
+                </button>
+              </div>
+            </section>
+          </form>
+        </main>
+        <footer className="w-full bg-[#266472] h-32"></footer>
+      </div>
     </>
   );
 };
