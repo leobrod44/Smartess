@@ -40,7 +40,6 @@ function UserInfoModal({
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
@@ -368,7 +367,6 @@ function UserInfoModal({
 
           {isDeletePopupOpen && (
             <DeleteConfirmationPopup
-              addressToDelete={addressToDelete}
               userName={userName}
               onConfirm={handleConfirmDelete}
               isUserDeletion={isUserDeletion}
