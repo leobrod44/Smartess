@@ -68,7 +68,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 			err = conn.WriteMessage(msgType, []byte(mockResponse2))
 			if err != nil {
-				log.Println("Error sending message1:", err)
+				log.Println("Error sending message2:", err)
 				break
 			}
 			log.Println("Sent mock event data1 to client")
@@ -87,7 +87,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 			err = conn.WriteMessage(msgType, []byte(mockResponse3))
 			if err != nil {
-				log.Println("Error sending message1:", err)
+				log.Println("Error sending message3:", err)
 				break
 			}
 			log.Println("Sent mock event data1 to client")
