@@ -1,6 +1,7 @@
 package ha
 
 import (
+	"Smartess/go/common/utils"
 	"strings"
 )
 
@@ -13,7 +14,7 @@ type EventClassification struct {
 }
 
 func classifyConciseEvent(event *ConciseEvent) EventClassification {
-	var classification EventClassification
+	classification := EventClassification{Class: "", Tags: []string{}}
 
 	// Determine the class
 	if event.Attributes.DeviceClass != nil {
@@ -30,21 +31,19 @@ func classifyConciseEvent(event *ConciseEvent) EventClassification {
 
 	// Collect tags
 	if event.Attributes.FriendlyName != nil {
-		classification.Tags = append(classification.Tags, formatTag(*event.Attributes.FriendlyName))
+		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.FriendlyName))
 	}
 
 	if event.Attributes.StateClass != nil {
-		classification.Tags = append(classification.Tags, formatTag(*event.Attributes.StateClass))
+		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.StateClass))
+	}
+	if event.Attributes.DeviceClass != nil {
+		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.DeviceClass))
 	}
 
 	//TODO: Additional tags can be added here based on other attributes + context conditionals
 
 	return classification
-}
-
-func formatTag(tag string) string {
-	// Format the tag to be suitable for routing keys (e.g., lowercase, no spaces)
-	return strings.ToLower(strings.ReplaceAll(tag, " ", "_"))
 }
 
 // TODO Expand and add edge cases
