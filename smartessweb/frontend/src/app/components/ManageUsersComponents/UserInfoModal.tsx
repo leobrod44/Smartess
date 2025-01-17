@@ -344,25 +344,25 @@ function UserInfoModal({
           <div className="flex justify-around mt-6">
             {/* Delete button only for master */}
             {currentUserRole === "master" && (
-              <div
+              <button
                 onClick={handleDeleteUserClick}
-                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
+                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
                   Delete
                 </div>
-              </div>
+              </button>
             )}
             {/* Save button for both admin and master */}
             {(currentUserRole === "master" || currentUserRole === "admin") && (
-              <div
+              <button
                 onClick={handleSave}
-                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
+                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
                   Save
                 </div>
-              </div>
+              </button>
             )}
           </div>
 
