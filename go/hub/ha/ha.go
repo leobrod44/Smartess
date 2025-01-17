@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+// HomeAssistantInstance is the Hass object represents a Home Assistant instance.
+// For more information, see: https://developers.home-assistant.io/docs/dev_101_hass
+type HomeAssistantInstance struct {
+	HassAPI struct {
+		Url         string
+		AccessToken string
+		Endpoints   map[string]string
+	}
+	Services    map[string]*structures.Service    `json:"services"`
+	Automations map[string]*structures.Automation `json:"automations"`
+	States      map[string]*structures.State      `json:"states"`
+
+	CoreConfig     interface{}
+	EventBus       interface{}
+	EntityRegistry interface{}
+}
 type WebhookMessage struct {
 	ID    int                     `json:"id"`
 	Type  string                  `json:"type"`
