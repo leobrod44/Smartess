@@ -346,7 +346,7 @@ function UserInfoModal({
             {currentUserRole === "master" && (
               <button
                 onClick={handleDeleteUserClick}
-                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 "
+                className="bg-[#ff5449] text-white text-xs w-[120px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
                   Delete User
@@ -357,7 +357,7 @@ function UserInfoModal({
             {(currentUserRole === "master" || currentUserRole === "admin") && (
               <button
                 onClick={handleSave}
-                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 "
+                className="bg-[#4b7d8d] text-white text-xs w-[120px] py-2 rounded-md hover:bg-[#254752] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
                   Save
