@@ -89,9 +89,17 @@ function UserInfoModal({
   };
 
   const handleDeleteClick = (address: string) => {
-    setAddressToDelete(address);
-    setIsUserDeletion(false);
-    setDeletePopupOpen(true);
+    const updatedAddresses = addresses.filter((addr) => addr !== address);
+    const project = orgProjects.find((proj) => proj.address === address);
+
+    if (project) {
+      setProjectIdsToDelete((prevIds) => [
+        ...prevIds,
+        Number(project.projectId),
+      ]);
+    }
+
+    setAddresses(updatedAddresses);
   };
 
   const handleDeleteUserClick = () => {
@@ -103,23 +111,7 @@ function UserInfoModal({
     if (isUserDeletion) {
       onDeleteUser(uid); // Handle user deletion
       onClose();
-    } else if (addressToDelete) {
-      const updatedAddresses = addresses.filter(
-        (addr) => addr !== addressToDelete
-      );
-
-      const project = orgProjects.find(
-        (proj) => proj.address === addressToDelete
-      );
-      if (project) {
-        setProjectIdsToDelete((prevIds) => [
-          ...prevIds,
-          Number(project.projectId),
-        ]);
-      }
-      setAddresses(updatedAddresses);
     }
-    setDeletePopupOpen(false);
   };
 
   const handleCancelDelete = () => {
@@ -146,8 +138,8 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-console.log("selectedProjectIds", selectedProjectIds)
-console.log("projectIdsToDelete", projectIdsToDelete)
+  console.log("selectedProjectIds", selectedProjectIds);
+  console.log("projectIdsToDelete", projectIdsToDelete);
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -357,7 +349,7 @@ console.log("projectIdsToDelete", projectIdsToDelete)
                 className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
-                  Delete
+                  Delete User
                 </div>
               </button>
             )}
