@@ -146,7 +146,8 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-
+console.log("selectedProjectIds", selectedProjectIds)
+console.log("projectIdsToDelete", projectIdsToDelete)
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -172,6 +173,9 @@ function UserInfoModal({
       if (role !== initialRole) {
         await changeUserRole(uid, currentOrg, role);
       }
+
+      setSelectedProjectIds([]);
+      setProjectIdsToDelete([]);
 
       onSave(addresses);
     } catch (err) {
