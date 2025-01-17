@@ -82,6 +82,26 @@ type EventContext struct {
 	ParentID string `json:"parent_id"`
 	UserID   string `json:"user_id"`
 }
+type Service struct {
+	ServiceID   string                 `json:"service_id"` // Important for service calls
+	Domain      string                 `json:"domain"`
+	Description string                 `json:"description"`
+	ServiceData map[string]interface{} `json:"service_data"`
+}
+
+// Automation represents an automation in Home Assistant.
+type Automation struct {
+	Alias     string `json:"alias"`
+	Trigger   string `json:"trigger"`
+	Condition string `json:"condition"`
+	Action    string `json:"action"`
+}
+
+type HARegistry interface {
+	Register(id string, item interface{}) error
+	Remove(id string) (interface{}, error)
+	Get(id string) (interface{}, error)
+}
 
 type Alert struct {
 	HubIP     string    `json:"hub_ip"`
