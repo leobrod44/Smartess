@@ -3,93 +3,144 @@ package rtsp
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	logs "Smartess/go/hub/logger"
-	"log"
+	"bytes"
+	"fmt"
+
+	"os"
+	"os/exec"
+	"strconv"
+	"time"
 
 	"github.com/bluenviron/gortsplib/v4"
-	"github.com/bluenviron/gortsplib/v4/pkg/base"
-	"github.com/bluenviron/gortsplib/v4/pkg/description"
-	"github.com/bluenviron/gortsplib/v4/pkg/format"
-	"github.com/pion/rtcp"
-	"github.com/pion/rtp"
+	"github.com/streadway/amqp"
+	"gopkg.in/yaml.v3"
 )
 
 type RtspProcessor struct {
 	instance *common_rabbitmq.RabbitMQInstance
 	client   *gortsplib.Client
-	streams  []base.URL
+	cameras  Cameras
 	Logger   *logs.Logger
 }
 
-func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (RtspProcessor, error) {
-	c := gortsplib.Client{}
+type CameraConfig struct {
+	Name        string `yaml:"name"`
+	Username    string `yaml:"username"`
+	Password    string `yaml:"password"`
+	Host        string `yaml:"host"`
+	Path        string `yaml:"path"`
+	SegmentTime int    `yaml:"segment_time"`
+}
 
-	urls := []string{
-		"rtsp://tapoadmin:tapoadmin@192.168.0.19:554/stream1",
+type Cameras struct {
+	CameraConfigs []CameraConfig `yaml:"cameras"`
+}
+
+func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (RtspProcessor, error) {
+
+	dir := "/app/config/hub/cameras.yaml"
+
+	var cameras Cameras
+	data, err := os.ReadFile(dir)
+	if err != nil {
+		return RtspProcessor{}, fmt.Errorf("failed to read file: %v", err)
 	}
 
-	var baseUrls []base.URL
-	for _, url := range urls {
-		baseUrl, err := base.ParseURL(url)
-		if err != nil {
-			log.Fatalf("Error parsing URL: %v", err)
-		}
-		baseUrls = append(baseUrls, *baseUrl)
+	err = yaml.Unmarshal(data, &cameras)
+	if err != nil {
+		return RtspProcessor{}, fmt.Errorf("failed to unmarshal yaml: %v", err)
 	}
 	return RtspProcessor{
 		instance: instance,
-		client:   &c,
-		streams:  baseUrls,
+		client:   &gortsplib.Client{},
+		cameras:  cameras,
 		Logger:   logger,
 	}, nil
 }
 
 func (rtsp *RtspProcessor) Start() {
-
-	for _, stream := range rtsp.streams {
-
-		// Connect to the RTSP server
-		err := rtsp.client.Start(stream.Scheme, stream.Host)
+	for _, camera := range rtsp.cameras.CameraConfigs {
+		streamURL := "rtsp://" + camera.Username + ":" + camera.Password + "@" + camera.Host + "/" + camera.Path
+		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
+		tmpDir := "/tmp/data" + camera.Name
+		err := os.MkdirAll(tmpDir, 0755)
 		if err != nil {
-			log.Fatalf("Error connecting to RTSP server: %v", err)
+			rtsp.Logger.Error(fmt.Sprintf("Error creating directory %v: %v", tmpDir, err))
+		}
+		cmd := exec.Command("ffmpeg",
+			"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+			"-i", streamURL, // Input RTSP stream
+			"-buffer_size", "1024000", // Set buffer size
+			"-timeout", "3000000", // Set timeout
+			"-c:v", "libx264", // Compress using H.264 codec
+			"-preset", "fast", // Use fast preset for encoding
+			"-crf", "23", // Control quality (lower = better)
+			"-f", "segment", // Enable segmentation
+			"-segment_time", strconv.Itoa(camera.SegmentTime), // Segment duration
+			"-reset_timestamps", "1", // Reset timestamps for each segment
+			"-segment_format", "mp4", // Output format
+			"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
+			"-segment_list_type", "m3u8", // HLS format
+			"-segment_list_size", "0", // Unlimited segments
+			"-segment_list_flags", "+live", // Make it a live playlist
+			fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir)) // Segment output
+
+		rtsp.Logger.Info(fmt.Sprintf("Starting FFmpeg for stream %s", camera.Name))
+
+		ffmpegOutput := &bytes.Buffer{}
+		cmd.Stdout = ffmpegOutput
+		cmd.Stderr = ffmpegOutput
+
+		err = cmd.Start()
+		if err != nil {
+			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
 
-		// Describe the available medias
-		desc, _, err := rtsp.client.Describe(&stream)
-		if err != nil {
-			log.Fatalf("Error describing media: %v", err)
-		}
+		go func(tmpDir string) {
+			for {
+				files, err := os.ReadDir(tmpDir)
+				if err != nil {
+					rtsp.Logger.Error(fmt.Sprintf("Error reading directory %v: %v", tmpDir, err))
+					return
+				}
 
-		// Set up all medias
-		err = rtsp.client.SetupAll(desc.BaseURL, desc.Medias)
-		if err != nil {
-			log.Fatalf("Error setting up media: %v", err)
-		}
+				for _, file := range files {
+					if file.IsDir() {
+						continue
+					}
+					if file.Name() != "segments.m3u8" {
+						segmentFilePath := fmt.Sprintf("%s/%s", tmpDir, file.Name())
 
-		rtsp.client.OnPacketRTPAny(func(medi *description.Media, forma format.Format, pkt *rtp.Packet) {
-			log.Printf("RTP packet from media %v\n", medi)
-		})
+						segmentFileContent, err := os.ReadFile(segmentFilePath)
+						if err != nil {
+							rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
+							continue
+						}
+						err = rtsp.instance.Channel.Publish(
+							"video_exchange", // Default exchange
+							"camera1",        // Routing key (queue name)
+							false,            // Mandatory
+							false,            // Immediate
+							amqp.Publishing{
+								ContentType: "application/octet-stream", // Type of the content
+								Body:        segmentFileContent,         // Content (segment file data)
+							})
+						if err != nil {
+							rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
+						}
+						err = os.Remove(segmentFilePath)
+						if err != nil {
+							rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
+							continue
+						}
+						rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
+					}
+				}
 
-		// Handle RTCP packet arrival
-		rtsp.client.OnPacketRTCPAny(func(medi *description.Media, pkt rtcp.Packet) {
-			log.Printf("RTCP packet received from media %v, type: %T", medi, pkt)
-		})
-
-		// Start playback
-		_, err = rtsp.client.Play(nil)
-		if err != nil {
-			log.Fatalf("Error starting playback: %v", err)
-		}
-
-		// Wait for the process to complete or until a fatal error occurs
-		log.Println("Waiting for the stream to play...")
-		err = rtsp.client.Wait()
-		if err != nil {
-			log.Fatalf("Fatal error: %v", err)
-		}
-
-		log.Println("Stream ended or connection closed successfully")
+				time.Sleep(time.Duration(camera.SegmentTime))
+			}
+		}(tmpDir)
 	}
-
 }
 
 func (rtsp *RtspProcessor) Close() {

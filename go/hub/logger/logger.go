@@ -43,19 +43,19 @@ func NewRabbitMQLogger() (*Logger, error) {
 		return nil, err
 	}
 
-	infoQueue, err := declareQueue(ch, "hub-info-logs")
+	infoQueue, err := declareQueue(ch, "logs.info")
 	if err != nil {
 		ch.Close()
 		return nil, err
 	}
 
-	warnQueue, err := declareQueue(ch, "hub-warn-logs")
+	warnQueue, err := declareQueue(ch, "logs.warn")
 	if err != nil {
 		ch.Close()
 		return nil, err
 	}
 
-	errorQueue, err := declareQueue(ch, "hub-error-logs")
+	errorQueue, err := declareQueue(ch, "logs.error")
 	if err != nil {
 		ch.Close()
 		return nil, err
@@ -103,7 +103,7 @@ func (r *Logger) logToRabbitMQ(queueName string, message string) error {
 	return r.channel.Publish(
 		"",        // Exchange
 		queueName, // Routing key
-		false,     // Mandatory
+		true,      // Mandatory
 		false,     // Immediate
 		logMessage,
 	)

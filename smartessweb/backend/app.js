@@ -19,6 +19,7 @@ const widgetRoutes = require('./routes/widgetRoutes');
 const manageAccountsRoutes = require('./routes/manageAccountsRoutes');
 const unitsRoutes = require('./routes/unitsRoutes');
 const individualUnitRoutes = require('./routes/individualUnitRoutes');
+const ticketsRoutes = require('./routes/ticketsRoutes');
 
 //Add path here
 app.use('/api/auth', authRoutes);
@@ -30,5 +31,6 @@ app.use('/api/widgets', widgetRoutes);
 app.use('/api/manage-accounts', manageAccountsRoutes);
 app.use('/api/units', unitsRoutes);
 app.use('/api/individual-unit', individualUnitRoutes);
+app.use('/api/tickets', ticketsRoutes);
 
 module.exports = app;

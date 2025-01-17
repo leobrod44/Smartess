@@ -225,6 +225,23 @@ export const unitsApi = {
 }
 
 export const individualUnitApi = {
+  getCurrentUserApi: async (token: string): Promise<{ currentUser: CurrentUser }> => {
+    const response = await fetch(`${API_URL}/individual-unit/get-current-user`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch current user data');
+    }
+
+    return data;
+  },
+
   getIndividualUnit: async ( unit_id: string, token: string): Promise<{ unit: Unit }> => {
     const response = await fetch(`${API_URL}/individual-unit/get-individual-unit`, {
       method: 'POST',
@@ -241,6 +258,27 @@ export const individualUnitApi = {
 
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch unit');
+    }
+
+    return data;
+  },
+
+  removeUserFromHub: async ( user_id: string | undefined, token: string): Promise<void> => {
+    const response = await fetch(`${API_URL}/individual-unit/remove-user-from-hub`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to remove user from hub');
     }
 
     return data;

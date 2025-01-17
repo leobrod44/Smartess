@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/streadway/amqp"
@@ -16,14 +15,13 @@ type RabbitMQInstance struct {
 }
 
 type RabbitMQConfig struct {
-	Queues    []QueueConfig    `yaml:"queues"`
 	Exchanges []ExchangeConfig `yaml:"exchanges"`
 }
 
 func UnmarshalConfig(path string) (RabbitMQConfig, error) {
 	var config RabbitMQConfig
 
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return RabbitMQConfig{}, fmt.Errorf("failed to read file: %v", err)
 	}

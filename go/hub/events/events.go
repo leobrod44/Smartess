@@ -7,11 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 
 	logs "Smartess/go/hub/logger"
@@ -53,45 +52,63 @@ func Init(selectedHub structures.HubTypeEnum, logger *logs.Logger, instance *com
 }
 
 func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
-	fmt.Print("Starting event handler")
-	iterCnt := 0
 	for {
-		msgType, message, err := r.webhookConn.ReadMessage()
-		// TODO RYAN GET KEY FROM MSG AND SEND TO PUBLISHTOPICMESSAGE
+		_, message, err := r.webhookConn.ReadMessage()
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to read message from WebSocket: %v", err))
 			continue
 		}
-		r.Logger.Info(fmt.Sprintf("Type: %s\nReceived: %s", strconv.Itoa(msgType), message))
 
-		if selectedHub == structures.MONGO_MOCK_HUB {
-			err = r.PublishMongo(message)
-			if err != nil {
-				r.Logger.Error(fmt.Sprintf("Failed to publish Mongo-Test message to RabbitMQ: %v", err))
-			}
-		} else {
-			var event ha.WebhookMessage
-			if err := json.Unmarshal(message, &event); err != nil {
-				r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
-				continue
-			}
-			_, err = r.checkPublishAlert(&event)
-			if err != nil {
-				r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
-				continue
-			}
+		var event ha.WebhookMessage
+		if err := json.Unmarshal(message, &event); err != nil {
+			r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
+			continue
 		}
-		if iterCnt == 0 {
-			err = r.PublishTopicMessages()
-			r.Logger.Info(fmt.Sprintf("Published messages to RabbitMQ"))
-			if err != nil {
-				r.Logger.Error(fmt.Sprintf("Failed to publish Test Topic messages to RabbitMQ: %v", err))
-			}
+		_, err = r.checkEvent(&event)
+		if err != nil {
+			r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
+			continue
 		}
-		iterCnt++
-		r.Logger.Info(fmt.Sprintf("Iteration count: %d", iterCnt))
-
 	}
+}
+
+// TODO all event parsing logic here
+func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
+
+	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
+		return false, nil
+	}
+
+	//TODO queue routing key logic hardcoded for now
+
+	alert_type := structures.AlertTypeWater
+
+	alert := structures.Alert{
+		HubIP:     os.Getenv("HUB_IP"),
+		DeviceID:  message.Event.Data.EntityID,
+		Message:   "Light state changed",
+		State:     message.Event.Data.NewState.State,
+		TimeStamp: message.Event.Data.NewState.LastChanged,
+		Type:      alert_type,
+	}
+
+	routeKey := "alerts.warning." + "test_id"
+	alertJson, err := json.Marshal(alert)
+
+	if err != nil {
+		return false, errors.New("failed to marshal alert")
+	}
+	r.Logger.Info(routeKey)
+	return true, r.instance.Channel.Publish(
+		"alerts", // exchange
+		routeKey, //key
+		true,     // mandatory
+		false,    // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(alertJson),
+		})
+
 }
 
 // TODO add with options which are dynamic with type of config, generic with event type, condition?
@@ -130,21 +147,16 @@ func connectWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (client *EventHandler) Publish(queueName string, message []byte) error {
-	return client.instance.Channel.Publish(
-		"",        // exchange
-		queueName, //key
-		false,     // mandatory
-		false,     // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		})
-}
 func (client *EventHandler) Close() {
-	client.instance.Channel.Close()
-	client.instance.Conn.Close()
-	client.webhookConn.Close()
+	closeWithErrorLog := func(closeFunc func() error, errMsg string) {
+		if err := closeFunc(); err != nil {
+			client.Logger.Error(fmt.Sprintf("%s: %v", errMsg, err))
+		}
+	}
+	closeWithErrorLog(client.instance.Channel.Close, "Failed to close RabbitMQ Instance channel(s)")
+	closeWithErrorLog(client.instance.Conn.Close, "Failed to close RabbitMQ Instance actual connection")
+	closeWithErrorLog(client.webhookConn.Close, "Failed to close WebSocket connection")
+
 }
 
 func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
@@ -216,35 +228,6 @@ func (client *EventHandler) PublishMongo(message []byte) error { // This is here
 		})
 }
 
-// TODO generalize
-func (r *EventHandler) checkPublishAlert(message *ha.WebhookMessage) (bool, error) {
-
-	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
-		return false, nil
-	}
-	r.Logger.Info(fmt.Sprintf("Received message %v", message))
-
-	alert := structures.Alert{
-		HubIP:     os.Getenv("HUB_IP"),
-		DeviceID:  message.Event.Data.EntityID,
-		Message:   "Light state changed",
-		State:     message.Event.Data.NewState.State,
-		TimeStamp: message.Event.Data.NewState.LastChanged,
-	}
-	r.Logger.Info(fmt.Sprintf("Sent alert for %s", alert))
-
-	alertJson, err := json.Marshal(alert)
-
-	if err != nil {
-		return false, errors.New("failed to marshal alert")
-	}
-	r.Logger.Info(fmt.Sprintf("Json alert %s", alertJson))
-	return true, r.Publish(
-		"alerts",
-		alertJson,
-	)
-
-}
 func loadTopicMessages(path string) ([]TopicMessage, error) {
 	var messages []TopicMessage
 
@@ -252,9 +235,14 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	// Closure (non parameter) needed to close local instance of file descritor after loadTopicMessages returns
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			log.Printf("failed to close file: %v", cerr)
+		}
+	}()
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		return nil, err
 	}
@@ -268,7 +256,6 @@ func loadTopicMessages(path string) ([]TopicMessage, error) {
 func (client *EventHandler) PublishTopicMessages() error {
 	var messages []TopicMessage
 	var err error
-	// TODO RYAN test messages for now
 	messages, err = loadTopicMessages("/app/config/test_topic_messages.json")
 	if err != nil {
 		log.Fatalf("Failed to load test messages: %v\n", err)
@@ -283,7 +270,7 @@ func (client *EventHandler) PublishTopicMessages() error {
 		{
 			Name:        common_rabbitmq.Test0AlertRoutingKey, // Alert exchange
 			Type:        "topic",
-			RoutingKeys: []string{"alerts"},
+			RoutingKeys: []string{"alerts", "notifications", "storemongo"},
 		},
 		{
 			Name:        common_rabbitmq.Test0VideoStreamingRoutingKey, // Video exchange
