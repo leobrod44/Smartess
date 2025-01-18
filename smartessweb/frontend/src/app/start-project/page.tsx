@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 import LandingNavbar from "@/app/components/LandingNavbar";
-
+import Logo from "../../public/images/logo.png";
+import Image from "next/image";
 const StartProjectPage = () => {
   const router = useRouter();
 
@@ -20,13 +21,13 @@ const StartProjectPage = () => {
   };
 
   const validatePhoneNumber = (phoneNumber: string) => {
-    const phoneRegex = /^\d{10}$/; // Simple 10-digit phone number validation
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
     return phoneRegex.test(phoneNumber);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!firstName || !lastName || !telephoneNumber) {
+    if (!firstName || !lastName || !telephoneNumber || !email) {
       showToastError("Please fill in all required fields");
       return;
     } else if (!validatePhoneNumber(telephoneNumber)) {
@@ -109,13 +110,31 @@ const StartProjectPage = () => {
           <section className="flex flex-col items-center justify-center">
             <div>
               <h1 className="text-4xl text-[#30525E] pt-20 font-sequel-sans font-extrabold">
-                Start Your Project
+                Start A Project With Us
               </h1>
             </div>
 
+            <h4 className="pt-3 font-sequel-sans text-[#266472]">
+              {" "}
+              Want to implement the{" "}
+              <Image
+                src={Logo}
+                alt="Smartess Logo"
+                width={100}
+                height={100}
+                className="inline ml-1"
+              />
+              system in your organization?{" "}
+            </h4>
+
+            <h5 className=" font-sequel-sans text-[#266472]">
+              {" "}
+              Fill out your details and we will get back to you as soon as
+              possible.
+            </h5>
             <div>
-              <h3 className="text-sm text-[#52525C] pt-10 pb-10 font-sequel-sans-regular">
-                Please fill in required information
+              <h3 className="text-sm text-[#52525C] pt-10 pb-4 font-sequel-sans-regular">
+                Please fill in all required fields
               </h3>
             </div>
           </section>
@@ -157,7 +176,7 @@ const StartProjectPage = () => {
                 <input
                   type="tel"
                   className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                  placeholder="Required"
+                  placeholder="Required : xxx-xxx-xxxx"
                   value={telephoneNumber}
                   onChange={(e) => setTelephoneNumber(e.target.value)}
                 />
