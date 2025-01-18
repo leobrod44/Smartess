@@ -1,4 +1,6 @@
 const supabase = require('../config/supabase');
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 exports.getAllHubUserEmailsInOrg = async (req, res) => {
   try {
@@ -51,7 +53,6 @@ exports.getAllHubUserEmailsInOrg = async (req, res) => {
 
     const userIds = hubUsers.map((hu) => hu.user_id);
 
-    // Step 4: Grab the user records, focusing on distinct emails
     const { data: users, error: userError } = await supabase
       .from('user')
       .select('user_id, email')
@@ -119,5 +120,60 @@ exports.getAllHubUserEmailsInProject = async (req, res) => {
     return res.json({ emails: uniqueEmails });
   } catch (error) {
     return res.status(500).json({ error: 'Internal server error.' });
+  }
+};
+
+exports.sendAnnouncementEmail = async (req, res) => {
+  const { emailList, type, selectedAddress, content, keywords, files } =
+    req.body;
+
+  const subject = `Smartess Announcement: ${
+    type === 'organization' ? 'Organization Update' : 'Project Update'
+  }`;
+
+  const htmlContent = `
+    <h1>${
+      type === 'organization'
+        ? 'Organization Announcement'
+        : 'Project Announcement'
+    }</h1>
+    <p>${content}</p>
+    ${
+      type === 'project' && selectedAddress
+        ? `<p><strong>Selected Address:</strong> ${selectedAddress}</p>`
+        : ''
+    }
+    ${
+      keywords && keywords.length > 0
+        ? `<p><strong>Keywords:</strong> ${keywords.join(', ')}</p>`
+        : ''
+    }
+    ${
+      files && files.length > 0
+        ? `<p><strong>Attached Files:</strong> ${files.join(', ')}</p>`
+        : ''
+    }
+  `;
+
+  try {
+    for (const email of emailList) {
+      console.log(`Sending email to: ${email}...`);
+
+      await resend.emails.send({
+        from: `Smartess <support@${process.env.RESEND_DOMAIN}>`,
+        to: email,
+        subject,
+        html: htmlContent,
+      });
+    }
+
+    return res.status(200).json({
+      message: 'All emails sent successfully.',
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Failed to send emails.',
+      error: error.message,
+    });
   }
 };
