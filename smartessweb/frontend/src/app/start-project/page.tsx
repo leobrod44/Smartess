@@ -5,6 +5,8 @@ import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 import LandingNavbar from "@/app/components/LandingNavbar";
 import Logo from "../../public/images/logo.png";
 import Image from "next/image";
+import { startProjectApi } from "@/api/start-project/start-project";
+
 const StartProjectPage = () => {
   const router = useRouter();
 
@@ -39,65 +41,16 @@ const StartProjectPage = () => {
     } else {
       try {
         // send email response to user
-        const sendEmailResponse = await fetch(
-          "http://localhost:3000/api/send-email",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              businessName,
-              firstName,
-              lastName,
-              telephoneNumber,
-              email,
-              description,
-            }),
-          }
-        );
-        const sendEmailData = await sendEmailResponse.json();
-
-        if (sendEmailResponse.ok) {
-          showToastSuccess("Email sent successfully!");
-
-          // store user email in database
-          const storeEmailResponse = await fetch(
-            "http://localhost:3000/api/store-start-project-data",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                businessName,
-                firstName,
-                lastName,
-                telephoneNumber,
-                email,
-                description,
-              }),
-            }
-          );
-          const storeEmailData = await storeEmailResponse.json();
-
-          if (storeEmailResponse.ok) {
-            setTimeout(() => {
-              router.push("/");
-            }, 1000);
-          } else {
-            showToastError(
-              storeEmailData.error || "Failed to store data. Please try again."
-            );
-          }
-        } else {
-          showToastError(
-            sendEmailData.error || "Failed to send email. Please try again."
-          );
-        }
+        await startProjectApi.sendEmail(businessName, firstName, lastName, telephoneNumber, email, description);
+        // store user email in database
+        await startProjectApi.storeStartProjectData(businessName, firstName, lastName, telephoneNumber, email, description);
       } catch {
         showToastError("Server error. Please try again later.");
       }
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+      showToastSuccess("Email sent successfully!");
     }
   };
 
@@ -191,7 +144,7 @@ const StartProjectPage = () => {
               </div>
 
               {/* Right hand side card for user input */}
-              <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
+                <div className="flex flex-col font-light text-sm text-[#52525C] pr-2 pl-2 w-full md:w-1/2">
                 <label className="pb-2 pt-2">Additional information</label>
                 <textarea
                   placeholder=""
@@ -199,10 +152,10 @@ const StartProjectPage = () => {
                   name="Description"
                   rows={10}
                   cols={20}
-                  value={description}
+                  value={description || ""}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-              </div>
+                </div>
             </section>
 
             {/* Start your project button */}
