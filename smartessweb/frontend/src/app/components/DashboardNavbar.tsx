@@ -421,7 +421,7 @@ const DashboardNavbar = () => {
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-6">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-5">
                     HOME
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
@@ -447,7 +447,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     GENERAL
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
@@ -473,7 +473,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     SECURITY
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
@@ -499,7 +499,7 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     COMMUNITY
                   </div>
                   <ul role="list" className="-mx-2 mt-2 space-y-1">
