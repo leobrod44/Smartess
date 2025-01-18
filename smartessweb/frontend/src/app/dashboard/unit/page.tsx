@@ -14,7 +14,6 @@ const unitsPerPage = 3;
 
 const UnitPage = () => {
   const router = useRouter();
-  const [setIsMounted] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
