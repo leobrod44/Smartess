@@ -3,7 +3,7 @@ import Image from "next/image";
 import building_straight from "../../public/images/building_straight.png";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Toast, { showToastError, showToastSuccess } from "../components/Toast";
+import Toast, { showToastError } from "../components/Toast";
 import { signInApi } from "@/api/sign-in/sign-in";
 import Logo from "../../public/images/logo.png";
 import { IconButton } from "@mui/material";
@@ -80,10 +80,9 @@ const SignInPage = () => {
       setUserFirstName(user.first_name);
       setUserLastName(user.last_name);
       setUserType(user.type);
-      showToastSuccess("Login successful!");
       setTimeout(() => {
         router.push("/dashboard");
-      }, 1000);
+      });
     } catch (error) {
       showToastError(
         error instanceof Error
