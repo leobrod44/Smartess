@@ -14,7 +14,7 @@ const unitsPerPage = 3;
 
 const UnitPage = () => {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const [setIsMounted] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,12 +41,7 @@ const UnitPage = () => {
     };
 
     fetchData();
-    setIsMounted(true);
   }, [router]);
-
-  // if (!isMounted) {
-  //   return <p>Loading...</p>;
-  // }
 
   // Mapping Units to components with Mock Data
   const allUnits = projects.flatMap((project) =>
