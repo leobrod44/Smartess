@@ -20,6 +20,7 @@ const UnitPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filterOptionsUnits = ["Most Pending Tickets"];
 
@@ -32,10 +33,12 @@ const UnitPage = () => {
     }
 
     const fetchData = async () => {
+      setIsLoading(true);
       const responseProjects = await unitsApi.getUserProjects(token);
       const fetchedProjects = responseProjects.projects;
       setProjects(fetchedProjects);
-    }
+      setIsLoading(false);
+    };
 
     fetchData();
     setIsMounted(true);
@@ -72,11 +75,15 @@ const UnitPage = () => {
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(unit.unitNumber)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
             unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
-          : String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
+          : String(unit.unitNumber)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
@@ -140,8 +147,9 @@ const UnitPage = () => {
         </div>
 
         <div className="bg-[#4b7d8d] p-[10px] rounded-[7px] w-full mx-auto mt-4">
-          {/* Check if currentUnits is empty and display a message */}
-          {currentUnits.length === 0 ? (
+          {isLoading ? (
+            <p className="text-white font-sequel-sans">Loading units...</p> 
+          ) : currentUnits.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
                 <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
