@@ -46,7 +46,7 @@ export default function Home() {
 
             <div className="relative z-20 text-center md:text-left flex-1 px-4 mt-10 text-white pt-20 ">
               <h2 className="text-xl md:text-2xl font-bold text-[#FFF]">
-                Resident Mobile app{" "}
+                Resident Mobile App{" "}
               </h2>
               <p className="mt-5 text-sm md:text-lg z-40 ">
                 Control your smart devices as soon as you <br />
@@ -73,13 +73,13 @@ export default function Home() {
         </div>
 
         <section
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10 "
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10 pb-10"
           style={{ marginTop: "150px", marginBottom: "50px" }}
         >
           {/* Text section: On the left for larger screens, stacked on smaller screens */}
           <div className="order-2 md:order-1">
-            <h2 className="text-xl md:text-2xl font-bold text-[#266472]">
-              Owner Web App
+            <h2 className="text-xl md:text-2xl font-bold text-[#266472] pt-5">
+              Management Web App
             </h2>
             <p className="mt-4 text-base md:text-lg text-[#266472]">
               A centralized system that aggregates information from an owner’s
