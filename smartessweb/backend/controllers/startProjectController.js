@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 exports.sendEmail = async (req, res) => {
   const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
 
-  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
+  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email)
     return res.status(400).json({ message: 'All fields are required' });
 
   console.log(`Sending email to: ${email}...`);
@@ -52,7 +52,7 @@ exports.sendEmail = async (req, res) => {
 exports.storeData = async (req, res) => {
   const { businessName, firstName, lastName, telephoneNumber, email, description } = req.body;
 
-  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email || !description)
+  if ( !businessName || !firstName || !lastName || !telephoneNumber || !email)
   return res.status(400).json({ message: 'All fields are required' });
 
   console.log(`Storing data for ${email} in database...`);
