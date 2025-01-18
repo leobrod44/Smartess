@@ -20,13 +20,13 @@ const StartProjectPage = () => {
   };
 
   const validatePhoneNumber = (phoneNumber: string) => {
-    const phoneRegex = /^\d{10}$/; // Simple 10-digit phone number validation
+    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/; 
     return phoneRegex.test(phoneNumber);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!firstName || !lastName || !telephoneNumber) {
+    if (!firstName || !lastName || !telephoneNumber || !email) {
       showToastError("Please fill in all required fields");
       return;
     } else if (!validatePhoneNumber(telephoneNumber)) {
@@ -157,7 +157,7 @@ const StartProjectPage = () => {
                 <input
                   type="tel"
                   className="border border-gray-400 rounded-lg  px-3 py-1  w-80"
-                  placeholder="Required"
+                  placeholder="Required : xxx-xxx-xxxx"
                   value={telephoneNumber}
                   onChange={(e) => setTelephoneNumber(e.target.value)}
                 />
