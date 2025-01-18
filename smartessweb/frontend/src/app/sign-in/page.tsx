@@ -80,10 +80,9 @@ const SignInPage = () => {
       setUserFirstName(user.first_name);
       setUserLastName(user.last_name);
       setUserType(user.type);
-      showToastSuccess("Login successful!");
       setTimeout(() => {
         router.push("/dashboard");
-      }, 1000);
+      });
     } catch (error) {
       showToastError(
         error instanceof Error
