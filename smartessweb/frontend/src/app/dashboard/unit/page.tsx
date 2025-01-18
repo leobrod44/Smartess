@@ -14,12 +14,12 @@ const unitsPerPage = 3;
 
 const UnitPage = () => {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
   const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   const filterOptionsUnits = ["Most Pending Tickets"];
 
@@ -32,18 +32,15 @@ const UnitPage = () => {
     }
 
     const fetchData = async () => {
+      setIsLoading(true);
       const responseProjects = await unitsApi.getUserProjects(token);
       const fetchedProjects = responseProjects.projects;
       setProjects(fetchedProjects);
-    }
+      setIsLoading(false);
+    };
 
     fetchData();
-    setIsMounted(true);
   }, [router]);
-
-  if (!isMounted) {
-    return <p>Loading...</p>;
-  }
 
   // Mapping Units to components with Mock Data
   const allUnits = projects.flatMap((project) =>
@@ -72,11 +69,15 @@ const UnitPage = () => {
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
+            String(unit.unitNumber)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
             unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
             ) // Check each user's first and last name
-          : String(unit.unitNumber).toLowerCase().includes(searchQuery.toLowerCase()) ||
+          : String(unit.unitNumber)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
             unit.owner.lastName
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
@@ -139,17 +140,18 @@ const UnitPage = () => {
           </div>
         </div>
 
-        <div className="bg-[#4b7d8d] p-[10px] rounded-[7px] w-full mx-auto mt-4">
-          {/* Check if currentUnits is empty and display a message */}
-          {currentUnits.length === 0 ? (
+        <div className="p-[10px] rounded-[7px] w-full mx-auto mt-4">
+          {isLoading ? (
+            <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+              Loading units...
+            </p>
+          ) : currentUnits.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-              <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 shadow-xl">
-                <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-                  No results found.
-                  <br />
-                  Please adjust your filters or search criteria.
-                </p>
-              </div>
+              <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+                No results found.
+                <br />
+                Please adjust your filters or search criteria.
+              </p>
             </div>
           ) : (
             /* Mapping of Filtered units by project selected in navar */
