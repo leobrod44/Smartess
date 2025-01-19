@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 var upgrader = websocket.Upgrader{
@@ -39,14 +37,25 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		if string(msg) == `{"id": 1, "type": "subscribe_events"}` {
 			// MOCK ALERT INFORMATION
 			mockResponse1 := fmt.Sprintf(`{
-			  "entity_id": "light.living_room",
-			  "state": "on",
-			  "attributes": {
-				"friendly_name": "Living Room Light",
-				"brightness": 255
-			  },
-			  "last_changed": "%s"
-			}`, time.Now().Format(time.RFC3339))
+				"attributes": {
+					"friendly_name": "Kitchen Light",
+					"off_brightness": null,
+					"off_with_transition": false,
+					"supported_color_modes": [
+						"onoff"
+					],
+					"supported_features": 8
+				},
+				"context": {
+					"id": "01JDN9R843GN161T321VYY0FJ7",
+					"parent_id": null,
+					"user_id": "288a21978a6d496b90aefec65844c6ec"
+				},
+				"entity_id": "light.lumi_lumi_switch_b1laus01_light_3",
+				"last_changed": "2024-11-26T22:33:57.907198+00:00",
+				"last_updated": "2024-11-26T22:33:57.907198+00:00",
+				"state": "off"
+			}`)
 
 			err = conn.WriteMessage(msgType, []byte(mockResponse1))
 			if err != nil {
@@ -54,45 +63,8 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			log.Println("Sent mock event data1 to client")
-
-			// MOCK ALERT WARNING
-			mockResponse2 := fmt.Sprintf(`{
-			  "entity_id": "sensor.front_door_battery",
-			  "state": "15",
-			  "attributes": {
-				"friendly_name": "Front Door Sensor Battery",
-				"unit_of_measurement": "%%",
-				"battery_level": 15
-			  },
-			  "last_changed": "%s"
-			}`, time.Now().Format(time.RFC3339))
-
-			err = conn.WriteMessage(msgType, []byte(mockResponse2))
-			if err != nil {
-				log.Println("Error sending message2:", err)
-				break
-			}
-			log.Println("Sent mock event data1 to client")
-
-			// MOCK ALERT CRITICAL
-			mockResponse3 := fmt.Sprintf(`{
-			  "entity_id": "binary_sensor.smoke_detector",
-			  "state": "on",
-			  "attributes": {
-				"friendly_name": "Kitchen Smoke Detector",
-				"smoke_detected": true,
-				"battery_level": 80
-			  },
-			  "last_changed": "%s"
-			}`, time.Now().Format(time.RFC3339))
-
-			err = conn.WriteMessage(msgType, []byte(mockResponse3))
-			if err != nil {
-				log.Println("Error sending message3:", err)
-				break
-			}
-			log.Println("Sent mock event data1 to client")
 		}
+
 	}
 }
 
