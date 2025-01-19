@@ -15,6 +15,10 @@ const (
 	AlertTypeBatteryLow  = "BatteryLow"
 	AlertTypeMotion      = "Motion"
 	AlertTypeDoorOpen    = "DoorOpen"
+	AlertTypeLight       = "Light"
+	AlertTypeLock        = "Lock"
+	AlertTypeFan         = "Fan"
+	AlertTypeUnknown     = "Unknown"
 )
 
 func (d HubTypeEnum) String() string {

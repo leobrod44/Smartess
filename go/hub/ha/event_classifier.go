@@ -56,3 +56,14 @@ func (*EventClassification) GenerateRoutingKey(event *ConciseEvent) string {
 	}
 	return routingKey
 }
+
+// TODO TEMP ALERT ROUTING KEY ONLY
+func (*EventClassification) GenerateAlertRoutingKey(event *ConciseEvent) string {
+	classification := classifyConciseEvent(event)
+	// Simple routing key format: class.tag1.tag2
+	routingKey := classification.Class
+	for _, tag := range classification.Tags {
+		routingKey += "." + tag
+	}
+	return routingKey
+}

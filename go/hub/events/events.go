@@ -3,6 +3,7 @@ package events
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	structures "Smartess/go/common/structures"
+	"Smartess/go/common/utils"
 	"Smartess/go/hub/ha"
 	"encoding/json"
 	"errors"
@@ -75,64 +76,60 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum, exchanges []com
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage, exchanges []common_rabbitmq.ExchangeConfig) (bool, error) {
 
-	////if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
-	////	return false, nil
-	////}
-	//
-	//// TODO RYAN ========================
-	//// event, key = check_for_event() | note that the event will have the type, the handle will use this type to handle the alert
-	//// 9999
-	//
-	//alert_type := structures.AlertTypeWater
-	//
-	//alert := structures.Alert{
-	//	HubIP:     os.Getenv("HUB_IP"),
-	//	DeviceID:  message.Event.Data.EntityID,
-	//	Message:   "Light state changed",
-	//	State:     message.Event.Data.NewState.State,
-	//	TimeStamp: message.Event.Data.NewState.LastChanged,
-	//	Type:      alert_type,
-	//}
-	//
-	//routeKey := "alerts.warning." + "test_id"
-	//alertJson, err := json.Marshal(alert)
-	//if err != nil {
-	//	return false, errors.New("failed to marshal alert")
-	//}
-	//
-	//// TODO ========================
-	//
-	//var exchangeName string
-	//// Find the matching exchange for the message's routing key
-	//for _, exchange := range exchanges {
-	//	for _, binding := range exchange.QueueBindings {
-	//		parts := strings.Split(binding.RoutingKey, ".")
-	//		if strings.Contains(message.RoutingKey, parts[0]) {
-	//			exchangeName = exchange.Name
-	//			break
-	//		}
-	//	}
-	//	if exchangeName != "" {
-	//		break
-	//	}
-	//}
-	//
-	//// If no exchange found for the routing key, log an error
-	//if exchangeName == "" {
-	//	log.Printf("No matching exchange found for routing key %s\n", message.RoutingKey)
-	//	return false, fmt.Errorf("no matching exchange found for routing key %s", message.RoutingKey)
-	//}
-	//
-	//return true, r.instance.Channel.Publish(
-	//	exchangeName,       // exchange
-	//	message.RoutingKey, //key
-	//	true,               // mandatory
-	//	false,              // immediate
-	//	amqp.Publishing{
-	//		ContentType: "text/plain",
-	//		Body:        []byte(alertJson),
-	//	})
-	return false, nil
+	var conciseEvent *ha.ConciseEvent
+	conciseEvent = ha.ConvertWebhookMessageToConciseEvent(message)
+	var routeKey string
+	classification := &ha.EventClassification{}
+	//  TODO NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT URGENCY INFORMATION/WARNING/CRITICAL
+	routeKey = classification.GenerateAlertRoutingKey(conciseEvent)
+	//  TODO NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT TYPE
+	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
+
+	alert := structures.Alert{
+		HubIP:    os.Getenv("HUB_IP"),
+		DeviceID: message.Event.Data.EntityID,
+		// TODO NEED FUNCTION TO DETERMINE THE MESSAGE LIKE STATE CHANGE OR ETC
+		Message:   *conciseEvent.Attributes.FriendlyName,
+		State:     message.Event.Data.NewState.State,
+		TimeStamp: message.Event.Data.NewState.LastChanged,
+		Type:      alertType,
+	}
+
+	alertJson, err := json.Marshal(alert)
+	if err != nil {
+		return false, errors.New("failed to marshal alert")
+	}
+
+	var exchangeName string
+	// Find the matching exchange for the message's routing key
+	for _, exchange := range exchanges {
+		for _, binding := range exchange.QueueBindings {
+			parts := strings.Split(binding.RoutingKey, ".")
+			if strings.Contains(routeKey, parts[0]) {
+				exchangeName = exchange.Name
+				break
+			}
+		}
+		if exchangeName != "" {
+			break
+		}
+	}
+
+	// If no exchange found for the routing key, log an error
+	if exchangeName == "" {
+		log.Printf("No matching exchange found for routing key %s\n", routeKey)
+		return false, fmt.Errorf("no matching exchange found for routing key %s", routeKey)
+	}
+
+	return true, r.instance.Channel.Publish(
+		exchangeName, // exchange
+		routeKey,     //key
+		true,         // mandatory
+		false,        // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        []byte(alertJson),
+		})
 }
 
 // TODO add with options which are dynamic with type of config, generic with event type, condition?
