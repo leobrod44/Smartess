@@ -80,15 +80,15 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage, exchanges []common
 	conciseEvent = ha.ConvertWebhookMessageToConciseEvent(message)
 	var routeKey string
 	classification := &ha.EventClassification{}
-	//  TODO NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT URGENCY INFORMATION/WARNING/CRITICAL
+	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT URGENCY/SEVERITY INFORMATION/WARNING/CRITICAL
 	routeKey = classification.GenerateAlertRoutingKey(conciseEvent)
-	//  TODO NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT TYPE
+	//  TODO 2 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT TYPE
 	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
 
 	alert := structures.Alert{
 		HubIP:    os.Getenv("HUB_IP"),
 		DeviceID: message.Event.Data.EntityID,
-		// TODO NEED FUNCTION TO DETERMINE THE MESSAGE LIKE STATE CHANGE OR ETC
+		// TODO 3 NEED FUNCTION TO DETERMINE THE MESSAGE LIKE STATE CHANGE OR ETC
 		Message:   *conciseEvent.Attributes.FriendlyName,
 		State:     message.Event.Data.NewState.State,
 		TimeStamp: message.Event.Data.NewState.LastChanged,
