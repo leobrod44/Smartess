@@ -5,7 +5,6 @@ type HubTypeEnum int
 const (
 	HA_NORMAL_HUB HubTypeEnum = iota
 	LOCAL_MOCK_HUB
-	MONGO_MOCK_HUB
 )
 
 const (

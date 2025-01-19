@@ -71,16 +71,15 @@ func GetDataFromAPIendpoint(fullApiUrl, token string, result interface{}) error 
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
 var alertMappings = map[string]string{
-	"light.*":      structures.AlertTypeLight,       // All lights are mapped to Light
-	"sensor.*":     structures.AlertTypeMotion,      // All motion sensors or general sensors to Motion
-	"lock.*":       structures.AlertTypeLock,        // All locks to Lock
-	"thermostat.*": structures.AlertTypeTemperature, // All thermostats to Temperature
-	"fan.*":        structures.AlertTypeFan,         // All fans to Fan
+	"light":      structures.AlertTypeLight,       // All lights are mapped to Light
+	"sensor":     structures.AlertTypeMotion,      // All motion sensors or general sensors to Motion
+	"lock":       structures.AlertTypeLock,        // All locks to Lock
+	"thermostat": structures.AlertTypeTemperature, // All thermostats to Temperature
+	"fan":        structures.AlertTypeFan,         // All fans to Fan
 }
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
 func DetermineAlertType(entityID string) string {
-	// Check entity type based on entity_id prefix
 	for prefix, alertType := range alertMappings {
 		if strings.HasPrefix(entityID, prefix) {
 			return alertType

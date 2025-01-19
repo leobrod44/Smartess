@@ -3,7 +3,6 @@ package handlers
 import (
 	"Smartess/go/common/structures"
 	"encoding/json"
-
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -40,6 +39,10 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		logger.Info("Motion alert")
 	case structures.AlertTypeDoorOpen:
 		logger.Info("Door open alert")
+	case structures.AlertTypeLight:
+		logger.Info("Light alert")
+	case structures.AlertTypeLock:
+		logger.Info("Lock alert")
 	default:
 		logger.Info("Unknown alert type")
 	}

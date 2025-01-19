@@ -79,7 +79,7 @@ func (hub *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
 	wg.Add(2)
 	go func() {
 		defer wg.Done() // Decrement the counter when this goroutine completes
-		hub.event_handler.Start(selectedHub, hub.instance.Config.Exchanges)
+		hub.event_handler.Start(selectedHub)
 	}()
 	go func() {
 		defer wg.Done() // Decrement the counter when this goroutine completes

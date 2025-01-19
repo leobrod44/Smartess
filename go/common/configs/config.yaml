@@ -6,7 +6,7 @@ exchanges:
     description: "Exchange for alert notifications"
     bindings:
       - queue: alerts.information
-        routing_key: "alerts.information.*"
+        routing_key: "alerts.information.#"
         type: queue
         max_size: 0
         passive: false
@@ -17,7 +17,7 @@ exchanges:
         arguments: { }
 
       - queue: alerts.warning
-        routing_key: "alerts.warning.*"
+        routing_key: "alerts.warning.#"
         type: queue
         max_size: 0
         passive: false
@@ -28,7 +28,7 @@ exchanges:
         arguments: {}
 
       - queue: alerts.critical
-        routing_key: "alerts.critical.*"
+        routing_key: "alerts.critical.#"
         type: queue
         max_size: 0
         passive: false
