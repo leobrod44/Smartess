@@ -51,7 +51,7 @@ func Init(selectedHub structures.HubTypeEnum, logger *logs.Logger, instance *com
 	}, nil
 }
 
-func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
+func (r *EventHandler) Start(selectedHub structures.HubTypeEnum, exchanges []common_rabbitmq.ExchangeConfig) {
 	for {
 		_, message, err := r.webhookConn.ReadMessage()
 		if err != nil {
@@ -64,7 +64,7 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 			r.Logger.Error(fmt.Sprintf("Failed to unmarshal message: %v", err))
 			continue
 		}
-		_, err = r.checkEvent(&event)
+		_, err = r.checkEvent(&event, exchanges)
 		if err != nil {
 			r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
 			continue
@@ -73,42 +73,66 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 }
 
 // TODO all event parsing logic here
-func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
+func (r *EventHandler) checkEvent(message *ha.WebhookMessage, exchanges []common_rabbitmq.ExchangeConfig) (bool, error) {
 
-	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
-		return false, nil
-	}
-
-	//TODO queue routing key logic hardcoded for now
-
-	alert_type := structures.AlertTypeWater
-
-	alert := structures.Alert{
-		HubIP:     os.Getenv("HUB_IP"),
-		DeviceID:  message.Event.Data.EntityID,
-		Message:   "Light state changed",
-		State:     message.Event.Data.NewState.State,
-		TimeStamp: message.Event.Data.NewState.LastChanged,
-		Type:      alert_type,
-	}
-
-	routeKey := "alerts.warning." + "test_id"
-	alertJson, err := json.Marshal(alert)
-
-	if err != nil {
-		return false, errors.New("failed to marshal alert")
-	}
-	r.Logger.Info(routeKey)
-	return true, r.instance.Channel.Publish(
-		"alerts", // exchange
-		routeKey, //key
-		true,     // mandatory
-		false,    // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(alertJson),
-		})
-
+	////if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
+	////	return false, nil
+	////}
+	//
+	//// TODO RYAN ========================
+	//// event, key = check_for_event() | note that the event will have the type, the handle will use this type to handle the alert
+	//// 9999
+	//
+	//alert_type := structures.AlertTypeWater
+	//
+	//alert := structures.Alert{
+	//	HubIP:     os.Getenv("HUB_IP"),
+	//	DeviceID:  message.Event.Data.EntityID,
+	//	Message:   "Light state changed",
+	//	State:     message.Event.Data.NewState.State,
+	//	TimeStamp: message.Event.Data.NewState.LastChanged,
+	//	Type:      alert_type,
+	//}
+	//
+	//routeKey := "alerts.warning." + "test_id"
+	//alertJson, err := json.Marshal(alert)
+	//if err != nil {
+	//	return false, errors.New("failed to marshal alert")
+	//}
+	//
+	//// TODO ========================
+	//
+	//var exchangeName string
+	//// Find the matching exchange for the message's routing key
+	//for _, exchange := range exchanges {
+	//	for _, binding := range exchange.QueueBindings {
+	//		parts := strings.Split(binding.RoutingKey, ".")
+	//		if strings.Contains(message.RoutingKey, parts[0]) {
+	//			exchangeName = exchange.Name
+	//			break
+	//		}
+	//	}
+	//	if exchangeName != "" {
+	//		break
+	//	}
+	//}
+	//
+	//// If no exchange found for the routing key, log an error
+	//if exchangeName == "" {
+	//	log.Printf("No matching exchange found for routing key %s\n", message.RoutingKey)
+	//	return false, fmt.Errorf("no matching exchange found for routing key %s", message.RoutingKey)
+	//}
+	//
+	//return true, r.instance.Channel.Publish(
+	//	exchangeName,       // exchange
+	//	message.RoutingKey, //key
+	//	true,               // mandatory
+	//	false,              // immediate
+	//	amqp.Publishing{
+	//		ContentType: "text/plain",
+	//		Body:        []byte(alertJson),
+	//	})
+	return false, nil
 }
 
 // TODO add with options which are dynamic with type of config, generic with event type, condition?
