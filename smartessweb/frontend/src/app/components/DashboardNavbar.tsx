@@ -145,8 +145,10 @@ const DashboardNavbar = () => {
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const {
+    userId,
     userFirstName,
     userLastName,
+    setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,
@@ -207,6 +209,7 @@ const DashboardNavbar = () => {
     try {
       await authApi.logout();
       localStorage.removeItem("token");
+      setUserId("");
       setUserEmail("");
       setUserFirstName("");
       setUserLastName("");
