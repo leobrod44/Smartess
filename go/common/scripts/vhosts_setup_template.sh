@@ -39,6 +39,8 @@ create_vhost_and_user() {
 #    prod)
 #        create_vhost_and_user "/prod-env" "prod_user" "prod_password"
 #        ;;
+#    ha_v0)
+#        create_vhost_and_user "/home-assistant-env0" "ha_v0_user" "ha_v0_password"
 #    *)
 #        echo "Usage: $0 {test|dev|prod}"
 #        exit 1
