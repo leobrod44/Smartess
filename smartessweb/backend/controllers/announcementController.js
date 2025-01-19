@@ -2,6 +2,35 @@ const supabase = require('../config/supabase');
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+exports.getCurrentUserOrgId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from('org_user')
+      .select('org_id')
+      .eq('user_id', userId);
+
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: 'Error fetching organization ID', error });
+    }
+
+    if (!data || data.length === 0) {
+      return res
+        .status(404)
+        .json({ message: 'User not found in any organization' });
+    }
+
+    const orgId = data[0].org_id;
+
+    return res.status(200).json({ orgId });
+  } catch (error) {
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 exports.getAllHubUserEmailsInOrg = async (req, res) => {
   try {
     const { orgId } = req.params;
