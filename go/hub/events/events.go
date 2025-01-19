@@ -76,12 +76,10 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum, exchanges []com
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage, exchanges []common_rabbitmq.ExchangeConfig) (bool, error) {
 
-	var conciseEvent *ha.ConciseEvent
-	conciseEvent = ha.ConvertWebhookMessageToConciseEvent(message)
-	var routeKey string
+	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
 	classification := &ha.EventClassification{}
 	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT URGENCY/SEVERITY INFORMATION/WARNING/CRITICAL
-	routeKey = classification.GenerateAlertRoutingKey(conciseEvent)
+	routeKey := classification.GenerateAlertRoutingKey(conciseEvent)
 	//  TODO 2 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT TYPE
 	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
 
