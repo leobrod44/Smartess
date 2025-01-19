@@ -7,7 +7,7 @@ import (
 
 func main() {
 	// Select between Local Host Hub, Physical HA RPI Hub and Mongo Atlas Hub
-	SELECTED_HUB := structures.MONGO_MOCK_HUB
+	SELECTED_HUB := structures.LOCAL_MOCK_HUB
 
 	hub, err := hub.Init(SELECTED_HUB)
 	if err != nil {

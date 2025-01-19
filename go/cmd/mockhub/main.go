@@ -30,13 +30,9 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 	for {
 		log.Println("Sending light switch event message")
 		message, _ := json.Marshal(event)
-		err := conn.WriteMessage(websocket.TextMessage, message)
+		err = conn.WriteMessage(websocket.TextMessage, message)
 		if err != nil {
-			if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-				log.Println("Client closed connection")
-			} else {
-				log.Println("Failed to send message:", err)
-			}
+			log.Println("Failed to send message:", err)
 			return
 		}
 		time.Sleep(1 * time.Second)
@@ -46,10 +42,7 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/api/websocket", mockHub)
 	log.Println("Mock hub running on :8765")
-	err := http.ListenAndServe(":8765", nil)
-	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
-	}
+	log.Fatal(http.ListenAndServe(":8765", nil))
 }
 
 func GenerateLightSwitchEventMessage() ha.WebhookMessage {
@@ -59,50 +52,72 @@ func GenerateLightSwitchEventMessage() ha.WebhookMessage {
 		Event: structures.EventDetails{
 			EventType: "state_changed",
 			Data: structures.EventData{
-				EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+				EntityID: "MOCKlight.MOCKliving_room",
 				OldState: structures.State{
-					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+					EntityID: "MOCKlight.MOCKliving_room",
 					State:    "off",
 					Attributes: map[string]interface{}{
-						"friendly_name":         "Kitchen Light",
-						"off_brightness":        nil,
-						"off_with_transition":   false,
-						"supported_color_modes": []string{"onoff"},
-						"supported_features":    8,
+						"min_color_temp_kelvin": 2000,
+						"max_color_temp_kelvin": 6500,
+						"min_mireds":            153,
+						"max_mireds":            500,
+						"effect_list":           []string{"colorloop", "random"},
+						"supported_color_modes": []string{"hs", "xy", "color_temp"},
+						"color_mode":            "hs",
+						"brightness":            0,
+						"hs_color":              []float64{0, 0},
+						"rgb_color":             []int{0, 0, 0},
+						"xy_color":              []float64{0, 0},
+						"effect":                "",
+						"mode":                  "normal",
+						"dynamics":              "none",
+						"friendly_name":         "Living Room Light",
+						"supported_features":    63,
 					},
-					LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
-					LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+					LastChanged: time.Now(),
+					LastUpdated: time.Now(),
 					Context: structures.EventContext{
-						ID:       "01JDN9R843GN161T321VYY0FJ7",
+						ID:       "context_id",
 						ParentID: "",
-						UserID:   "288a21978a6d496b90aefec65844c6ec",
+						UserID:   "",
 					},
 				},
 				NewState: structures.State{
-					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+					EntityID: "light.living_room",
 					State:    "on",
 					Attributes: map[string]interface{}{
-						"friendly_name":         "Kitchen Light",
-						"off_brightness":        nil,
-						"off_with_transition":   false,
-						"supported_color_modes": []string{"onoff"},
-						"supported_features":    8,
+						"min_color_temp_kelvin": 2000,
+						"max_color_temp_kelvin": 6500,
+						"min_mireds":            153,
+						"max_mireds":            500,
+						"effect_list":           []string{"colorloop", "random"},
+						"supported_color_modes": []string{"hs", "xy", "color_temp"},
+						"color_mode":            "hs",
+						"brightness":            255,
+						"hs_color":              []float64{0, 100},
+						"rgb_color":             []int{255, 0, 0},
+						"xy_color":              []float64{0.7, 0.3},
+						"effect":                "colorloop",
+						"mode":                  "normal",
+						"dynamics":              "none",
+						"friendly_name":         "Living Room Light",
+						"supported_features":    63,
 					},
-					LastChanged: time.Date(2024, 11, 26, 22, 34, 57, 907198000, time.UTC),
-					LastUpdated: time.Date(2024, 11, 26, 22, 34, 57, 907198000, time.UTC),
+					LastChanged: time.Now(),
+					LastUpdated: time.Now(),
 					Context: structures.EventContext{
-						ID:       "01JDN9R843GN161T321VYY0FJ7",
+						ID:       "context_id",
 						ParentID: "",
-						UserID:   "288a21978a6d496b90aefec65844c6ec",
+						UserID:   "",
 					},
 				},
 			},
 			Origin:    "LOCAL",
 			TimeFired: time.Now().Format(time.RFC3339),
 			Context: structures.EventContext{
-				ID:       "01JDN9R843GN161T321VYY0FJ7",
+				ID:       "context_id",
 				ParentID: "",
-				UserID:   "288a21978a6d496b90aefec65844c6ec",
+				UserID:   "",
 			},
 		},
 	}
