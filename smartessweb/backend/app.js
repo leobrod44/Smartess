@@ -23,7 +23,7 @@ const ticketsRoutes = require('./routes/ticketsRoutes');
 
 //Add path here
 app.use('/api/auth', authRoutes);
-app.use('/api', startProjectRoutes);
+app.use('/api/start-project', startProjectRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/hubs', hubRoutes);

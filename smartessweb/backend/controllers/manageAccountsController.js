@@ -308,81 +308,84 @@ exports.assignOrgUserToProject = async (req, res) => {
         }
 
         if (rows.length === 1) {
-            // If only one row exists, update its proj_id with the first element of proj_ids
-            const firstProjId = proj_ids[0];
+            // if the org user is assigned to no projects
+            if (rows[0].proj_id === null) {
+                // If only one row exists, update its proj_id with the first element of proj_ids
+                const firstProjId = proj_ids[0];
 
-            // // Increment admin_users_count if org_user_type is admin
-            if (org_user_type === 'admin') {
-                const { data: project, error: fetchProjectError } = await supabase
-                    .from('project')
-                    .select('admin_users_count')
-                    .eq('proj_id', firstProjId)
-                    .single();
-
-                if (!fetchProjectError && project) {
-                    const newCount = (project.admin_users_count || 0) + 1;
-                    await supabase
+                // // Increment admin_users_count if org_user_type is admin
+                if (org_user_type === 'admin') {
+                    const { data: project, error: fetchProjectError } = await supabase
                         .from('project')
-                        .update({ admin_users_count: newCount })
-                        .eq('proj_id', firstProjId);
-                }
-            }
+                        .select('admin_users_count')
+                        .eq('proj_id', firstProjId)
+                        .single();
 
-            const { error: updateError } = await supabase
-                .from('org_user')
-                .update({ proj_id: firstProjId })
-                .eq('user_id', user_id)
-                .eq('org_id', org_id);
-
-            if (updateError) {
-                console.error('Update Error:', updateError);
-                return res.status(500).json({ error: 'Failed to update existing org_user row.' });
-            }
-
-            // If there are more proj_ids, insert new rows for the rest
-            if (proj_ids.length > 1) {
-                const additionalProjIds = proj_ids.slice(1);
-
-                const insertPromises = additionalProjIds.map(async proj_id => {
-                    // Increment admin_users_count if org_user_type is admin
-                    if (org_user_type === 'admin') {
-                        const { data: project, error: fetchProjectError } = await supabase
+                    if (!fetchProjectError && project) {
+                        const newCount = (project.admin_users_count || 0) + 1;
+                        await supabase
                             .from('project')
-                            .select('admin_users_count')
-                            .eq('proj_id', proj_id)
-                            .single();
-
-                        if (!fetchProjectError && project) {
-                            const newCount = (project.admin_users_count || 0) + 1;
-                            await supabase
-                                .from('project')
-                                .update({ admin_users_count: newCount })
-                                .eq('proj_id', proj_id);
-                        }
+                            .update({ admin_users_count: newCount })
+                            .eq('proj_id', firstProjId);
                     }
-
-                    return supabase
-                        .from('org_user')
-                        .insert([
-                            {
-                                user_id,
-                                org_id,
-                                proj_id,
-                                org_user_type
-                            }
-                        ]);
-                });
-
-                const results = await Promise.all(insertPromises);
-
-                const insertError = results.find(result => result.error);
-                if (insertError) {
-                    console.error('Insert Error:', insertError.error);
-                    return res.status(500).json({ error: 'Failed to assign user to additional project(s).' });
                 }
-            }
 
-            return res.status(200).json({ message: 'User successfully updated and assigned to additional project(s) if applicable.' });
+                const { error: updateError } = await supabase
+                    .from('org_user')
+                    .update({ proj_id: firstProjId })
+                    .eq('user_id', user_id)
+                    .eq('org_id', org_id);
+
+                if (updateError) {
+                    console.error('Update Error:', updateError);
+                    return res.status(500).json({ error: 'Failed to update existing org_user row.' });
+                }
+
+                // If there are more proj_ids, insert new rows for the rest
+                if (proj_ids.length > 1) {
+                    const additionalProjIds = proj_ids.slice(1);
+
+                    const insertPromises = additionalProjIds.map(async proj_id => {
+                        // Increment admin_users_count if org_user_type is admin
+                        if (org_user_type === 'admin') {
+                            const { data: project, error: fetchProjectError } = await supabase
+                                .from('project')
+                                .select('admin_users_count')
+                                .eq('proj_id', proj_id)
+                                .single();
+
+                            if (!fetchProjectError && project) {
+                                const newCount = (project.admin_users_count || 0) + 1;
+                                await supabase
+                                    .from('project')
+                                    .update({ admin_users_count: newCount })
+                                    .eq('proj_id', proj_id);
+                            }
+                        }
+
+                        return supabase
+                            .from('org_user')
+                            .insert([
+                                {
+                                    user_id,
+                                    org_id,
+                                    proj_id,
+                                    org_user_type
+                                }
+                            ]);
+                    });
+
+                    const results = await Promise.all(insertPromises);
+
+                    const insertError = results.find(result => result.error);
+                    if (insertError) {
+                        console.error('Insert Error:', insertError.error);
+                        return res.status(500).json({ error: 'Failed to assign user to additional project(s).' });
+                    }
+                }
+
+                return res.status(200).json({ message: 'User successfully updated and assigned to additional project(s) if applicable.' });
+            }
         }
 
         // If more than one row exists, proceed with inserting new rows

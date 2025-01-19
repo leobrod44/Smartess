@@ -40,7 +40,6 @@ function UserInfoModal({
   const [addresses, setAddresses] = useState<string[]>(initialAddresses);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isDeletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [isProjectMenuOpen, setProjectMenuOpen] = useState(false);
   const [isUserDeletion, setIsUserDeletion] = useState(false);
   const [orgProjects, setOrgProjects] = useState<Project[]>([]);
@@ -70,6 +69,12 @@ function UserInfoModal({
     fetchOrgProjectsData();
   }, [addresses, currentOrg]);
 
+  const handleModalClose = () => {
+    setRole(initialRole);
+    setAddresses(initialAddresses);
+    onClose();
+  };
+
   const handleEditRoleClick = () => {
     setIsEditingRole(!isEditingRole);
   };
@@ -83,9 +88,17 @@ function UserInfoModal({
   };
 
   const handleDeleteClick = (address: string) => {
-    setAddressToDelete(address);
-    setIsUserDeletion(false);
-    setDeletePopupOpen(true);
+    const updatedAddresses = addresses.filter((addr) => addr !== address);
+    const project = orgProjects.find((proj) => proj.address === address);
+
+    if (project) {
+      setProjectIdsToDelete((prevIds) => [
+        ...prevIds,
+        Number(project.projectId),
+      ]);
+    }
+
+    setAddresses(updatedAddresses);
   };
 
   const handleDeleteUserClick = () => {
@@ -97,23 +110,7 @@ function UserInfoModal({
     if (isUserDeletion) {
       onDeleteUser(uid); // Handle user deletion
       onClose();
-    } else if (addressToDelete) {
-      const updatedAddresses = addresses.filter(
-        (addr) => addr !== addressToDelete
-      );
-
-      const project = orgProjects.find(
-        (proj) => proj.address === addressToDelete
-      );
-      if (project) {
-        setProjectIdsToDelete((prevIds) => [
-          ...prevIds,
-          Number(project.projectId),
-        ]);
-      }
-      setAddresses(updatedAddresses);
     }
-    setDeletePopupOpen(false);
   };
 
   const handleCancelDelete = () => {
@@ -140,7 +137,8 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-
+  console.log("selectedProjectIds", selectedProjectIds);
+  console.log("projectIdsToDelete", projectIdsToDelete);
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -159,7 +157,6 @@ function UserInfoModal({
         JSON.stringify(filteredSelectedProjectIds) !==
         JSON.stringify(filteredProjectIdsToDelete)
       ) {
-        console.log("calling apis");
         await assignOrgUserProject(uid, currentOrg, selectedProjectIds, role);
         await removeOrgUserProject(uid, currentOrg, projectIdsToDelete);
       }
@@ -168,7 +165,9 @@ function UserInfoModal({
         await changeUserRole(uid, currentOrg, role);
       }
 
-      onClose();
+      setSelectedProjectIds([]);
+      setProjectIdsToDelete([]);
+
       onSave(addresses);
     } catch (err) {
       console.error("Error during save:", err);
@@ -250,7 +249,7 @@ function UserInfoModal({
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
         <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
           <IconButton
-            onClick={onClose}
+            onClick={handleModalClose}
             className="absolute top-2 right-2 text-[#30525E]"
           >
             <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
@@ -344,31 +343,30 @@ function UserInfoModal({
           <div className="flex justify-around mt-6">
             {/* Delete button only for master */}
             {currentUserRole === "master" && (
-              <div
+              <button
                 onClick={handleDeleteUserClick}
-                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 select-none"
+                className="bg-[#ff5449] text-white text-xs w-[120px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
-                  Delete
+                  Delete User
                 </div>
-              </div>
+              </button>
             )}
             {/* Save button for both admin and master */}
             {(currentUserRole === "master" || currentUserRole === "admin") && (
-              <div
+              <button
                 onClick={handleSave}
-                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300 select-none"
+                className="bg-[#4b7d8d] text-white text-xs w-[120px] py-2 rounded-md hover:bg-[#254752] transition duration-300 "
               >
                 <div className="text-center text-white text-lg font-['Sequel Sans']">
                   Save
                 </div>
-              </div>
+              </button>
             )}
           </div>
 
           {isDeletePopupOpen && (
             <DeleteConfirmationPopup
-              addressToDelete={addressToDelete}
               userName={userName}
               onConfirm={handleConfirmDelete}
               isUserDeletion={isUserDeletion}
