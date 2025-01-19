@@ -125,24 +125,33 @@ export default function AnnouncementFormModal({
         return;
       }
 
-      const payload = {
-        emailList: fetchedEmails,
-        type,
-        selectedAddress: type === "project" ? selectedProject : undefined,
-        content,
-        keywords,
-        files: files.map((file) => file.name),
-      };
+      const formData = new FormData();
+      formData.append("emailList", JSON.stringify(fetchedEmails));
+      formData.append("type", type);
+      formData.append("content", content);
 
-      await announcementApi.sendAnnouncement(payload);
+      if (type === "project") {
+        formData.append("selectedAddress", selectedProject);
+      }
+
+      if (keywords.length > 0) {
+        formData.append("keywords", JSON.stringify(keywords));
+      }
+
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await announcementApi.sendAnnouncement(formData);
       showToastSuccess("Announcement posted successfully!");
+
       setTimeout(() => {
         router.push("/dashboard/announcement");
       }, 1000);
+
       resetForm();
       onClose();
     } catch (err) {
-      console.error("Error sending announcement:", err);
       showToastError("Failed to send announcement.");
     }
   };

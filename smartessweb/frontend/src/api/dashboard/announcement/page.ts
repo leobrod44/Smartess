@@ -1,14 +1,5 @@
 import { API_URL } from "@/api/api";
 
-export interface AnnouncementRequest {
-  emailList: string[];
-  type: "organization" | "project";
-  selectedAddress?: string;
-  content: string;
-  keywords?: string[];
-  files?: string[];
-}
-
 export interface AnnouncementResponse {
   message: string;
 }
@@ -75,16 +66,13 @@ export const announcementApi = {
   },
 
   sendAnnouncement: async (
-    announcement: AnnouncementRequest
+    formData: FormData
   ): Promise<AnnouncementResponse> => {
     const response = await fetch(
       `${API_URL}/announcements/send_announcement_email`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(announcement),
+        body: formData,
       }
     );
 

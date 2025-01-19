@@ -1,4 +1,6 @@
 const express = require("express");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const {
   getCurrentUserOrgId,
   getAllHubUserEmailsInOrg,
@@ -10,6 +12,10 @@ const router = express.Router();
 router.get("/get_current_user_org_id/:userId", getCurrentUserOrgId);
 router.get("/get_hub_user_emails_org/:orgId", getAllHubUserEmailsInOrg);
 router.get("/get_hub_user_emails_proj/:projId", getAllHubUserEmailsInProject);
-router.post("/send_announcement_email", sendAnnouncementEmail);
+router.post(
+  "/send_announcement_email",
+  upload.array("files"),
+  sendAnnouncementEmail
+);
 
 module.exports = router;
