@@ -101,3 +101,83 @@ exports.getTickets = async (req, res) => {
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+exports.deleteTicket = async (req, res) => {
+    try {
+        const token = req.token;
+        const { ticket_id } = req.params;
+
+        if (!ticket_id) {
+            return res.status(400).json({ error: 'Ticket ID is required' });
+        }
+        
+        // Verify user token
+        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+        
+        if (authError) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        // Get user_id from user table
+        const { data: userData, error: userError } = await supabase
+            .from('user')
+            .select('user_id')
+            .eq('email', user.email)
+            .single();
+
+        if (userError || !userData) {
+            return res.status(500).json({ error: 'Failed to fetch user data' });
+        }
+
+        // First, get the ticket to verify it exists and get its project ID
+        const { data: ticket, error: ticketError } = await supabase
+            .from('tickets')
+            .select('proj_id')
+            .eq('ticket_id', ticket_id)
+            .single();
+
+        if (ticketError) {
+            return res.status(500).json({ error: 'Failed to fetch ticket data' });
+        }
+
+        if (!ticket) {
+            return res.status(404).json({ error: 'Ticket not found' });
+        }
+
+        // Verify user has access to this project
+        const { data: projectAccess, error: accessError } = await supabase
+            .from('org_user')
+            .select('proj_id')
+            .eq('user_id', userData.user_id)
+            .eq('proj_id', ticket.proj_id);
+
+        if (accessError) {
+            return res.status(500).json({ error: 'Failed to verify project access' });
+        }
+
+        if (!projectAccess || projectAccess.length === 0) {
+            return res.status(403).json({ error: 'User does not have access to this ticket' });
+        }
+
+        // Check if user has admin or master role
+        if (projectAccess.org_user_type !== 'admin' && projectAccess.org_user_type !== 'master') {
+            return res.status(403).json({ error: 'User does not have permission to delete tickets' });
+        }
+
+        // Delete the ticket
+        const { error: deleteError } = await supabase
+            .from('tickets')
+            .delete()
+            .eq('ticket_id', ticket_id);
+
+        if (deleteError) {
+            return res.status(500).json({ error: 'Failed to delete ticket' });
+        }
+
+        res.status(200).json({ message: 'Ticket successfully deleted' });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
