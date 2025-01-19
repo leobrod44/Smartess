@@ -145,7 +145,6 @@ const DashboardNavbar = () => {
   const [suggestions, setSuggestions] = useState<SidebarItem[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const {
-    userId,
     userFirstName,
     userLastName,
     setUserId,
