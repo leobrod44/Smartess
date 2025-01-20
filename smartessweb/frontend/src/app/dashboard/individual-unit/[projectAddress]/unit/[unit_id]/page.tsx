@@ -52,7 +52,7 @@ useEffect(() => {
 
       setAddress(decodedAddress);
 
-      const response = await individualUnitApi.getIndividualUnit(decodedUnitId, token);
+      const response = await individualUnitApi.getIndividualUnit(decodedAddress, decodedUnitId, token);
       const fetchedUnit = response.unit;
       setUnit(fetchedUnit);
 
