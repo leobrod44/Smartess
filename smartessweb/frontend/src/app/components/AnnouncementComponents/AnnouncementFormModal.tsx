@@ -153,6 +153,7 @@ export default function AnnouncementFormModal({
       onClose();
     } catch (err) {
       showToastError("Failed to send announcement.");
+      console.error("Failed to send announcement:", err);
     }
   };
 
