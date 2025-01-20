@@ -132,6 +132,7 @@ const DashboardNavbar = () => {
   const {
     userFirstName,
     userLastName,
+    setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,
@@ -186,6 +187,7 @@ const DashboardNavbar = () => {
     try {
       await authApi.logout();
       localStorage.removeItem("token");
+      setUserId("");
       setUserEmail("");
       setUserFirstName("");
       setUserLastName("");

@@ -34,8 +34,13 @@ const SignInPage = () => {
     setForgotPasswordOpen(false);
   };
 
-  const { setUserEmail, setUserFirstName, setUserLastName, setUserType } =
-    useUserContext();
+  const {
+    setUserId,
+    setUserEmail,
+    setUserFirstName,
+    setUserLastName,
+    setUserType,
+  } = useUserContext();
 
   const validateEmail = (email: string) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -76,6 +81,7 @@ const SignInPage = () => {
       const data = await signInApi.signIn({ email, password });
       localStorage.setItem("token", data.token);
       const user = await userApi.getUserInfo(data.token);
+      setUserId(user.user_id);
       setUserEmail(user.email);
       setUserFirstName(user.first_name);
       setUserLastName(user.last_name);
