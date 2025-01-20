@@ -28,11 +28,9 @@ import DoorBackOutlinedIcon from "@mui/icons-material/DoorBackOutlined";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import ElectricBoltOutlinedIcon from "@mui/icons-material/ElectricBoltOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import AnnouncementOutlinedIcon from "@mui/icons-material/AnnouncementOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
 import Person2OutlinedIcon from "@mui/icons-material/Person2Outlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { usePathname, useRouter } from "next/navigation";
@@ -73,6 +71,11 @@ const general = [
     href: "/dashboard/consumption",
     icon: ElectricBoltOutlinedIcon,
   },
+  {
+    name: "Alerts",
+    href: "/dashboard/alerts",
+    icon: ConfirmationNumberOutlinedIcon,
+  },
 ];
 
 const security = [
@@ -80,11 +83,6 @@ const security = [
     name: "Surveillance",
     href: "/dashboard/surveillance",
     icon: VideocamOutlinedIcon,
-  },
-  {
-    name: "Locks",
-    href: "/dashboard/lock",
-    icon: LockOutlinedIcon,
   },
 ];
 
@@ -103,19 +101,6 @@ const community = [
     name: "Manage Accounts",
     href: "/dashboard/manage-accounts",
     icon: PeopleAltOutlinedIcon,
-  },
-];
-
-const information = [
-  {
-    name: "Logs",
-    href: "/dashboard/log",
-    icon: ConfirmationNumberOutlinedIcon,
-  },
-  {
-    name: "Documentation",
-    href: "/dashboard/documentation",
-    icon: MenuBookOutlinedIcon,
   },
 ];
 
@@ -154,13 +139,7 @@ const DashboardNavbar = () => {
     setUserType,
   } = useUserContext();
 
-  const sidebarItems = [
-    ...home,
-    ...general,
-    ...security,
-    ...community,
-    ...information,
-  ];
+  const sidebarItems = [...home, ...general, ...security, ...community];
 
   const handleProjectChange = (projectId: string, projectAddress: string) => {
     setSelectedProjectId(projectId);
@@ -239,10 +218,7 @@ const DashboardNavbar = () => {
       */}
       <div>
         <Transition show={sidebarOpen}>
-          <Dialog
-            className="relative z-50 lg:hidden"
-            onClose={setSidebarOpen}
-          >
+          <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
             <TransitionChild
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
@@ -307,18 +283,12 @@ const DashboardNavbar = () => {
                     />
 
                     <nav className="flex flex-1 flex-col">
-                      <ul
-                        role="list"
-                        className="flex flex-1 flex-col gap-y-7"
-                      >
+                      <ul role="list" className="flex flex-1 flex-col gap-y-7">
                         <li>
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             HOME
                           </div>
-                          <ul
-                            role="list"
-                            className="-mx-2 mt-2 space-y-1"
-                          >
+                          <ul role="list" className="-mx-2 mt-2 space-y-1">
                             {home.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -344,10 +314,7 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             GENERAL
                           </div>
-                          <ul
-                            role="list"
-                            className="-mx-2 mt-2 space-y-1"
-                          >
+                          <ul role="list" className="-mx-2 mt-2 space-y-1">
                             {general.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -373,10 +340,7 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             SECURITY
                           </div>
-                          <ul
-                            role="list"
-                            className="-mx-2 mt-2 space-y-1"
-                          >
+                          <ul role="list" className="-mx-2 mt-2 space-y-1">
                             {security.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -402,40 +366,8 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             COMMUNITY
                           </div>
-                          <ul
-                            role="list"
-                            className="-mx-2 mt-2 space-y-1"
-                          >
+                          <ul role="list" className="-mx-2 mt-2 space-y-1">
                             {community.map((item) => (
-                              <li key={item.name}>
-                                <Link
-                                  href={item.href}
-                                  className={classNames(
-                                    pathname === item.href
-                                      ? "bg-[#14323B]"
-                                      : "hover:bg-[#14323B]",
-                                    "text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6"
-                                  )}
-                                >
-                                  <item.icon
-                                    className="text-white"
-                                    aria-hidden="true"
-                                  />
-                                  {item.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                        <li>
-                          <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
-                            INFORMATION
-                          </div>
-                          <ul
-                            role="list"
-                            className="-mx-2 mt-2 space-y-1"
-                          >
-                            {information.map((item) => (
                               <li key={item.name}>
                                 <Link
                                   href={item.href}
@@ -487,18 +419,12 @@ const DashboardNavbar = () => {
             />
 
             <nav className="flex flex-1 flex-col">
-              <ul
-                role="list"
-                className="flex flex-1 flex-col gap-y-7"
-              >
+              <ul role="list" className="flex flex-1 flex-col gap-y-7">
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-5">
                     HOME
                   </div>
-                  <ul
-                    role="list"
-                    className="-mx-2 mt-2 space-y-1"
-                  >
+                  <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {home.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -521,13 +447,10 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     GENERAL
                   </div>
-                  <ul
-                    role="list"
-                    className="-mx-2 mt-2 space-y-1"
-                  >
+                  <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {general.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -550,13 +473,10 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     SECURITY
                   </div>
-                  <ul
-                    role="list"
-                    className="-mx-2 mt-2 space-y-1"
-                  >
+                  <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {security.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -579,43 +499,11 @@ const DashboardNavbar = () => {
                   </ul>
                 </li>
                 <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                  <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     COMMUNITY
                   </div>
-                  <ul
-                    role="list"
-                    className="-mx-2 mt-2 space-y-1"
-                  >
+                  <ul role="list" className="-mx-2 mt-2 space-y-1">
                     {community.map((item) => (
-                      <li key={item.name}>
-                        <Link
-                          href={item.href}
-                          className={classNames(
-                            pathname === item.href
-                              ? "bg-[#14323B]"
-                              : "hover:bg-[#14323B]",
-                            "text-white group flex gap-x-3 rounded-full p-2 text-xs leading-6"
-                          )}
-                        >
-                          <item.icon
-                            className="text-white"
-                            aria-hidden="true"
-                          />
-                          {item.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li>
-                  <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
-                    INFORMATION
-                  </div>
-                  <ul
-                    role="list"
-                    className="-mx-2 mt-2 space-y-1"
-                  >
-                    {information.map((item) => (
                       <li key={item.name}>
                         <Link
                           href={item.href}
@@ -649,10 +537,7 @@ const DashboardNavbar = () => {
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
-              <Bars3Icon
-                className="h-6 w-6"
-                aria-hidden="true"
-              />
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
             </button>
 
             {/* Separator */}
@@ -666,10 +551,7 @@ const DashboardNavbar = () => {
                 className="relative flex flex-1"
                 onSubmit={(e) => e.preventDefault()}
               >
-                <label
-                  htmlFor="search-field"
-                  className="sr-only"
-                >
+                <label htmlFor="search-field" className="sr-only">
                   Search
                 </label>
                 <MagnifyingGlassIcon
@@ -708,10 +590,7 @@ const DashboardNavbar = () => {
                 />
 
                 {/* Profile dropdown */}
-                <Menu
-                  as="div"
-                  className="relative"
-                >
+                <Menu as="div" className="relative">
                   <MenuButton className="-m-1.5 flex items-center p-1.5">
                     <span className="sr-only">Open user menu</span>
                     <Image

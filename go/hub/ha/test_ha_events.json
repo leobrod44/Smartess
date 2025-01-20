@@ -1,0 +1,1109 @@
+{
+  "ha_events_log_sequence_1": [
+{
+  "attributes": {
+    "friendly_name": "Kitchen Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9R843GN161T321VYY0FJ7",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_3",
+  "last_changed": "2024-11-26T22:33:57.907198+00:00",
+  "last_updated": "2024-11-26T22:33:57.907198+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "color_mode": "onoff",
+    "friendly_name": "Kitchen Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9R9TJQ5R4Z5K9N5PBKJ5V",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_3",
+  "last_changed": "2024-11-26T22:33:58.960236+00:00",
+  "last_updated": "2024-11-26T22:33:58.960236+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "current_temperature": 20.5,
+    "friendly_name": "Master Bedroom Thermostat",
+    "hvac_action": "idle",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 1950,
+    "pi_heating_demand": 0,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 19.5,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDN9RZ6HMT9PEZAMT3DHY2MB",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "climate.sinope_technologies_th1124zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:26:12.795069+00:00",
+  "last_updated": "2024-11-26T22:34:20.807774+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "current_temperature": 20.5,
+    "friendly_name": "Master Bedroom Thermostat",
+    "hvac_action": "idle",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 2050,
+    "pi_heating_demand": 0,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 20.5,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDN9S8MZQ4HAS9S25VSD68V9",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "climate.sinope_technologies_th1124zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:26:12.795069+00:00",
+  "last_updated": "2024-11-26T22:34:30.489733+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "friendly_name": "Bathroom Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9SDANMAC54E9NNW9SZX9Z",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_6",
+  "last_changed": "2024-11-26T22:34:35.495262+00:00",
+  "last_updated": "2024-11-26T22:34:35.495262+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "color_mode": "onoff",
+    "friendly_name": "Bathroom Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9SGD74QQ90BB68YPG0HM0",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_6",
+  "last_changed": "2024-11-26T22:34:38.663382+00:00",
+  "last_updated": "2024-11-26T22:34:38.663382+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "friendly_name": "Basement Light",
+    "icon": "mdi:lightbulb"
+  },
+  "context": {
+    "id": "01JDN9SM8K6XYH3YJQGD9427CZ",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "switch.signify_netherlands_b_v_lom004_switch",
+  "last_changed": "2024-11-26T22:34:42.359199+00:00",
+  "last_updated": "2024-11-26T22:34:42.359199+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "friendly_name": "Basement Light",
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 0
+  },
+  "context": {
+    "id": "01JDN9SM9QDSE861WXD4021JDB",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "light.signify_netherlands_b_v_lom004_switch",
+  "last_changed": "2024-11-26T22:34:42.359546+00:00",
+  "last_updated": "2024-11-26T22:34:42.359546+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "device_class": "temperature",
+    "friendly_name": "Sinope Technologies TH1123ZB-G2 Temperature",
+    "state_class": "measurement",
+    "unit_of_measurement": "°C"
+  },
+  "context": {
+    "id": "01JDN9SN345HZCFMAJJG769V8K",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1123zb_g2_temperature",
+  "last_changed": "2024-11-26T22:34:43.172305+00:00",
+  "last_updated": "2024-11-26T22:34:43.172305+00:00",
+  "state": "21.3"
+},
+{
+  "attributes": {
+    "friendly_name": "Basement Light",
+    "icon": "mdi:lightbulb"
+  },
+  "context": {
+    "id": "01JDN9SN88SMFF4YTWP89JKCNB",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "switch.signify_netherlands_b_v_lom004_switch",
+  "last_changed": "2024-11-26T22:34:43.372452+00:00",
+  "last_updated": "2024-11-26T22:34:43.372452+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "color_mode": "onoff",
+    "friendly_name": "Basement Light",
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 0
+  },
+  "context": {
+    "id": "01JDN9SN9CQEREXKRMMK0X71W8",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "light.signify_netherlands_b_v_lom004_switch",
+  "last_changed": "2024-11-26T22:34:43.372823+00:00",
+  "last_updated": "2024-11-26T22:34:43.372823+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Node status",
+    "icon": "mdi:robot-dead"
+  },
+  "context": {
+    "id": "01JDN9TG3HYMWNX1BN5ZZFP60R",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.node_18_node_status",
+  "last_changed": "2024-11-26T22:35:10.833914+00:00",
+  "last_updated": "2024-11-26T22:35:10.833914+00:00",
+  "state": "dead"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Idle Access Control Lock state"
+  },
+  "context": {
+    "id": "01JDN9TG3J7D581H85863F1C96",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "button.touchscreen_deadbolt_z_wave_plus_idle_access_control_lock_state",
+  "last_changed": "2024-11-26T22:35:10.834216+00:00",
+  "last_updated": "2024-11-26T22:35:10.834216+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Idle Access Control Keypad state"
+  },
+  "context": {
+    "id": "01JDN9TG3JTA7A49R7T7W76KFQ",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "button.touchscreen_deadbolt_z_wave_plus_idle_access_control_keypad_state",
+  "last_changed": "2024-11-26T22:35:10.834403+00:00",
+  "last_updated": "2024-11-26T22:35:10.834403+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Idle Home Security Sensor status"
+  },
+  "context": {
+    "id": "01JDN9TG3J5ZDF7E98J85CGT4F",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "button.touchscreen_deadbolt_z_wave_plus_idle_home_security_sensor_status",
+  "last_changed": "2024-11-26T22:35:10.834562+00:00",
+  "last_updated": "2024-11-26T22:35:10.834562+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Idle Power Management Battery maintenance status"
+  },
+  "context": {
+    "id": "01JDN9TG3JXBC01YMQFZ1BYMZA",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "button.touchscreen_deadbolt_z_wave_plus_idle_power_management_battery_maintenance_status",
+  "last_changed": "2024-11-26T22:35:10.834710+00:00",
+  "last_updated": "2024-11-26T22:35:10.834710+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Idle System Hardware status"
+  },
+  "context": {
+    "id": "01JDN9TG3JZSHE42DNA22GR89T",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "button.touchscreen_deadbolt_z_wave_plus_idle_system_hardware_status",
+  "last_changed": "2024-11-26T22:35:10.834861+00:00",
+  "last_updated": "2024-11-26T22:35:10.834861+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "battery",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Battery level",
+    "state_class": "measurement",
+    "unit_of_measurement": "%"
+  },
+  "context": {
+    "id": "01JDN9TG3KJS1ZDE9ZNAG08PWN",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.touchscreen_deadbolt_z_wave_plus_battery_level",
+  "last_changed": "2024-11-26T22:35:10.835044+00:00",
+  "last_updated": "2024-11-26T22:35:10.835044+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Indicator value",
+    "max": 255,
+    "min": 0,
+    "mode": "auto",
+    "step": 1
+  },
+  "context": {
+    "id": "01JDN9TG3KVVCXW0KA67TYCA2A",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "number.touchscreen_deadbolt_z_wave_plus_indicator_value",
+  "last_changed": "2024-11-26T22:35:10.835265+00:00",
+  "last_updated": "2024-11-26T22:35:10.835265+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "door",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Current status of the door"
+  },
+  "context": {
+    "id": "01JDN9TG3KY5BE7K19HN6GC0VW",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_current_status_of_the_door",
+  "last_changed": "2024-11-26T22:35:10.835461+00:00",
+  "last_updated": "2024-11-26T22:35:10.835461+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "problem",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Lock jammed"
+  },
+  "context": {
+    "id": "01JDN9TG3KWE9R0BDDZMKAQ2AK",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_lock_jammed",
+  "last_changed": "2024-11-26T22:35:10.835633+00:00",
+  "last_updated": "2024-11-26T22:35:10.835633+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Keypad temporary disabled"
+  },
+  "context": {
+    "id": "01JDN9TG3KYJBMX1R0DNQH9KQ7",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_keypad_temporary_disabled",
+  "last_changed": "2024-11-26T22:35:10.835782+00:00",
+  "last_updated": "2024-11-26T22:35:10.835782+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "safety",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Intrusion"
+  },
+  "context": {
+    "id": "01JDN9TG3KXF5SNVQN8CFDVG6B",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_intrusion",
+  "last_changed": "2024-11-26T22:35:10.835930+00:00",
+  "last_updated": "2024-11-26T22:35:10.835930+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "battery",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Replace battery soon"
+  },
+  "context": {
+    "id": "01JDN9TG3MA3E1AJFR72RKY7A4",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_replace_battery_soon",
+  "last_changed": "2024-11-26T22:35:10.836077+00:00",
+  "last_updated": "2024-11-26T22:35:10.836077+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "battery",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Replace battery now"
+  },
+  "context": {
+    "id": "01JDN9TG3MSWRDXN2D5WJXN5WM",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_replace_battery_now",
+  "last_changed": "2024-11-26T22:35:10.836226+00:00",
+  "last_updated": "2024-11-26T22:35:10.836226+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "problem",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus System hardware failure"
+  },
+  "context": {
+    "id": "01JDN9TG3MB86RCW38XEA1DCQM",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_system_hardware_failure",
+  "last_changed": "2024-11-26T22:35:10.836395+00:00",
+  "last_updated": "2024-11-26T22:35:10.836395+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "device_class": "battery",
+    "friendly_name": "Touchscreen Deadbolt Z-Wave Plus Low battery level"
+  },
+  "context": {
+    "id": "01JDN9TG3MXGFZKD7JVCHJFGYS",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "binary_sensor.touchscreen_deadbolt_z_wave_plus_low_battery_level",
+  "last_changed": "2024-11-26T22:35:10.836562+00:00",
+  "last_updated": "2024-11-26T22:35:10.836562+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Front Door Lock",
+    "supported_features": 0
+  },
+  "context": {
+    "id": "01JDN9TDFADEAE6N1H53TX0Y62",
+    "parent_id": null,
+    "user_id": "2cfced4b8a794ab59da3543e6feebdd7"
+  },
+  "entity_id": "lock.touchscreen_deadbolt_z_wave_plus",
+  "last_changed": "2024-11-26T22:35:10.836727+00:00",
+  "last_updated": "2024-11-26T22:35:10.836727+00:00",
+  "state": "unavailable"
+},
+{
+  "attributes": {
+    "friendly_name": "Master Bedroom Fan",
+    "icon": "mdi:fan"
+  },
+  "context": {
+    "id": "01JDN9WPKHKY0PYPCHT4YMSZBV",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "switch.lumi_lumi_plug_maus01_switch",
+  "last_changed": "2024-11-26T22:36:23.096559+00:00",
+  "last_updated": "2024-11-26T22:36:23.096559+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "friendly_name": "Master Bedroom Fan",
+    "icon": "mdi:fan"
+  },
+  "context": {
+    "id": "01JDN9WQW43MX0FB4X7CJRA1JA",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "switch.lumi_lumi_plug_maus01_switch",
+  "last_changed": "2024-11-26T22:36:24.382016+00:00",
+  "last_updated": "2024-11-26T22:36:24.382016+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDN9WT79WCWCJWMR3V28AFTS",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:36:26.729185+00:00",
+  "last_updated": "2024-11-26T22:36:26.729185+00:00",
+  "state": "113"
+},
+{
+  "attributes": {
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 HVAC action"
+  },
+  "context": {
+    "id": "01JDN9WT7B62DSGQRGSDNW7MS7",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_hvac_action",
+  "last_changed": "2024-11-26T22:36:26.731698+00:00",
+  "last_updated": "2024-11-26T22:36:26.731698+00:00",
+  "state": "heating"
+},
+{
+  "attributes": {
+    "current_temperature": 20.5,
+    "friendly_name": "Master Bedroom Thermostat",
+    "hvac_action": "heating",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 2050,
+    "pi_heating_demand": 20,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 20.5,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDN9WT7C2SCFSNBD2MN4439N",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "climate.sinope_technologies_th1124zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:26:12.795069+00:00",
+  "last_updated": "2024-11-26T22:36:26.732855+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDN9WTSJKEGBG1PARRA6EX8X",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:36:27.314914+00:00",
+  "last_updated": "2024-11-26T22:36:27.314914+00:00",
+  "state": "666.69"
+},
+{
+  "attributes": {
+    "device_class": "current",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 RMS current",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "rms_current_max": "6.7",
+    "state_class": "measurement",
+    "unit_of_measurement": "A"
+  },
+  "context": {
+    "id": "01JDN9WXJ3RXKDBFHXG8KTSXGS",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_rms_current",
+  "last_changed": "2024-11-26T22:36:30.147505+00:00",
+  "last_updated": "2024-11-26T22:36:30.147505+00:00",
+  "state": "0.5"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDN9XQKH3F5TB4Y0P092AFT7",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:36:56.817971+00:00",
+  "last_updated": "2024-11-26T22:36:56.817971+00:00",
+  "state": "0"
+},
+{
+  "attributes": {
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 HVAC action"
+  },
+  "context": {
+    "id": "01JDN9XQKTY6RE3N02PWFM6M9F",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_hvac_action",
+  "last_changed": "2024-11-26T22:36:56.826228+00:00",
+  "last_updated": "2024-11-26T22:36:56.826228+00:00",
+  "state": "idle"
+},
+{
+  "attributes": {
+    "current_temperature": 20.5,
+    "friendly_name": "Master Bedroom Thermostat",
+    "hvac_action": "idle",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 2050,
+    "pi_heating_demand": 0,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 20.5,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDN9XQKVMSJVX11TYW84JSMT",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "climate.sinope_technologies_th1124zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:26:12.795069+00:00",
+  "last_updated": "2024-11-26T22:36:56.827667+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDN9XR24NEMF6N0K06NYYB52",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:36:57.284299+00:00",
+  "last_updated": "2024-11-26T22:36:57.284299+00:00",
+  "state": "666.691"
+},
+{
+  "attributes": {
+    "device_class": "current",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 RMS current",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "rms_current_max": "6.7",
+    "state_class": "measurement",
+    "unit_of_measurement": "A"
+  },
+  "context": {
+    "id": "01JDN9XTVMVZHQAB626WTS3QNC",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_rms_current",
+  "last_changed": "2024-11-26T22:37:00.148813+00:00",
+  "last_updated": "2024-11-26T22:37:00.148813+00:00",
+  "state": "0.0"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDN9Y1CX8JN794Q8T56BRQVD",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:37:06.845931+00:00",
+  "last_updated": "2024-11-26T22:37:06.845931+00:00",
+  "state": "130"
+},
+{
+  "attributes": {
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 HVAC action"
+  },
+  "context": {
+    "id": "01JDN9YMW0YQK5HXRZHKAPXA07",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_hvac_action",
+  "last_changed": "2024-11-26T22:37:26.784137+00:00",
+  "last_updated": "2024-11-26T22:37:26.784137+00:00",
+  "state": "heating"
+},
+{
+  "attributes": {
+    "current_temperature": 20.5,
+    "friendly_name": "Master Bedroom Thermostat",
+    "hvac_action": "heating",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 2050,
+    "pi_heating_demand": 20,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 20.5,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDN9YMW1V4WVG8GF090711E4",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "climate.sinope_technologies_th1124zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:26:12.795069+00:00",
+  "last_updated": "2024-11-26T22:37:26.785892+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDN9YNANYDK98XFR70JF3FZG",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:37:27.253817+00:00",
+  "last_updated": "2024-11-26T22:37:27.253817+00:00",
+  "state": "666.692"
+},
+{
+  "attributes": {
+    "device_class": "current",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 RMS current",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "rms_current_max": "6.7",
+    "state_class": "measurement",
+    "unit_of_measurement": "A"
+  },
+  "context": {
+    "id": "01JDN9YR5456QVGBW5DXVEG9A4",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_rms_current",
+  "last_changed": "2024-11-26T22:37:30.148562+00:00",
+  "last_updated": "2024-11-26T22:37:30.148562+00:00",
+  "state": "0.5"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDN9YYSA1FGFXFDYFYC0J1XY",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:37:36.938454+00:00",
+  "last_updated": "2024-11-26T22:37:36.938454+00:00",
+  "state": "146"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDN9ZDFS5DJ97VTFC5A3KKS5",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:37:51.993250+00:00",
+  "last_updated": "2024-11-26T22:37:51.993250+00:00",
+  "state": "130"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDN9ZJK6GJQ9YPR5FKGCZRJN",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:37:57.222267+00:00",
+  "last_updated": "2024-11-26T22:37:57.222267+00:00",
+  "state": "666.693"
+},
+{
+  "attributes": {
+    "friendly_name": "Bathroom Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9ZV73GDZHWCH63S3KRTTG",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_6",
+  "last_changed": "2024-11-26T22:38:06.448113+00:00",
+  "last_updated": "2024-11-26T22:38:06.448113+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "friendly_name": "Office Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9ZWGEWCX0CEMB5QYERPD9",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_5",
+  "last_changed": "2024-11-26T22:38:08.439515+00:00",
+  "last_updated": "2024-11-26T22:38:08.439515+00:00",
+  "state": "off"
+},
+{
+  "attributes": {
+    "color_mode": "onoff",
+    "friendly_name": "Office Light",
+    "off_brightness": null,
+    "off_with_transition": false,
+    "supported_color_modes": [
+      "onoff"
+    ],
+    "supported_features": 8
+  },
+  "context": {
+    "id": "01JDN9ZYVEBV0VV7G67S805SAJ",
+    "parent_id": null,
+    "user_id": "288a21978a6d496b90aefec65844c6ec"
+  },
+  "entity_id": "light.lumi_lumi_switch_b1laus01_light_5",
+  "last_changed": "2024-11-26T22:38:10.067594+00:00",
+  "last_updated": "2024-11-26T22:38:10.067594+00:00",
+  "state": "on"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDNA0AWJGR0RZS3WR43EP3XH",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:38:22.098778+00:00",
+  "last_updated": "2024-11-26T22:38:22.098778+00:00",
+  "state": "146"
+},
+{
+  "attributes": {
+    "current_temperature": 21.3,
+    "friendly_name": "Office Thermostat",
+    "hvac_action": "idle",
+    "hvac_modes": [
+      "off",
+      "heat"
+    ],
+    "max_temp": 30,
+    "min_temp": 5,
+    "occupancy": 1,
+    "occupied_cooling_setpoint": 2600,
+    "occupied_heating_setpoint": 2100,
+    "pi_heating_demand": 0,
+    "preset_mode": "none",
+    "preset_modes": [
+      "away",
+      "none"
+    ],
+    "supported_features": 17,
+    "system_mode": "[<SystemMode.Heat: 4>]/heat",
+    "temperature": 21,
+    "unoccupied_heating_setpoint": 1500
+  },
+  "context": {
+    "id": "01JDNA0FSW29XTAVD2ACQ71T20",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "climate.sinope_technologies_th1123zb_g2_thermostat",
+  "last_changed": "2024-11-14T14:25:58.374577+00:00",
+  "last_updated": "2024-11-26T22:38:27.132865+00:00",
+  "state": "heat"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDNA0FVQQPTZF30Q69XR9TCJ",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:38:27.191592+00:00",
+  "last_updated": "2024-11-26T22:38:27.191592+00:00",
+  "state": "666.695"
+},
+{
+  "attributes": {
+    "device_class": "current",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 RMS current",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "rms_current_max": "6.7",
+    "state_class": "measurement",
+    "unit_of_measurement": "A"
+  },
+  "context": {
+    "id": "01JDNA0JRDJJ3X1GR14W2S7GQC",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_rms_current",
+  "last_changed": "2024-11-26T22:38:30.157730+00:00",
+  "last_updated": "2024-11-26T22:38:30.157730+00:00",
+  "state": "0.6"
+},
+{
+  "attributes": {
+    "active_power_max": "1626",
+    "device_class": "power",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Active power",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "state_class": "measurement",
+    "unit_of_measurement": "W"
+  },
+  "context": {
+    "id": "01JDNA189A9XV2TM4SMW8NN7CM",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_active_power",
+  "last_changed": "2024-11-26T22:38:52.202647+00:00",
+  "last_updated": "2024-11-26T22:38:52.202647+00:00",
+  "state": "162"
+},
+{
+  "attributes": {
+    "device_class": "energy",
+    "device_type": "Electric Metering",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 Summation delivered",
+    "state_class": "total_increasing",
+    "status": "NO_ALARMS",
+    "unit_of_measurement": "kWh"
+  },
+  "context": {
+    "id": "01JDNA1D479GHDNRXM1FWF8PS1",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_summation_delivered",
+  "last_changed": "2024-11-26T22:38:57.159548+00:00",
+  "last_updated": "2024-11-26T22:38:57.159548+00:00",
+  "state": "666.696"
+},
+{
+  "attributes": {
+    "device_class": "current",
+    "friendly_name": "Sinope Technologies TH1124ZB-G2 RMS current",
+    "measurement_type": "ACTIVE_MEASUREMENT, PHASE_A_MEASUREMENT",
+    "rms_current_max": "6.7",
+    "state_class": "measurement",
+    "unit_of_measurement": "A"
+  },
+  "context": {
+    "id": "01JDNA1G1T8VVC7SZNRHY47DSG",
+    "parent_id": null,
+    "user_id": null
+  },
+  "entity_id": "sensor.sinope_technologies_th1124zb_g2_rms_current",
+  "last_changed": "2024-11-26T22:39:00.154112+00:00",
+  "last_updated": "2024-11-26T22:39:00.154112+00:00",
+  "state": "0.7"
+}
+    ]
+}
