@@ -67,7 +67,7 @@ exports.getCurrentUser = async (req, res) => {
 exports.getIndividualUnit = async (req, res) => {
     try {                
         const token = req.token;
-        const { unit_id } = req.body;
+        const { projAddress, unit_id } = req.body;
 
         // Validate token and get user information
         const { data: { user }, error: authError } = await supabase.auth.getUser(token);
@@ -76,12 +76,22 @@ exports.getIndividualUnit = async (req, res) => {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
+        const { data: project, error: projectError } = await supabase
+            .from('project')
+            .select('proj_id')
+            .eq('address', projAddress)
+            .single();
+
+        if (projectError) {
+            return res.status(401).json({ error: 'Cannot find project' });
+        }
 
         // Fetch hub data based on unit_id
         const { data: hubData, error: hubError } = await supabase
             .from('hub')
             .select('hub_id, unit_number')
             .eq('unit_number', unit_id)
+            .eq('proj_id', project.proj_id)
             .single();
 
         if (hubError || !hubData) {
