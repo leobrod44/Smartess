@@ -91,8 +91,16 @@ const UnitComponent = ({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-4">
-        <div className="text-[#14323B] text-lg">Loading unit details...</div>
+      <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
+        <div className="w-full h-full unit-title text-white text-l flex justify-center">
+          <button className="w-full font-sequel-sans-black">
+            Unit {unitNumber}
+          </button>
+        </div>
+
+        <div className="unit-info-sections bg-white rounded-[7px] flex flex-col sm:flex-row items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 my-3"></div>
+        </div>
       </div>
     );
   }

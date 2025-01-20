@@ -25,7 +25,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
   };
 
   // Calculate which projects to display based on the current page
-  const projectsPerPage = 3;
+  const projectsPerPage = 6;
   const startIndex = (page - 1) * projectsPerPage;
   const projectsToDisplay = projects.slice(
     startIndex,
@@ -118,7 +118,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
           </div>
 
           {showUnits === startIndex + index && (
-            <div className="pt-4 space-y-4 max-h-60 overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
+            <div className="pt-4 space-y-4 max-h-[390px] overflow-x-hidden overflow-y-auto custom-scrollbar pr-4">
               {project.units.map((unit) => (
                 <Unit
                   key={`${project.projectId}-${unit.unitNumber}`}
