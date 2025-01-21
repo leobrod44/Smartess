@@ -1,50 +1,54 @@
-const supabase = require('../config/supabase');
+const supabase = require("../config/supabase");
 
 exports.getTickets = async (req, res) => {
-    try {
-        const token = req.token;
-        
-        // Get user from token
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-        
-        if (authError) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
+  try {
+    const token = req.token;
 
-        // Get user_id from user table
-        const { data: userData, error: userError } = await supabase
-            .from('user')
-            .select('user_id')
-            .eq('email', user.email)
-            .single();
+    // Get user from token
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
 
-        if (userError) {
-            console.error('User Error:', userError);
-            return res.status(500).json({ error: 'Failed to fetch user data.' });
-        }
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
 
-        if (!userData) {
-            return res.status(404).json({ error: 'User not found.' });
-        }
+    // Get user_id from user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
 
-        // Get projects from org_user table
-        const { data: projectsData, error: projectsError } = await supabase
-            .from('org_user')
-            .select('proj_id')
-            .eq('user_id', userData.user_id)
-            .not('proj_id', 'is', null);
+    if (userError) {
+      console.error("User Error:", userError);
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
 
-        if (projectsError) {
-            console.error('Projects Error:', projectsError);
-            return res.status(500).json({ error: 'Failed to fetch projects data.' });
-        }
+    if (!userData) {
+      return res.status(404).json({ error: "User not found." });
+    }
 
-        const projectIds = projectsData.map(proj => proj.proj_id);
+    // Get projects from org_user table
+    const { data: projectsData, error: projectsError } = await supabase
+      .from("org_user")
+      .select("proj_id")
+      .eq("user_id", userData.user_id)
+      .not("proj_id", "is", null);
 
-        // Get tickets for these projects with all needed fields
-        const { data: ticketsData, error: ticketsError } = await supabase
-            .from('tickets')
-            .select(`
+    if (projectsError) {
+      console.error("Projects Error:", projectsError);
+      return res.status(500).json({ error: "Failed to fetch projects data." });
+    }
+
+    const projectIds = projectsData.map((proj) => proj.proj_id);
+
+    // Get tickets for these projects with all needed fields
+    const { data: ticketsData, error: ticketsError } = await supabase
+      .from("tickets")
+      .select(
+        `
                 ticket_id,
                 proj_id,
                 hub_id,
@@ -53,131 +57,146 @@ exports.getTickets = async (req, res) => {
                 type,
                 status,
                 created_at
-            `)
-            .in('proj_id', projectIds);
+            `
+      )
+      .in("proj_id", projectIds);
 
-        if (ticketsError) {
-            console.error('Tickets Error:', ticketsError);
-            return res.status(500).json({ error: 'Failed to fetch tickets data.' });
-        }
-
-        // Get unique hub_ids from tickets
-        const uniqueHubIds = [...new Set(ticketsData.map(ticket => ticket.hub_id))];
-
-        // Get unit numbers for these hub_ids
-        const { data: hubData, error: hubError } = await supabase
-            .from('hub')
-            .select('hub_id, unit_number')
-            .in('hub_id', uniqueHubIds);
-
-        if (hubError) {
-            console.error('Hub Error:', hubError);
-            return res.status(500).json({ error: 'Failed to fetch hub data.' });
-        }
-
-        // Format tickets with hub information
-        const formattedTickets = ticketsData.map(ticket => {
-            const hub = hubData.find(h => h.hub_id === ticket.hub_id);
-            const createdDate = new Date(ticket.created_at).toISOString().split('T')[0]; // Format: YYYY-MM-DD
-
-            return {
-                ticket_id: ticket.ticket_id,
-                proj_id: ticket.proj_id,
-                unit_id: ticket.hub_id,
-                name: ticket.description,
-                description: ticket.description_detailed,
-                type: ticket.type,
-                unit: hub ? hub.unit_number : null,
-                status: ticket.status,
-                created_at: createdDate
-            };
-        });
-
-        // Return formatted tickets
-        res.json({ tickets: formattedTickets });
-
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Internal server error.' });
+    if (ticketsError) {
+      console.error("Tickets Error:", ticketsError);
+      return res.status(500).json({ error: "Failed to fetch tickets data." });
     }
+
+    // Get unique hub_ids from tickets
+    const uniqueHubIds = [
+      ...new Set(ticketsData.map((ticket) => ticket.hub_id)),
+    ];
+
+    // Get unit numbers for these hub_ids
+    const { data: hubData, error: hubError } = await supabase
+      .from("hub")
+      .select("hub_id, unit_number")
+      .in("hub_id", uniqueHubIds);
+
+    if (hubError) {
+      console.error("Hub Error:", hubError);
+      return res.status(500).json({ error: "Failed to fetch hub data." });
+    }
+
+    // Format tickets with hub information
+    const formattedTickets = ticketsData.map((ticket) => {
+      const hub = hubData.find((h) => h.hub_id === ticket.hub_id);
+      const createdDate = new Date(ticket.created_at)
+        .toISOString()
+        .split("T")[0]; // Format: YYYY-MM-DD
+
+      return {
+        ticket_id: ticket.ticket_id,
+        proj_id: ticket.proj_id,
+        unit_id: ticket.hub_id,
+        name: ticket.description,
+        description: ticket.description_detailed,
+        type: ticket.type,
+        unit: hub ? hub.unit_number : null,
+        status: ticket.status,
+        created_at: createdDate,
+      };
+    });
+
+    // Return formatted tickets
+    res.json({ tickets: formattedTickets });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
 };
 
 exports.deleteTicket = async (req, res) => {
-    try {
-        const token = req.token;
-        const { ticket_id } = req.params;
+  try {
+    const token = req.token;
+    const { ticket_id } = req.params;
 
-        if (!ticket_id) {
-            return res.status(400).json({ error: 'Ticket ID is required' });
-        }
-        
-        // Verify user token
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-        
-        if (authError) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-
-        // Get user_id from user table
-        const { data: userData, error: userError } = await supabase
-            .from('user')
-            .select('user_id')
-            .eq('email', user.email)
-            .single();
-
-        if (userError || !userData) {
-            return res.status(500).json({ error: 'Failed to fetch user data' });
-        }
-
-        // First, get the ticket to verify it exists and get its project ID
-        const { data: ticket, error: ticketError } = await supabase
-            .from('tickets')
-            .select('proj_id')
-            .eq('ticket_id', ticket_id)
-            .single();
-
-        if (ticketError) {
-            return res.status(500).json({ error: 'Failed to fetch ticket data' });
-        }
-
-        if (!ticket) {
-            return res.status(404).json({ error: 'Ticket not found' });
-        }
-
-        // Verify user has access to this project
-        const { data: projectAccess, error: accessError } = await supabase
-            .from('org_user')
-            .select('proj_id')
-            .eq('user_id', userData.user_id)
-            .eq('proj_id', ticket.proj_id);
-
-        if (accessError) {
-            return res.status(500).json({ error: 'Failed to verify project access' });
-        }
-
-        if (!projectAccess || projectAccess.length === 0) {
-            return res.status(403).json({ error: 'User does not have access to this ticket' });
-        }
-
-        // Check if user has admin or master role
-        if (projectAccess.org_user_type !== 'admin' && projectAccess.org_user_type !== 'master') {
-            return res.status(403).json({ error: 'User does not have permission to delete tickets' });
-        }
-
-        // Delete the ticket
-        const { error: deleteError } = await supabase
-            .from('tickets')
-            .delete()
-            .eq('ticket_id', ticket_id);
-
-        if (deleteError) {
-            return res.status(500).json({ error: 'Failed to delete ticket' });
-        }
-
-        res.status(200).json({ message: 'Ticket successfully deleted' });
-
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Internal server error' });
+    if (!ticket_id) {
+      return res.status(400).json({ error: "Ticket ID is required" });
     }
+
+    // Verify user token
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get user_id from user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+
+    // First, get the ticket to verify it exists and get its project ID
+    const { data: ticket, error: ticketError } = await supabase
+      .from("tickets")
+      .select("proj_id")
+      .eq("ticket_id", ticket_id)
+      .single();
+
+    if (ticketError) {
+      return res.status(500).json({ error: "Failed to fetch ticket data" });
+    }
+
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Verify user has access to this project, and retrieve org_user_type as well
+    const { data: projectAccess, error: accessError } = await supabase
+      .from("org_user")
+      .select("proj_id, org_user_type") // Important: also fetch org_user_type
+      .eq("user_id", userData.user_id)
+      .eq("proj_id", ticket.proj_id)
+      .single(); // Expect a single row
+
+    if (accessError) {
+      return res.status(500).json({ error: "Failed to verify project access" });
+    }
+
+    if (!projectAccess) {
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
+    }
+
+    // Check if user has admin or master role
+    if (
+      projectAccess.org_user_type !== "admin" &&
+      projectAccess.org_user_type !== "master"
+    ) {
+      console.log("User type is:", projectAccess.org_user_type);
+      return res
+        .status(403)
+        .json({ error: "User does not have permission to delete tickets" });
+    }
+
+    // Delete the ticket
+    const { error: deleteError } = await supabase
+      .from("tickets")
+      .delete()
+      .eq("ticket_id", ticket_id);
+
+    if (deleteError) {
+      return res.status(500).json({ error: "Failed to delete ticket" });
+    }
+
+    res.status(200).json({ message: "Ticket successfully deleted" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 };

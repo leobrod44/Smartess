@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pagination } from "@mui/material";
 import DeleteTicketModal from "./DeleteTicketModal";
 import { showToastSuccess } from "@/app/components/Toast";
+import { ticketsListApi } from "@/api/dashboard/ticket/page";
 
 interface Ticket {
   ticketId: string;
@@ -20,9 +21,11 @@ interface Ticket {
 const TicketList = ({
   tickets,
   userType,
+  onTicketDelete,
 }: {
   tickets: Ticket[];
   userType: string;
+  onTicketDelete: (ticketId: string) => void;
 }) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -41,11 +44,24 @@ const TicketList = ({
     setModalOpen(true);
   };
 
-  const handleDeleteConfirm = () => {
-    if (selectedTicket) {
-      console.log(`Deleting ticket: ${selectedTicket.ticketId}`);
+  const handleDeleteConfirm = async () => {
+    if (selectedTicket && userType !== "basic") {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        await ticketsListApi.deleteTicket(token, selectedTicket.ticketId);
+        onTicketDelete(selectedTicket.ticketId);
+        showToastSuccess(`Ticket ${selectedTicket.ticketId} has been deleted.`);
+      } catch (err) {
+        console.error("Error deleting ticket:", err);
+      } finally {
+        setModalOpen(false);
+      }
+    } else {
       setModalOpen(false);
-      showToastSuccess(`Ticket ${selectedTicket.ticketId} has been deleted.`);
     }
   };
 
