@@ -7,7 +7,7 @@ import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
 import { useUserContext } from "@/context/UserProvider";
-import { ticketsListApi, APITicketList} from "@/api/dashboard/ticket/page";
+import { ticketsListApi, APITicketList } from "@/api/dashboard/ticket/page";
 
 interface Ticket {
   ticketId: string;
@@ -34,14 +34,14 @@ const filterOptionsTicket = [
 const transformType = (type: string): "Alert" | "Repair" | "Other" => {
   const lowercaseType = type.toLowerCase();
   switch (lowercaseType) {
-    case 'alert':
-      return 'Alert';
-    case 'repair':
-      return 'Repair';
-    case 'other':
-      return 'Other';
+    case "alert":
+      return "Alert";
+    case "repair":
+      return "Repair";
+    case "other":
+      return "Other";
     default:
-      return 'Other';
+      return "Other";
   }
 };
 
@@ -49,14 +49,14 @@ const transformType = (type: string): "Alert" | "Repair" | "Other" => {
 const transformStatus = (status: string): "Open" | "Pending" | "Closed" => {
   const lowercaseStatus = status.toLowerCase();
   switch (lowercaseStatus) {
-    case 'open':
-      return 'Open';
-    case 'pending':
-      return 'Pending';
-    case 'closed':
-      return 'Closed';
+    case "open":
+      return "Open";
+    case "pending":
+      return "Pending";
+    case "closed":
+      return "Closed";
     default:
-      return 'Open';
+      return "Open";
   }
 };
 
@@ -68,9 +68,9 @@ const transformTicket = (apiTicketList: APITicketList): Ticket => ({
   name: apiTicketList.name,
   description: apiTicketList.description,
   type: transformType(apiTicketList.type),
-  unit: apiTicketList.unit || 'N/A',
+  unit: apiTicketList.unit || "N/A",
   status: transformStatus(apiTicketList.status),
-  date: apiTicketList.created_at
+  date: apiTicketList.created_at,
 });
 
 const TicketPage = () => {
@@ -87,9 +87,9 @@ const TicketPage = () => {
     const fetchTickets = async () => {
       try {
         setIsLoading(true);
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('No token found');
+          throw new Error("No token found");
         }
 
         const data = await ticketsListApi.getTickets(token);
@@ -97,8 +97,10 @@ const TicketPage = () => {
         setTickets(transformedTickets);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch tickets');
-        console.error('Error fetching tickets:', err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch tickets"
+        );
+        console.error("Error fetching tickets:", err);
       } finally {
         setIsLoading(false);
       }
@@ -106,7 +108,7 @@ const TicketPage = () => {
 
     fetchTickets();
   }, []);
-  
+
   // Filter tickets based on search and selected project
   useEffect(() => {
     const projectTickets = selectedProjectId
@@ -124,7 +126,7 @@ const TicketPage = () => {
           ticket.unit,
           ticket.status,
           ticket.date,
-        ].some((field) => 
+        ].some((field) =>
           field?.toString().toLowerCase().includes(query.toLowerCase())
         )
       )
@@ -133,6 +135,13 @@ const TicketPage = () => {
 
   const handleSearch = (searchQuery: string) => {
     setQuery(searchQuery);
+  };
+
+  // Handle removing the ticket from local state after successful API deletion
+  const handleTicketDelete = (ticketId: string) => {
+    setTickets((prevTickets) =>
+      prevTickets.filter((ticket) => ticket.ticketId !== ticketId)
+    );
   };
 
   const ticketCounts = useMemo(() => {
@@ -250,6 +259,7 @@ const TicketPage = () => {
       <TicketList
         tickets={filteredTickets}
         userType={userType}
+        onTicketDelete={handleTicketDelete}
       />
     </div>
   );
