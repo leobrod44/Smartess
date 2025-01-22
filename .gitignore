@@ -48,3 +48,5 @@ go.sum
 # go.work
 
 /workflows/
+
+*.env
