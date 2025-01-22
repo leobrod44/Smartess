@@ -6,7 +6,9 @@ const {
   getAllHubUserEmailsInOrg,
   getAllHubUserEmailsInProject,
   sendAnnouncementEmail,
+  storeAnnouncement,
 } = require("../controllers/announcementController");
+
 const router = express.Router();
 
 router.get("/get_current_user_org_id/:userId", getCurrentUserOrgId);
@@ -17,5 +19,6 @@ router.post(
   upload.array("files"),
   sendAnnouncementEmail
 );
+router.post("/post_announcement", upload.array("files"), storeAnnouncement);
 
 module.exports = router;

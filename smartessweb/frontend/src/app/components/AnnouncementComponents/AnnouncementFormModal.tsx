@@ -23,7 +23,9 @@ export default function AnnouncementFormModal({
   isOpen,
   onClose,
 }: AnnouncementFormModalProps) {
+  const router = useRouter();
   const { userId } = useUserContext();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [type, setType] = useState<"organization" | "project">("organization");
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -32,7 +34,6 @@ export default function AnnouncementFormModal({
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
-  const router = useRouter();
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -58,15 +59,15 @@ export default function AnnouncementFormModal({
     setKeywords([]);
     setNewKeyword("");
     setType("organization");
-    setSelectedProject(projects[0]?.address || "");
+    setSelectedProject("");
     setContent("");
     setFiles([]);
   };
 
   const handleAddKeyword = () => {
-    const trimmedKeyword = newKeyword.trim();
-    if (trimmedKeyword && !keywords.includes(trimmedKeyword)) {
-      setKeywords((prev) => [...prev, trimmedKeyword]);
+    const trimmed = newKeyword.trim();
+    if (trimmed && !keywords.includes(trimmed)) {
+      setKeywords((prev) => [...prev, trimmed]);
       setNewKeyword("");
     }
   };
@@ -77,12 +78,14 @@ export default function AnnouncementFormModal({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+
     const selectedFiles = Array.from(e.target.files);
     selectedFiles.forEach((file) => {
       if (file.size <= 10 * 1024 * 1024) {
         setFiles((prev) => [...prev, file]);
       } else {
         console.error(`File "${file.name}" exceeds 10MB limit.`);
+        showToastError(`File "${file.name}" exceeds 10MB limit.`);
       }
     });
   };
@@ -100,41 +103,24 @@ export default function AnnouncementFormModal({
     }
 
     try {
-      let fetchedEmails: string[] = [];
+      const formData = new FormData();
+      formData.append("type", type);
+      formData.append("user_id", userId);
+      formData.append("content", content);
 
       if (type === "organization") {
         const orgResponse = await announcementApi.getOrgId(userId);
-        const emailResponse = await announcementApi.getEmailsInOrg(
-          orgResponse.orgId
-        );
-        fetchedEmails = emailResponse.emails;
-      } else if (type === "project") {
-        const selectedProj = projects.find(
-          (p) => p.address === selectedProject
-        );
-        if (selectedProj) {
-          const emailResponse = await announcementApi.getEmailsInProject(
-            selectedProj.projectId
-          );
-          fetchedEmails = emailResponse.emails;
+        formData.append("org_id", orgResponse.orgId);
+      } else {
+        const selProjObj = projects.find((p) => p.address === selectedProject);
+        if (!selProjObj) {
+          showToastError("Please select a valid project.");
+          return;
         }
+        formData.append("proj_id", selProjObj.projectId.toString());
       }
 
-      if (fetchedEmails.length === 0) {
-        showToastError("No recipients found.");
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append("emailList", JSON.stringify(fetchedEmails));
-      formData.append("type", type);
-      formData.append("content", content);
-
-      if (type === "project") {
-        formData.append("selectedAddress", selectedProject);
-      }
-
-      if (keywords.length > 0) {
+      if (keywords.length) {
         formData.append("keywords", JSON.stringify(keywords));
       }
 
@@ -142,18 +128,52 @@ export default function AnnouncementFormModal({
         formData.append("files", file);
       });
 
-      await announcementApi.sendAnnouncement(formData);
+      await announcementApi.postAnnouncement(formData);
+
+      let fetchedEmails: string[] = [];
+      if (type === "organization") {
+        const orgResponse = await announcementApi.getOrgId(userId);
+        const emailResponse = await announcementApi.getEmailsInOrg(
+          orgResponse.orgId
+        );
+        fetchedEmails = emailResponse.emails;
+      } else {
+        const selProjObj = projects.find((p) => p.address === selectedProject);
+        if (selProjObj) {
+          const emailResponse = await announcementApi.getEmailsInProject(
+            selProjObj.projectId
+          );
+          fetchedEmails = emailResponse.emails;
+        }
+      }
+
+      if (fetchedEmails.length > 0) {
+        const emailForm = new FormData();
+        emailForm.append("emailList", JSON.stringify(fetchedEmails));
+        emailForm.append("type", type);
+        emailForm.append("content", content);
+
+        if (type === "project") {
+          emailForm.append("selectedAddress", selectedProject);
+        }
+        if (keywords.length) {
+          emailForm.append("keywords", JSON.stringify(keywords));
+        }
+        files.forEach((file) => emailForm.append("files", file));
+
+        await announcementApi.sendAnnouncement(emailForm);
+      }
+
       showToastSuccess("Announcement posted successfully!");
+      resetForm();
+      onClose();
 
       setTimeout(() => {
         router.push("/dashboard/announcement");
       }, 1000);
-
-      resetForm();
-      onClose();
     } catch (err) {
-      showToastError("Failed to send announcement.");
-      console.error("Failed to send announcement:", err);
+      console.error("Failed to post announcement:", err);
+      showToastError("Failed to post announcement.");
     }
   };
 
@@ -190,6 +210,7 @@ export default function AnnouncementFormModal({
             Send An Announcement
           </h2>
 
+          {/* The Form */}
           <form
             onSubmit={handleSubmit}
             className="mt-8 space-y-8"
@@ -224,7 +245,7 @@ export default function AnnouncementFormModal({
               </div>
             </fieldset>
 
-            {/* Project dropdown */}
+            {/* Project dropdown (if type=project) */}
             {type === "project" && (
               <div className="w-full">
                 <label
