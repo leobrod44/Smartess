@@ -25,10 +25,7 @@ type RtspProcessor struct {
 
 type CameraConfig struct {
 	Name        string `yaml:"name"`
-	Username    string `yaml:"username"`
-	Password    string `yaml:"password"`
-	Host        string `yaml:"host"`
-	Path        string `yaml:"path"`
+	StreamURL   string `yaml:"streamURL"`
 	SegmentTime int    `yaml:"segment_time"`
 }
 
@@ -60,7 +57,7 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 
 func (rtsp *RtspProcessor) Start() {
 	for _, camera := range rtsp.cameras.CameraConfigs {
-		streamURL := "rtsp://" + camera.Username + camera.Password + camera.Host + "/" + camera.Path
+		streamURL := camera.StreamURL
 		rtsp.Logger.Info(fmt.Sprintf("stream url %s", streamURL))
 		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
 		tmpDir := "/tmp/data/" + camera.Name
@@ -96,7 +93,6 @@ func (rtsp *RtspProcessor) Start() {
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
-		rtsp.Logger.InternalLogger.Info(fmt.Sprintf("FFmpeg output: %s", ffmpegOutput.String()))
 
 		go func(tmpDir string) {
 			for {
@@ -118,7 +114,6 @@ func (rtsp *RtspProcessor) Start() {
 							rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
 							continue
 						}
-						rtsp.Logger.InternalLogger.Info("Publishing video packet")
 						err = rtsp.instance.Channel.Publish(
 							"videostream", // Default exchange
 							fmt.Sprintf("videostream.hubid.%s", camera.Name), // Routing key (queue name)
