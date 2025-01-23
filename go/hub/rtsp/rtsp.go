@@ -60,9 +60,10 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 
 func (rtsp *RtspProcessor) Start() {
 	for _, camera := range rtsp.cameras.CameraConfigs {
-		streamURL := "rtsp://" + camera.Username + ":" + camera.Password + "@" + camera.Host + "/" + camera.Path
+		streamURL := "rtsp://" + camera.Username + camera.Password + camera.Host + "/" + camera.Path
+		rtsp.Logger.Info(fmt.Sprintf("stream url %s", streamURL))
 		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
-		tmpDir := "/tmp/data" + camera.Name
+		tmpDir := "/tmp/data/" + camera.Name
 		err := os.MkdirAll(tmpDir, 0755)
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Error creating directory %v: %v", tmpDir, err))
@@ -86,7 +87,7 @@ func (rtsp *RtspProcessor) Start() {
 			fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir)) // Segment output
 
 		rtsp.Logger.Info(fmt.Sprintf("Starting FFmpeg for stream %s", camera.Name))
-
+		rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
 		ffmpegOutput := &bytes.Buffer{}
 		cmd.Stdout = ffmpegOutput
 		cmd.Stderr = ffmpegOutput
@@ -95,6 +96,7 @@ func (rtsp *RtspProcessor) Start() {
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
+		rtsp.Logger.InternalLogger.Info(fmt.Sprintf("FFmpeg output: %s", ffmpegOutput.String()))
 
 		go func(tmpDir string) {
 			for {
@@ -116,11 +118,12 @@ func (rtsp *RtspProcessor) Start() {
 							rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
 							continue
 						}
+						rtsp.Logger.InternalLogger.Info("Publishing video packet")
 						err = rtsp.instance.Channel.Publish(
-							"video_exchange", // Default exchange
-							"camera1",        // Routing key (queue name)
-							false,            // Mandatory
-							false,            // Immediate
+							"videostream", // Default exchange
+							fmt.Sprintf("videostream.hubid.%s", camera.Name), // Routing key (queue name)
+							false, // Mandatory
+							false, // Immediate
 							amqp.Publishing{
 								ContentType: "application/octet-stream", // Type of the content
 								Body:        segmentFileContent,         // Content (segment file data)
