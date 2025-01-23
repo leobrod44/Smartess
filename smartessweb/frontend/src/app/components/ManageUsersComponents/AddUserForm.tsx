@@ -112,7 +112,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
                 htmlFor="email"
                 className="block text-sm font-medium text-[#30525E]"
               >
-                Email
+                Email <span className="text-red-500">*</span>
               </label>
               <input
                 type="email"
@@ -130,7 +130,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
                 htmlFor="role"
                 className="block text-sm font-medium text-[#30525E]"
               >
-                Assign Role
+                Assign Role <span className="text-red-500">*</span>
               </label>
               <select
                 id="role"
@@ -146,7 +146,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
             {/* Always Open Project Selection */}
             <div className="mt-4">
               <p className="block text-sm font-medium text-[#30525E]">
-                Select Projects
+                Select Projects <span className="text-red-500">*</span>
               </p>
               <ProjectAddressMenu
                 unlinkedProjects={unlinkedProjects}
