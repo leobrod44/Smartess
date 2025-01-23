@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 import ProjectAddressMenu from "./ProjectAddressMenu";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Toast, { showToastError } from "../Toast";
 
 type AddUserProps = {
   isOpen: boolean;
@@ -56,6 +57,32 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
       projectId: Number(project.projectId),
       address: project.address,
     }));
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleSendInvitation = () => {
+    if (!email) {
+      showToastError("Email is required");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      showToastError("Invalid email format");
+      return;
+    }
+
+    if (selectedProjects.length === 0) {
+      showToastError("At least one project must be selected");
+      return;
+    }
+
+    // Logic to send the invitation goes here
+    resetForm();
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -146,6 +173,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
             <div className="flex items-center justify-end gap-x-4">
               <button
                 type="button"
+                onClick={handleSendInvitation}
                 className="flex-1 rounded-md bg-[#254752] px-4 py-2 font-medium text-white shadow-sm hover:bg-[#14323B]"
               >
                 Send Invitation
@@ -154,6 +182,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
           </form>
         </div>
       </div>
+      <Toast />
     </div>
   );
 }
