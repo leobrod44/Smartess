@@ -248,12 +248,14 @@ function UserInfoModal({
     <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
         <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
-          <IconButton
-            onClick={handleModalClose}
-            className="absolute top-2 right-2 text-[#30525E]"
+          <button
+            onClick={() => {
+              handleModalClose();
+            }}
+            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition duration-300"
           >
-            <CloseIcon />
-          </IconButton>
+            ✕
+          </button>
 
           <div className="flex flex-col items-center justify-center">
             <Typography
