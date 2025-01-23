@@ -49,6 +49,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
         prev.filter((id) => id !== Number(project.projectId))
       );
     }
+    console.log("Selected Project IDs:", selectedProjectIds);
   };
 
   const unlinkedProjects = projects

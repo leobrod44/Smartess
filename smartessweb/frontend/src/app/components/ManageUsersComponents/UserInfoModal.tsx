@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
