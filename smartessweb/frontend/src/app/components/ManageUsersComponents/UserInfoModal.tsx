@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Typography, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteConfirmationPopup from "./DeleteConfirmation";
 import RoleEditForm from "./RoleEditForm";
@@ -328,12 +328,9 @@ function UserInfoModal({
                 >
                   <p className="flex-1">{address}</p>
                   {currentUserRole === "master" && (
-                    <IconButton
-                      className="text-red-600"
-                      onClick={() => handleDeleteClick(address)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+                    <button onClick={() => handleDeleteClick(address)}>
+                      <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
+                    </button>
                   )}
                 </div>
               ))}

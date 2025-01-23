@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Toast, { showToastError } from "../Toast";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 type AddUserProps = {
   isOpen: boolean;
@@ -161,10 +161,15 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
                     className="flex items-center justify-between border p-2 rounded-md shadow-sm"
                   >
                     <span>{address}</span>
-                    <DeleteIcon
-                      onClick={() => handleRemoveProject(address)}
-                      className="text-red-600 hover:text-red-800"
-                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleRemoveProject(address);
+                      }}
+                    >
+                      <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900 " />
+                    </button>
                   </div>
                 ))}
               </div>
