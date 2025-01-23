@@ -26,7 +26,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const resetForm = () => {
     setEmail("");
     setRole("basic");
-    setSelectedProjects(projects[0]?.address ? [projects[0].address] : []);
+    setSelectedProjects([]);
     setSelectedProjectIds([]);
   };
 
