@@ -120,7 +120,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-2 block w-full rounded-md border-gray-300 bg-white px-3 py-2 text-base focus:ring-[#254752] focus:border-[#254752]"
-                placeholder="Enter user's email"
+                placeholder="email@example.com"
               />
             </div>
 
