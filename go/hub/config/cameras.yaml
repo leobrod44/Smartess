@@ -15,5 +15,3 @@ cameras:
     segment_time: 3
       
       #"rtsp://mock_camera:8554/live"
-
-      ffmpeg -rtsp_transport tcp -i rtsp://mock_camera:8554/live -buffer_size 1024000 -timeout 3000000 -c:v libx264 -preset fast -crf 23 -f segment -segment_time 3 -reset_timestamps 1 -segment_format mp4 -segment_list /tmp/data/mock_camera/segments.m3u8 -segment_list_type m3u8 -segment_list_size 0 -segment_list_flags +live /tmp/data/mock_camera/segment-%03d.mp4
