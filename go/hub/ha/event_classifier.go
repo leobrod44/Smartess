@@ -110,7 +110,7 @@ func getLightSeverity(event *WebhookMessage) string {
 	}
 
 	// NEW DEVICE
-	if (oldStateValue == "" && newStateValue != "") || (utils.IsStructEmpty(oldState) && utils.IsStructEmpty(newState) == false) {
+	if (oldStateValue == "" && newStateValue != "") || (utils.IsStructEmpty(oldState) && !utils.IsStructEmpty(newState)) {
 		return structures.SeverityInfo
 	}
 
