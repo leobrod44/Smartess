@@ -48,7 +48,7 @@ func main() {
 
 func GenerateEventMessage() ha.WebhookMessage {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	eventID := rng.Intn(4) + 1
+	eventID := rng.Intn(5) + 1
 	var event ha.WebhookMessage
 
 	switch eventID {
@@ -104,15 +104,32 @@ func GenerateEventMessage() ha.WebhookMessage {
 	case 2:
 		event = ha.WebhookMessage{
 			ID:   2,
-			Type: "light_switch_event",
+			Type: "Light Information",
 			Event: structures.EventDetails{
 				EventType: "state_changed",
 				Data: structures.EventData{
 					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
-					OldState: structures.State{},
-					NewState: structures.State{
+					OldState: structures.State{
 						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
 						State:    "off",
+						Attributes: map[string]interface{}{
+							"friendly_name":         "Kitchen Light",
+							"off_brightness":        nil,
+							"off_with_transition":   false,
+							"supported_color_modes": []string{"onoff"},
+							"supported_features":    8,
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9R843GN161T321VYY0FJ7",
+							ParentID: "",
+							UserID:   "288a21978a6d496b90aefec65844c6ec",
+						},
+					},
+					NewState: structures.State{
+						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						State:    "on",
 						Attributes: map[string]interface{}{
 							"friendly_name":         "Kitchen Light",
 							"off_brightness":        nil,
@@ -179,34 +196,91 @@ func GenerateEventMessage() ha.WebhookMessage {
 	case 4:
 		event = ha.WebhookMessage{
 			ID:   4,
-			Type: "state_changed",
+			Type: "Light Warning",
 			Event: structures.EventDetails{
 				EventType: "state_changed",
 				Data: structures.EventData{
-					EntityID: "lock.touchscreen_deadbolt_z_wave_plus",
-					OldState: structures.State{},
-					NewState: structures.State{
-						EntityID: "lock.touchscreen_deadbolt_z_wave_plus",
-						State:    "unavailable",
+					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+					OldState: structures.State{
+						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						State:    "on",
 						Attributes: map[string]interface{}{
-							"friendly_name":      "Front Door Lock",
-							"supported_features": 0,
+							"friendly_name":         "Kitchen Light",
+							"off_brightness":        nil,
+							"off_with_transition":   false,
+							"supported_color_modes": []string{"onoff"},
+							"supported_features":    8,
 						},
-						LastChanged: time.Date(2024, 11, 26, 22, 35, 10, 836727000, time.UTC),
-						LastUpdated: time.Date(2024, 11, 26, 22, 35, 10, 836727000, time.UTC),
+						LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
 						Context: structures.EventContext{
-							ID:       "01JDN9TDFADEAE6N1H53TX0Y62",
+							ID:       "01JDN9R843GN161T321VYY0FJ7",
 							ParentID: "",
-							UserID:   "2cfced4b8a794ab59da3543e6feebdd7",
+							UserID:   "288a21978a6d496b90aefec65844c6ec",
+						},
+					},
+					NewState: structures.State{
+						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						State:    "on",
+						Attributes: map[string]interface{}{
+							"friendly_name":         "Kitchen Light",
+							"off_brightness":        nil,
+							"off_with_transition":   false,
+							"supported_color_modes": []string{"onoff"},
+							"supported_features":    12,
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9R843GN161T321VYY0FJ7",
+							ParentID: "",
+							UserID:   "288a21978a6d496b90aefec65844c6ec",
 						},
 					},
 				},
 				Origin:    "LOCAL",
 				TimeFired: time.Now().Format(time.RFC3339),
 				Context: structures.EventContext{
-					ID:       "01JDN9TDFADEAE6N1H53TX0Y62",
+					ID:       "01JDN9R843GN161T321VYY0FJ7",
 					ParentID: "",
-					UserID:   "2cfced4b8a794ab59da3543e6feebdd7",
+					UserID:   "288a21978a6d496b90aefec65844c6ec",
+				},
+			},
+		}
+	case 5:
+		event = ha.WebhookMessage{
+			ID:   5,
+			Type: "Light Information",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						State:    "on",
+						Attributes: map[string]interface{}{
+							"friendly_name":         "Kitchen Light",
+							"off_brightness":        nil,
+							"off_with_transition":   false,
+							"supported_color_modes": []string{"onoff"},
+							"supported_features":    12,
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9R843GN161T321VYY0FJ7",
+							ParentID: "",
+							UserID:   "288a21978a6d496b90aefec65844c6ec",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9R843GN161T321VYY0FJ7",
+					ParentID: "",
+					UserID:   "288a21978a6d496b90aefec65844c6ec",
 				},
 			},
 		}

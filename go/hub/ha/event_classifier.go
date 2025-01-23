@@ -59,9 +59,9 @@ func (*EventClassification) GenerateRoutingKey(event *ConciseEvent) string {
 }
 
 // TODO TEMP ALERT ROUTING KEY ONLY
-func (*EventClassification) GenerateAlertRoutingKey(event *ConciseEvent) string {
-	classification := classifyConciseEvent(event)
-	severity := determineAlertSeverity(event)
+func (*EventClassification) GenerateAlertRoutingKey(consiseEvent *ConciseEvent, webMessage *WebhookMessage) string {
+	classification := classifyConciseEvent(consiseEvent)
+	severity := determineAlertSeverity(webMessage)
 	routingKey := "alerts." + severity + "." + classification.Class
 	for _, tag := range classification.Tags {
 		routingKey += "." + tag
@@ -70,30 +70,65 @@ func (*EventClassification) GenerateAlertRoutingKey(event *ConciseEvent) string 
 }
 
 // TODO DETERMINE SEVERITY OF ALERTS
-func determineAlertSeverity(event *ConciseEvent) string {
-	entityID := event.EntityID
-	state := event.State
-	// Base severity on the type of device and state
-	if strings.HasPrefix(entityID, "sensor.smoke") || strings.HasPrefix(entityID, "sensor.water") {
-		if state == "on" {
-			return structures.SeverityCritical // Critical for smoke or water detected
-		}
+func determineAlertSeverity(event *WebhookMessage) string {
+	entityID := event.Event.Data.EntityID
+
+	var severity string
+	// LIGHT EVENTS
+	if strings.HasPrefix(entityID, "light") {
+		severity = getLightSeverity(event)
 	}
 
-	// Battery or lock alerts could be warnings
-	if strings.Contains(entityID, "battery") {
-		if state == "low" {
-			return structures.SeverityWarning // Warning for low battery
-		}
-	}
+	// TODO CLIMATE
 
-	// Regular devices like lights, fans, and thermostats are informational
-	if strings.HasPrefix(entityID, "light.") || strings.HasPrefix(entityID, "fan.") || strings.HasPrefix(entityID, "thermostat.") {
-		if state == "off" {
-			return structures.SeverityInfo // Information for lights or fans turning off
-		}
-	}
+	// TODO SENSOR
 
 	// Default to warning if no other condition matches
+	return severity
+}
+
+// CHECK SEVERITY OF LIGHT EVENT
+func getLightSeverity(event *WebhookMessage) string {
+	oldState := event.Event.Data.OldState
+	newState := event.Event.Data.NewState
+
+	oldStateValue := oldState.State
+	newStateValue := newState.State
+
+	oldOffBrightness := oldState.Attributes["off_brightness"]
+	newOffBrightness := newState.Attributes["off_brightness"]
+
+	oldSupportedColorModes := oldState.Attributes["supported_color_modes"]
+	newSupportedColorModes := newState.Attributes["supported_color_modes"]
+
+	oldSupportedFeatures := oldState.Attributes["supported_features"]
+	newSupportedFeatures := newState.Attributes["supported_features"]
+
+	// CRITICAL SECTION
+	if newStateValue == "unavailable" {
+		return structures.SeverityCritical
+	}
+
+	// NEW DEVICE
+	if (oldStateValue == "" && newStateValue != "") || (utils.IsStructEmpty(oldState) && utils.IsStructEmpty(newState) == false) {
+		return structures.SeverityInfo
+	}
+
+	// WARNING SECTION
+	if oldSupportedFeatures != newSupportedFeatures {
+		return structures.SeverityWarning
+	}
+
+	// INFORMATION SECTION
+	if oldStateValue != newStateValue {
+		return structures.SeverityInfo
+	}
+	if oldOffBrightness != newOffBrightness {
+		return structures.SeverityInfo
+	}
+	if oldSupportedColorModes != newSupportedColorModes {
+		return structures.SeverityInfo
+	}
+
 	return structures.SeverityWarning
 }

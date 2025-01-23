@@ -8,16 +8,10 @@ const (
 )
 
 const (
-	AlertTypeSmoke       = "Smoke"
-	AlertTypeWater       = "Water"
-	AlertTypeTemperature = "Temperature"
-	AlertTypeBatteryLow  = "BatteryLow"
-	AlertTypeMotion      = "Motion"
-	AlertTypeDoorOpen    = "DoorOpen"
-	AlertTypeLight       = "Light"
-	AlertTypeLock        = "Lock"
-	AlertTypeFan         = "Fan"
-	AlertTypeUnknown     = "Unknown"
+	AlertTypeLight   = "Light"
+	AlertTypeSensor  = "Sensor"
+	AlertTypeClimate = "Climate"
+	AlertTypeUnknown = "Unknown"
 )
 
 const (

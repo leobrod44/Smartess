@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -71,11 +72,9 @@ func GetDataFromAPIendpoint(fullApiUrl, token string, result interface{}) error 
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
 var alertMappings = map[string]string{
-	"light":      structures.AlertTypeLight,       // All lights are mapped to Light
-	"sensor":     structures.AlertTypeMotion,      // All motion sensors or general sensors to Motion
-	"lock":       structures.AlertTypeLock,        // All locks to Lock
-	"thermostat": structures.AlertTypeTemperature, // All thermostats to Temperature
-	"fan":        structures.AlertTypeFan,         // All fans to Fan
+	"light":   structures.AlertTypeLight,
+	"sensor":  structures.AlertTypeSensor,
+	"climate": structures.AlertTypeClimate,
 }
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
@@ -87,4 +86,26 @@ func DetermineAlertType(entityID string) string {
 	}
 
 	return structures.AlertTypeUnknown
+}
+
+func IsStructEmpty(s interface{}) bool {
+	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return true
+		}
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		panic("IsStructEmpty: input is not a struct or pointer to a struct")
+	}
+
+	for i := 0; i < v.NumField(); i++ {
+		if !reflect.DeepEqual(v.Field(i).Interface(), reflect.Zero(v.Field(i).Type()).Interface()) {
+			return false
+		}
+	}
+
+	return true
 }

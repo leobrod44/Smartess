@@ -72,17 +72,22 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
+	//Check if state change event
+	if message.Event.EventType != "state_changed" {
+		return false, errors.New("event is not a state change")
+	}
+
 	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
 	classification := &ha.EventClassification{}
-	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT URGENCY/SEVERITY INFORMATION/WARNING/CRITICAL
-	routeKey := classification.GenerateAlertRoutingKey(conciseEvent)
-	//  TODO 2 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT TYPE
+	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
+	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
+	//  TODO ADD MORE TYPE
 	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
 
 	alert := structures.Alert{
 		HubIP:    os.Getenv("HUB_IP"),
 		DeviceID: message.Event.Data.EntityID,
-		// TODO 3 NEED FUNCTION TO DETERMINE THE MESSAGE LIKE STATE CHANGE OR ETC
+		// TODO WHAT IS THE MESSAGE?
 		Message:   *conciseEvent.Attributes.FriendlyName,
 		State:     message.Event.Data.NewState.State,
 		TimeStamp: message.Event.Data.NewState.LastChanged,
