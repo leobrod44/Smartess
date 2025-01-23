@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
-import { generateMockProjects } from "../../mockData";
+import { generateMockProjects, Project } from "../../mockData";
+import ProjectAddressMenu from "./ProjectAddressMenu";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 type AddUserProps = {
   isOpen: boolean;
@@ -11,8 +12,8 @@ type AddUserProps = {
 
 export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState("");
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("basic");
 
@@ -24,24 +25,37 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const resetForm = () => {
     setEmail("");
     setRole("basic");
-    setSelectedProject(projects[0]?.address || "");
+    setSelectedProjects(projects[0]?.address ? [projects[0].address] : []);
+    setSelectedProjectIds([]);
   };
 
-  function classNames(...classes: string[]): string {
-    return classes.filter(Boolean).join(" ");
-  }
-
-  const selectedProjectObj = projects.find(
-    (p: any) => p.address === selectedProject
-  );
-  const dropdownLabel = selectedProjectObj
-    ? selectedProjectObj.address
-    : "Select Project";
-
-  const handleSelectProject = (projectAddress: string) => {
-    setSelectedProject(projectAddress);
-    setIsOpenDropdown(false);
+  const handleProjectSelect = (project: {
+    projectId: number;
+    address: string;
+  }) => {
+    if (!selectedProjects.includes(project.address)) {
+      setSelectedProjects((prev) => [...prev, project.address]);
+      setSelectedProjectIds((prev) => [...prev, project.projectId]);
+    }
   };
+
+  const handleRemoveProject = (address: string) => {
+    setSelectedProjects((prev) => prev.filter((a) => a !== address));
+
+    const project = projects.find((proj) => proj.address === address);
+    if (project) {
+      setSelectedProjectIds((prev) =>
+        prev.filter((id) => id !== Number(project.projectId))
+      );
+    }
+  };
+
+  const unlinkedProjects = projects
+    .filter((project) => !selectedProjects.includes(project.address))
+    .map((project) => ({
+      projectId: Number(project.projectId),
+      address: project.address,
+    }));
 
   if (!isOpen) return null;
 
@@ -69,7 +83,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-900"
+                className="block text-sm font-medium text-[#30525E]"
               >
                 Email
               </label>
@@ -87,7 +101,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
             <div>
               <label
                 htmlFor="role"
-                className="block text-sm font-medium text-gray-900"
+                className="block text-sm font-medium text-[#30525E]"
               >
                 Assign Role
               </label>
@@ -102,55 +116,29 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
               </select>
             </div>
 
-            {/* Project Dropdown */}
-            <div>
-              <label
-                htmlFor="project-dropdown"
-                className="block text-sm font-medium text-gray-900"
-              >
-                Select Project
-              </label>
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsOpenDropdown(!isOpenDropdown)}
-                  className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3b5c6b]"
-                >
-                  {dropdownLabel}
-                  {isOpenDropdown ? (
-                    <ChevronUpIcon
-                      className="-mr-1 h-5 w-5 text-gray-400"
-                      aria-hidden="true"
+            {/* Always Open Project Selection */}
+            <div className="mt-4">
+              <p className="block text-sm font-medium text-[#30525E]">
+                Select Projects
+              </p>
+              <ProjectAddressMenu
+                unlinkedProjects={unlinkedProjects}
+                onSelectProject={handleProjectSelect}
+              />
+              {/* Render Selected Projects */}
+              <div className="flex flex-col gap-2 mt-4">
+                {selectedProjects.map((address, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between border p-2 rounded-md shadow-sm"
+                  >
+                    <span>{address}</span>
+                    <DeleteIcon
+                      onClick={() => handleRemoveProject(address)}
+                      className="text-red-600 hover:text-red-800"
                     />
-                  ) : (
-                    <ChevronDownIcon
-                      className="-mr-1 h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  )}
-                </button>
-
-                {isOpenDropdown && (
-                  <div className="mt-2 max-h-60 overflow-y-auto rounded-md bg-white shadow-lg">
-                    <div className="py-1">
-                      {projects.map((project: any) => (
-                        <button
-                          key={project.projectId}
-                          type="button"
-                          onClick={() => handleSelectProject(project.address)}
-                          className={classNames(
-                            selectedProject === project.address
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-700 hover:bg-gray-200 hover:text-gray-900",
-                            "block w-full text-left px-4 py-2 text-sm"
-                          )}
-                        >
-                          {project.address}
-                        </button>
-                      ))}
-                    </div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
 
