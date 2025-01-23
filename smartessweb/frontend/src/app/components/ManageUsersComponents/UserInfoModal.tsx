@@ -252,7 +252,7 @@ function UserInfoModal({
             onClick={handleModalClose}
             className="absolute top-2 right-2 text-[#30525E]"
           >
-            <CloseIcon className="absolute top-3 right-3 text-gray-500 cursor-pointer hover:text-gray-700 transition duration-300" />
+            <CloseIcon />
           </IconButton>
 
           <div className="flex flex-col items-center justify-center">
