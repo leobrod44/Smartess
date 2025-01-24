@@ -63,7 +63,9 @@ services:
     image: rabbitmq:management #TODO: Development only. For Production, use: rabbitmq:latest
     ports:
       - "5672:5672"
-      - "15672:15672"
+      - "15672:15672" # management
+      - "15674:15674" # web stomp
+      - "15675:15675" # stomp
     volumes:
       - ./data:/var/lib/rabbitmq
     environment:
@@ -78,6 +80,10 @@ services:
       start_period: 15s # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
+    command: >
+      bash -c "
+      rabbitmq-plugins enable rabbitmq_web_stomp &&
+      rabbitmq-server"
 
   #to launch only smartess web use the following command: docker-compose up --build smartessweb
   smartessweb_dev:

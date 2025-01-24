@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -66,4 +67,26 @@ func GetDataFromAPIendpoint(fullApiUrl, token string, result interface{}) error 
 	}
 
 	return nil
+}
+
+func IsStructEmpty(s interface{}) bool {
+	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return true
+		}
+		v = v.Elem()
+	}
+
+	if v.Kind() != reflect.Struct {
+		panic("IsStructEmpty: input is not a struct or pointer to a struct")
+	}
+
+	for i := 0; i < v.NumField(); i++ {
+		if !reflect.DeepEqual(v.Field(i).Interface(), reflect.Zero(v.Field(i).Type()).Interface()) {
+			return false
+		}
+	}
+
+	return true
 }

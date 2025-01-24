@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net/url"
 	"os"
@@ -30,8 +29,6 @@ func Init(selectedHub structures.HubTypeEnum, logger *logs.Logger, instance *com
 	var webhookConn *websocket.Conn
 	var err error
 	switch selectedHub {
-	case structures.MONGO_MOCK_HUB:
-		webhookConn, err = connectTestMongoWebhook(logger)
 	case structures.LOCAL_MOCK_HUB:
 		webhookConn, err = connectMockHubWebhook(logger)
 	case structures.HA_NORMAL_HUB:
@@ -74,42 +71,62 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
-
-	if !strings.Contains(message.Event.Data.EntityID, "light") && !strings.Contains(message.Event.Data.OldState.State, "switch") {
-		return false, nil
+	//Check if state change event
+	if message.Event.EventType != "state_changed" {
+		return false, errors.New("event is not a state change")
 	}
 
-	//TODO queue routing key logic hardcoded for now
-
-	alert_type := structures.AlertTypeWater
+	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
+	classification := &ha.EventClassification{}
+	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
+	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
+	//  TODO ADD MORE TYPE | sensors have many different types
+	alertType := ha.DetermineAlertType(conciseEvent.EntityID)
 
 	alert := structures.Alert{
-		HubIP:     os.Getenv("HUB_IP"),
-		DeviceID:  message.Event.Data.EntityID,
-		Message:   "Light state changed",
+		HubIP:    os.Getenv("HUB_IP"),
+		DeviceID: message.Event.Data.EntityID,
+		// TODO WHAT IS THE MESSAGE?
+		Message:   *conciseEvent.Attributes.FriendlyName,
 		State:     message.Event.Data.NewState.State,
 		TimeStamp: message.Event.Data.NewState.LastChanged,
-		Type:      alert_type,
+		Type:      alertType,
 	}
 
-	routeKey := "alerts.warning." + "test_id"
 	alertJson, err := json.Marshal(alert)
-
 	if err != nil {
 		return false, errors.New("failed to marshal alert")
 	}
-	r.Logger.Info(routeKey)
-	r.Logger.Info(string(alertJson))
+
+	var exchangeName string
+	// Find the matching exchange for the message's routing key
+	for _, exchange := range r.instance.Config.Exchanges {
+		for _, binding := range exchange.QueueBindings {
+			parts := strings.Split(binding.RoutingKey, ".")
+			if strings.Contains(routeKey, parts[0]) {
+				exchangeName = exchange.Name
+				break
+			}
+		}
+		if exchangeName != "" {
+			break
+		}
+	}
+	// If no exchange found for the routing key, log an error
+	if exchangeName == "" {
+		log.Printf("No matching exchange found for routing key %s\n", routeKey)
+		return false, fmt.Errorf("no matching exchange found for routing key %s", routeKey)
+	}
+
 	return true, r.instance.Channel.Publish(
-		"alerts", // exchange
-		routeKey, //key
-		true,     // mandatory
-		false,    // immediate
+		exchangeName, // exchange
+		routeKey,     //key
+		true,         // mandatory
+		false,        // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body:        []byte(alertJson),
 		})
-
 }
 
 // TODO add with options which are dynamic with type of config, generic with event type, condition?
@@ -192,138 +209,4 @@ func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	}
 	logger.Info("Subscribed to Home Assistant events")
 	return conn, nil
-}
-
-func connectTestMongoWebhook(logger *logs.Logger) (*websocket.Conn, error) { // This is here to simulate a connection to rpi
-
-	u := url.URL{Scheme: "ws", Host: "mock-mongo-server:9090", Path: "/ws"}
-	logger.Info(fmt.Sprintf("Connecting to: %s", u.String()))
-
-	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
-	if err != nil {
-		logger.Fatal(fmt.Sprintf("Failed to dial WebSocket: %v", err))
-		return nil, fmt.Errorf("Failed to connect to Mock Mongo Server")
-	}
-
-	logger.Info("Connected to Mock Mongo Server")
-
-	subscribeMessage := `{"id": 1, "type": "subscribe_events"}`
-	err = conn.WriteMessage(websocket.TextMessage, []byte(subscribeMessage))
-	if err != nil {
-		logger.Error("Failed to subscribe to events")
-		return nil, fmt.Errorf("failed to subscribe to events")
-	}
-	logger.Info("Subscribed to Mock Mongo events")
-	return conn, nil
-}
-
-func (client *EventHandler) PublishMongo(message []byte) error { // This is here to simulate a connection to rpi
-	return client.instance.Channel.Publish(
-		"", // exchange
-		"mongo-messages",
-		false, // mandatory
-		false, // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(message),
-		})
-}
-
-func loadTopicMessages(path string) ([]TopicMessage, error) {
-	var messages []TopicMessage
-
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	// Closure (non parameter) needed to close local instance of file descritor after loadTopicMessages returns
-	defer func() {
-		if cerr := file.Close(); cerr != nil {
-			log.Printf("failed to close file: %v", cerr)
-		}
-	}()
-
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(data, &messages); err != nil {
-		return nil, err
-	}
-
-	return messages, nil
-}
-func (client *EventHandler) PublishTopicMessages() error {
-	var messages []TopicMessage
-	var err error
-	messages, err = loadTopicMessages("/app/config/test_topic_messages.json")
-	if err != nil {
-		log.Fatalf("Failed to load test messages: %v\n", err)
-	}
-
-	// todo CURRENTLY choosing which exchnage to publish to is done by contains, but should be changed to maybe regex???? the internal * # does not work here
-	exchanges := []struct {
-		Name        string
-		Type        string
-		RoutingKeys []string
-	}{
-		{
-			Name:        common_rabbitmq.Test0AlertRoutingKey, // Alert exchange
-			Type:        "topic",
-			RoutingKeys: []string{"alerts", "notifications", "storemongo"},
-		},
-		{
-			Name:        common_rabbitmq.Test0VideoStreamingRoutingKey, // Video exchange
-			Type:        "direct",
-			RoutingKeys: []string{"video.stream", "video.monitor"},
-		},
-	}
-
-	// Iterate over the messages
-	for _, msg := range messages {
-		var exchangeName string
-		// Find the matching exchange for the message's routing key
-		for _, exchange := range exchanges {
-			for _, key := range exchange.RoutingKeys {
-				// Check if routing key matches any of the patterns (simple example, could be extended for pattern matching)
-				if strings.Contains(msg.RoutingKey, key) {
-					exchangeName = exchange.Name
-					break
-				}
-			}
-			if exchangeName != "" {
-				break
-			}
-		}
-
-		// If no exchange found for the routing key, log an error
-		if exchangeName == "" {
-			log.Printf("No matching exchange found for routing key %s\n", msg.RoutingKey)
-			return fmt.Errorf("no matching exchange found for routing key %s", msg.RoutingKey)
-		}
-
-		err := client.instance.Channel.Publish(
-			exchangeName,   // Selected exchange
-			msg.RoutingKey, // Routing key
-			false,          // mandatory
-			false,          // immediate                                 // immediate
-			amqp.Publishing{
-				ContentType: "application/json",
-				Body:        []byte(msg.Content),
-			})
-
-		if err != nil {
-			log.Printf("Failed to publish message to exchange %s with routing key %s: %v\n", exchangeName, msg.RoutingKey, err)
-			return err
-		} else {
-			log.Printf("Published message to exchange %s with routing key %s\n", exchangeName, msg.RoutingKey)
-		}
-	}
-	return nil
-}
-
-type TopicMessage struct {
-	RoutingKey string `json:"routing_key"`
-	Content    string `json:"content"`
 }
