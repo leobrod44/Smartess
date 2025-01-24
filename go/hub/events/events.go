@@ -99,6 +99,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 		return false, errors.New("failed to marshal alert")
 	}
 	r.Logger.Info(routeKey)
+	r.Logger.Info(string(alertJson))
 	return true, r.instance.Channel.Publish(
 		"alerts", // exchange
 		routeKey, //key

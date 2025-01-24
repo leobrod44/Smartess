@@ -25,10 +25,7 @@ type RtspProcessor struct {
 
 type CameraConfig struct {
 	Name        string `yaml:"name"`
-	Username    string `yaml:"username"`
-	Password    string `yaml:"password"`
-	Host        string `yaml:"host"`
-	Path        string `yaml:"path"`
+	StreamURL   string `yaml:"streamURL"`
 	SegmentTime int    `yaml:"segment_time"`
 }
 
@@ -60,7 +57,8 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 
 func (rtsp *RtspProcessor) Start() {
 	for _, camera := range rtsp.cameras.CameraConfigs {
-		streamURL := "rtsp://" + camera.Username + ":" + camera.Password + "@" + camera.Host + "/" + camera.Path
+		streamURL := camera.StreamURL
+		rtsp.Logger.Info(fmt.Sprintf("stream url %s", streamURL))
 		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
 		tmpDir := "/tmp/data/" + camera.Name
 		err := os.MkdirAll(tmpDir, 0755)
@@ -93,7 +91,6 @@ func (rtsp *RtspProcessor) Start() {
 		time.Sleep(time.Second)
 
 		rtsp.Logger.Info(fmt.Sprintf("Starting FFmpeg for stream %s", camera.Name))
-
 		rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
 
 		ffmpegOutput := &bytes.Buffer{}
@@ -129,7 +126,7 @@ func (rtsp *RtspProcessor) Start() {
 						rtsp.Logger.Info((fmt.Sprintf("Publishing segment to queue: %v", segmentFilePath)))
 						err = rtsp.instance.Channel.Publish(
 							"videostream", // Default exchange
-							"videostream.hubid."+camera.Name,
+							fmt.Sprintf("videostream.hubid.%s", camera.Name), // Routing key (queue name)
 							false, // Mandatory
 							false, // Immediate
 							amqp.Publishing{
