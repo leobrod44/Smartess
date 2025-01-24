@@ -6,6 +6,7 @@ const (
 	HA_NORMAL_HUB HubTypeEnum = iota
 	LOCAL_MOCK_HUB
 )
+
 // TODO type AlertType string
 const (
 	AlertTypeLight   = "Light"
@@ -13,6 +14,7 @@ const (
 	AlertTypeClimate = "Climate"
 	AlertTypeUnknown = "Unknown"
 )
+
 // TODO type AlertSeverity string
 const (
 	SeverityCritical = "critical"
