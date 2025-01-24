@@ -73,18 +73,118 @@ func (*EventClassification) GenerateAlertRoutingKey(consiseEvent *ConciseEvent, 
 func determineAlertSeverity(event *WebhookMessage) string {
 	entityID := event.Event.Data.EntityID
 
-	var severity string
-	// LIGHT EVENTS
-	if strings.HasPrefix(entityID, "light") {
-		severity = getLightSeverity(event)
+	if strings.HasPrefix(entityID, "light") { // LIGHT EVENTS
+		return getLightSeverity(event)
+	} else if strings.HasPrefix(entityID, "climate") { // CLIMATE EVENTS
+		return getClimateSeverity(event)
+	} else if strings.HasPrefix(entityID, "sensor") { // SENSOR EVENTS | IMPORTANT THERE ARE DIFFERENT TYPES OF SENSORS
+		return getSensorSeverity(event)
+	} else {
+		return structures.SeverityWarning
+	}
+}
+
+func getClimateSeverity(event *WebhookMessage) string {
+	oldState := event.Event.Data.OldState
+	newState := event.Event.Data.NewState
+
+	oldStateValue := oldState.State
+	newStateValue := newState.State
+
+	// NEW DEVICE
+	if (oldStateValue == "" && newStateValue != "") || (utils.IsStructEmpty(oldState) && !utils.IsStructEmpty(newState)) {
+		return structures.SeverityInfo
 	}
 
-	// TODO CLIMATE
+	// CRITICAL
+	if newStateValue == "unavailable" {
+		return structures.SeverityCritical
+	}
 
-	// TODO SENSOR
+	// CRITICAL: Temperature Stuck at Extreme Value (Critical Alert)
+	if newState.Attributes["temperature"] != nil {
+		newTemp := newState.Attributes["temperature"].(float64)
 
-	// Default to warning if no other condition matches
-	return severity
+		if newTemp <= 0 || newTemp >= 40 {
+			return structures.SeverityCritical
+		}
+	}
+
+	// CRITICAL: HVAC Mode Stuck
+	if newState.Attributes["hvac_action"] != nil {
+		hvacAction := newState.Attributes["hvac_action"].(string)
+
+		if hvacAction == "heating" || hvacAction == "cooling" {
+			if oldStateValue == newStateValue {
+				return structures.SeverityCritical
+			}
+		}
+	}
+
+	// WARNING: Temperature Exceeds Limits
+	if newState.Attributes["temperature"] != nil {
+		newTemp := newState.Attributes["temperature"].(float64)
+		if newTemp > newState.Attributes["max_temp"].(float64) {
+			return structures.SeverityWarning
+		}
+		if newTemp < newState.Attributes["min_temp"].(float64) {
+			return structures.SeverityWarning
+		}
+	}
+
+	// WARNING: System Efficiency Concerns
+	if newState.Attributes["occupancy"] != nil && newState.Attributes["hvac_action"] != nil {
+		occupancy := newState.Attributes["occupancy"].(int)
+		hvacAction := newState.Attributes["hvac_action"].(string)
+
+		if occupancy == 0 && (hvacAction == "heating" || hvacAction == "cooling") {
+			return structures.SeverityWarning
+		}
+	}
+
+	// Information Alert: Temperature Change
+	if oldState.Attributes["temperature"] != nil && newState.Attributes["temperature"] != nil {
+		oldTemp := oldState.Attributes["temperature"].(float64)
+		newTemp := newState.Attributes["temperature"].(float64)
+
+		// If the temperature has changed, it's an informational alert
+		if oldTemp != newTemp {
+			return structures.SeverityInfo // Temperature change detected
+		}
+	}
+
+	// Information Alert: HVAC Mode Change
+	if oldState.Attributes["hvac_action"] != nil && newState.Attributes["hvac_action"] != nil {
+		oldHvacAction := oldState.Attributes["hvac_action"].(string)
+		newHvacAction := newState.Attributes["hvac_action"].(string)
+
+		// If the HVAC action has changed, it's an informational alert
+		if oldHvacAction != newHvacAction {
+			return structures.SeverityInfo // HVAC mode change detected
+		}
+	}
+
+	return structures.SeverityWarning
+}
+
+func getSensorSeverity(event *WebhookMessage) string {
+	oldState := event.Event.Data.OldState
+	newState := event.Event.Data.NewState
+
+	oldStateValue := oldState.State
+	newStateValue := newState.State
+
+	// NEW DEVICE
+	if (oldStateValue == "" && newStateValue != "") || (utils.IsStructEmpty(oldState) && !utils.IsStructEmpty(newState)) {
+		return structures.SeverityInfo
+	}
+
+	// CRITICAL
+	if newStateValue == "unavailable" {
+		return structures.SeverityCritical
+	}
+
+	return structures.SeverityWarning
 }
 
 // CHECK SEVERITY OF LIGHT EVENT
@@ -104,7 +204,7 @@ func getLightSeverity(event *WebhookMessage) string {
 	oldSupportedFeatures := oldState.Attributes["supported_features"]
 	newSupportedFeatures := newState.Attributes["supported_features"]
 
-	// CRITICAL SECTION
+	// CRITICAL
 	if newStateValue == "unavailable" {
 		return structures.SeverityCritical
 	}
@@ -114,12 +214,12 @@ func getLightSeverity(event *WebhookMessage) string {
 		return structures.SeverityInfo
 	}
 
-	// WARNING SECTION
+	// WARNING: Changes in device capabilities
 	if oldSupportedFeatures != newSupportedFeatures {
 		return structures.SeverityWarning
 	}
 
-	// INFORMATION SECTION
+	// INFORMATION: General state or attribute changes
 	if oldStateValue != newStateValue {
 		return structures.SeverityInfo
 	}

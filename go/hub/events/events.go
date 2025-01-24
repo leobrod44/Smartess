@@ -81,7 +81,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 	classification := &ha.EventClassification{}
 	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
 	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
-	//  TODO ADD MORE TYPE
+	//  TODO ADD MORE TYPE | sensors have many different types
 	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
 
 	alert := structures.Alert{
