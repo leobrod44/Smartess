@@ -1,7 +1,8 @@
 cameras:
-  - name: "tapo_C200"
-    username: "tapoadmin"
-    password: "tapoadmin"
-    host: "192.168.0.99:554"
-    path: "stream1"
+  - name: "tapo C200"
+    streamURL: "rtsp://tapoadmin:tapoadmin@192.168.0.99:554/stream1"
     segment_time: 10
+
+  - name: "mock_camera"
+    streamURL: "rtsp://mock_camera:8554/live"
+    segment_time: 3

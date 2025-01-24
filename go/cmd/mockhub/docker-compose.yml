@@ -10,6 +10,17 @@ services:
       - HUB_IP=mockhub:8765 # temporary hub_ip value for easier logging (logging set up for real hub)
     ports:
       - "8765:8765"
+    volumes:
+      - ./data:/tmp/data
+    networks:
+      - smartess_network
+
+  mock_camera:
+    container_name: mock_camera
+    build:
+      context: ../../../go/cmd/mock_camera
+    ports:
+      - "8554:8554"
     networks:
       - smartess_network
 networks:
