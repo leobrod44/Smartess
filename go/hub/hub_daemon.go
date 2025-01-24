@@ -78,11 +78,11 @@ func (hub *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	go func() {
-		defer wg.Done() // Decrement the counter when this goroutine completes
+		defer wg.Done()
 		hub.event_handler.Start(selectedHub)
 	}()
 	go func() {
-		defer wg.Done() // Decrement the counter when this goroutine completes
+		defer wg.Done()
 		hub.rtsp_processor.Start()
 	}()
 	wg.Wait()

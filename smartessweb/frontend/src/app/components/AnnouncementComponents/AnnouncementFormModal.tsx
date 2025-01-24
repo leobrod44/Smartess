@@ -7,6 +7,8 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import { useRouter } from "next/navigation";
 import { projectApi } from "@/api/page";
 import { Project } from "../../mockData";
+import { announcementApi } from "@/api/dashboard/announcement/page";
+import { useUserContext } from "@/context/UserProvider";
 
 type AnnouncementFormModalProps = {
   isOpen: boolean;
@@ -21,6 +23,7 @@ export default function AnnouncementFormModal({
   isOpen,
   onClose,
 }: AnnouncementFormModalProps) {
+  const { userId } = useUserContext();
   const [projects, setProjects] = useState<Project[]>([]);
   const [type, setType] = useState<"organization" | "project">("organization");
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -88,7 +91,7 @@ export default function AnnouncementFormModal({
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!content.trim()) {
@@ -96,20 +99,62 @@ export default function AnnouncementFormModal({
       return;
     }
 
-    console.log({
-      type,
-      selectedProject,
-      content,
-      keywords,
-      files,
-    });
+    try {
+      let fetchedEmails: string[] = [];
 
-    showToastSuccess("Announcement posted successfully!");
-    setTimeout(() => {
-      router.push("/dashboard/announcement");
-    }, 1000);
-    resetForm();
-    onClose();
+      if (type === "organization") {
+        const orgResponse = await announcementApi.getOrgId(userId);
+        const emailResponse = await announcementApi.getEmailsInOrg(
+          orgResponse.orgId
+        );
+        fetchedEmails = emailResponse.emails;
+      } else if (type === "project") {
+        const selectedProj = projects.find(
+          (p) => p.address === selectedProject
+        );
+        if (selectedProj) {
+          const emailResponse = await announcementApi.getEmailsInProject(
+            selectedProj.projectId
+          );
+          fetchedEmails = emailResponse.emails;
+        }
+      }
+
+      if (fetchedEmails.length === 0) {
+        showToastError("No recipients found.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("emailList", JSON.stringify(fetchedEmails));
+      formData.append("type", type);
+      formData.append("content", content);
+
+      if (type === "project") {
+        formData.append("selectedAddress", selectedProject);
+      }
+
+      if (keywords.length > 0) {
+        formData.append("keywords", JSON.stringify(keywords));
+      }
+
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      await announcementApi.sendAnnouncement(formData);
+      showToastSuccess("Announcement posted successfully!");
+
+      setTimeout(() => {
+        router.push("/dashboard/announcement");
+      }, 1000);
+
+      resetForm();
+      onClose();
+    } catch (err) {
+      showToastError("Failed to send announcement.");
+      console.error("Failed to send announcement:", err);
+    }
   };
 
   const selectedProjectObj = projects.find(

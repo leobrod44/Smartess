@@ -58,4 +58,6 @@ For Hub: Refer to [Hub developper's guide](https://github.com/leobrod44/Smartess
 For Web: Refer to [Web developper's guide](https://github.com/leobrod44/Smartess/tree/main/smartessweb#readme)
 
 
+## Diversity Statement
 
+At Smartess, we believe that diversity drives innovation. We are keen to build an inclusive environment where people from all backgrounds and values feel respected, included, and comfortable in their own homes. We understand that as a company that focuses on enhancing living experiences, our solutions come from diverse perspectives and skills of the team and the communities that we serve. We prioritize inclusivity in our software design and in the development of our platform by creating a user-friendly interface that ensures accessibility for all individuals regardless of their technological background. At Smartess, we work as a team where collaboration thrives across different cultures, backgrounds, and abilities to better understand and cater to the evolving needs of the world around us.

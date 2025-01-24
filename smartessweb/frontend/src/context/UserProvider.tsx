@@ -11,10 +11,12 @@ import {
 
 // Define the interface for context values
 interface UserContextProps {
+  userId: string;
   userEmail: string;
   userFirstName: string;
   userLastName: string;
   userType: string;
+  setUserId: Dispatch<SetStateAction<string>>;
   setUserEmail: Dispatch<SetStateAction<string>>;
   setUserFirstName: Dispatch<SetStateAction<string>>;
   setUserLastName: Dispatch<SetStateAction<string>>;
@@ -26,16 +28,19 @@ const UserContext = createContext<UserContextProps | null>(null);
 
 // Create a context provider component
 export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const [userId, setUserId] = useState<string>("");
   const [userEmail, setUserEmail] = useState<string>("");
   const [userFirstName, setUserFirstName] = useState<string>("");
   const [userLastName, setUserLastName] = useState<string>("");
   const [userType, setUserType] = useState<string>("");
 
   const value = {
+    userId,
     userEmail,
     userFirstName,
     userLastName,
     userType,
+    setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,

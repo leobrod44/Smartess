@@ -17,7 +17,7 @@ exports.getUser = async (req, res) => {
     // Query the user table using the email
     const { data: userData, error: dbError } = await supabase
       .from("user")
-      .select("email, first_name, last_name, type")
+      .select("user_id, email, first_name, last_name, type")
       .eq("email", user.email)
       .single();
 
@@ -30,6 +30,7 @@ exports.getUser = async (req, res) => {
     }
 
     res.json({
+      user_id: userData.user_id,
       email: userData.email,
       first_name: userData.first_name,
       last_name: userData.last_name,
