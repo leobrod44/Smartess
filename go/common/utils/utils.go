@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"Smartess/go/common/structures"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -68,24 +67,6 @@ func GetDataFromAPIendpoint(fullApiUrl, token string, result interface{}) error 
 	}
 
 	return nil
-}
-
-// TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
-var alertMappings = map[string]string{
-	"light":   structures.AlertTypeLight,
-	"sensor":  structures.AlertTypeSensor,
-	"climate": structures.AlertTypeClimate,
-}
-
-// TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
-func DetermineAlertType(entityID string) string {
-	for prefix, alertType := range alertMappings {
-		if strings.HasPrefix(entityID, prefix) {
-			return alertType
-		}
-	}
-
-	return structures.AlertTypeUnknown
 }
 
 func IsStructEmpty(s interface{}) bool {

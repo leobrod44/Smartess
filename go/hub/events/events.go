@@ -3,7 +3,6 @@ package events
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	structures "Smartess/go/common/structures"
-	"Smartess/go/common/utils"
 	"Smartess/go/hub/ha"
 	"encoding/json"
 	"errors"
@@ -82,7 +81,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
 	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
 	//  TODO ADD MORE TYPE | sensors have many different types
-	alertType := utils.DetermineAlertType(conciseEvent.EntityID)
+	alertType := ha.DetermineAlertType(conciseEvent.EntityID)
 
 	alert := structures.Alert{
 		HubIP:    os.Getenv("HUB_IP"),
