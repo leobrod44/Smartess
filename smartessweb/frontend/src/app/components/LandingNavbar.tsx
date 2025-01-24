@@ -48,7 +48,7 @@ const LandingNavbar = () => {
                 </Link>
                 <Link
                   href='/sign-in'
-                  className='button text-[#266472] border border-[#266472] rounded-full hover:bg-[#266472] hover:text-white px-3 py-2 text-sm font-medium'
+                  className='button text-[#266472] border border-[#266472] rounded-full px-3 py-2 text-sm font-medium hover:bg-[#266472] hover:text-white transition duration-300'
                 >
                   Sign In
                 </Link>

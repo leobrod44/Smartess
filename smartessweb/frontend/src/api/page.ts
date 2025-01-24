@@ -242,7 +242,7 @@ export const individualUnitApi = {
     return data;
   },
 
-  getIndividualUnit: async ( unit_id: string, token: string): Promise<{ unit: Unit }> => {
+  getIndividualUnit: async ( projAddress: string, unit_id: string, token: string): Promise<{ unit: Unit }> => {
     const response = await fetch(`${API_URL}/individual-unit/get-individual-unit`, {
       method: 'POST',
       headers: {
@@ -250,6 +250,7 @@ export const individualUnitApi = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        projAddress,
         unit_id
       }),
     });
