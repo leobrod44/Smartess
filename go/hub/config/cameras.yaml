@@ -1,6 +1,6 @@
 cameras:
   - name: "tapo C200"
-    streamURL: "rtsp://tapoadmin:tapoadmin@192.168.0.19:554/stream1"
+    streamURL: "rtsp://tapoadmin:tapoadmin@192.168.0.99:554/stream1"
     segment_time: 10
 
   - name: "mock_camera"
