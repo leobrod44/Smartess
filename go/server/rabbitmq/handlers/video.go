@@ -12,7 +12,4 @@ func NewVideoHandler() *VideoHandler {
 	return &VideoHandler{}
 }
 
-func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
-	logger.Info(
-		"Video Data:  {}, Routing Key: {}", zap.ByteString("videoData", msg.Body), zap.String("key", msg.RoutingKey))
-}
+func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {}
