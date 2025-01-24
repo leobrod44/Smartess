@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { generateMockProjects, Project } from "../../mockData";
 import ProjectAddressMenu from "./ProjectAddressMenu";
-import Toast, { showToastError } from "../Toast";
+import Toast, { showToastError, showToastSuccess } from "../Toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 type AddUserProps = {
@@ -81,8 +81,10 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
     }
 
     // Logic to send the invitation goes here
+
     resetForm();
-    onClose();
+
+    showToastSuccess("Invitiation Sent!");
   };
 
   if (!isOpen) return null;
