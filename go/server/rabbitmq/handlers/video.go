@@ -12,5 +12,4 @@ func NewVideoHandler() *VideoHandler {
 	return &VideoHandler{}
 }
 
-func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
-}
+func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {}
