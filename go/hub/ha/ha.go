@@ -68,3 +68,22 @@ func ConvertAttributesToConciseAttributes(attributes map[string]interface{}) *Co
 		SupportedFeatures: attributes["supported_features"],
 	}
 }
+
+// Converts WebhookMessage(from hub) to a home assitance concise event
+func ConvertWebhookMessageToConciseEvent(message *WebhookMessage) *ConciseEvent {
+	var conciseAttributes *ConciseAttributes
+	if message.Event.Data.NewState.Attributes != nil {
+		conciseAttributes = ConvertAttributesToConciseAttributes(message.Event.Data.NewState.Attributes)
+	} else {
+		conciseAttributes = &ConciseAttributes{}
+	}
+
+	return &ConciseEvent{
+		Attributes:  *conciseAttributes,
+		Context:     message.Event.Context,
+		EntityID:    message.Event.Data.EntityID,
+		LastChanged: message.Event.Data.NewState.LastChanged,
+		LastUpdated: message.Event.Data.NewState.LastUpdated,
+		State:       message.Event.Data.NewState.State,
+	}
+}
