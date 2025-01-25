@@ -2,12 +2,6 @@
 package ha
 
 import (
-	"bufio"
-
-	"fmt"
-	"os"
-	"os/exec"
-	"strings"
 	"testing"
 	"time"
 )
@@ -27,7 +21,7 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		}
 	}()
 	t.Log("Waiting for mockhub to start...")
-	err := waitForServices(t, "../cmd/mockhub")
+	err := WaitForServices(t, "../cmd/mockhub")
 	if err != nil {
 		t.Fatalf("Mockhub did not start properly: %v", err)
 	}
@@ -44,7 +38,7 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		}
 	}()
 	t.Log("Waiting for other services to start...")
-	err = waitForServices(t, "../../")
+	err = WaitForServices(t, "../../")
 	if err != nil {
 		t.Fatalf("Other services did not start properly: %v", err)
 	}
@@ -61,7 +55,7 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		}
 	}()
 	t.Log("Waiting for hub to start...")
-	err = waitForServices(t, "../cmd/hub")
+	err = WaitForServices(t, "../cmd/hub")
 	if err != nil {
 		t.Fatalf("Hub did not start properly: %v", err)
 	}
@@ -72,7 +66,7 @@ func TestSmartessHubWithDocker(t *testing.T) {
 	// Unbuffered error/fatal channel
 	// Instead of doing Fail or Fatalf here within a non-testing goroutine
 	errCh := make(chan error)
-	go monitorLogFile(t, errCh, logFilePath, expectedLog)
+	go MonitorLogFile(t, errCh, logFilePath, expectedLog)
 
 	// Sleep for a while to allow events to be generated
 	t.Log("Waiting for events to be processed...")
@@ -85,60 +79,4 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		}
 	default:
 	}
-}
-
-func waitForServices(t *testing.T, dir string) error {
-	for i := 0; i < 10; i++ {
-		err := RunCommand("docker", []string{"ps"}, dir)
-		if err == nil {
-			t.Log("Services are running.")
-			return nil
-		}
-		t.Log("Waiting for services to start...")
-		time.Sleep(2 * time.Second)
-	}
-	return fmt.Errorf("services did not start in time")
-}
-
-func monitorLogFile(t *testing.T, errCh chan<- error, logFilePath, expectedLog string) {
-	file, err := os.Open(logFilePath)
-
-	if err != nil {
-		errCh <- fmt.Errorf("Failed to open log file: %v", err)
-		return
-	}
-	defer func() {
-		err := file.Close()
-		if err != nil {
-			errCh <- fmt.Errorf("Failed to close log file: %v", err)
-		}
-	}()
-
-	reader := bufio.NewReader(file)
-
-	// Continuously read the log file
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			time.Sleep(1 * time.Second) // Wait and retry
-			continue
-		}
-
-		if strings.Contains(line, expectedLog) {
-			t.Logf("Found expected log: %s", line)
-			errCh <- nil
-			return
-		}
-	}
-}
-
-// RunCommand runs a shell command and returns any errors.
-func RunCommand(cmd string, args []string, dir string) error {
-	command := exec.Command(cmd, args...)
-	command.Dir = dir // Set the working directory for the command
-	output, err := command.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to execute %s %v in directory %s: %v\nOutput: %s", cmd, args, dir, err, string(output))
-	}
-	return nil
 }
