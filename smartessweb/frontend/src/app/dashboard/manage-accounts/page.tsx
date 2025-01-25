@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { manageAccountsApi } from "@/api/page";
+import AddUserModal from "@/app/components/ManageUsersComponents/AddUserForm";
 
 /*  Mock current organization user data, this is different from the data 
     displayed on the page (all organization users) which you can find in the mockData.tsx
@@ -31,6 +32,8 @@ const ManageUsersPage = () => {
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentOrg, setCurrentOrg] = useState<number | undefined>(undefined);
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+
   const itemsPerPage = 8;
 
   // Add roles to filter options
@@ -42,79 +45,81 @@ const ManageUsersPage = () => {
     "basic",
   ];
 
-const consolidateUsers = (
-  projects: Project[],
-  orgUsers: OrgUser[],
-  individuals: Individual[],
-  currentUserAddresses: string[],
-  selectedProjectAddress: string
-) => {
-  const userMap: {
-    [individualId: string]: { user: Individual; addresses: string[] };
-  } = {};
+  const consolidateUsers = (
+    projects: Project[],
+    orgUsers: OrgUser[],
+    individuals: Individual[],
+    currentUserAddresses: string[],
+    selectedProjectAddress: string
+  ) => {
+    const userMap: {
+      [individualId: string]: { user: Individual; addresses: string[] };
+    } = {};
 
-
-  const nullProjOrgUsers = orgUsers.filter((orgUser) => orgUser.proj_id === null);
-
-  nullProjOrgUsers.forEach((orgUser) => {
-    const matchingIndividual = individuals.find(
-      (individual) => individual.individualId === orgUser.user_id
+    const nullProjOrgUsers = orgUsers.filter(
+      (orgUser) => orgUser.proj_id === null
     );
 
-    if (matchingIndividual) {
-      if (!userMap[matchingIndividual.individualId]) {
-        userMap[matchingIndividual.individualId] = {
-          user: matchingIndividual,
-          addresses: [], // Empty addresses for null projects
-        };
-      }
-    }
-  });
-
-  projects.forEach((project) => {
-    const shouldIncludeProject =
-      selectedProjectAddress === "ALL PROJECTS" ||
-      project.address === selectedProjectAddress;
-
-    if (shouldIncludeProject && currentUserAddresses.includes(project.address)) {
-
-      // find users in orgUsers linked to the project by proj_id
-      const projectOrgUsers = orgUsers.filter(
-        (orgUser) => orgUser.proj_id === parseInt(project.projectId, 10)
+    nullProjOrgUsers.forEach((orgUser) => {
+      const matchingIndividual = individuals.find(
+        (individual) => individual.individualId === orgUser.user_id
       );
 
-      // match these orgUsers with individuals by user_id
-      projectOrgUsers.forEach((orgUser) => {
-      
-        const matchingIndividual = individuals.find(
-          (individual) => individual.individualId === orgUser.user_id
+      if (matchingIndividual) {
+        if (!userMap[matchingIndividual.individualId]) {
+          userMap[matchingIndividual.individualId] = {
+            user: matchingIndividual,
+            addresses: [], // Empty addresses for null projects
+          };
+        }
+      }
+    });
+
+    projects.forEach((project) => {
+      const shouldIncludeProject =
+        selectedProjectAddress === "ALL PROJECTS" ||
+        project.address === selectedProjectAddress;
+
+      if (
+        shouldIncludeProject &&
+        currentUserAddresses.includes(project.address)
+      ) {
+        // find users in orgUsers linked to the project by proj_id
+        const projectOrgUsers = orgUsers.filter(
+          (orgUser) => orgUser.proj_id === parseInt(project.projectId, 10)
         );
 
-        if (matchingIndividual) {
+        // match these orgUsers with individuals by user_id
+        projectOrgUsers.forEach((orgUser) => {
+          const matchingIndividual = individuals.find(
+            (individual) => individual.individualId === orgUser.user_id
+          );
 
-          // add user to the userMap
-          if (userMap[matchingIndividual.individualId]) {
-            userMap[matchingIndividual.individualId].addresses.push(
-              project.address
-            );
+          if (matchingIndividual) {
+            // add user to the userMap
+            if (userMap[matchingIndividual.individualId]) {
+              userMap[matchingIndividual.individualId].addresses.push(
+                project.address
+              );
+            } else {
+              userMap[matchingIndividual.individualId] = {
+                user: matchingIndividual,
+                addresses: [project.address],
+              };
+            }
           } else {
-            userMap[matchingIndividual.individualId] = {
-              user: matchingIndividual,
-              addresses: [project.address],
-            };
+            console.log(
+              `No matching individual found for orgUser ${orgUser.user_id}`
+            );
           }
-        } else {
-          console.log(
-            `No matching individual found for orgUser ${orgUser.user_id}`);
-        }
-      });
-    } else {
-      console.log(`Skipping project: ${project.projectId}`);
-    }
-  });
+        });
+      } else {
+        console.log(`Skipping project: ${project.projectId}`);
+      }
+    });
 
-  return Object.values(userMap);
-};
+    return Object.values(userMap);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -126,16 +131,17 @@ const consolidateUsers = (
 
     const fetchData = async () => {
       try {
-        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
+          token
+        );
         const tempCurrentUser = responseCurrentUser.currentUser;
         setCurrentUser({
           userId: tempCurrentUser.userId.toString(),
           role: tempCurrentUser.role,
           address: tempCurrentUser.address,
-          firstName:tempCurrentUser.firstName,
-          lastName:tempCurrentUser.lastName,
+          firstName: tempCurrentUser.firstName,
+          lastName: tempCurrentUser.lastName,
         });
-
 
         const responseOrgUsers = await manageAccountsApi.getOrgUsersApi(token);
         const fetchedOrgUsers = responseOrgUsers.orgUsers;
@@ -144,14 +150,17 @@ const consolidateUsers = (
           setCurrentOrg(fetchedOrgUsers[0].org_id);
         }
 
-        const responseIndividuals = await manageAccountsApi.getOrgIndividualsData(fetchedOrgUsers, token);
+        const responseIndividuals =
+          await manageAccountsApi.getOrgIndividualsData(fetchedOrgUsers, token);
         const fetchedIndividuals = responseIndividuals.individuals;
         setIndividuals(fetchedIndividuals);
 
-        const responseProjects = await manageAccountsApi.getOrgUsersProjects(fetchedOrgUsers, token);
+        const responseProjects = await manageAccountsApi.getOrgUsersProjects(
+          fetchedOrgUsers,
+          token
+        );
         const fetchedProjects = responseProjects.projects;
         setProjects(fetchedProjects);
-
       } catch (err) {
         console.error("Error fetching organization users:", err);
       } finally {
@@ -160,7 +169,6 @@ const consolidateUsers = (
     };
 
     fetchData();
-
   }, [router]);
 
   const handleFilterChange = (filterValue: string) => {
@@ -168,8 +176,14 @@ const consolidateUsers = (
   };
 
   const consolidatedUsers = currentUser
-  ? consolidateUsers(projects, orgUsers, individuals, currentUser.address, selectedProjectAddress)
-  : [];
+    ? consolidateUsers(
+        projects,
+        orgUsers,
+        individuals,
+        currentUser.address,
+        selectedProjectAddress
+      )
+    : [];
 
   const filteredUsers = consolidatedUsers
     .filter(({ user, addresses }) => {
@@ -222,7 +236,7 @@ const consolidateUsers = (
   };
 
   const handleAddUserClick = () => {
-    console.log("Add user clicked!");
+    setIsAddUserModalOpen(true);
   };
 
   const handleRemoveUser = (uid: number) => {
@@ -254,15 +268,22 @@ const consolidateUsers = (
         </p>
 
         {currentUser && currentUser.role === "master" && (
-          <div
-            onClick={handleAddUserClick}
-            className="cursor-pointer flex items-center"
-            style={{ fontSize: "2rem" }}
-          >
-            <AddIcon className="text-[#30525E]" fontSize="inherit" />
-          </div>
+          <>
+            <div
+              onClick={handleAddUserClick}
+              className="cursor-pointer flex items-center"
+              style={{ fontSize: "2rem" }}
+            >
+              <AddIcon className="text-[#30525E]" fontSize="inherit" />
+            </div>
+            <AddUserModal
+              isOpen={isAddUserModalOpen}
+              onClose={() => setIsAddUserModalOpen(false)}
+            />
+          </>
         )}
       </div>
+
       <div className="flex-grow">
         {currentItems.map(({ user, addresses }) => {
           const addressString =

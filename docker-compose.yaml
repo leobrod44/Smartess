@@ -29,8 +29,8 @@ services:
       - "4000:4000"
     volumes:
       - ./observability/grafana/data:/var/lib/grafana
-      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards  # For dashboards
-      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/datasources  # For data sources
+      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards # For dashboards
+      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/datasources # For data sources
 
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
@@ -42,8 +42,8 @@ services:
   server:
     container_name: server
     build:
-      context: ./go  # Set the build context to the go directory
-      dockerfile: cmd/server/Dockerfile  # Specify the Dockerfile path relative to the build context
+      context: ./go # Set the build context to the go directory
+      dockerfile: cmd/server/Dockerfile # Specify the Dockerfile path relative to the build context
     ports:
       - "8080:8080"
     volumes:
@@ -51,19 +51,21 @@ services:
       - ./go/common/configs:/app/config
     depends_on:
       rabbitmq:
-        condition: service_healthy  # Correct placement of health condition
+        condition: service_healthy # Correct placement of health condition
     environment:
       RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
       MONGO_STRING: mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
     networks:
       - smartess_network
-  
+
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:management #TODO: Development only. For Production, use: rabbitmq:latest
     ports:
       - "5672:5672"
-      - "15672:15672"
+      - "15672:15672" # management
+      - "15674:15674" # web stomp
+      - "15675:15675" # stomp
     volumes:
       - ./data:/var/lib/rabbitmq
     environment:
@@ -71,13 +73,17 @@ services:
       - RABBITMQ_DEFAULT_PASS=admin
       - RABBITMQ_URI=amqp://admin:admin@localhost:5672/ # amqp://guest:guest@localhost:5672/
     healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]  # Check RabbitMQ status only
-      interval: 10s      # Check every 10 seconds
-      timeout: 5s        # Time allowed for RabbitMQ to respond
-      retries: 3         # Retry up to 3 times before marking the service as unhealthy
-      start_period: 15s  # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
+      test: [ "CMD", "rabbitmqctl", "status" ] # Check RabbitMQ status only
+      interval: 10s # Check every 10 seconds
+      timeout: 5s # Time allowed for RabbitMQ to respond
+      retries: 3 # Retry up to 3 times before marking the service as unhealthy
+      start_period: 15s # Allow up to 15 seconds for RabbitMQ to start before healthcheck begins
     networks:
       - smartess_network
+    command: >
+      bash -c "
+      rabbitmq-plugins enable rabbitmq_web_stomp &&
+      rabbitmq-server"
 
   #to launch only smartess web use the following command: docker-compose up --build smartessweb
   smartessweb_dev:
@@ -106,8 +112,8 @@ services:
       - "3001:3001"
     environment:
       - NODE_ENV=production
-#    depends_on:
-#      - rabbitmq
+    #    depends_on:
+    #      - rabbitmq
     networks:
       - smartess_network
 

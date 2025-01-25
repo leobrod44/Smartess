@@ -81,7 +81,10 @@ func Init() (RabbitMQServer, error) {
 				return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
 					exchangeConfig.Name, queueConfig.RoutingKey, err)
 			}
-			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient)
+			if queue.Name == "website.alert" {
+				continue
+			}
+			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient, instance)
 			if err != nil {
 				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 			}
@@ -132,12 +135,12 @@ func (r *RabbitMQServer) Start() {
 	select {}
 }
 
-func setHandler(exchange string, queue string, mongoClient *mongo.Client) (handlers.MessageHandler, error) {
+func setHandler(exchange string, queue string, mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance) (handlers.MessageHandler, error) {
 	switch exchange {
 	case "logs":
 		return handlers.NewHubLogHandler(queue), nil
 	case "alerts":
-		return handlers.NewAlertHandler(mongoClient), nil
+		return handlers.NewAlertHandler(mongoClient, instance), nil
 	case "videostream":
 		return handlers.NewVideoHandler(), nil
 	default:
