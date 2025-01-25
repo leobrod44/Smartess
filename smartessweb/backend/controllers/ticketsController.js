@@ -359,6 +359,18 @@ exports.getAssignableEmployees = async (req, res) => {
       return res.status(403).json({ error: "User does not have permission to assign tickets" });
     }
 
+    // Get already assigned user IDs
+    const { data: assignments, error: assignmentError } = await supabase
+      .from("tickets_assignments")
+      .select("assigned_to_user_id")
+      .eq("ticket_id", ticket_id);
+
+    if (assignmentError) {
+      return res.status(500).json({ error: "Failed to fetch ticket assignments" });
+    }
+
+    const assignedUserIds = assignments ? assignments.map(a => a.assigned_to_user_id) : [];
+
     // Get all employees for this project
     const { data: orgUsers, error: orgUsersError } = await supabase
       .from("org_user")
@@ -370,8 +382,11 @@ exports.getAssignableEmployees = async (req, res) => {
       return res.status(500).json({ error: "Failed to fetch employees" });
     }
 
+    // Filter out already assigned users
+    const unassignedOrgUsers = orgUsers.filter(user => !assignedUserIds.includes(user.user_id));
+    const userIds = unassignedOrgUsers.map(user => user.user_id);
+
     // Get employee details
-    const userIds = orgUsers.map(user => user.user_id);
     const { data: employees, error: employeesError } = await supabase
       .from("user")
       .select("user_id, first_name, last_name, email")
@@ -382,7 +397,7 @@ exports.getAssignableEmployees = async (req, res) => {
     }
 
     const formattedEmployees = employees.map(emp => {
-      const orgUser = orgUsers.find(ou => ou.user_id === emp.user_id);
+      const orgUser = unassignedOrgUsers.find(ou => ou.user_id === emp.user_id);
       return {
         employeeId: emp.user_id,
         firstName: emp.first_name,
