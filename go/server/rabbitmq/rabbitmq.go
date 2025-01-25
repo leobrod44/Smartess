@@ -81,7 +81,7 @@ func Init() (RabbitMQServer, error) {
 				return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
 					exchangeConfig.Name, queueConfig.RoutingKey, err)
 			}
-			if queue.Name == "website.alert" {
+			if queue.Name == "website.alert" || queue.Name == "videostream.hubid" {
 				continue
 			}
 			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient, instance)
