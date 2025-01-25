@@ -2,25 +2,47 @@ import React, { useState, useEffect } from "react";
 import { Individual, Ticket, CurrentUser } from "../../mockData";
 import AssignedUser from "./UserComponents/AssignedUserComponent";
 import AssignUserModalComponent from "./AssignUserModal";
-import { mockUsersNotAssignedToTicker } from "../../mockData";
 import { showToastError, showToastSuccess } from "../Toast";
 import AssignedUserClosedTicket from "./UserComponents/AssignedUserClosedComponent";
 import { useRouter } from "next/navigation";
 import { manageAccountsApi } from "@/api/page";
+import { ticketAssignApis } from "@/api/components/IndividualTicketPageComponents/ManageTicketAssignment";
+
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
 }
 
+interface AssignedUser {
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  resolved: boolean;
+}
+
 function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const router = useRouter();
-  const assignedUsers = ticket.assigned_employees;
+  const [assignedUsers, setAssignedUsers] = useState<AssignedUser[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const MAX_USERS = 3;
   const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
 
-  //get current logged in users role
+  useEffect(() => {
+    const fetchAssignedUsers = async () => {
+      try {
+        const users = await ticketAssignApis.getAssignedUsers(ticket.ticket_id);
+        setAssignedUsers(users);
+      } catch (error) {
+        console.error('Error:', error);
+        showToastError('Failed to load assigned users');
+      }
+    };
+
+    fetchAssignedUsers();
+  }, [ticket.ticket_id]);
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -30,9 +52,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
     const fetchData = async () => {
       try {
-        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
-          token
-        );
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
         const tempCurrentUser = responseCurrentUser.currentUser;
         setCurrentUser({
           userId: tempCurrentUser.userId.toString(),
@@ -43,22 +63,26 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         });
       } catch (err) {
         console.error("Error fetching user role:", err);
-      } finally {
-        //setLoading(false);
       }
     };
     fetchData();
   }, [router]);
 
-  //Get a list of the users that are part of the proj that this ticket is in, but not assigned to the ticket. these are considered available users
-  //since i cant do that right now, i will hardcode some users that arent assigned
   useEffect(() => {
-    const users = mockUsersNotAssignedToTicker(); // Call the function to get mock users
-    setAvailableUsers(users);
-  }, []);
+    const fetchAvailableUsers = async () => {
+      try {
+        const users = await ticketAssignApis.getAssignableEmployees(ticket.ticket_id);
+        setAvailableUsers(users);
+      } catch (error) {
+        console.error('Error:', error);
+        showToastError('Failed to load available employees');
+      }
+    };
+
+    fetchAvailableUsers();
+  }, [ticket.ticket_id]);
 
   useEffect(() => {
-    // Check if there are no assigned users, and if the status isnt open. if so, change it to open
     if (assignedUsers.length === 0 && ticket.status !== "closed") {
       onStatusUpdate("open");
     }
@@ -75,66 +99,56 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const handleAssignUser = (selectedUsers: Individual[]) => {
     try {
       if (assignedUsers.length + selectedUsers.length > MAX_USERS) {
-        showToastError(
-          `Cannot assign more than ${MAX_USERS} users to this ticket.`
-        );
+        showToastError(`Cannot assign more than ${MAX_USERS} users to this ticket.`);
         return;
       }
 
-      // Simulate assigning users
-      selectedUsers.forEach((user) => {
-        showToastSuccess(
-          `Assigned ${user.firstName} ${user.lastName} successfully!`
-        );
-      });
+      // Convert Individual to AssignedUser format
+      const newAssignedUsers: AssignedUser[] = selectedUsers.map(user => ({
+        userId: user.individualId,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: "",
+        resolved: false
+      }));
 
-      ticket.assigned_employees.push(...selectedUsers);
+      setAssignedUsers(prev => [...prev, ...newAssignedUsers]);
       onStatusUpdate("pending");
       setIsModalOpen(false);
 
-      // Refresh available users list by removing the users that were just added to the ticket (mocked)
-      setAvailableUsers(
-        availableUsers.filter(
-          (user) =>
-            !selectedUsers.some(
-              (selected) => selected.individualId === user.individualId
-            )
-        )
+      setAvailableUsers(prevUsers => 
+        prevUsers.filter(user => !selectedUsers.some(selected => selected.individualId === user.individualId))
       );
+
+      selectedUsers.forEach((user) => {
+        showToastSuccess(`Assigned ${user.firstName} ${user.lastName} successfully!`);
+      });
     } catch (error) {
       showToastError("There was an error while assigning the user(s).");
       console.error(error);
     }
   };
 
-  //assigning the current user to the ticket
   const assignYourself = () => {
     try {
-      //convert crrentUser to an individual..... have to do thisbecause current user
-      //and individual are different types..so i cant add the current user to the list of assigned employees
-      //since assigned employees are of  individual type...
-      //CURRENTLY FIRST AND LAST NAME ARE UNDEFINED
-
       if (!currentUser) {
         showToastError("Unable to assign yourself. User data is unavailable.");
         return;
       }
 
-      // Convert currentUser to Individual type
-      const currentUserAsIndividual: Individual = {
-        individualId: parseInt(currentUser.userId, 10),
+      const newAssignedUser: AssignedUser = {
+        userId: parseInt(currentUser.userId),
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
-        role: currentUser.role,
+        email: "",
+        resolved: false
       };
 
-      // Assign the current user
-      ticket.assigned_employees.push(currentUserAsIndividual);
+      setAssignedUsers(prev => [...prev, newAssignedUser]);
 
-      // Update available users by filtering out the current user
       setAvailableUsers((prevAvailableUsers) =>
         prevAvailableUsers.filter(
-          (user) => user.individualId !== currentUserAsIndividual.individualId
+          (user) => user.individualId !== parseInt(currentUser.userId)
         )
       );
 
@@ -148,22 +162,16 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
   const handleUnassignUser = (userId: number) => {
     try {
-      // Remove the user from assigned_employees
-      const updatedAssignedUsers = assignedUsers.filter(
-        (user) => user.individualId !== userId
-      );
-      ticket.assigned_employees = updatedAssignedUsers;
-
-      //add them back to the available employees
-      const unassignedUser = assignedUsers.find(
-        (user) => user.individualId === userId
-      );
+      setAssignedUsers(prev => prev.filter(user => user.userId !== userId));
+      const unassignedUser = assignedUsers.find(user => user.userId === userId);
 
       if (unassignedUser) {
-        setAvailableUsers((prevAvailableUsers) => [
-          ...prevAvailableUsers,
-          unassignedUser,
-        ]);
+        setAvailableUsers(prev => [...prev, {
+          individualId: unassignedUser.userId,
+          firstName: unassignedUser.firstName,
+          lastName: unassignedUser.lastName,
+          role: "basic" // Default role
+        }]);
       }
     } catch (error) {
       showToastError("There was an error unassigning the user.");
@@ -173,36 +181,44 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
   return (
     <>
-      {ticket.status === "closed" ? ( //if ticket is closed, display this section with the previously assigned users
+      {ticket.status === "closed" ? (
         <div className="w-full px-2 bg-white rounded-[38px] pb-6">
-          {ticket.assigned_employees.length !== 0 ? (
+          {assignedUsers.length !== 0 ? (
             <>
-              <div className="text-[#254752] px-3 text-[20px] font-sequel-sans w-full  flex items-center justify-between">
+              <div className="text-[#254752] px-3 text-[20px] font-sequel-sans w-full flex items-center justify-between">
                 Users Previously Assigned To This Ticket
               </div>
               <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
                 <div className="flex-1 text-left">ID</div>
                 <div className="flex-1 text-left">Name</div>
-                <div className="flex-1 text-center"> Contact </div>
+                <div className="flex-1 text-center">Contact</div>
                 <div className="flex-1 text-right mr-3">Resolved</div>
               </div>
 
-              {ticket.assigned_employees.map((Individual, index) => (
-                <AssignedUserClosedTicket key={index} Individual={Individual} />
+              {assignedUsers.map((user, index) => (
+                <AssignedUserClosedTicket 
+                  key={index} 
+                  Individual={{
+                    individualId: user.userId,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    role: "basic"
+                  }} 
+                />
               ))}
             </>
           ) : (
             <>
-              <div className="text-[#266472] px-3 text-[18px font-sequel-sans w-full">
+              <div className="text-[#266472] px-3 text-[18px] font-sequel-sans w-full">
                 No Users Were Assigned To This Ticket When Closed
               </div>
             </>
           )}
         </div>
-      ) : assignedUsers.length === 0 ? ( //if ticket has no users assigned, display section to assign users
+      ) : assignedUsers.length === 0 ? (
         <>
           <div className="w-full px-2.5 bg-white rounded-[38px] pb-6">
-            <div className=" px-3 text-[#254752] text-s font-['Sequel Sans'] ">
+            <div className="px-3 text-[#254752] text-s font-['Sequel Sans']">
               There are currently no users assigned to this ticket.{" "}
               <span
                 className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
@@ -222,7 +238,6 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           </div>
         </>
       ) : (
-        //if ticket has some users assigned, display them
         <>
           <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6 mb-10">
             <div className="text-[#254752] text-[20px] font-sequel-sans w-full px-[13px] pt-6 flex items-center justify-between">
@@ -232,15 +247,20 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
               <div className="flex-1 text-left">ID</div>
               <div className="flex-1 text-left">Name</div>
-              <div className="flex-1 text-center"> Unassign </div>
-              <div className="flex-1 text-center"> Contact </div>
+              <div className="flex-1 text-center">Unassign</div>
+              <div className="flex-1 text-center">Contact</div>
               <div className="flex-1 text-right mr-3">Resolved</div>
             </div>
 
-            {ticket.assigned_employees.map((Individual, index) => (
+            {assignedUsers.map((user, index) => (
               <AssignedUser
                 key={index}
-                Individual={Individual}
+                Individual={{
+                  individualId: user.userId,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  role: "basic"
+                }}
                 onUnassignClick={handleUnassignUser}
               />
             ))}
@@ -248,7 +268,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             {assignedUsers.length < MAX_USERS && (
               <div className="flex justify-center mt-3">
                 <button
-                  className=" px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
+                  className="px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                   onClick={handleOpenModal}
                 >
                   Assign User
