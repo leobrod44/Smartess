@@ -200,3 +200,112 @@ exports.deleteTicket = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.fetchIndividualTicket = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id } = req.params;
+
+    if (!ticket_id) {
+      return res.status(400).json({ error: "Ticket ID is required" });
+    }
+
+    // Verify user token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get user_id from user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+
+    // Fetch the ticket with all its details
+    const { data: ticket, error: ticketError } = await supabase
+      .from("tickets")
+      .select(`
+        ticket_id,
+        proj_id,
+        hub_id,
+        description,
+        description_detailed,
+        type,
+        status,
+        created_at,
+        submitted_by_user_id
+      `)
+      .eq("ticket_id", ticket_id)
+      .single();
+
+    if (ticketError || !ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Verify user has access to this project
+    const { data: projectAccess, error: accessError } = await supabase
+      .from("org_user")
+      .select("proj_id")
+      .eq("user_id", userData.user_id)
+      .eq("proj_id", ticket.proj_id)
+      .single();
+
+    if (accessError || !projectAccess) {
+      return res.status(403).json({ error: "User does not have access to this ticket" });
+    }
+
+    // Get hub (unit) information
+    const { data: hubData, error: hubError } = await supabase
+      .from("hub")
+      .select("unit_number")
+      .eq("hub_id", ticket.hub_id)
+      .single();
+
+    if (hubError || !hubData) {
+      return res.status(500).json({ error: "Failed to fetch unit information" });
+    }
+
+    // Get submitter info
+    const { data: submitterData, error: submitterError } = await supabase
+    .from("user")
+    .select("first_name, last_name, email")
+    .eq("user_id", ticket.submitted_by_user_id)
+    .single();
+
+    // Get project address
+    const { data: projectData, error: projectError } = await supabase
+    .from("project")
+    .select("address")
+    .eq("proj_id", ticket.proj_id)
+    .single();
+
+
+    // Format the response
+    const formattedTicket = {
+      ticket_id: ticket.ticket_id,
+      proj_id: ticket.proj_id,
+      unit_id: ticket.hub_id,
+      name: ticket.description,
+      description: ticket.description_detailed,
+      type: ticket.type,
+      unit: hubData.unit_number,
+      status: ticket.status,
+      created_at: new Date(ticket.created_at).toISOString().split("T")[0],
+      submitted_by_firstName: submitterData.first_name,
+      submitted_by_lastName: submitterData.last_name,
+      submitted_by_email: submitterData.email,
+      project_address: projectData.address
+    };
+
+    res.json({ ticket: formattedTicket });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
