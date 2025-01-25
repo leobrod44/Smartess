@@ -84,7 +84,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
 
     resetForm();
 
-    showToastSuccess("Invitiation Sent!");
+    showToastSuccess("Invitation Sent!");
   };
 
   if (!isOpen) return null;
