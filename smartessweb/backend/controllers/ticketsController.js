@@ -309,3 +309,166 @@ exports.fetchIndividualTicket = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.getAssignableEmployees = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id } = req.params;
+
+    // Verify user token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get current user's id
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+
+    // Get ticket and its project
+    const { data: ticket, error: ticketError } = await supabase
+      .from("tickets")
+      .select("proj_id")
+      .eq("ticket_id", ticket_id)
+      .single();
+
+    if (ticketError || !ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Verify user has admin/master access to this project
+    const { data: projectAccess, error: accessError } = await supabase
+      .from("org_user")
+      .select("org_user_type")
+      .eq("user_id", userData.user_id)
+      .eq("proj_id", ticket.proj_id)
+      .single();
+
+    if (accessError || !projectAccess) {
+      return res.status(403).json({ error: "User does not have access to this ticket" });
+    }
+
+    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
+      return res.status(403).json({ error: "User does not have permission to assign tickets" });
+    }
+
+    // Get already assigned user IDs
+    const { data: assignments, error: assignmentError } = await supabase
+      .from("tickets_assignments")
+      .select("assigned_to_user_id")
+      .eq("ticket_id", ticket_id);
+
+    if (assignmentError) {
+      return res.status(500).json({ error: "Failed to fetch ticket assignments" });
+    }
+
+    const assignedUserIds = assignments ? assignments.map(a => a.assigned_to_user_id) : [];
+
+    // Get all employees for this project
+    const { data: orgUsers, error: orgUsersError } = await supabase
+      .from("org_user")
+      .select("user_id, org_user_type")
+      .eq("proj_id", ticket.proj_id)
+      .in("org_user_type", ['basic', 'admin', 'master']);
+
+    if (orgUsersError) {
+      return res.status(500).json({ error: "Failed to fetch employees" });
+    }
+
+    // Filter out already assigned users
+    const unassignedOrgUsers = orgUsers.filter(user => !assignedUserIds.includes(user.user_id));
+    const userIds = unassignedOrgUsers.map(user => user.user_id);
+
+    // Get employee details
+    const { data: employees, error: employeesError } = await supabase
+      .from("user")
+      .select("user_id, first_name, last_name, email")
+      .in("user_id", userIds);
+
+    if (employeesError) {
+      return res.status(500).json({ error: "Failed to fetch employee details" });
+    }
+
+    const formattedEmployees = employees.map(emp => {
+      const orgUser = unassignedOrgUsers.find(ou => ou.user_id === emp.user_id);
+      return {
+        employeeId: emp.user_id,
+        firstName: emp.first_name,
+        lastName: emp.last_name,
+        email: emp.email,
+        role: orgUser.org_user_type
+      };
+    });
+
+    res.json({ employees: formattedEmployees });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.getAssignedUsers = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id } = req.params;
+ 
+    // Validate token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) return res.status(401).json({ error: "Invalid token" });
+ 
+    // Get assignments for this ticket from tickets_assignments table
+    const { data: assignments, error: assignmentError } = await supabase
+      .from('tickets_assignments')
+      .select(`
+        assigned_to_user_id,
+        resolved_status
+      `)
+      .eq('ticket_id', ticket_id);
+ 
+    if (assignmentError) {
+      return res.status(500).json({ error: "Failed to fetch assignments" });
+    }
+ 
+    // Return empty array if no assignments found
+    if (!assignments.length) {
+      return res.json({ assignedUsers: [] });
+    }
+ 
+    // Get user IDs from assignments
+    const userIds = assignments.map(a => a.assigned_to_user_id);
+ 
+    // Fetch user details for assigned users
+    const { data: users, error: userError } = await supabase
+      .from('user')
+      .select('user_id, first_name, last_name, email')
+      .in('user_id', userIds);
+ 
+    if (userError) {
+      return res.status(500).json({ error: "Failed to fetch user details" });
+    }
+ 
+    // Combine user details with assignment status
+    const assignedUsers = assignments.map(assignment => {
+      const user = users.find(u => u.user_id === assignment.assigned_to_user_id);
+      return {
+        userId: user.user_id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        resolved: assignment.resolved_status
+      };
+    });
+ 
+    res.json({ assignedUsers });
+ 
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+ };
