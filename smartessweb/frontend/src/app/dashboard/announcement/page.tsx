@@ -3,24 +3,16 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import AnnouncementComponent from "@/app/components/AnnouncementComponents/AnnouncementComponent";
 import AnnouncementFormModal from "@/app/components/AnnouncementComponents/AnnouncementFormModal";
-import { Announcement, generateMockAnnouncements } from "@/app/mockData";
+import { announcementApi } from "@/api/dashboard/announcement/page";
 import Searchbar from "@/app/components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
+import { useUserContext } from "@/context/UserProvider";
 
 const AnnouncementPage = () => {
-  //sort the announcements we get by date to ensure that they are presented from most recent- oldest
-  const mockAnnouncements = generateMockAnnouncements().sort(
-    (a, b) => b.date.getTime() - a.date.getTime()
-  );
-  const [announcements] = //add setAnnouncements here, removed for CI
-    useState<Announcement[]>(mockAnnouncements);
-  const [filteredAnnouncements, setFilteredAnnouncements] =
-    useState<Announcement[]>(mockAnnouncements);
-
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [filteredAnnouncements, setFilteredAnnouncements] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 5;
 
@@ -29,28 +21,90 @@ const AnnouncementPage = () => {
 
   const filterOptions = ["Most Likes", "Project Level", "Organization Level"];
 
-  //setting up the skeleton for getting the announcements from backens
+  // Pull userId from context
+  const { userId } = useUserContext();
+
+  const handleAnnouncementAdded = async (newAnnouncement: any) => {
+    try {
+      // Trigger a re-fetch of announcements after adding a new one
+      const response = await announcementApi.getAnnouncements(userId);
+      const fetchedAnnouncements = response.announcements.map((ann) => ({
+        id: ann.announcement_id,
+        title: ann.org_name || ann.address,
+        tag:
+          ann.announcement_type === "organization" ? "Organization" : "Project",
+        author: ann.name,
+        description: ann.content,
+        date: new Date(ann.created_at),
+        keyword: ann.keywords?.join(", ") || "",
+        likes: ann.like_count || 0,
+        files:
+          ann.file_urls?.map((url: string, idx: number) => ({
+            name: `File ${idx + 1}`,
+            url,
+          })) || [],
+      }));
+
+      setAnnouncements(fetchedAnnouncements);
+      setFilteredAnnouncements(fetchedAnnouncements);
+    } catch (error) {
+      console.error("Error re-fetching announcements after adding:", error);
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/sign-in");
       return;
     }
-    const fetchData = async () => {
-      // const responseAnnouncements = await announcementsApi.getAnnouncements(token);
-      // const fetchedAnnouncements = responseAnnouncements;
-      // setAnnouncements(fetchedAnnouncements);
+
+    // If userId is not yet loaded, skip fetching
+    if (!userId) return;
+
+    const fetchAnnouncements = async () => {
+      try {
+        // Fetch announcements
+        const response = await announcementApi.getAnnouncements(userId);
+
+        // Transform data for AnnouncementComponent
+        const fetchedAnnouncements = response.announcements.map((ann) => ({
+          id: ann.announcement_id,
+          title: ann.org_name || ann.address,
+          tag:
+            ann.announcement_type === "organization"
+              ? "Organization"
+              : "Project",
+          author: ann.name,
+          description: ann.content,
+          date: new Date(ann.created_at),
+          keyword: ann.keywords?.join(", ") || "",
+          likes: ann.like_count || 0,
+          files:
+            ann.file_urls?.map((url: string, idx: number) => ({
+              name: `File ${idx + 1}`,
+              url,
+            })) || [], // Default to an empty array
+        }));
+
+        // Debug: console.log(fetchedAnnouncements);
+        setAnnouncements(fetchedAnnouncements);
+        setFilteredAnnouncements(fetchedAnnouncements);
+      } catch (error) {
+        console.error("Error fetching announcements:", error);
+      }
     };
-    fetchData();
+
+    fetchAnnouncements();
     setIsMounted(true);
-  }, [router]);
+  }, [router, userId]);
 
   if (!isMounted) {
     return <p>Loading...</p>;
   }
 
   const handleSearch = (query: string) => {
-    const filtered = mockAnnouncements.filter((announcement) => {
+    const filtered = announcements.filter((announcement) => {
       const titleMatch = announcement.title
         .toLowerCase()
         .includes(query.toLowerCase());
@@ -63,10 +117,17 @@ const AnnouncementPage = () => {
       const descriptionMatch = announcement.description
         .toLowerCase()
         .includes(query.toLowerCase());
-      const tagMatch=announcement.tag
-      .toLowerCase()
-      .includes(query.toLowerCase());
-      return titleMatch || keywordMatch || authorMatch || descriptionMatch || tagMatch;
+      const tagMatch = announcement.tag
+        .toLowerCase()
+        .includes(query.toLowerCase());
+
+      return (
+        titleMatch ||
+        keywordMatch ||
+        authorMatch ||
+        descriptionMatch ||
+        tagMatch
+      );
     });
     setFilteredAnnouncements(filtered);
     setCurrentPage(1);
@@ -111,9 +172,12 @@ const AnnouncementPage = () => {
     setCurrentPage(page);
   };
 
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8  min-h-screen flex flex-col">
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
         <div className="flex items-center justify-between">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
             Announcements
@@ -127,7 +191,7 @@ const AnnouncementPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 mt-10 ">
+        <div className="flex flex-col gap-4 mt-10">
           {currentAnnouncements.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
@@ -157,11 +221,15 @@ const AnnouncementPage = () => {
       </div>
       <button
         onClick={openModal}
-        className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#254752] text-white text-2xlfont-bold shadow-lg hover:bg-[#14323B] transition duration-300"
+        className="fixed bottom-8 right-8 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#254752] text-white text-2xl font-bold shadow-lg hover:bg-[#14323B] transition duration-300"
       >
         +
       </button>
-      <AnnouncementFormModal isOpen={isModalOpen} onClose={closeModal} />
+      <AnnouncementFormModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        onAnnouncementAdded={handleAnnouncementAdded}
+      />
       <div className="mt-4 flex justify-center">
         <Pagination
           className="custom-pagination"

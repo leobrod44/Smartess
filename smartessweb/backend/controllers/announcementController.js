@@ -6,6 +6,171 @@ const { Resend } = require("resend");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
+ * GET /get_announcements/:userId
+ * Fetches announcements that the given user can see based on:
+ * 1) The organizations they belong to (type: 'organization')
+ * 2) The projects they manage (type: 'project')
+ */
+exports.getAnnouncements = async (req, res) => {
+  try {
+    // Extract userId from URL params
+    const { userId } = req.params;
+
+    // 1) Check if the user exists by userId
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("user_id", userId)
+      .single();
+
+    if (userError) {
+      console.error("User Error:", userError);
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
+
+    if (!userData) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const currentUserId = userData.user_id;
+
+    // 2) Get all org_id and proj_id entries from org_user where user_id = currentUserId
+    const { data: orgUserData, error: orgUserError } = await supabase
+      .from("org_user")
+      .select("org_id, proj_id")
+      .eq("user_id", currentUserId);
+
+    if (orgUserError) {
+      console.error("org_user Error:", orgUserError);
+      return res.status(500).json({ error: "Failed to fetch org_user data." });
+    }
+
+    // Collect all org IDs and project IDs this user is associated with
+    const userOrgIds = [
+      ...new Set(orgUserData.map((item) => item.org_id).filter(Boolean)),
+    ];
+    const userProjIds = [
+      ...new Set(orgUserData.map((item) => item.proj_id).filter(Boolean)),
+    ];
+
+    // 3) Fetch organization-level announcements
+    let announcementsOrg = [];
+    if (userOrgIds.length > 0) {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select(
+          `
+          announcement_id,
+          announcement_type,
+          user_id,
+          org_id,
+          proj_id,
+          content,
+          keywords,
+          file_urls,
+          like_count,
+          created_at,
+          user:user_id (
+            first_name,
+            last_name
+          ),
+          organization:org_id (
+            name
+          ),
+          project:proj_id (
+            address
+          )
+        `
+        )
+        .eq("announcement_type", "organization") // or 'organization'
+        .in("org_id", userOrgIds);
+
+      if (error) {
+        console.error("Announcements Org Error:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to fetch organization announcements." });
+      }
+      announcementsOrg = data || [];
+    }
+
+    // 4) Fetch project-level announcements
+    let announcementsProj = [];
+    if (userProjIds.length > 0) {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select(
+          `
+          announcement_id,
+          announcement_type,
+          user_id,
+          org_id,
+          proj_id,
+          content,
+          keywords,
+          file_urls,
+          like_count,
+          created_at,
+          user:user_id (
+            first_name,
+            last_name
+          ),
+          organization:org_id (
+            name
+          ),
+          project:proj_id (
+            address
+          )
+        `
+        )
+        .eq("announcement_type", "project") // or 'project'
+        .in("proj_id", userProjIds);
+
+      if (error) {
+        console.error("Announcements Proj Error:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to fetch project announcements." });
+      }
+      announcementsProj = data || [];
+    }
+
+    // 5) Combine both sets of announcements
+    const allAnnouncements = [...announcementsOrg, ...announcementsProj];
+
+    // 6) Format them in the desired shape
+    const formatted = allAnnouncements.map((ann) => {
+      const fullName = ann.user
+        ? `${ann.user.first_name ?? ""} ${ann.user.last_name ?? ""}`.trim()
+        : null;
+
+      return {
+        announcement_id: ann.announcement_id,
+        announcement_type: ann.announcement_type,
+        user_id: ann.user_id,
+        name: fullName,
+        org_id: ann.org_id || null,
+        org_name: ann.organization ? ann.organization.name : null,
+        proj_id: ann.proj_id || null,
+        address: ann.project ? ann.project.address : null,
+        content: ann.content,
+        keywords: ann.keywords || [],
+        file_urls: ann.file_urls || [],
+        like_count: ann.like_count || 0,
+        // Format created_at to YYYY-MM-DD or keep the original timestamp if desired
+        created_at: ann.created_at ? ann.created_at.split("T")[0] : null,
+      };
+    });
+
+    // 7) Return the results
+    return res.json({ announcements: formatted });
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+/**
  * This route stores an announcement in the database along with any uploaded files.
  * - Uploads files to Supabase Storage
  * - Inserts announcement data into the "announcements" table (including file URLs)
@@ -20,24 +185,21 @@ exports.storeAnnouncement = async (req, res) => {
       keywords = JSON.parse(keywords);
     }
 
-    // Handle attached files (via Multer)
     const files = req.files || [];
     const fileUrls = [];
 
-    // Upload each file to Supabase, generate a public URL, and store it
+    // Upload files to Supabase and get public URLs
     for (const file of files) {
       const filePath = path.resolve(file.path);
       const ext = path.extname(file.originalname);
       const uniqueFileName = `${uuidv4()}${ext}`;
 
-      // Upload file to the "announcement_uploads" bucket
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("announcement_uploads")
         .upload(`announcements/${uniqueFileName}`, fs.readFileSync(filePath), {
           contentType: file.mimetype,
         });
 
-      // Delete local file after upload
       fs.unlinkSync(filePath);
 
       if (uploadError) {
@@ -47,7 +209,6 @@ exports.storeAnnouncement = async (req, res) => {
           .json({ message: "File upload error", error: uploadError });
       }
 
-      // Retrieve the public URL of the uploaded file
       const { data: publicUrlData } = supabase.storage
         .from("announcement_uploads")
         .getPublicUrl(`announcements/${uniqueFileName}`);
@@ -56,18 +217,44 @@ exports.storeAnnouncement = async (req, res) => {
       fileUrls.push(publicUrl);
     }
 
-    // Insert the announcement record into the database
-    const { error: insertError } = await supabase.from("announcements").insert([
-      {
-        announcement_type: type,
+    const { data: insertedData, error: insertError } = await supabase
+      .from("announcements")
+      .insert([
+        {
+          announcement_type: type,
+          user_id,
+          org_id: org_id || null,
+          proj_id: proj_id || null,
+          content,
+          keywords: keywords || [],
+          file_urls: fileUrls,
+        },
+      ])
+      .select(
+        `
+        announcement_id,
+        announcement_type,
         user_id,
-        org_id: org_id || null,
-        proj_id: proj_id || null,
+        org_id,
+        proj_id,
         content,
-        keywords: keywords || [],
-        file_urls: fileUrls,
-      },
-    ]);
+        keywords,
+        file_urls,
+        like_count,
+        created_at,
+        user:user_id (
+          first_name,
+          last_name
+        ),
+        organization:org_id (
+          name
+        ),
+        project:proj_id (
+          address
+        )
+      `
+      )
+      .single();
 
     if (insertError) {
       console.error("Insert Error:", insertError);
@@ -76,8 +263,30 @@ exports.storeAnnouncement = async (req, res) => {
         .json({ message: "Failed to store data", error: insertError });
     }
 
-    console.log("Data stored successfully");
-    return res.status(200).json({ message: "Data stored successfully" });
+    const insertedAnnouncement = {
+      announcement_id: insertedData.announcement_id,
+      announcement_type: insertedData.announcement_type,
+      user_id: insertedData.user_id,
+      name: `${insertedData.user.first_name ?? ""} ${
+        insertedData.user.last_name ?? ""
+      }`.trim(),
+      org_id: insertedData.org_id || null,
+      org_name: insertedData.organization
+        ? insertedData.organization.name
+        : null,
+      proj_id: insertedData.proj_id || null,
+      address: insertedData.project ? insertedData.project.address : null,
+      content: insertedData.content,
+      keywords: insertedData.keywords || [],
+      file_urls: insertedData.file_urls || [],
+      like_count: insertedData.like_count || 0,
+      created_at: insertedData.created_at
+        ? insertedData.created_at.split("T")[0]
+        : null,
+    };
+
+    // Return as an array to match `AnnouncementsData`
+    return res.status(200).json({ announcements: [insertedAnnouncement] });
   } catch (error) {
     console.error("Server Error:", error);
     return res

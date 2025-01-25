@@ -7,6 +7,7 @@ const {
   getAllHubUserEmailsInProject,
   sendAnnouncementEmail,
   storeAnnouncement,
+  getAnnouncements,
 } = require("../controllers/announcementController");
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post(
   sendAnnouncementEmail
 );
 router.post("/post_announcement", upload.array("files"), storeAnnouncement);
+router.get("/get-announcements/:userId", getAnnouncements);
 
 module.exports = router;
