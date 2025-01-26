@@ -569,3 +569,91 @@ exports.getAssignedUsers = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
  };
+
+ exports.unassignUserFromTicket = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id, user_id } = req.body;
+ 
+    if (!ticket_id || !user_id) {
+      return res.status(400).json({ error: "Invalid request data" });
+    }
+ 
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+ 
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+ 
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+ 
+    const { data: ticket, error: ticketError } = await supabase
+      .from("tickets")
+      .select("proj_id, status")
+      .eq("ticket_id", ticket_id)
+      .single();
+ 
+    if (ticketError || !ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+ 
+    if (ticket.status === "closed") {
+      return res.status(400).json({ error: "Cannot unassign users from a closed ticket" });
+    }
+ 
+    const { data: projectAccess, error: accessError } = await supabase
+      .from("org_user")
+      .select("org_user_type")
+      .eq("user_id", userData.user_id)
+      .eq("proj_id", ticket.proj_id)
+      .single();
+ 
+    if (!projectAccess) {
+      return res.status(403).json({ error: "User does not have access to this ticket" });
+    }
+ 
+    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
+      return res.status(403).json({ error: "User does not have permission to unassign users" });
+    }
+ 
+    const { error: deleteError } = await supabase
+      .from("tickets_assignments")
+      .delete()
+      .eq("ticket_id", ticket_id)
+      .eq("assigned_to_user_id", user_id);
+ 
+    if (deleteError) {
+      return res.status(500).json({ error: "Failed to unassign user" });
+    }
+ 
+    // Check if this was the last assignment
+    const { data: remainingAssignments, error: checkError } = await supabase
+      .from("tickets_assignments")
+      .select("assigned_to_user_id")
+      .eq("ticket_id", ticket_id);
+ 
+    if (!checkError && remainingAssignments.length === 0) {
+      // Update ticket status to open if no assignments remain
+      const { error: updateError } = await supabase
+        .from("tickets")
+        .update({ status: "open" })
+        .eq("ticket_id", ticket_id);
+ 
+      if (updateError) {
+        return res.status(500).json({ error: "Failed to update ticket status" });
+      }
+    }
+ 
+    res.status(200).json({ message: "User successfully unassigned from ticket" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+ };

@@ -169,21 +169,25 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
-  const handleUnassignUser = (userId: number) => {
+  const handleUnassignUser = async (userId: number) => {
     try {
+      await ticketAssignApis.unassignUserFromTicket(ticket.ticket_id, userId);
+  
       setAssignedUsers(prev => prev.filter(user => user.userId !== userId));
       const unassignedUser = assignedUsers.find(user => user.userId === userId);
-
+  
       if (unassignedUser) {
         setAvailableUsers(prev => [...prev, {
           individualId: unassignedUser.userId,
           firstName: unassignedUser.firstName,
           lastName: unassignedUser.lastName,
-          role: "basic" // Default role
+          role: "basic"
         }]);
       }
+  
+      showToastSuccess("User successfully unassigned from ticket");
     } catch (error) {
-      showToastError("There was an error unassigning the user.");
+      showToastError(error instanceof Error ? error.message : "There was an error unassigning the user.");
       console.error(error);
     }
   };

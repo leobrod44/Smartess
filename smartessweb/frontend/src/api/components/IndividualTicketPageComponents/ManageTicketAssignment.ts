@@ -74,8 +74,33 @@ const assignUsersToTicket = async (ticketId: string, userIds: number[]): Promise
   return response.json();
 };
 
+const unassignUserFromTicket = async (ticketId: string, userId: number): Promise<void> => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('No token found');
+ 
+  const response = await fetch(`${API_URL}/tickets/unassign-user`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ticket_id: parseInt(ticketId),
+      user_id: userId
+    })
+  });
+ 
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to unassign user');
+  }
+ 
+  return response.json();
+ };
+
 export const ticketAssignApis = {
   getAssignedUsers,
   getAssignableEmployees,
-  assignUsersToTicket
+  assignUsersToTicket,
+  unassignUserFromTicket
 };
