@@ -10,9 +10,26 @@ import { Project } from "../../mockData";
 import { announcementApi } from "@/api/dashboard/announcement/page";
 import { useUserContext } from "@/context/UserProvider";
 
+interface AnnouncementApiData {
+  announcement_id: number;
+  announcement_type: "organization" | "project";
+  user_id: number;
+  name: string | null;
+  org_id: number | null;
+  org_name: string | null;
+  proj_id: number | null;
+  address: string | null;
+  content: string;
+  keywords: string[] | null;
+  file_urls: string[] | null;
+  like_count: number;
+  created_at: string;
+}
+
 type AnnouncementFormModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onAnnouncementAdded: (newAnnouncement: AnnouncementApiData) => void;
 };
 
 function classNames(...classes: string[]) {
@@ -22,8 +39,12 @@ function classNames(...classes: string[]) {
 export default function AnnouncementFormModal({
   isOpen,
   onClose,
+  onAnnouncementAdded,
 }: AnnouncementFormModalProps) {
-  const { userId } = useUserContext();
+  const router = useRouter();
+  const { userId } = useUserContext(); // Fetch user ID from context
+
+  // State variables for managing form data and UI states
   const [projects, setProjects] = useState<Project[]>([]);
   const [type, setType] = useState<"organization" | "project">("organization");
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -32,17 +53,17 @@ export default function AnnouncementFormModal({
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
   const [content, setContent] = useState<string>("");
   const [files, setFiles] = useState<File[]>([]);
-  const router = useRouter();
 
+  // Fetch user's projects when the modal is open
   const fetchProjects = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token"); // Fetch token from local storage
       if (!token) {
-        router.push("/sign-in");
+        router.push("/sign-in"); // Redirect if not authenticated
         return;
       }
-      const response = await projectApi.getUserProjects(token);
-      setProjects(response.projects);
+      const response = await projectApi.getUserProjects(token); // Fetch projects
+      setProjects(response.projects); // Update projects state
     } catch (err) {
       console.error("Failed to fetch projects:", err);
     }
@@ -50,47 +71,55 @@ export default function AnnouncementFormModal({
 
   useEffect(() => {
     if (isOpen) {
-      fetchProjects();
+      fetchProjects(); // Fetch projects on modal open
     }
   }, [isOpen, fetchProjects]);
 
+  // Reset form to its initial state
   const resetForm = () => {
     setKeywords([]);
     setNewKeyword("");
     setType("organization");
-    setSelectedProject(projects[0]?.address || "");
+    setSelectedProject("");
     setContent("");
     setFiles([]);
   };
 
+  // Add a new keyword
   const handleAddKeyword = () => {
-    const trimmedKeyword = newKeyword.trim();
-    if (trimmedKeyword && !keywords.includes(trimmedKeyword)) {
-      setKeywords((prev) => [...prev, trimmedKeyword]);
-      setNewKeyword("");
+    const trimmed = newKeyword.trim();
+    if (trimmed && !keywords.includes(trimmed)) {
+      setKeywords((prev) => [...prev, trimmed]); // Update keywords list
+      setNewKeyword(""); // Clear input
     }
   };
 
+  // Remove a keyword
   const handleRemoveKeyword = (keyword: string) => {
     setKeywords((prev) => prev.filter((k) => k !== keyword));
   };
 
+  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
+
     const selectedFiles = Array.from(e.target.files);
     selectedFiles.forEach((file) => {
       if (file.size <= 10 * 1024 * 1024) {
-        setFiles((prev) => [...prev, file]);
+        setFiles((prev) => [...prev, file]); // Add file if within size limit
       } else {
         console.error(`File "${file.name}" exceeds 10MB limit.`);
+        showToastError(`File "${file.name}" exceeds 10MB limit.`);
       }
     });
   };
 
+  // Remove a file from the list
   const handleRemoveFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -100,63 +129,86 @@ export default function AnnouncementFormModal({
     }
 
     try {
-      let fetchedEmails: string[] = [];
+      const formData = new FormData();
+      formData.append("type", type); // Add type to form data
+      formData.append("user_id", userId); // Add user ID
+      formData.append("content", content); // Add content
 
+      // Additional logic for organization or project type
+      if (type === "organization") {
+        const orgResponse = await announcementApi.getOrgId(userId);
+        formData.append("org_id", orgResponse.orgId);
+      } else {
+        const selProjObj = projects.find((p) => p.address === selectedProject);
+        if (!selProjObj) {
+          showToastError("Please select a valid project.");
+          return;
+        }
+        formData.append("proj_id", selProjObj.projectId.toString());
+      }
+
+      // Append keywords and files
+      if (keywords.length) {
+        formData.append("keywords", JSON.stringify(keywords));
+      }
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const response = await announcementApi.postAnnouncement(formData); // Post announcement
+      const newAnnouncement = response.announcements[0]; // Fetch new announcement
+
+      await onAnnouncementAdded(newAnnouncement); // Notify parent
+
+      // Notify recipients (organization or project-specific emails)
+      let fetchedEmails: string[] = [];
       if (type === "organization") {
         const orgResponse = await announcementApi.getOrgId(userId);
         const emailResponse = await announcementApi.getEmailsInOrg(
           orgResponse.orgId
         );
         fetchedEmails = emailResponse.emails;
-      } else if (type === "project") {
-        const selectedProj = projects.find(
-          (p) => p.address === selectedProject
-        );
-        if (selectedProj) {
+      } else {
+        const selProjObj = projects.find((p) => p.address === selectedProject);
+        if (selProjObj) {
           const emailResponse = await announcementApi.getEmailsInProject(
-            selectedProj.projectId
+            selProjObj.projectId
           );
           fetchedEmails = emailResponse.emails;
         }
       }
 
-      if (fetchedEmails.length === 0) {
-        showToastError("No recipients found.");
-        return;
+      if (fetchedEmails.length > 0) {
+        const emailForm = new FormData();
+        emailForm.append("emailList", JSON.stringify(fetchedEmails));
+        emailForm.append("type", type);
+        emailForm.append("content", content);
+
+        if (type === "project") {
+          emailForm.append("selectedAddress", selectedProject);
+        }
+        if (keywords.length) {
+          emailForm.append("keywords", JSON.stringify(keywords));
+        }
+        files.forEach((file) => emailForm.append("files", file));
+
+        await announcementApi.sendAnnouncement(emailForm); // Send emails
       }
 
-      const formData = new FormData();
-      formData.append("emailList", JSON.stringify(fetchedEmails));
-      formData.append("type", type);
-      formData.append("content", content);
-
-      if (type === "project") {
-        formData.append("selectedAddress", selectedProject);
-      }
-
-      if (keywords.length > 0) {
-        formData.append("keywords", JSON.stringify(keywords));
-      }
-
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      await announcementApi.sendAnnouncement(formData);
       showToastSuccess("Announcement posted successfully!");
-
-      setTimeout(() => {
-        router.push("/dashboard/announcement");
-      }, 1000);
-
       resetForm();
       onClose();
+
+      setTimeout(() => {
+        router.push("/dashboard/announcement"); // Redirect after success
+      }, 1000);
     } catch (err) {
-      showToastError("Failed to send announcement.");
-      console.error("Failed to send announcement:", err);
+      console.error("Failed to post announcement:", err);
+      showToastError("Failed to post announcement.");
     }
   };
 
+  // Dropdown label
   const selectedProjectObj = projects.find(
     (p) => p.address === selectedProject
   );
@@ -164,11 +216,13 @@ export default function AnnouncementFormModal({
     ? selectedProjectObj.address
     : "Select Project";
 
+  // Handle project selection
   const handleSelectProject = (projectAddress: string) => {
     setSelectedProject(projectAddress);
-    setIsOpenDropdown(false);
+    setIsOpenDropdown(false); // Close dropdown
   };
 
+  // If modal is not open, render nothing
   if (!isOpen) return null;
 
   return (
@@ -190,6 +244,7 @@ export default function AnnouncementFormModal({
             Send An Announcement
           </h2>
 
+          {/* The Form */}
           <form
             onSubmit={handleSubmit}
             className="mt-8 space-y-8"
@@ -224,7 +279,7 @@ export default function AnnouncementFormModal({
               </div>
             </fieldset>
 
-            {/* Project dropdown */}
+            {/* Project dropdown (if type=project) */}
             {type === "project" && (
               <div className="w-full">
                 <label
