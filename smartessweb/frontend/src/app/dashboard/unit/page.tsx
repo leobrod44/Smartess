@@ -66,24 +66,30 @@ const UnitPage = () => {
           ? unit.projectAddress
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.owner.lastName
+            `${unit.owner.firstName} ${unit.owner.lastName}`
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
+            unit.owner.email
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            unit.hubUsers.some((user) =>
+              user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
+            ) ||
             String(unit.unitNumber)
               .toLowerCase()
-              .includes(searchQuery.toLowerCase()) ||
-            unit.hubUsers.some((user) =>
-              user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
-            ) // Check each user's first and last name
-          : String(unit.unitNumber)
+              .includes(searchQuery.toLowerCase())
+          : `${unit.owner.firstName} ${unit.owner.lastName}`
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            unit.owner.lastName
+            unit.owner.email
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
             unit.hubUsers.some((user) =>
               user.lastName.toLowerCase().includes(searchQuery.toLowerCase())
-            );
+            ) ||
+            String(unit.unitNumber)
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
 
       return matchesProjectAddress && matchesSearchQuery;
     })
@@ -125,7 +131,7 @@ const UnitPage = () => {
         <div className="flex flex-row justify-between">
           <div className="flex flex-row">
             <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
-              Units
+              <h4>Units</h4>
             </h2>
           </div>
           {/* Filtering and searching div */}
@@ -139,7 +145,6 @@ const UnitPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
-
         <div className="p-[10px] rounded-[7px] w-full mx-auto mt-4">
           {isLoading ? (
             <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
