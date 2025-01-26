@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { manageAccountsApi } from "@/api/page";
 import { ticketAssignApis } from "@/api/components/IndividualTicketPageComponents/ManageTicketAssignment";
 
+
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
@@ -96,35 +97,43 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     setIsModalOpen(false);
   };
 
-  const handleAssignUser = (selectedUsers: Individual[]) => {
+  const handleAssignUser = async (selectedUsers: Individual[]) => {
     try {
       if (assignedUsers.length + selectedUsers.length > MAX_USERS) {
         showToastError(`Cannot assign more than ${MAX_USERS} users to this ticket.`);
         return;
       }
-
-      // Convert Individual to AssignedUser format
+  
+      // Get the IDs of selected users
+      const userIds = selectedUsers.map(user => user.individualId);
+      
+      // Make the API call
+      await ticketAssignApis.assignUsersToTicket(ticket.ticket_id, userIds);
+  
+      // After successful API call, update local state
       const newAssignedUsers: AssignedUser[] = selectedUsers.map(user => ({
         userId: user.individualId,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: "",
+        email: "",  // You might want to include email in the API response
         resolved: false
       }));
-
+  
       setAssignedUsers(prev => [...prev, ...newAssignedUsers]);
       onStatusUpdate("pending");
       setIsModalOpen(false);
-
+  
       setAvailableUsers(prevUsers => 
-        prevUsers.filter(user => !selectedUsers.some(selected => selected.individualId === user.individualId))
+        prevUsers.filter(user => !selectedUsers.some(selected => 
+          selected.individualId === user.individualId
+        ))
       );
-
+  
       selectedUsers.forEach((user) => {
         showToastSuccess(`Assigned ${user.firstName} ${user.lastName} successfully!`);
       });
     } catch (error) {
-      showToastError("There was an error while assigning the user(s).");
+      showToastError(error instanceof Error ? error.message : "There was an error while assigning the user(s).");
       console.error(error);
     }
   };
@@ -160,21 +169,25 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
-  const handleUnassignUser = (userId: number) => {
+  const handleUnassignUser = async (userId: number) => {
     try {
+      await ticketAssignApis.unassignUserFromTicket(ticket.ticket_id, userId);
+  
       setAssignedUsers(prev => prev.filter(user => user.userId !== userId));
       const unassignedUser = assignedUsers.find(user => user.userId === userId);
-
+  
       if (unassignedUser) {
         setAvailableUsers(prev => [...prev, {
           individualId: unassignedUser.userId,
           firstName: unassignedUser.firstName,
           lastName: unassignedUser.lastName,
-          role: "basic" // Default role
+          role: "basic"
         }]);
       }
+  
+      showToastSuccess("User successfully unassigned from ticket");
     } catch (error) {
-      showToastError("There was an error unassigning the user.");
+      showToastError(error instanceof Error ? error.message : "There was an error unassigning the user.");
       console.error(error);
     }
   };
