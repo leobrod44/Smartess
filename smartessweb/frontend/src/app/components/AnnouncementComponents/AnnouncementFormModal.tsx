@@ -10,10 +10,26 @@ import { Project } from "../../mockData";
 import { announcementApi } from "@/api/dashboard/announcement/page";
 import { useUserContext } from "@/context/UserProvider";
 
+interface AnnouncementApiData {
+  announcement_id: number;
+  announcement_type: "organization" | "project";
+  user_id: number;
+  name: string | null;
+  org_id: number | null;
+  org_name: string | null;
+  proj_id: number | null;
+  address: string | null;
+  content: string;
+  keywords: string[] | null;
+  file_urls: string[] | null;
+  like_count: number;
+  created_at: string;
+}
+
 type AnnouncementFormModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onAnnouncementAdded: (newAnnouncement: any) => void;
+  onAnnouncementAdded: (newAnnouncement: AnnouncementApiData) => void;
 };
 
 function classNames(...classes: string[]) {

@@ -9,9 +9,39 @@ import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useUserContext } from "@/context/UserProvider";
 
+interface AnnouncementApiData {
+  announcement_id: number;
+  announcement_type: "organization" | "project";
+  user_id: number;
+  name: string | null;
+  org_id: number | null;
+  org_name: string | null;
+  proj_id: number | null;
+  address: string | null;
+  content: string;
+  keywords: string[] | null;
+  file_urls: string[] | null;
+  like_count: number;
+  created_at: string;
+}
+
+interface AnnouncementItem {
+  id: number;
+  title: string;
+  tag: "Organization" | "Project";
+  author: string;
+  description: string;
+  date: Date;
+  keyword: string;
+  likes: number;
+  files: { name: string; url: string }[];
+}
+
 const AnnouncementPage = () => {
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [filteredAnnouncements, setFilteredAnnouncements] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [filteredAnnouncements, setFilteredAnnouncements] = useState<
+    AnnouncementItem[]
+  >([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 5;
@@ -24,26 +54,33 @@ const AnnouncementPage = () => {
   // Pull userId from context
   const { userId } = useUserContext();
 
-  const handleAnnouncementAdded = async (newAnnouncement: any) => {
+  const handleAnnouncementAdded = async () => {
     try {
       // Trigger a re-fetch of announcements after adding a new one
       const response = await announcementApi.getAnnouncements(userId);
-      const fetchedAnnouncements = response.announcements.map((ann) => ({
-        id: ann.announcement_id,
-        title: ann.org_name || ann.address,
-        tag:
-          ann.announcement_type === "organization" ? "Organization" : "Project",
-        author: ann.name,
-        description: ann.content,
-        date: new Date(ann.created_at),
-        keyword: ann.keywords?.join(", ") || "",
-        likes: ann.like_count || 0,
-        files:
-          ann.file_urls?.map((url: string, idx: number) => ({
-            name: `File ${idx + 1}`,
-            url,
-          })) || [],
-      }));
+      const fetchedAnnouncements: AnnouncementItem[] =
+        response.announcements.map(
+          (ann: AnnouncementApiData): AnnouncementItem => {
+            return {
+              id: ann.announcement_id,
+              title: ann.org_name ?? ann.address ?? "",
+              tag:
+                ann.announcement_type === "organization"
+                  ? "Organization"
+                  : "Project",
+              author: ann.name ?? "",
+              description: ann.content,
+              date: new Date(ann.created_at),
+              keyword: ann.keywords?.join(", ") || "",
+              likes: ann.like_count || 0,
+              files:
+                ann.file_urls?.map((url, idx) => ({
+                  name: `File ${idx + 1}`,
+                  url,
+                })) || [],
+            };
+          }
+        );
 
       setAnnouncements(fetchedAnnouncements);
       setFilteredAnnouncements(fetchedAnnouncements);
@@ -68,26 +105,30 @@ const AnnouncementPage = () => {
         const response = await announcementApi.getAnnouncements(userId);
 
         // Transform data for AnnouncementComponent
-        const fetchedAnnouncements = response.announcements.map((ann) => ({
-          id: ann.announcement_id,
-          title: ann.org_name || ann.address,
-          tag:
-            ann.announcement_type === "organization"
-              ? "Organization"
-              : "Project",
-          author: ann.name,
-          description: ann.content,
-          date: new Date(ann.created_at),
-          keyword: ann.keywords?.join(", ") || "",
-          likes: ann.like_count || 0,
-          files:
-            ann.file_urls?.map((url: string, idx: number) => ({
-              name: `File ${idx + 1}`,
-              url,
-            })) || [], // Default to an empty array
-        }));
+        const fetchedAnnouncements: AnnouncementItem[] =
+          response.announcements.map(
+            (ann: AnnouncementApiData): AnnouncementItem => {
+              return {
+                id: ann.announcement_id,
+                title: ann.org_name ?? ann.address ?? "",
+                tag:
+                  ann.announcement_type === "organization"
+                    ? "Organization"
+                    : "Project",
+                author: ann.name ?? "",
+                description: ann.content,
+                date: new Date(ann.created_at),
+                keyword: ann.keywords?.join(", ") || "",
+                likes: ann.like_count || 0,
+                files:
+                  ann.file_urls?.map((url, idx) => ({
+                    name: `File ${idx + 1}`,
+                    url,
+                  })) || [],
+              };
+            }
+          );
 
-        // Debug: console.log(fetchedAnnouncements);
         setAnnouncements(fetchedAnnouncements);
         setFilteredAnnouncements(fetchedAnnouncements);
       } catch (error) {
