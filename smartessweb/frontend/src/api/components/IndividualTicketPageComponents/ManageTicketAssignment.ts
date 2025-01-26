@@ -1,4 +1,5 @@
 import { Individual } from "@/app/mockData";
+import { API_URL } from "@/api/api";
 
 interface AssignedUser {
   userId: number;
@@ -10,7 +11,7 @@ interface AssignedUser {
 
 const getAssignedUsers = async (ticketId: string): Promise<AssignedUser[]> => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`http://localhost:3000/api/tickets/assigned-users/${ticketId}`, {
+  const response = await fetch(`${API_URL}/tickets/assigned-users/${ticketId}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -31,7 +32,7 @@ interface AssignableEmployee {
 
 const getAssignableEmployees = async (ticketId: string): Promise<Individual[]> => {
   const token = localStorage.getItem('token');
-  const response = await fetch(`http://localhost:3000/api/tickets/assignable-employees/${ticketId}`, {
+  const response = await fetch(`${API_URL}/tickets/assignable-employees/${ticketId}`, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -49,7 +50,32 @@ const getAssignableEmployees = async (ticketId: string): Promise<Individual[]> =
   }));
 };
 
+const assignUsersToTicket = async (ticketId: string, userIds: number[]): Promise<void> => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('No token found');
+
+  const response = await fetch(`${API_URL}/tickets/assign-users`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      ticket_id: parseInt(ticketId),
+      user_ids: userIds
+    })
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to assign users');
+  }
+
+  return response.json();
+};
+
 export const ticketAssignApis = {
   getAssignedUsers,
-  getAssignableEmployees
+  getAssignableEmployees,
+  assignUsersToTicket
 };
