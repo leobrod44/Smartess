@@ -9,7 +9,6 @@ import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useUserContext } from "@/context/UserProvider";
 import { useProjectContext } from "@/context/ProjectProvider";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 interface AnnouncementApiData {
   announcement_id: number;
