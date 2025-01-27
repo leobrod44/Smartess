@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import Toast, { showToastError } from "../components/Toast";
 import { signInApi } from "@/api/sign-in/sign-in";
 import Logo from "../../public/images/logo.png";
-import { IconButton } from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { useUserContext } from "@/context/UserProvider";
 import { userApi } from "@/api/components/DashboardNavbar";
 import ForgotPasswordModal from "../components/ForgotPassword/ForgotPasswordModal";
@@ -167,13 +165,17 @@ const SignInPage = () => {
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
             />
-            <IconButton
+            <button
               type="button"
               onClick={() => setShowPassword(!showPassword)} // Toggle visibility
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472]"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
             >
-              {showPassword ? <VisibilityOff /> : <Visibility />}
-            </IconButton>
+              {showPassword ? (
+                <EyeSlashIcon className="h-6 w-6" />
+              ) : (
+                <EyeIcon className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
 
