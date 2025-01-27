@@ -119,15 +119,19 @@ const AnnouncementPage = () => {
             proj_id: ann.proj_id,
           }));
 
-        const projectFiltered = selectedProjectId
-          ? fetchedAnnouncements.filter(
-              (announcement) =>
-                announcement.proj_id === Number(selectedProjectId)
-            )
-          : fetchedAnnouncements;
-
-        setAnnouncements(projectFiltered);
-        setFilteredAnnouncements(projectFiltered);
+          const sortedAnnouncements = fetchedAnnouncements.sort(
+            (a, b) => b.date.getTime() - a.date.getTime()
+          );
+          
+          const projectFiltered = selectedProjectId
+            ? sortedAnnouncements.filter(
+                (announcement) =>
+                  announcement.proj_id === Number(selectedProjectId)
+              )
+            : sortedAnnouncements;
+      
+          setAnnouncements(projectFiltered);
+          setFilteredAnnouncements(projectFiltered);
       } catch (error) {
         console.error("Error fetching announcements:", error);
       }
