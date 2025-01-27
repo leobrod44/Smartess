@@ -79,8 +79,12 @@ const AnnouncementPage = () => {
           proj_id: ann.proj_id || null,
         }));
 
-      setAnnouncements(fetchedAnnouncements);
-      setFilteredAnnouncements(fetchedAnnouncements);
+        const sortedAnnouncements = fetchedAnnouncements.sort(
+          (a, b) => b.date.getTime() - a.date.getTime()
+        );
+    
+        setAnnouncements(sortedAnnouncements);
+        setFilteredAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error("Error re-fetching announcements after adding:", error);
     }
