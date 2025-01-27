@@ -1,9 +1,11 @@
 ### NOTES
 - There are 2 section. The first section will explain how to setup your environment when using for the first time. The second section will tell you about how to run web for development.
 - The container used for development is different than container used for production/deployment.
-      - The development container for website combines both frontend and backend together so we can run the code with just 1 command! 
-      - The containers for deployment/production separates frontend and backend. This is because frontend is a static website (don't need a server) and backend needs a server (which costs $$).
-      - Summary: Development uses 1 container. Production/deployment uses 2 containers and keep frontend and backend separated as proposed in feedback (by Professor Rigby) for release 1.
+   - The development container for website combines both frontend and backend together so we can run the code with just 1 command! 
+
+   - The containers for deployment/production separates frontend and backend. This is because frontend is a static website (don't need a server) and backend needs a server (which costs $$).
+
+   - **Summary**: Development uses 1 container. Production/deployment uses 2 containers and keep frontend and backend separated as proposed in feedback (by Professor Rigby) for release 1.
 
 
 
