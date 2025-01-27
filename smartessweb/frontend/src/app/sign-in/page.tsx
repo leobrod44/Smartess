@@ -196,7 +196,7 @@ const SignInPage = () => {
         {/* Login button */}
         <div className="h-[102px] w-full max-w-lg py-5 flex flex-col justify-center items-center gap-2.5">
           <button
-            className="self-stretch px-[149px] py-[13px] bg-[#30525e] opacity-40 rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex transition-opacity hover:opacity-100 custom-transition-length-1s text-center text-white text-lg font-sequel-sans-regular"
+            className="self-stretch px-[149px] py-[13px] bg-[#266472] rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex hover:bg-[#1f505e] transition duration-300 text-center text-white text-lg font-sequel-sans-regular"
             onClick={handleLogin}
           >
             Login
