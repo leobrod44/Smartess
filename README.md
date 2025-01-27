@@ -1,5 +1,5 @@
 # Smartess
-## Release 1 Demo
+## Release 2 Demo
 https://drive.google.com/file/d/1MvIh3tUW6fsqQBHBUWBLqvQHEsESYOVF/view?usp=sharing
 ## Release 1 Demo
 https://drive.google.com/file/d/1VhbKIfahZcb6RqXoC6UfZoBpeX1w_sCs/view?usp=sharing
