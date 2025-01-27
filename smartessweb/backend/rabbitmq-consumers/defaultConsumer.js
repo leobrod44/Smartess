@@ -8,7 +8,7 @@ class RabbitMQService {
     // for now only alerts, later can use other queues
     // won't use all queues in queues.yaml, so no need to get queues from file. Can hardcode
     this.queues = [
-
+      { name: 'videostream', routingKey: 'videostream.hubid.*' },
       //{ name: 'alerts', routingKey: '#.alerts.*' },
     ];
   }
@@ -112,6 +112,10 @@ class RabbitMQService {
         //notify frontend? seems like frontend already polling supabase on load see hubController.js line 62
         //should notify frontend on alert, not only on reload
         break;
+      case "videostream":
+      const videoSegment = msg.content;
+      console.log('handling video stream message:', videoSegment);
+      //TO DO: use video data on website
       default:
         console.warn(`No handler found for queue: ${queue}`);
     }
