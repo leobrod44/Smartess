@@ -36,7 +36,7 @@
 
 _The go/ folder is the backend of the Smartess project. It is the core of the system, handling the IoT events on hardware and networks, and microservices needed into processing and using them_
 
-> Doc & ref infra+arch wikis: Antoine (notify for major edits) &nbsp; [as of state of main branch on **2024-11-07** (may or may not be subject to changes in future)]
+> Doc & ref infra+standards+research wikis: Antoine (notify for major edits/removals/additions, just to keep everyone in hub team in-line) &nbsp;
  
 > Collaborators of go/: &nbsp; Leo, Ryan, Antoine,Renaud 
 
@@ -76,6 +76,7 @@ Methods to: Marshall into configStructs from yaml-config , then from configstruc
     
 ### common/structures
 Common data structures, Entities, Contexts, States, EntityFormats structs \
+Also lot of HA specific structs and interfaces, as well as relevant enums for go codebase \
 [WIP] TODO: Eventually have proper models/structs distinguishable between 'server' and 'hub'
 
 ## hub/
@@ -104,6 +105,8 @@ Any scripts, configs, utilities specifically related to the Backend service \
 
 # Dependencies and Design from Wikis
 For Go, RabbitMQ, Docker, and other dependencies, see the Architecture wiki and Infrastructure and Tools wikis. \
+For smart cameras real time streaming feature specifically, see the research notes wiki. \
+For the QA and CI pipeline of go codebase, see Code standards wiki and name convention. \
 Docker-composes and Dockerfiles should be commented and clear enough to understand the dependencies (Grafana, Loki,Promtail,etc...) and the build process as of Release 1. 
 
 
@@ -130,13 +133,8 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |   |       Dockerfile
 |   |       main.go
 |   |
-|   +---mock_mongo_server
-|   |   |   docker-compose.yml
-|   |   |   Dockerfile
-|   |   |   main.go
-|   |   |
-|   |   \---logs
-|   |           server.log
+|   +---mock camera
+|   |
 |   |           ....
 |   \---server
 |       |   Dockerfile
@@ -147,8 +145,8 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |                ....   
 +---common
 |   +---configs
-|   |       queues.yaml
-|   |       exchanges.yaml
+|   |       config.yaml (Previously or eventually again: queues.yaml + exchanges.yaml)
+|   |       
 |   |
 |   +---logging
 |   |       logging.go
@@ -177,9 +175,9 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |   +---events (General handling of RPI hub side IoT events/alerts; Now Unified even system)
 |   |
 |   |
-|   +---installation (Hub Hardwares installation doc and scripts
+|   +---installation (Hub Hardwares installation doc and scripts)
 |   |
-|   +---rtsp (New Video streaming feature; core networking and logic)
+|   +---rtsp (New Video streaming feature; core networking, processing logic for hub app+transport-layer)
 |   |
 |   |
 |   \---logger
