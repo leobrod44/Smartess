@@ -1,3 +1,5 @@
+### Smartess Deployed Website
+https://smartess.vercel.app/
 ### NOTES
 - There are 2 section. The first section will explain how to setup your environment when using for the first time. The second section will tell you about how to run web for development.
 - The container used for development is different than container used for production/deployment.
