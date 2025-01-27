@@ -1,7 +1,7 @@
 # Smartess
 ## Release 2 Demo
 https://drive.google.com/file/d/1MvIh3tUW6fsqQBHBUWBLqvQHEsESYOVF/view?usp=sharing
-## Smartess deployed website
+## Smartess Deployed Website
 https://smartess.vercel.app/
 ## Release 2 full powerpoint slides
 https://docs.google.com/presentation/d/12y3bnTnzrGjZ1UozoUyumIzgscmhRSeP49k8k3wQjeM/edit?usp=sharing
