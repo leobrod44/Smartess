@@ -8,16 +8,16 @@ const ProfileCard = () => {
       <div className="justify-between w-full h-full rounded ">
         <div className="flex flex-col justify-center items-center w-full h-full rounded">
           <div className="bg-white w-full h-full rounded ">
-            <div className="flex justify-center p-8">
+            <div className="flex justify-center p-7">
               <Image
                 src={Logo}
                 alt="Smartess Logo"
                 width={300}
                 height={300}
-                className="w-48 h-48 rounded-full"
+                className="w-64 h-64 rounded-full"
               />
             </div>
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center">
               <label className="cursor-pointer bg-[#266472] hover:bg-[#1f505e] w-28 h-8 text-white text-xs text-center hover:bg-[#1f505e] transition duration-300 rounded-md pt-2 pb-6">
                 Upload Image
                 <input type="file" accept="image/*" className="hidden" />
