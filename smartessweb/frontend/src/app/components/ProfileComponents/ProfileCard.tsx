@@ -4,7 +4,7 @@ import Logo from "../../../public/images/building_straight.png";
 const ProfileCard = () => {
   return (
     <div className="flex flex-col justify-between sm:w-3/4 h-[680px] gap-2 drop-shadow-2xl ">
-      <div className="flex flex-col justify-center items-center bg-[#266472] rounded-t-lg w-full h-[54px]"></div>
+      <div className="flex flex-col justify-center items-center bg-[#266472] rounded-t-lg w-full h-[54.5px]"></div>
       <div className="justify-between w-full h-full rounded ">
         <div className="flex flex-col justify-center items-center w-full h-full rounded">
           <div className="bg-white w-full h-full rounded ">
