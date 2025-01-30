@@ -33,7 +33,7 @@ function RoleEditForm({
           onChange={handleRoleChange}
           className="mr-2 form-radio text-black hover:ring-2 hover:ring-[#30525E] transition duration-200"
         />
-        admin
+        Admin
       </label>
       <label className="flex items-center hover:text-[#30525E] transition duration-200">
         <input
@@ -44,7 +44,7 @@ function RoleEditForm({
           onChange={handleRoleChange}
           className="mr-2 form-radio text-black hover:ring-2 hover:ring-[#30525E] transition duration-200"
         />
-        basic
+        Basic
       </label>
     </div>
   );
