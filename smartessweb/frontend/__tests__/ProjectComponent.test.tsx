@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import ProjectInfo from "@/app/components/DashboardComponents/ProjectComponent";
+import ProjectInfo from "../../frontend/src/app/components/DashboardComponents/ProjectComponent";
 import { Project } from "@/app/mockData";
 
 describe("ProjectInfo", () => {
