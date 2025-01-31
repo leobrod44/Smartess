@@ -67,7 +67,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
             </div>
             <div className="text-center">
               <p className="text-[#14323B] text-lg font-sequel-sans-medium leading-tight tracking-tight">
-                Action
+                View Units
               </p>
             </div>
           </div>
