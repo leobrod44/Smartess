@@ -247,7 +247,7 @@ const ManageUsersPage = () => {
 
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="flex items-center pt-4 justify-between mb-6">
+      <div className="flex items-center pt-4 justify-between mb-8">
         <div className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Manage Your Organization Users
         </div>
