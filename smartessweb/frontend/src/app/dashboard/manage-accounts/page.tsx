@@ -247,15 +247,19 @@ const ManageUsersPage = () => {
 
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="flex justify-end mb-4">
-        <div className="pt-2">
+      <div className="flex items-center pt-4 justify-between mb-6">
+        <div className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
+          Manage Your Organization Users
+        </div>
+        <div className="flex items-center pt-2 gap-4">
           <FilterComponent
             onFilterChange={handleFilterChange}
             filterOptions={filterOptionsManageUsers}
           />
+          <Searchbar onSearch={handleSearch} />
         </div>
-        <Searchbar onSearch={handleSearch} />
       </div>
+
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Project
