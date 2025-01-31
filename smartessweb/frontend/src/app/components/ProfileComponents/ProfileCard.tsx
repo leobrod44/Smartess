@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Logo from "../../../public/images/building_straight.png";
 
-const ProfileCard = () => {
+const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
   return (
     <div className="flex flex-col justify-between sm:w-3/4 h-[680px] gap-2 drop-shadow-2xl ">
       <div className="flex flex-col justify-center items-center bg-[#266472] rounded-t-lg w-full h-[54.5px]"></div>
@@ -30,9 +30,16 @@ const ProfileCard = () => {
             </div>
             <div>
               <div className="flex justify-center pt-3">
-                <div className="bg-[#CCCCCC] w-28 text-white text-sm rounded-md p-1">
-                  <h1 className="text-center">Master</h1>
-                </div>
+                {
+                  <div className="bg-[#CCCCCC] w-28 text-white text-sm rounded-md p-1">
+                    <h1 className="text-center">
+                      {currentUser.role === "master" ||
+                      currentUser.role === "admin"
+                        ? "Master"
+                        : "Basic"}
+                    </h1>
+                  </div>
+                }
               </div>
             </div>
           </div>
