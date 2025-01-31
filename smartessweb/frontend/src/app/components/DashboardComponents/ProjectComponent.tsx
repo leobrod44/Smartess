@@ -103,6 +103,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
             <div className="text-center">
               <div className="flex justify-center">
                 <button
+                  aria-label="View Units"
                   className="bg-[#4b7d8d]  text-white w-[50px] h-10 rounded-lg shadow-md flex items-center justify-center  hover:bg-[#266472] hover:scale-105 transition-transform duration-300"
                   onClick={() => handleToggle(startIndex + index)}
                 >

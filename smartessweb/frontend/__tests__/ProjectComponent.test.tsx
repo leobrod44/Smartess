@@ -221,7 +221,7 @@ describe("ProjectInfo", () => {
     waitFor(() => expect(screen.getByText("Unit 102")).toBeInTheDocument());
 
     // Click the "More" button again to hide the units
-    fireEvent.click(screen.getAllByRole("button", { name: "More" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "View Units" })[0]);
 
     // Check that the units are no longer visible
     expect(screen.queryByText("Unit 101")).not.toBeInTheDocument();
