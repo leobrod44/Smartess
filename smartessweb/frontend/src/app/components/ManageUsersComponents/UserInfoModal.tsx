@@ -68,6 +68,12 @@ function UserInfoModal({
     fetchOrgProjectsData();
   }, [addresses, currentOrg]);
 
+  const capitalizeWords = (str: string) =>
+    str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
   const handleModalClose = () => {
     setRole(initialRole);
     setAddresses(initialAddresses);
@@ -262,7 +268,7 @@ function UserInfoModal({
               id="user-details-modal"
               className="text-[#254752] text-s font-sequel-sans-black mb-4"
             >
-              {userName}
+              {capitalizeWords(userName)}
             </Typography>
 
             <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
@@ -281,7 +287,7 @@ function UserInfoModal({
                 ) : (
                   <div className="flex justify-center items-center">
                     <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
-                      {role}
+                      {capitalizeWords(role)}
                     </span>
                   </div>
                 )}
