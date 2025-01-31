@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import { Pagination } from "@mui/material";
-import Unit from "../components/Unit";
-import { Project } from "../mockData";
+import Unit from "../Unit";
+import { Project } from "../../mockData";
 
 interface ProjectInfoProps {
   projects: Project[];
