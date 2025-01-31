@@ -103,14 +103,17 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
             <div className="text-center">
               <div className="flex justify-center">
                 <button
-                  className="bg-[#4b7d8d] pl-2 text-white w-[82px] h-8 rounded-[20px] flex items-center justify-center hover:bg-[#266472] transition duration-300"
+                  className="bg-[#4b7d8d]  text-white w-[50px] h-10 rounded-lg shadow-md flex items-center justify-center  hover:bg-[#266472] hover:scale-105 transition-transform duration-300"
                   onClick={() => handleToggle(startIndex + index)}
                 >
-                  More
                   {showUnits === startIndex + index ? (
-                    <ChevronUpIcon className="w-5 h-5 ml-2" />
+                    <>
+                      <ChevronUpIcon className="w-5 h-5" />
+                    </>
                   ) : (
-                    <ChevronDownIcon className="w-5 h-5 ml-2" />
+                    <>
+                      <ChevronDownIcon className="w-5 h-5" />
+                    </>
                   )}
                 </button>
               </div>
