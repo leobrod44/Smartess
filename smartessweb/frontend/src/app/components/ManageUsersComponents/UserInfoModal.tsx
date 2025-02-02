@@ -120,7 +120,7 @@ function UserInfoModal({
         );
         onClose(); // Close the modal after deletion
       }
-    } catch (error) {
+    } catch {
       showToastError("Failed to delete the user. Please try again.");
     }
   };
