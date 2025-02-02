@@ -9,6 +9,7 @@ import ProjectAddressMenu from "./ProjectAddressMenu";
 import { Project } from "../../mockData";
 import { manageAccountsApi } from "@/api/page";
 import router from "next/router";
+import { showToastError, showToastSuccess } from "../Toast";
 
 interface UserInfoModalProps {
   uid: number;
@@ -110,11 +111,17 @@ function UserInfoModal({
     setIsUserDeletion(true); // Set to true for user deletion
     setDeletePopupOpen(true);
   };
-
-  const handleConfirmDelete = () => {
-    if (isUserDeletion) {
-      onDeleteUser(uid); // Handle user deletion
-      onClose();
+  const handleConfirmDelete = async () => {
+    try {
+      if (isUserDeletion) {
+        await onDeleteUser(uid); // Handle user deletion logic
+        showToastSuccess(
+          ` ${capitalizeWords(userName)} has been successfully deleted.`
+        );
+        onClose(); // Close the modal after deletion
+      }
+    } catch (error) {
+      showToastError("Failed to delete the user. Please try again.");
     }
   };
 
