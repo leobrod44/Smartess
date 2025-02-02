@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import ProjectComponent from "../components/ProjectComponent";
+import ProjectComponent from "../components/DashboardComponents/ProjectComponent";
 import DashboardWidget from "../components/DashboardComponents/DashboardWidget";
 import Searchbar from "../components/Searchbar";
 import FilterComponent from "../components/FilterList";
@@ -99,7 +99,9 @@ const DashboardPage = () => {
         newFilteredProjects.sort((a, b) => b.hubUsersCount - a.hubUsersCount);
         break;
       case "Most Pending Tickets":
-        newFilteredProjects.sort((a, b) => b.pendingTicketsCount - a.pendingTicketsCount);
+        newFilteredProjects.sort(
+          (a, b) => b.pendingTicketsCount - a.pendingTicketsCount
+        );
         break;
       default:
         break;
