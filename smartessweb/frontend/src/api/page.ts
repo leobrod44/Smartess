@@ -1,6 +1,10 @@
 import { API_URL } from "./api";
 import { Project, OrgUser, Individual, CurrentUser, Unit } from "@/app/mockData";
 
+export interface ManageAccEmailResponse {
+  message: string;
+}
+
 export const projectApi = {
   getUserProjects: async (token: string): Promise<{ projects: Project[] }> => {
     const response = await fetch(`${API_URL}/projects/get_user_projects`, {
@@ -207,7 +211,7 @@ export const manageAccountsApi = {
   sendInvite: async (
     token: string,
     formData: FormData
-  ): Promise<void> => {
+  ): Promise<ManageAccEmailResponse> => {
     const response = await fetch(
       `${API_URL}/manage-accounts/invite-user-email`,
       {
