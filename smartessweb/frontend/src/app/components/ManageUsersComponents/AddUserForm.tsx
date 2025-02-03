@@ -5,6 +5,8 @@ import { generateMockProjects, Project } from "../../mockData";
 import ProjectAddressMenu from "./ProjectAddressMenu";
 import { showToastError, showToastSuccess } from "../Toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { manageAccountsApi } from "@/api/page";
+import { useUserContext } from "@/context/UserProvider";
 
 type AddUserProps = {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("basic");
+  const { userFirstName, userLastName } = useUserContext(); // Fetch the logged in users' name
 
   useEffect(() => {
     const mockProjects = generateMockProjects();
@@ -64,7 +67,9 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
     return emailRegex.test(email);
   };
 
-  const handleSendInvitation = () => {
+  const handleSendInvitation = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!email) {
       showToastError("Email is required");
       return;
@@ -80,11 +85,32 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
       return;
     }
 
-    // Logic to send the invitation goes here
+    try {
+      const token = localStorage.getItem("token"); // Fetch token from local storage
+      if (!token) {
+        showToastError("No token provided");
+        return;
+      }
+      const formData = new FormData();
+      const sender_name = userFirstName + " " + userLastName;
 
-    resetForm();
+      formData.append("email", email);
+      formData.append("role", role);
+      formData.append("sender_name", sender_name);
 
-    showToastSuccess("Invitation Sent!");
+      // Append each project as a separate field
+      selectedProjects.forEach((project, index) => {
+        formData.append(`projects[${index}]`, project);
+      });
+
+      await manageAccountsApi.sendInvite(token, formData); //send email
+      resetForm();
+      showToastSuccess("Invitation Sent!");
+      onClose();
+    } catch (err) {
+      console.error("Failed to send invite:", err);
+      showToastError("Failed to send invite.");
+    }
   };
 
   if (!isOpen) return null;
