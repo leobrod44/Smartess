@@ -82,15 +82,15 @@ const TicketList = ({
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    const [year, month, day] = dateStr.split("-").map(Number);
-    const date = new Date(year, month - 1, day);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  // const formatDate = (dateStr: string) => {
+  //   const [year, month, day] = dateStr.split("-").map(Number);
+  //   const date = new Date(year, month - 1, day);
+  //   return date.toLocaleDateString("en-US", {
+  //     year: "numeric",
+  //     month: "long",
+  //     day: "numeric",
+  //   });
+  // };
 
   return (
     <div className="mt-8 flow-root">
@@ -186,7 +186,8 @@ const TicketList = ({
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-3 py-4 text-sm text-[#14323B]">
-                    {formatDate(ticket.date)}
+                    {/* {formatDate(ticket.date)} */}
+                    {ticket.date}
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-center text-sm font-medium sm:pr-3">
                     <button
