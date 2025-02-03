@@ -57,12 +57,12 @@ export const manageAccountsApi = {
 
   getOrgIndividualsData: async (fetchedOrgUsers: OrgUser[], token: string): Promise<{ individuals: Individual[] }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-org-individuals-data`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ fetchedOrgUsers }), 
+      body: JSON.stringify({ fetchedOrgUsers }),
     });
 
     const data = await response.json();
@@ -76,12 +76,12 @@ export const manageAccountsApi = {
 
   getOrgUsersProjects: async (fetchedOrgUsers: OrgUser[], token: string): Promise<{ projects: Project[] }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-org-users-projects`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ fetchedOrgUsers }), 
+      body: JSON.stringify({ fetchedOrgUsers }),
     });
 
     const data = await response.json();
@@ -95,12 +95,12 @@ export const manageAccountsApi = {
 
   getOrgProjects: async (currentOrg: number | undefined, token: string): Promise<{ orgProjects: Project[] }> => {
     const response = await fetch(`${API_URL}/manage-accounts/get-org-projects`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ currentOrg }), 
+      body: JSON.stringify({ currentOrg }),
     });
 
     const data = await response.json();
@@ -114,7 +114,7 @@ export const manageAccountsApi = {
 
   assignOrgUserToProject: async (user_id: number, org_id: number | undefined, proj_ids: number[], org_user_type: string, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/assign-org-user-to-project`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -138,7 +138,7 @@ export const manageAccountsApi = {
 
   removeOrgUserFromProject: async (user_id: number, org_id: number | undefined, proj_ids: number[], token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/remove-org-user-from-project`, {
-      method: 'POST', 
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export const manageAccountsApi = {
 
     return data;
   },
-  
+
   changeOrgUserRole: async (user_id: number, org_id: number | undefined, role: string, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/change-org-user-role`, {
       method: 'POST',
@@ -181,7 +181,7 @@ export const manageAccountsApi = {
 
     return data;
   },
-  
+
   deleteOrgUser: async (user_id: number, org_id: number | undefined, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/manage-accounts/delete-org-user`, {
       method: 'POST',
@@ -201,6 +201,27 @@ export const manageAccountsApi = {
       throw new Error(data.error || 'Failed to remove user from organization');
     }
 
+    return data;
+  },
+
+  sendInvite: async (
+    token: string,
+    formData: FormData
+  ): Promise<void> => {
+    const response = await fetch(
+      `${API_URL}/manage-accounts/invite-user-email`,
+      {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to send invite email");
+    }
     return data;
   }
 };
@@ -242,7 +263,7 @@ export const individualUnitApi = {
     return data;
   },
 
-  getIndividualUnit: async ( projAddress: string, unit_id: string, token: string): Promise<{ unit: Unit }> => {
+  getIndividualUnit: async (projAddress: string, unit_id: string, token: string): Promise<{ unit: Unit }> => {
     const response = await fetch(`${API_URL}/individual-unit/get-individual-unit`, {
       method: 'POST',
       headers: {
@@ -264,7 +285,7 @@ export const individualUnitApi = {
     return data;
   },
 
-  removeUserFromHub: async ( user_id: string | undefined, token: string): Promise<void> => {
+  removeUserFromHub: async (user_id: string | undefined, token: string): Promise<void> => {
     const response = await fetch(`${API_URL}/individual-unit/remove-user-from-hub`, {
       method: 'POST',
       headers: {
@@ -283,5 +304,5 @@ export const individualUnitApi = {
     }
 
     return data;
-  }
+  },
 }
