@@ -1,6 +1,15 @@
 "use client";
+import AlertList from "../../components/AlertsPageComponents/AlertList";
+import { generateMockProjects } from "../../mockData";
 
 const AlertPage = () => {
+  const alerts = generateMockProjects().flatMap((project) =>
+    project.units.flatMap((unit) => unit.alerts)
+  );
+
+  const handleAlertResolve = (id: string) => {
+    console.log(`Resolving alert with ID: ${id}`);
+  };
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
       <div className="flex items-center pt-4 justify-between mb-8">
@@ -28,6 +37,7 @@ const AlertPage = () => {
           Action
         </p>
       </div>
+      <AlertList alerts={alerts} />
     </div>
   );
 };
