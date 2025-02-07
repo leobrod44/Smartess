@@ -30,13 +30,14 @@
     "multer": "^1.4.5-lts.1",
     "next": "^14.2.15",
     "nodemon": "^3.1.7",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-toastify": "^10.0.6",
     "resend": "^4.0.0",
     "smartess": "file:",
     "stompjs": "^2.3.3",
     "swiper": "^11.1.15",
+    "uuid": "^11.0.5",
     "winston": "^3.15.0"
   },
   "devDependencies": {

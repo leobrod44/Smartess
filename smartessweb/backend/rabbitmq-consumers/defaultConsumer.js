@@ -8,7 +8,8 @@ class RabbitMQService {
     // for now only alerts, later can use other queues
     // won't use all queues in queues.yaml, so no need to get queues from file. Can hardcode
     this.queues = [
-      { name: 'alerts', routingKey: '#.alerts.*' },
+      { name: 'videostream', routingKey: 'videostream.hubid.*' },
+      //{ name: 'alerts', routingKey: '#.alerts.*' },
     ];
   }
 
@@ -51,11 +52,13 @@ class RabbitMQService {
 
   async setupExchangesAndQueues() {
     try {
-      await this.channel.assertExchange('smartess_topic_exchange', 'topic', { durable: true });
+      //TODO: set specific exchange for each queue
+      await this.channel.assertExchange('videostream', 'topic', { durable: true });
 
       for (const queue of this.queues) {
         await this.channel.assertQueue(queue.name, { durable: true });
-        await this.channel.bindQueue(queue.name, 'smartess_topic_exchange', queue.routingKey);
+        await this.channel.bindQueue(queue.name, 'videostream', queue.routingKey);
+        console.log(`Queue ${queue.name} bound to exchange with routing key: ${queue.routingKey}`);
       }
 
       console.log('Exchanges and queues set up successfully');
@@ -109,6 +112,10 @@ class RabbitMQService {
         //notify frontend? seems like frontend already polling supabase on load see hubController.js line 62
         //should notify frontend on alert, not only on reload
         break;
+      case "videostream":
+      const videoSegment = msg.content;
+      console.log('handling video stream message:', videoSegment);
+      //TO DO: use video data on website
       default:
         console.warn(`No handler found for queue: ${queue}`);
     }

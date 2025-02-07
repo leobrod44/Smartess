@@ -4,10 +4,22 @@ package ha
 import (
 	"testing"
 	"time"
+
+	"github.com/streadway/amqp"
+	"github.com/stretchr/testify/mock"
 )
 
+type MockRabbitMQInstance struct {
+	mock.Mock
+}
+
+func (m *MockRabbitMQInstance) Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error {
+	args := m.Called(exchange, key, mandatory, immediate, msg)
+	return args.Error(0)
+}
+
 // need to pass true in cmd/hub/main.go Init to use the mock hub before running the test
-func TestSmartessHubWithDocker(t *testing.T) {
+func TestRtspStream(t *testing.T) {
 	// Start the services using Docker
 	mockhuberr := RunCommand("docker-compose", []string{"up", "-d"}, "../cmd/mockhub")
 	if mockhuberr != nil {
@@ -26,9 +38,9 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		t.Fatalf("Mockhub did not start properly: %v", err)
 	}
 
-	otherserviceserr := RunCommand("docker-compose", []string{"up", "-d"}, "../../")
-	if otherserviceserr != nil {
-		t.Fatalf("Failed to start Docker containers in dir1: %v", otherserviceserr)
+	servererr := RunCommand("docker-compose", []string{"up", "-d", "server"}, "../../")
+	if servererr != nil {
+		t.Fatalf("Failed to start Docker containers in dir1: %v", servererr)
 	}
 	defer func() {
 		// Stop and remove the containers in dir1 after the test
@@ -37,6 +49,19 @@ func TestSmartessHubWithDocker(t *testing.T) {
 			t.Errorf("Failed to stop Docker containers in dir1: %v", otherserviceserr)
 		}
 	}()
+
+	rabbitmqerr := RunCommand("docker-compose", []string{"up", "-d", "rabbitmq"}, "../../")
+	if rabbitmqerr != nil {
+		t.Fatalf("Failed to start Docker containers in dir1: %v", rabbitmqerr)
+	}
+	defer func() {
+		// Stop and remove the containers in dir1 after the test
+		otherserviceserr := RunCommand("docker-compose", []string{"down"}, "../../")
+		if otherserviceserr != nil {
+			t.Errorf("Failed to stop Docker containers in dir1: %v", otherserviceserr)
+		}
+	}()
+
 	t.Log("Waiting for other services to start...")
 	err = WaitForServices(t, "../../")
 	if err != nil {
@@ -60,15 +85,15 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		t.Fatalf("Hub did not start properly: %v", err)
 	}
 
-	expectedLog := "MOCKlight.MOCKliving_room"
+	// Monitor the log file for the expected log message
+	expectedLog := "frame="
 	logFilePath := "../cmd/hub/logs/server.log"
-	// Unbuffered error/fatal channel
-	// Instead of doing Fail or Fatalf here within a non-testing goroutine
 	errCh := make(chan error)
 	go MonitorLogFile(t, errCh, logFilePath, expectedLog)
 
+	// Sleep for a while to allow events to be generated
 	t.Log("Waiting for events to be processed...")
-	time.Sleep(10 * time.Second)
+	time.Sleep(25 * time.Second)
 
 	select {
 	case errt := <-errCh:
@@ -77,4 +102,5 @@ func TestSmartessHubWithDocker(t *testing.T) {
 		}
 	default:
 	}
+
 }
