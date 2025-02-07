@@ -48,7 +48,7 @@ func main() {
 
 func GenerateEventMessage() ha.WebhookMessage {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	eventID := rng.Intn(5) + 1
+	eventID := rng.Intn(11) + 1
 	var event ha.WebhookMessage
 
 	switch eventID {
@@ -281,6 +281,223 @@ func GenerateEventMessage() ha.WebhookMessage {
 					ID:       "01JDN9R843GN161T321VYY0FJ7",
 					ParentID: "",
 					UserID:   "288a21978a6d496b90aefec65844c6ec",
+				},
+			},
+		}
+	case 6:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "battery.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "battery.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
+				},
+			},
+		}
+
+	case 7:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "motion.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "motion.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
+				},
+			},
+		}
+	case 8:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "door.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "door.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
+				},
+			},
+		}
+	case 9:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "smoke.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "smoke.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
+				},
+			},
+		}
+	case 10:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "water.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "water.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
+				},
+			},
+		}
+	case 11:
+		event = ha.WebhookMessage{
+			ID:   3,
+			Type: "state_changed",
+			Event: structures.EventDetails{
+				EventType: "state_changed",
+				Data: structures.EventData{
+					EntityID: "temperature.sinope_technologies_th1123zb_g2_temperature",
+					OldState: structures.State{},
+					NewState: structures.State{
+						EntityID: "temperature.sinope_technologies_th1123zb_g2_temperature",
+						State:    "21.3",
+						Attributes: map[string]interface{}{
+							"device_class":        "temperature",
+							"friendly_name":       "Sinope Technologies TH1123ZB-G2 Temperature",
+							"state_class":         "measurement",
+							"unit_of_measurement": "°C",
+						},
+						LastChanged: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						LastUpdated: time.Date(2024, 11, 26, 22, 34, 43, 172305000, time.UTC),
+						Context: structures.EventContext{
+							ID:       "01JDN9SN345HZCFMAJJG769V8K",
+							ParentID: "",
+							UserID:   "",
+						},
+					},
+				},
+				Origin:    "LOCAL",
+				TimeFired: time.Now().Format(time.RFC3339),
+				Context: structures.EventContext{
+					ID:       "01JDN9SN345HZCFMAJJG769V8K",
+					ParentID: "",
+					UserID:   "",
 				},
 			},
 		}
