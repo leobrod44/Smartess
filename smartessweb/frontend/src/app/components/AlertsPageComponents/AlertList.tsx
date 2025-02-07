@@ -44,32 +44,34 @@ const getAlertIcon = (message: string) => {
 const AlertList = ({ alerts }: AlertListProps) => {
   return (
     <div className="space-y-4">
-      {alerts.map((alert) => (
+      {alerts.map((alert, index) => (
         <div
           key={alert.id}
-          className="flex items-center p-4 border border-gray-200 rounded-lg shadow-md hover:bg-gray-50 transition-all duration-200"
+          className={`grid grid-cols-6 items-center p-4 transition-all duration-200 ${
+            index % 2 === 0 ? "bg-white" : "bg-gray-100"
+          }`}
         >
           {/* Id */}
-          <div className="flex-1 pl-2 text-[#30525E]">{alert.id}</div>
+          <div className=" pl-2 text-[#30525E]">{alert.id}</div>
 
           {/* Alert message */}
-          <div className="flex-1 text-[#30525E]">{alert.message}</div>
+          <div className=" pr-6 text-[#30525E]">{alert.message}</div>
 
           {/* Type */}
-          <div className="flex-1 pl-2">{getAlertIcon(alert.message)}</div>
+          <div className=" pl-2">{getAlertIcon(alert.message)}</div>
 
           {/* Date */}
-          <div className="flex-1 text-[#30525E]">
+          <div className="text-[#30525E]">
             {format(new Date(alert.timestamp), "yyyy-MM-dd")}
           </div>
 
           {/* Time */}
-          <div className="flex-1 text-[#30525E]">
+          <div className=" text-[#30525E]">
             {format(new Date(alert.timestamp), "HH:mm:ss")}
           </div>
 
           {/* Action (Button or Placeholder for further functionality) */}
-          <div className="flex-1 pr-6">
+          <div className="pl-10">
             <button>
               <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
             </button>
