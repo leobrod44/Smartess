@@ -1,11 +1,30 @@
 "use client";
 import AlertList from "../../components/AlertsPageComponents/AlertList";
 import { generateMockProjects } from "../../mockData";
+import Pagination from "@mui/material/Pagination";
+import { useState } from "react";
+
+const itemsPerPage = 8;
 
 const AlertPage = () => {
   const alerts = generateMockProjects().flatMap((project) =>
     project.units.flatMap((unit) => unit.alerts)
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  // Pagination logic
+  const totalPages = Math.ceil(alerts.length / itemsPerPage);
+  const currentItems = alerts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
 
   return (
     <div className=" flex border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
@@ -34,7 +53,16 @@ const AlertPage = () => {
           Action
         </p>
       </div>
-      <AlertList alerts={alerts} />
+      <AlertList alerts={currentItems} />
+      <div className="mt-4 flex justify-center">
+        <Pagination
+          className="custom-pagination"
+          count={totalPages}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+        />
+      </div>
     </div>
   );
 };
