@@ -83,10 +83,12 @@ const tickets: Ticket[] = [
   },
 ];
 
+type WidgetFilter = "all" | "resolved" | "unresolved";
+
 const AssignedTicketPage = () => {
   const { selectedProjectId } = useProjectContext();
   const [query, setQuery] = useState("");
-  const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
+  const [widgetFilter, setWidgetFilter] = useState<WidgetFilter>("all");
 
   const filterOptionsTicket = [
     "Ticket A-Z",
@@ -97,13 +99,35 @@ const AssignedTicketPage = () => {
     "Least Important",
   ];
 
-  useEffect(() => {
-    const projectTickets = selectedProjectId
-      ? tickets.filter((ticket) => ticket.projectId == selectedProjectId)
-      : tickets;
+  const projectTickets = useMemo(() => {
+    if (!selectedProjectId) return tickets;
+    return tickets.filter(
+      (ticket) => ticket.projectId === String(selectedProjectId)
+    );
+  }, [selectedProjectId]);
 
-    setFilteredTickets(
-      projectTickets.filter((ticket) =>
+  const widgetStats = useMemo(() => {
+    const total = projectTickets.length;
+    const resolved = projectTickets.filter(
+      (ticket) => ticket.isResolved
+    ).length;
+    const unresolved = total - resolved;
+    return { total, resolved, unresolved };
+  }, [projectTickets]);
+
+  const [displayedTickets, setDisplayedTickets] = useState<Ticket[]>([]);
+
+  useEffect(() => {
+    let tempTickets = [...projectTickets];
+
+    if (widgetFilter === "resolved") {
+      tempTickets = tempTickets.filter((ticket) => ticket.isResolved);
+    } else if (widgetFilter === "unresolved") {
+      tempTickets = tempTickets.filter((ticket) => !ticket.isResolved);
+    }
+
+    if (query.trim()) {
+      tempTickets = tempTickets.filter((ticket) =>
         [
           ticket.ticketId,
           ticket.name,
@@ -114,34 +138,21 @@ const AssignedTicketPage = () => {
           ticket.status,
           ticket.date,
         ].some((field) => field.toLowerCase().includes(query.toLowerCase()))
-      )
-    );
-  }, [selectedProjectId, query]);
+      );
+    }
 
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
-
-  const ticketCounts = useMemo(() => {
-    const total = filteredTickets.length;
-    const resolved = filteredTickets.filter(
-      (ticket) => ticket.isResolved
-    ).length;
-    const unresolved = filteredTickets.filter(
-      (ticket) => !ticket.isResolved
-    ).length;
-    return { total, resolved, unresolved };
-  }, [filteredTickets]);
+    setDisplayedTickets(tempTickets);
+  }, [projectTickets, widgetFilter, query]);
 
   const handleFilterChange = (filterValue: string) => {
-    const newFilteredTickets = [...filteredTickets];
+    const newDisplayedTickets = [...displayedTickets];
 
     switch (filterValue) {
       case "Ticket A-Z":
-        newFilteredTickets.sort((a, b) => a.name.localeCompare(b.name));
+        newDisplayedTickets.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "Status":
-        newFilteredTickets.sort((a, b) => {
+        newDisplayedTickets.sort((a, b) => {
           const statusOrder: Record<string, number> = { false: 0, true: 1 };
           return (
             statusOrder[String(a.isResolved)] -
@@ -150,23 +161,23 @@ const AssignedTicketPage = () => {
         });
         break;
       case "Most Recent":
-        newFilteredTickets.sort(
+        newDisplayedTickets.sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
         break;
       case "Least Recent":
-        newFilteredTickets.sort(
+        newDisplayedTickets.sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
         break;
       case "Most Important":
-        newFilteredTickets.sort((a, b) => {
+        newDisplayedTickets.sort((a, b) => {
           const importanceOrder = { Alert: 1, Repair: 2, Other: 3 };
           return importanceOrder[a.type] - importanceOrder[b.type];
         });
         break;
       case "Least Important":
-        newFilteredTickets.sort((a, b) => {
+        newDisplayedTickets.sort((a, b) => {
           const importanceOrder = { Alert: 1, Repair: 2, Other: 3 };
           return importanceOrder[b.type] - importanceOrder[a.type];
         });
@@ -174,27 +185,39 @@ const AssignedTicketPage = () => {
       default:
         break;
     }
-    setFilteredTickets(newFilteredTickets);
+
+    setDisplayedTickets(newDisplayedTickets);
   };
+
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
+
+  const handleClickTotal = () => setWidgetFilter("all");
+  const handleClickResolved = () => setWidgetFilter("resolved");
+  const handleClickUnresolved = () => setWidgetFilter("unresolved");
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex justify-center">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-fit border-2 border-black rounded-lg p-4">
           <TicketWidget
-            count={ticketCounts.total}
+            count={widgetStats.total}
             label="Total Tickets"
             backgroundColor="bg-[#56798d]"
+            onClick={handleClickTotal}
           />
           <TicketWidget
-            count={ticketCounts.resolved}
+            count={widgetStats.resolved}
             label="Resolved Tickets"
             backgroundColor="bg-[#729987]"
+            onClick={handleClickResolved}
           />
           <TicketWidget
-            count={ticketCounts.unresolved}
+            count={widgetStats.unresolved}
             label="Unresolved Tickets"
             backgroundColor="bg-[#A6634F]"
+            onClick={handleClickUnresolved}
           />
         </div>
       </div>
@@ -210,7 +233,7 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList tickets={filteredTickets} />
+      <AssignedTicketList tickets={displayedTickets} />
     </div>
   );
 };
