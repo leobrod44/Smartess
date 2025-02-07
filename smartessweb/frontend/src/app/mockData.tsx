@@ -131,8 +131,6 @@ export interface Alert {
     | "Unknown";
 
   timestamp: Date;
-
-  resolved: boolean;
 }
 
 export interface Ticket {
@@ -569,8 +567,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Smoke",
 
     timestamp: new Date("2024-12-15T14:30:00"),
-
-    resolved: false,
   },
 
   {
@@ -585,8 +581,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Water",
 
     timestamp: new Date("2024-03-02T11:12:00"),
-
-    resolved: false,
   },
 
   {
@@ -601,8 +595,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Temperature",
 
     timestamp: new Date("2024-04-10T10:49"),
-
-    resolved: true,
   },
 
   {
@@ -617,8 +609,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "BatteryLow",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
   {
     id: "5",
@@ -632,8 +622,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Sensor",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
 
   {
@@ -648,8 +636,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "DoorOpen",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
   {
     id: "7",
@@ -663,8 +649,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Motion",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
 
   {
@@ -679,8 +663,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Climate",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
 
   {
@@ -695,8 +677,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Unknown",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
 
   {
@@ -711,8 +691,6 @@ const generateMockAlerts = (): Alert[] => [
     type: "Light",
 
     timestamp: new Date("2024-08-11T10:15:00"),
-
-    resolved: false,
   },
 ];
 
