@@ -19,10 +19,17 @@ for dir in "${directories[@]}"; do
         cd "$dir" || exit 1
 
         if [[ -f "docker-compose.yml" || -f "docker-compose.yaml" ]]; then
+
+            # Clean up Docker
+#            docker system prune -af # clean all useless images, containers, build binaries and volumes from filesystem
+#            docker-compose down --volumes --remove-orphans # clean non-compose containers for fresh images
+
             # Run the Docker Compose commands
             docker-compose pull
             docker-compose build --no-cache
             docker-compose up -d --force-recreate
+
+            # docker-compose down --volumes --remove-orphans # clean non-compose containers for fresh images
 
             echo "Completed Docker Compose commands in directory: $dir"
         else
