@@ -19,7 +19,9 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^6.1.6",
+    "@stomp/stompjs": "^7.0.0",
     "@supabase/supabase-js": "^2.45.4",
+    "@types/stompjs": "^2.3.9",
     "amqplib": "^0.10.5",
     "concurrently": "^9.0.1",
     "cors": "^2.8.5",
@@ -33,6 +35,7 @@
     "react-toastify": "^10.0.6",
     "resend": "^4.0.0",
     "smartess": "file:",
+    "stompjs": "^2.3.3",
     "swiper": "^11.1.15",
     "winston": "^3.15.0"
   },
