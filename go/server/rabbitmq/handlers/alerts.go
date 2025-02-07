@@ -36,7 +36,18 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 		logger.Info("Sensor alert")
 	case structures.AlertTypeClimate:
 		logger.Info("Climate alert")
-
+	case structures.AlertTypeBatteryLow:
+		logger.Info("Battery low alert")
+	case structures.AlertTypeMotion:
+		logger.Info("Motion alert")
+	case structures.AlertTypeDoorOpen:
+		logger.Info("Door open alert")
+	case structures.AlertTypeSmoke:
+		logger.Info("Smoke alert")
+	case structures.AlertTypeWater:
+		logger.Info("Water alert")
+	case structures.AlertTypeTemperature:
+		logger.Info("Temperature alert")
 	default:
 		logger.Info("Unknown alert type")
 	}
