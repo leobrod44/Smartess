@@ -59,12 +59,14 @@ const AlertList = ({ alerts }: AlertListProps) => {
       {alerts.map((alert, index) => (
         <div
           key={alert.id}
-          className={`grid grid-cols-6 items-center p-4 transition-all duration-200 ${
+          className={`grid grid-cols-7 items-center p-4 transition-all duration-200 ${
             index % 2 === 0 ? "bg-white" : "bg-gray-100"
           }`}
         >
           {/* Id */}
           <div className=" pl-2 text-[#30525E]">{alert.id}</div>
+
+          <div className=" pl-2 text-[#30525E]"> {alert.unitNumber} </div>
 
           {/* Alert message */}
           <div className=" pr-6 text-[#30525E]">{alert.message}</div>
@@ -82,8 +84,8 @@ const AlertList = ({ alerts }: AlertListProps) => {
             {format(new Date(alert.timestamp), "HH:mm:ss")}
           </div>
 
-          {/* Action (Button or Placeholder for further functionality) */}
-          <div className="pl-10">
+          {/* Action */}
+          <div className="pl-8">
             <button>
               <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
             </button>
