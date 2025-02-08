@@ -31,25 +31,23 @@ const getAlertIcon = (type: string) => {
     case "Water":
       return <WaterDamageIcon className="text-blue-500" fontSize="large" />;
     case "Temperature":
-      return (
-        <DeviceThermostatIcon className="text-orange-500" fontSize="large" />
-      );
+      return <DeviceThermostatIcon className="text-red-500" fontSize="large" />;
 
     case "BatteryLow":
-      return <BatteryAlertIcon className="text-gray-500" fontSize="large" />;
+      return <BatteryAlertIcon className="text-green-500" fontSize="large" />;
     case "Motion":
-      return <DirectionsRunIcon className="text-red-600" fontSize="large" />;
+      return <DirectionsRunIcon className="text-gray-600" fontSize="large" />;
     case "DoorOpen":
-      return <DoorBackIcon className="text-orange-500" fontSize="large" />;
+      return <DoorBackIcon className="text-brown-500" fontSize="large" />;
     case "Sensor":
       return <SensorsIcon className="text-orange-500" fontSize="large" />;
     case "Climate":
-      return <AcUnitIcon className="text-orange-500" fontSize="large" />;
+      return <AcUnitIcon className="text-blue-500" fontSize="large" />;
     case "Unknown":
-      return <HelpOutlineIcon className="text-orange-500" fontSize="large" />;
+      return <HelpOutlineIcon className="text-gray-500" fontSize="large" />;
     case "Light":
       return (
-        <WbIncandescentIcon className="text-orange-500" fontSize="large" />
+        <WbIncandescentIcon className="text-yellow-500" fontSize="large" />
       );
     default:
       return <DangerousIcon className="text-gray-400" fontSize="large" />;
