@@ -51,7 +51,7 @@ const ForgotPasswordModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
       <form onSubmit={handleFormSubmission}>
-        <div className="bg-white rounded-xl shadow-lg p-10 max-w-1/2 max-h-full relative">
+        <div className="bg-white rounded-xl shadow-lg p-10 max-w-full max-h-full relative">
           <button
             className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition duration-300"
             onClick={onClose}
@@ -74,33 +74,33 @@ const ForgotPasswordModal = ({
 
           <div className="flex flex-col justify-center pb-10">
             <div className="flex items-center justify-center gap-4">
-              <label className="text-sm font-sequel-sans-regular">
-                Email Address
-              </label>
+              <label className="text-sm font-sequel-sans-regular">Email</label>
               <input
                 type="text"
                 name="email"
                 value={email}
                 onChange={handleEmailInput}
-                className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-80"
+                className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-2/4"
               />
             </div>
           </div>
 
-          <div className="flex justify-around">
-            <button
-              className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
-              type="button"
-              onClick={onClose}
-            >
-              Cancel
-            </button>
-            <button
-              className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
-              type="submit"
-            >
-              Reset
-            </button>
+          <div className="flex justify-center">
+            <div className="flex justify-around w-4/5">
+              <button
+                className="bg-[#ff5449] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#9b211b] transition duration-300"
+                type="button"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-[#4b7d8d] text-white text-xs w-[110px] py-2 rounded-md hover:bg-[#254752] transition duration-300"
+                type="submit"
+              >
+                Reset
+              </button>
+            </div>
           </div>
         </div>
       </form>
