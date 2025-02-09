@@ -49,7 +49,23 @@ exports.getConsumptions = async (req, res) => {
         .json({ error: "No projects associated with this user." });
     }
 
-    // Fetch energy consumption data for the user's project IDs
+    // Fetch address from the "project" table using the project IDs
+    const { data: projectsData, error: projectsError } = await supabase
+      .from("project")
+      .select("proj_id, address")
+      .in("proj_id", userProjIds);
+
+    if (projectsError) {
+      console.error("Projects Error:", projectsError);
+      return res.status(500).json({ error: "Failed to fetch project data." });
+    }
+
+    const projectAddressMap = {};
+    projectsData.forEach((project) => {
+      projectAddressMap[project.proj_id] = project.address;
+    });
+
+    // 4. Fetch energy consumption data for the user's project IDs
     const { data: energyConsumptionData, error: energyConsumptionError } =
       await supabase
         .from("energy_consumption")
@@ -86,8 +102,12 @@ exports.getConsumptions = async (req, res) => {
         variation = parseFloat(variation.toFixed(2)); // Ensure variation is a float with 2 decimals
       }
 
+      // Attach the address using the map
+      const address = projectAddressMap[item.proj_id] || null;
+
       return {
         ...item,
+        address,
         currentMonthConsumption,
         currentMonthTemperature,
         variation,
