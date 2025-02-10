@@ -832,16 +832,43 @@ exports.deleteOrgUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 }),
-
+  /**
+   * Handles sending an invitation email to a user for joining Smartess projects.
+   *
+   * This function extracts the recipient's email, role, sender's name, and selected projects
+   * from the request body, formats an HTML email, and sends the invitation using Resend.
+   *
+   * @param {Object} req - The HTTP request object containing:
+   *   @property {string} req.body.email - The recipient's email address.
+   *   @property {string} req.body.role - The role assigned to the user.
+   *   @property {string} req.body.sender_name - The name of the sender inviting the user.
+   *   @property {Object} req.body - Contains project information under dynamic keys (e.g., "projects[0]", "projects[1]").
+   *
+   * @param {Object} res - The HTTP response object used to return success or error messages.
+   *
+   * @returns {Response} - A JSON response:
+   *   - `{ message: "Email sent successfully." }` on success (HTTP 200).
+   *   - `{ message: "Failed to send email.", error: error.message }` on failure (HTTP 500).
+   *
+   * @throws {Error} If an error occurs while sending the email, it logs the error and returns a 500 response.
+   */
   (exports.sendInvite = async (req, res) => {
     try {
       const { email, role, sender_name } = req.body;
-
-      const projects = Object.keys(req.body)
-        .filter((key) => key.startsWith("projects[")) 
-        .map((key) => req.body[key]);
-
+      let projects = [];
+      projects = [req.body.projects];
       const subject = `Smartess Organization Invite:`;
+
+      console.log(
+        "RECEIVED FROM THE REQUEST BODY : \nemail : " +
+          email +
+          " \nrole: " +
+          role +
+          " \nsender name: " +
+          sender_name +
+          " \nProjects: "+
+          projects
+      );
 
       // Simple HTML template for the email
       const htmlContent = `
@@ -955,7 +982,13 @@ exports.deleteOrgUser = async (req, res) => {
       });
 
       // Send a success response
-      return res.status(200).json({ message: "Email sent successfully." });
+      return res
+        .status(200)
+        .json({
+          message:
+            "Email sent successfully to " + email,
+        });
+
     } catch (error) {
       console.error("Failed to send email:", error);
       return res
