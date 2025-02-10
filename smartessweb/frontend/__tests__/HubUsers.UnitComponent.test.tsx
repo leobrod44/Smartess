@@ -13,7 +13,7 @@ describe("HubUsers Component", () => {
   
   it("renders the hub users title correctly", () => {
     render(<HubUsers hubUsers={usersMock} />);
-    expect(screen.getByText("Hub users")).toBeInTheDocument();
+    expect(screen.getByText("Hub Users")).toBeInTheDocument();
   });
 
   it("displays the first three users with formatted names", () => {

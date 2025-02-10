@@ -11,7 +11,7 @@ describe("HubOwner Component", () => {
 
   it("renders the hub owner title correctly", () => {
     render(<HubOwner owner={ownerMock} />);
-    expect(screen.getByText("Hub owner")).toBeInTheDocument();
+    expect(screen.getByText("Hub Owner")).toBeInTheDocument();
   });
 
   it("renders the owner's formatted name and email when owner exists", () => {
