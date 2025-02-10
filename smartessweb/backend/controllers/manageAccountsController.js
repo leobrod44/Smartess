@@ -856,7 +856,20 @@ exports.deleteOrgUser = async (req, res) => {
     try {
       const { email, role, sender_name } = req.body;
       let projects = [];
-      projects = [req.body.projects];
+    
+    if (req.body.projects) {
+      if (typeof req.body.projects === 'string') {
+        projects = req.body.projects.split(',').map(project => project.trim());
+      } else {
+        projects = req.body.projects;
+      }
+    } else {
+      projects = Object.keys(req.body)
+        .filter((key) => key.startsWith("projects["))
+        .map((key) => req.body[key]);
+    }
+
+    console.log("Projects received:", projects);
       const subject = `Smartess Organization Invite:`;
 
       console.log(
@@ -972,6 +985,8 @@ exports.deleteOrgUser = async (req, res) => {
               </body>
               </html>
             `;
+
+            console.log(htmlContent);
 
       // Send the email to the  address provided
       await resend.emails.send({
