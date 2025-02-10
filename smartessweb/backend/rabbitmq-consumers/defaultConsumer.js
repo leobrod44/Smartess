@@ -88,29 +88,9 @@ class RabbitMQService {
       case 'alerts':
         //Publish to supabase
         const log = JSON.parse(msg.content.toString());
-        const { data, error } = await supabase
-          .from('alerts')
-          .insert([
-            { 
-              type: 'default', 
-              active: 'FALSE', 
-              created_at: log.time_fired.toString(), 
-              device_id: log.device.toString(), 
-              message: log.message.toString(), 
-              description: log.state.toString(), 
-              hub_ip: log.hub_ip.toString(),
-              hub_id: "1"
-            }
-          ]);
 
-        if (error) {
-          console.error('Error inserting alert into supabase:', error);
-        } else {
-          console.log('Alert inserted successfully in supabase:', data);
-        }
-
-        //notify frontend? seems like frontend already polling supabase on load see hubController.js line 62
-        //should notify frontend on alert, not only on reload
+        //will consume alerts in the page directly, logging to supabase now done from the server on alert handling
+        //leaving js code here for later frontend use
         break;
       case "videostream":
       const videoSegment = msg.content;

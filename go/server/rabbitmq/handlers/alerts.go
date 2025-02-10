@@ -4,7 +4,9 @@ import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	"Smartess/go/common/structures"
 	"encoding/json"
+	"os"
 
+	"github.com/nedpals/supabase-go"
 	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
@@ -13,10 +15,15 @@ import (
 type AlertHandler struct {
 	MongoClient *mongo.Client
 	r           *common_rabbitmq.RabbitMQInstance
+	supabase    *supabase.Client
 }
 
 func NewAlertHandler(mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance) *AlertHandler {
-	return &AlertHandler{MongoClient: mongoClient, r: instance}
+	supabaseUrl := os.Getenv("SUPABASE_URL")
+	supabaseKey := os.Getenv("SUPABASE_ANON_KEY")
+	supabaseClient := supabase.CreateClient(supabaseUrl, supabaseKey)
+
+	return &AlertHandler{MongoClient: mongoClient, r: instance, supabase: supabaseClient}
 }
 
 func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
@@ -75,6 +82,28 @@ func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 			zap.String("msg", string(msg.Body)),
 		)
 	}
+
+	// Insert alert into Supabase
+	go func() {
+		data := map[string]interface{}{
+			"type":        alert.Type,
+			"active":      false,
+			"created_at":  alert.TimeStamp,
+			"device_id":   alert.DeviceID,
+			"message":     alert.Message,
+			"description": alert.State,
+			"hub_ip":      alert.HubIP,
+			"hub_id":      "1",
+		}
+
+		var result interface{}
+		err := h.supabase.DB.From("alerts").Insert(data).Execute(&result)
+		if err != nil {
+			logger.Error("Error inserting alert into Supabase", zap.Error(err))
+		} else {
+			logger.Info("Alert inserted into Supabase successfully")
+		}
+	}()
 
 	// collection := h.MongoClient.Database("TestDB1").Collection(alert.HubIP) // database = building, collection = unit | where is building info???
 	// _, err = collection.InsertOne(context.TODO(), bson.D{
