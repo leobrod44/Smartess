@@ -67,6 +67,25 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
     return emailRegex.test(email);
   };
 
+  /**
+ * Handles sending an invitation to a user via email.
+ * 
+ * This function validates the provided email and ensures at least one project is selected 
+ * before sending an invitation request to the API. It retrieves the authentication token 
+ * from local storage and constructs a FormData object with the required details, 
+ * including the email, role, sender's name, and selected projects. If the request is 
+ * successful, the form resets, and a success message is displayed.
+ * 
+ * @param {React.FormEvent} e - The form submission event.
+ * 
+ * @returns {Promise<void>} - A promise that resolves when the function completes execution.
+ * 
+ * @throws Displays error messages if:
+ * - Email is missing or invalid.
+ * - No project is selected.
+ * - The authentication token is missing.
+ * - The API request fails.
+ */
   const handleSendInvitation = async (e: React.FormEvent) => {
     e.preventDefault();
 

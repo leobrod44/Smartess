@@ -208,10 +208,31 @@ export const manageAccountsApi = {
     return data;
   },
 
+  /** 
+  * Sends an invitation email to a user by making a POST request to the API.
+  * 
+  * This function sends a request to the `/manage-accounts/invite-user-email` endpoint 
+  * with the provided authentication token and form data containing the invitation details.
+  * 
+  * @param {string} token - The authentication token used for authorization.
+  * @param {FormData} formData - The form data containing the email, role, sender's name, 
+  * and selected projects.
+  * 
+  * @returns {Promise<ManageAccEmailResponse>} - A promise that resolves with the API response.
+  * 
+  * @throws {Error} If the request fails, an error is thrown containing the API error message 
+  * or a default error message ("Failed to send invite email").
+  */
   sendInvite: async (
     token: string,
     formData: FormData
   ): Promise<ManageAccEmailResponse> => {
+    console.log("Entering sendinvite in the page.ts manage accounts API ");
+    const formDataObj: Record<string, any> = {};
+    formData.forEach((value, key) => {
+      formDataObj[key] = value;
+    });
+
     const response = await fetch(
       `${API_URL}/manage-accounts/invite-user-email`,
       {
@@ -223,9 +244,10 @@ export const manageAccountsApi = {
       }
     );
     const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to send invite email");
+    if (!response.ok) { 
+      throw new Error(data.error || "Failed to send invite email in page.ts");
     }
+    console.log("Response Data:", data); //email sent succesffully
     return data;
   }
 };
