@@ -227,7 +227,6 @@ export const manageAccountsApi = {
     token: string,
     formData: FormData
   ): Promise<ManageAccEmailResponse> => {
-    console.log("Entering sendinvite in the page.ts manage accounts API ");
     const formDataObj: Record<string, any> = {};
     formData.forEach((value, key) => {
       formDataObj[key] = value;
