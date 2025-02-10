@@ -227,9 +227,9 @@ export const manageAccountsApi = {
     token: string,
     formData: FormData
   ): Promise<ManageAccEmailResponse> => {
-    const formDataObj: Record<string, any> = {};
+    const formDataObj: Record<string, string> = {};
     formData.forEach((value, key) => {
-      formDataObj[key] = value;
+      formDataObj[key] = value as string;
     });
 
     const response = await fetch(
@@ -243,10 +243,10 @@ export const manageAccountsApi = {
       }
     );
     const data = await response.json();
-    if (!response.ok) { 
+    if (!response.ok) {
       throw new Error(data.error || "Failed to send invite email in page.ts");
     }
-    console.log("Response Data:", data); //email sent succesffully
+    console.log("Response Data:", data);
     return data;
   }
 };

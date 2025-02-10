@@ -856,32 +856,20 @@ exports.deleteOrgUser = async (req, res) => {
     try {
       const { email, role, sender_name } = req.body;
       let projects = [];
-    
-    if (req.body.projects) {
-      if (typeof req.body.projects === 'string') {
-        projects = req.body.projects.split(',').map(project => project.trim());
+
+      if (req.body.projects) {
+        if (typeof req.body.projects === "string") {
+          projects = req.body.projects
+            .split(",")
+            .map((project) => project.trim());
+        } else {
+          projects = req.body.projects;
+        }
       } else {
-        projects = req.body.projects;
+        projects = Object.keys(req.body)
+          .filter((key) => key.startsWith("projects["))
+          .map((key) => req.body[key]);
       }
-    } else {
-      projects = Object.keys(req.body)
-        .filter((key) => key.startsWith("projects["))
-        .map((key) => req.body[key]);
-    }
-
-    console.log("Projects received:", projects);
-      const subject = `Smartess Organization Invite:`;
-
-      console.log(
-        "RECEIVED FROM THE REQUEST BODY : \nemail : " +
-          email +
-          " \nrole: " +
-          role +
-          " \nsender name: " +
-          sender_name +
-          " \nProjects: "+
-          projects
-      );
 
       // Simple HTML template for the email
       const htmlContent = `
@@ -986,7 +974,7 @@ exports.deleteOrgUser = async (req, res) => {
               </html>
             `;
 
-            console.log(htmlContent);
+      console.log(htmlContent);
 
       // Send the email to the  address provided
       await resend.emails.send({
@@ -997,13 +985,9 @@ exports.deleteOrgUser = async (req, res) => {
       });
 
       // Send a success response
-      return res
-        .status(200)
-        .json({
-          message:
-            "Email sent successfully to " + email,
-        });
-
+      return res.status(200).json({
+        message: "Email sent successfully to " + email,
+      });
     } catch (error) {
       console.error("Failed to send email:", error);
       return res
