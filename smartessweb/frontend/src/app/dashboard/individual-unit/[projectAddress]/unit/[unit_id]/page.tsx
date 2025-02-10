@@ -92,7 +92,7 @@ export default function UnitPage({
       <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
         {/* Back Arrow Button */}
         <div className="flex items center justify-between mb-4">
-          <h1 className="text-[#325a67] text-[30px] leading-10 tracking-tight">
+          <h1 className="text-[#4B7D8D] text-[35px] font-sequel-sans-black leading-10 tracking-tight">
             {address}
           </h1>
           <BackArrowButton />
