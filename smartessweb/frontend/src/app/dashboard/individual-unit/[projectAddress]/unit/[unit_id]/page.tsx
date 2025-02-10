@@ -97,7 +97,7 @@ export default function UnitPage({
           </h1>
           <BackArrowButton />
         </div>
-        <h1 className="text-[#325a67] text-[25px] leading-10 tracking-tight">
+        <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
           Unit {unit.unitNumber}
         </h1>
 
