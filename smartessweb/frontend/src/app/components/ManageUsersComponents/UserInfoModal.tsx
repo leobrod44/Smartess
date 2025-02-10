@@ -149,8 +149,7 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-  console.log("selectedProjectIds", selectedProjectIds);
-  console.log("projectIdsToDelete", projectIdsToDelete);
+  
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
