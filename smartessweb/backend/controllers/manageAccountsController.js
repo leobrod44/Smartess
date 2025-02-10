@@ -871,6 +871,8 @@ exports.deleteOrgUser = async (req, res) => {
           .map((key) => req.body[key]);
       }
 
+      const subject = `Smartess Organization Invite:`;
+
       // Simple HTML template for the email
       const htmlContent = `
               <!DOCTYPE html>
