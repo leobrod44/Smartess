@@ -34,7 +34,7 @@ export default function Home() {
               className="absolute inset-0 bg-[#489ba7] z-10 h-full"
               style={{ top: "85px" }}
             ></div>
-            <div className="relative z-20 text-white max-w-lg pt-20 mt-10 ">
+            <div className="relative z-[50] text-white max-w-lg pt-20 mr-10 mt-10 ">
               <h1 className="text-2xl md:text-3xl font-bold pb-8">
                 Why Smartess?
               </h1>
@@ -51,7 +51,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="hidden md:hidden lg:flex justify-end pt-20 lg:pt-2 lg:pb-[110px] z-30 w-full absolute right-0">
+            <div className="hidden md:hidden lg:flex justify-end pt-20 lg:pt-2 lg:pb-[110px] z-30 w-full absolute right-0 ">
               <Image
                 src={building}
                 alt="Building"
