@@ -114,6 +114,7 @@ const RegistrationPage = () => {
               </label>
               <input
                 type="tel"
+                name="tel"
                 placeholder="Phone number"
                 className="w-full rounded-lg text-[#266472] text-l font-sequel-sans-regular focus:outline-none"
                 value={phone}
