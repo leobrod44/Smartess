@@ -34,6 +34,22 @@ export default function Home() {
               className="absolute inset-0 bg-[#489ba7] z-10 h-full"
               style={{ top: "85px" }}
             ></div>
+            <div className="relative z-20 text-white max-w-lg pt-20 mt-10 ">
+              <h1 className="text-2xl md:text-3xl font-bold pb-8">
+                Why Smartess?
+              </h1>
+              <h2 className="text-2xl md:text-2xl font-bold">
+                Smartess simplifies smart living by offering an all-in-one
+                solution that’s affordable, scalable, and easy to manage.
+              </h2>
+              <p className="mt-8 text-base md:text-lg">
+                Organizations and property owners benefit from a centralized
+                system to monitor and manage all their units and projects in one
+                place. No more juggling multiple providers or dealing with
+                devices that don’t work well together—everything just works
+                seamlessly.
+              </p>
+            </div>
 
             <div className="hidden md:hidden lg:flex justify-end pt-20 lg:pt-2 lg:pb-[110px] z-30 w-full absolute right-0">
               <Image
