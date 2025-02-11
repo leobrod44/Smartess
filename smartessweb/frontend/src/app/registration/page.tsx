@@ -3,7 +3,7 @@ import Image from "next/image";
 import building_straight from "../../public/images/building_straight.png";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Toast, { showToastError,showToastSuccess } from "../components/Toast";
+import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import LandingNavbar from "@/app/components/LandingNavbar";
 
