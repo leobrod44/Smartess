@@ -1,31 +1,38 @@
+"use client";
 import Image from "next/image";
 import desktop from "../public/images/desktop.png";
 import hub from "../public/images/hub.png";
 import building from "../public/images/building.png";
-import Link from "next/link";
 import Head from "next/head";
 import LandingNavbar from "@/app/components/LandingNavbar";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const handleStartProject = () => {
+    router.push("/start-project");
+  };
   return (
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
       <LandingNavbar />
-      <main className="flex-col items-left justify-left space-y-16 pt-10">
-        <section className="text-center p-4 md:p-8">
+      <main className="flex-col items-left justify-left space-y-16 pt-10  ">
+        <section className="text-center p-4 md:p-8 relative z-[50]">
           <h1 className="text-3xl md:text-4xl font-bold">
             The Future of Smart Living is Here
           </h1>
+
           <p className="mt-4 text-base md:text-lg">
             First all-in-one smart home platform for residential communities
           </p>
-          <Link href="/start-project">
-            <button className="mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300">
-              Start Your Project
-            </button>
-          </Link>
+          <button
+            onClick={handleStartProject}
+            className="  mt-6 px-6 py-3 bg-[#266472] text-white rounded-full hover:bg-[#1f505e] transition duration-300"
+          >
+            Start Your Project
+          </button>
         </section>
 
         <div className="relative w-full">
