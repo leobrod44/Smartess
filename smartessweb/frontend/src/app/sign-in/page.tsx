@@ -122,93 +122,88 @@ const SignInPage = () => {
       <Toast />
       <div className="flex flex-1">
         {/* Left side content */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-5">
-          <div className="w-full max-w-lg h-auto mb-10 text-center md:text-left">
-            <span className="font-sequel-sans-black text-[#30525e] text-[32px]">
+        <div className="flex flex-col items-center pt-[5%] w-full md:w-1/2 ">
+          <div className="flex flex-col items-center text-center">
+            <span className=" font-sequel-sans-black text-[#30525e] text-[32px]">
               Smart Living at Scale
               <br />
             </span>
-            <span className="font-sequel-sans-light text-[#30525e] text-[24px]">
+            <span className=" px-2 font-sequel-sans-light text-[#30525e] text-[24px] mb-5">
               Welcome back to your Smartess account
             </span>
+            <h3 className="text-sm text-[#52525C]  font-sequel-sans-regular mb-12">
+              Please fill in all required fields (*)
+            </h3>
           </div>
 
-          {/* Email field */}
-          <div className="h-[102px] w-full max-w-lg pr-0.5 pt- pb-5 flex-col justify-center items-center gap-2.5 flex">
-            <div className="self-stretch px-2.5 justify-start items-center gap-2.5 inline-flex">
-              <div className="text-[#266472] text-[20px] font-sequel-sans-regular">
-                Email
-              </div>
-            </div>
-            <div className="self-stretch">
+          <div className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3">
+            <div className="w-full max-w-lg flex-col  gap-1.5 flex">
+              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+                Email Address *
+              </label>
               <input
                 type="email"
-                placeholder="Your email"
-                className="w-full text-[#266472] text-xl font-sequel-sans-regular self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] items-center gap-2.5 inline-flex focus:outline-none"
+                placeholder="example@email.com"
+                className="w-full  self-stretch text-[#266472] text-l font-sequel-sans-regular  rounded-lg focus:outline-none"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={handleKeyDown}
               />
             </div>
-          </div>
 
-          {/* Password field */}
-          <div className="h-[102px] w-full max-w-lg pr-0.5 pt-10 flex-col justify-center items-center gap-2.5 flex">
-            <div className="self-stretch px-2.5 justify-start items-center gap-2.5 inline-flex">
-              <div className="text-[#266472] text-[20px] font-sequel-sans-regular">
-                Password
+            <div className=" w-full  flex-col gap-1.5 flex">
+              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+                Password *
+              </label>
+              <div className="relative w-full">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  className="w-full rounded-lg text-[#266472] text-l font-sequel-sans-regular focus:outline-none"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-6 w-6" />
+                  ) : (
+                    <EyeIcon className="h-6 w-6" />
+                  )}
+                </button>
               </div>
             </div>
-            <div className="relative self-stretch">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Your Password"
-                className="w-full self-stretch px-5 py-3 bg-[#898888]/20 rounded-[20px] text-[#266472] text-xl font-sequel-sans-regular focus:outline-none"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)} // Toggle visibility
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+
+            {/* Forgot password link */}
+            <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-5 w-full">
+              <a
+                className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
+                onClick={handleOpenModal}
               >
-                {showPassword ? (
-                  <EyeSlashIcon className="h-6 w-6" />
-                ) : (
-                  <EyeIcon className="h-6 w-6" />
-                )}
+                Forgot your password?
+              </a>
+              {/* Forgot Password Modal Component */}
+              <ForgotPasswordModal
+                isOpen={isForgotPasswordOpen}
+                onClose={handleCloseModal}
+                onReset={handlePassworReset}
+              />
+            </div>
+
+            <div className=" w-full max-w-lg py-5 flex flex-col justify-center items-center  gap-1.5">
+              <button
+                className="w-full px-[149px] py-[13px] bg-[#266472] rounded-xl shadow justify-center items-center  gap-1.5 inline-flex hover:bg-[#1f505e] transition duration-300 text-center text-white text-lg font-sequel-sans-regular"
+                onClick={handleLogin}
+              >
+                Login
               </button>
             </div>
           </div>
-
-          {/* Forgot password link */}
-          <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-10 w-full">
-            <a
-              className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
-              onClick={handleOpenModal}
-            >
-              Forgot your password?
-            </a>
-            {/* Forgot Password Modal Component */}
-            <ForgotPasswordModal
-              isOpen={isForgotPasswordOpen}
-              onClose={handleCloseModal}
-              onReset={handlePassworReset}
-            />
-          </div>
-
-          {/* Login button */}
-          <div className="h-[102px] w-full max-w-lg py-5 flex flex-col justify-center items-center gap-2.5">
-            <button
-              className="self-stretch px-[149px] py-[13px] bg-[#266472] rounded-[20px] shadow justify-center items-center gap-2.5 inline-flex hover:bg-[#1f505e] transition duration-300 text-center text-white text-lg font-sequel-sans-regular"
-              onClick={handleLogin}
-            >
-              Login
-            </button>
-          </div>
         </div>
-
         {/* Right side with image */}
         <div className="hidden md:block md:w-1/2">
           <Image
