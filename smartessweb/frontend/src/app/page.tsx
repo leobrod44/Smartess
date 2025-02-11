@@ -29,7 +29,7 @@ export default function Home() {
         </section>
 
         <div className="relative w-full">
-          <section className="relative w-full h-[300px] flex flex-col md:flex-row justify-between items-center px-4 md:px-8 mt-16">
+          <section className="relative w-full h-[500px] flex flex-col md:flex-row justify-between items-center px-4 md:px-8 mt-16">
             <div
               className="absolute inset-0 bg-[#489ba7] z-10 h-full"
               style={{ top: "85px" }}
@@ -60,20 +60,19 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="hidden lg:flex justify-end pt-20 lg:pt-20 z-30 w-full absolute right-0">
+            <div className="hidden md:hidden  lg:flex justify-end pt-20 lg:pt-2 lg:pb-[110px] z-30 w-full absolute right-0">
               <Image
                 src={building}
                 alt="Building"
                 layout="intrinsic"
-                width={400}
-                height={400}
+                width={800}
               />
             </div>
           </section>
         </div>
 
         <section
-          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10 pb-10"
+          className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-1 items-center w-full px-2 md:px-10 pb-10 pt-10"
           style={{ marginTop: "150px", marginBottom: "50px" }}
         >
           {/* Text section: On the left for larger screens, stacked on smaller screens */}
@@ -90,7 +89,7 @@ export default function Home() {
           </div>
 
           {/* Laptop mockup  */}
-          <div className="flex justify-center md:justify-end order-1 md:order-2">
+          <div className="flex justify-center md:justify-end order-1 md:order-2 ">
             <div className="relative w-[300px] h-[200px] md:w-[280px] md:h-[180px] bg-[#E2E8F0] rounded-[10px] p-3  flex justify-center items-center z-20 order-1 md:order-2">
               <Image
                 src={desktop}
