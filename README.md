@@ -1,9 +1,33 @@
 # Smartess
+## Release 2 Demo
+https://drive.google.com/file/d/1MvIh3tUW6fsqQBHBUWBLqvQHEsESYOVF/view?usp=sharing
+## Smartess Deployed Website
+https://smartess.vercel.app/
+## Release 2 full powerpoint slides
+https://docs.google.com/presentation/d/12y3bnTnzrGjZ1UozoUyumIzgscmhRSeP49k8k3wQjeM/edit?usp=sharing
+## Important files (Release 2)
+### Top 5 files
+  
+| File path with clickable link | Purpose (1 line description) |
+|------|------------|
+|[go/hub/rtsp/rtsp.go](go/hub/rtsp/rtsp.go)|Hub video stream interception and publishing|
+|[go/hub/events/events.go](go/hub/events/events.go)|Event/alert handling for all home assistant events from hubs|
+|[smartessweb/frontend/src/app/dashboard/page.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/src/app/dashboard/page.tsx)|Dashboard page, main entry for multiple components. |
+|[smartessweb/backend/controllers/manageAccountsController.js](smartessweb/backend/controllers/manageAccountsController.js)|Contains most logic related to user accounts management |
+|[smartessweb/frontend/src/app/dashboard/manage-accounts/page.tsx](smartessweb/frontend/src/app/dashboard/manage-accounts/page.tsx)|Role-based UI controls for managing organization users. |
+### Top 5 Tests
+| File path with clickable link | Purpose (1 line description) |
+|------|------------|
+|[go/tests/rtsp_test.go](go/tests/rtsp_test.go)|Integration test for hub rtsp stream interception and publish to RabbitMQ|
+|[smartessweb/backend/tests/controllers/authController.test.js](smartessweb/backend/tests/controllers/authController.test.js)|Tests behavior of web authorization system|
+|[smartessweb/backend/tests/controllers/projectController.test.js](smartessweb/backend/tests/controllers/projectController.test.js)|Tests behavior of projects data retrieval for web|
+|[smartessweb/backend/tests/controllers/ticketsController.test.js](smartessweb/backend/tests/controllers/ticketsController.test.js)|Tests controllers to retrieve tickets related functionalities.|
+|[smartessweb/frontend/__tests__/ProjectComponent.test.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/__tests__/ProjectComponent.test.tsx)|Test the frontend Project component’s behavior|
 
 ## Release 1 Demo
 https://drive.google.com/file/d/1VhbKIfahZcb6RqXoC6UfZoBpeX1w_sCs/view?usp=sharing
 
-## Important files
+## Important files (Release 1)
 ### Top 5 files
   
 | File path with clickable link | Purpose (1 line description) |

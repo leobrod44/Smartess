@@ -15,7 +15,11 @@ interface ManageAccountsListProps {
   currentOrg: number | undefined;
   onUserDeleted?: (uid: number) => void;
 }
-
+const capitalizeWords = (str: string) =>
+  str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 const ManageAccountsList = ({
   uid,
   address: initialAddress,
@@ -24,7 +28,7 @@ const ManageAccountsList = ({
   currentUserRole,
   addresses, // Destructure addresses
   currentOrg,
-  onUserDeleted
+  onUserDeleted,
 }: ManageAccountsListProps) => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [displayAddress, setDisplayAddress] = useState(initialAddress); // Local state for address
@@ -38,14 +42,12 @@ const ManageAccountsList = ({
     setModalOpen(false);
   };
 
-  const deleteOrgUser = async (
-    uid: number
-  ) => {
+  const deleteOrgUser = async (uid: number) => {
     if (!token) {
       router.push("/sign-in");
       return;
     }
-  
+
     try {
       await manageAccountsApi.deleteOrgUser(uid, currentOrg, token);
       if (onUserDeleted) {
@@ -60,7 +62,7 @@ const ManageAccountsList = ({
     if (updatedAddresses.length > 1) {
       const formattedAddress = `${updatedAddresses[0]} (+${
         updatedAddresses.length - 1
-      } more)`; 
+      } more)`;
       setDisplayAddress(formattedAddress);
     } else {
       setDisplayAddress(updatedAddresses[0]);
@@ -88,18 +90,19 @@ const ManageAccountsList = ({
       >
         <div className="flex-1 pr-4">
           {displayAddress ? (
-            <p>{displayAddress}</p> ) : (
+            <p>{displayAddress}</p>
+          ) : (
             <p className="text-red-500 font-semibold">NO PROJECTS</p>
-            )}
+          )}
         </div>
         <div className="flex-1 pr-4">
-          <p>{userName}</p>
+          <p>{capitalizeWords(userName)}</p>{" "}
         </div>
         <div className="flex-1 pr-4">
           <div
             className={`w-[78px] h-8 px-5 rounded-[20px] flex items-center justify-center ${getColorClasses()}`}
           >
-            <p className="text-sm font-medium">{permission}</p>
+            <p className="text-sm font-medium">{capitalizeWords(permission)}</p>
           </div>
         </div>
 
