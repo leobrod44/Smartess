@@ -136,38 +136,54 @@ const SignInPage = () => {
             </h3>
           </div>
 
-          <div className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3">
+          <form
+            role="form"
+            className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3"
+          >
             <div className="w-full max-w-lg flex-col  gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+              <label
+                htmlFor="email"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
                 Email Address *
               </label>
               <input
+                id="email"
                 type="email"
                 placeholder="example@email.com"
                 className="w-full  self-stretch text-[#266472] text-l font-sequel-sans-regular  rounded-lg focus:outline-none"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={handleKeyDown}
+                aria-required="true"
+                aria-label="Enter your email address"
               />
             </div>
 
             <div className=" w-full  flex-col gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+              <label
+                htmlFor="password"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
                 Password *
               </label>
               <div className="relative w-full">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   className="w-full rounded-lg text-[#266472] text-l font-sequel-sans-regular focus:outline-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-required="true"
+                  aria-label="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)} // Toggle visibility
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+                  aria-label={showPassword ? "Hide Password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-6 w-6" />
@@ -183,6 +199,7 @@ const SignInPage = () => {
               <a
                 className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
                 onClick={handleOpenModal}
+                aria-label="Forgot your password?"
               >
                 Forgot your password?
               </a>
@@ -198,11 +215,12 @@ const SignInPage = () => {
               <button
                 className="w-full px-[149px] py-[13px] bg-[#266472] rounded-xl shadow justify-center items-center  gap-1.5 inline-flex hover:bg-[#1f505e] transition duration-300 text-center text-white text-lg font-sequel-sans-regular"
                 onClick={handleLogin}
+                aria-label="Login"
               >
                 Login
               </button>
             </div>
-          </div>
+          </form>
         </div>
         {/* Right side with image */}
         <div className="hidden md:block md:w-1/2">
