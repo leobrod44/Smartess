@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTickets, deleteTicket, fetchIndividualTicket, getAssignableEmployees, getAssignedUsers, assignUsersToTicket, unassignUserFromTicket } = require('../controllers/ticketsController');
+const { getTickets, deleteTicket, fetchIndividualTicket, getAssignableEmployees, getAssignedUsers, assignUsersToTicket, unassignUserFromTicket, closeTicket } = require('../controllers/ticketsController');
 const { verifyToken } = require('../middleware/middleware');
 
 const router = express.Router();
@@ -11,5 +11,6 @@ router.get('/assignable-employees/:ticket_id', verifyToken, getAssignableEmploye
 router.get('/assigned-users/:ticket_id', verifyToken, getAssignedUsers);
 router.post('/assign-users', verifyToken, assignUsersToTicket);
 router.post('/unassign-user', verifyToken, unassignUserFromTicket);
+router.post('/close-ticket/:ticket_id', verifyToken, closeTicket);
 
 module.exports = router;
