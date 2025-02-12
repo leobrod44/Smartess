@@ -33,7 +33,7 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({ projects }) => {
     <div className="w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#3b5c6b]"
+        className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3b5c6b]"
       >
         {selectedProjectAddress || "ALL PROJECTS"}
         {isOpen ? (
@@ -58,7 +58,7 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({ projects }) => {
                 selectedProjectId === ""
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-700 hover:bg-gray-200 hover:text-gray-900",
-                "block w-full text-left px-4 py-2 text-sm"
+                "block w-full text-left px-4 py-2 text-sm font-normal"
               )}
             >
               ALL PROJECTS
@@ -73,7 +73,7 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({ projects }) => {
                   selectedProjectId === project.projectId
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-700 hover:bg-gray-200 hover:text-gray-900",
-                  "block w-full text-left px-4 py-2 text-sm"
+                  "block w-full text-left px-4 py-2 text-sm font-normal"
                 )}
               >
                 {project.address}

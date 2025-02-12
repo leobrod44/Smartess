@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { HubUser } from "../../mockData";
 import { useRouter } from "next/navigation";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import DeleteConfirmation from "../ManageUsersComponents/DeleteConfirmation";
 import { individualUnitApi } from "@/api/page";
 
@@ -37,12 +37,13 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
       }
 
       await individualUnitApi.removeUserFromHub(user?.tokenId, token);
-
     } catch (err) {
       console.error("Error removing user:", err);
-    } 
+    }
     if (user) {
-      setActiveHubUsers((prevUsers) => prevUsers.filter((hubUser) => hubUser.tokenId !== user.tokenId));
+      setActiveHubUsers((prevUsers) =>
+        prevUsers.filter((hubUser) => hubUser.tokenId !== user.tokenId)
+      );
     }
   };
 
@@ -51,7 +52,8 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
     setSelectedUser(null);
   };
 
-  const gridColsClass = currentUserRole === "basic" ? "md:grid-cols-4" : "md:grid-cols-5";
+  const gridColsClass =
+    currentUserRole === "basic" ? "md:grid-cols-4" : "md:grid-cols-5";
 
   return (
     <div className="relative">
@@ -61,12 +63,16 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
       </div>
 
       {/* Table Headers */}
-      <div className={`hidden md:grid ${gridColsClass} w-full text-center text-[#14323B] font-semibold text-sm mb-2`}>
+      <div
+        className={`hidden md:grid ${gridColsClass} w-full text-center text-[#14323B] font-semibold text-sm mb-2`}
+      >
         <div>User</div>
         <div>Telephone</div>
         <div>Email</div>
         <div>Contact</div>
-        {(currentUserRole === "master" || currentUserRole === "admin") ? (<div>Actions</div> ) : null}
+        {currentUserRole === "master" || currentUserRole === "admin" ? (
+          <div>Actions</div>
+        ) : null}
       </div>
       {/* Separator Line */}
       <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
@@ -84,8 +90,11 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
               <div className="text-[#14323B] font-semibold">
                 Telephone:
               </div>{" "}
-                {user.telephone
-                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(3, 6)}-${user.telephone.slice(6)}`
+              {user.telephone
+                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(
+                    3,
+                    6
+                  )}-${user.telephone.slice(6)}`
                 : "Not Provided"}
               <div className="text-[#14323B] font-semibold">Email:</div>{" "}
               {user.email}
@@ -94,19 +103,18 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
                   Contact
                 </button>
               </p>
-              {(currentUserRole === "master" || currentUserRole === "admin") ? (
+              {currentUserRole === "master" || currentUserRole === "admin" ? (
                 <div>
                   <div className="text-[#14323B] font-semibold">Actions:</div>
-                    <button>
-                      <DeleteIcon
-                        onClick={() => handleDeleteClick(user)}
-                        className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer"
-                      />
-                    </button>
+                  <button>
+                    <TrashIcon
+                      onClick={() => handleDeleteClick(user)}
+                      className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  "
+                    />
+                  </button>
                 </div>
               ) : null}
             </div>
-              
 
             {/* Table view for medium and larger screens */}
             <div className="hidden md:flex items-center justify-center">
@@ -114,7 +122,10 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
             </div>
             <div className="hidden md:flex items-center justify-center">
               {user.telephone
-                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(3, 6)}-${user.telephone.slice(6)}`
+                ? `${user.telephone.slice(0, 3)}-${user.telephone.slice(
+                    3,
+                    6
+                  )}-${user.telephone.slice(6)}`
                 : "Not Provided"}
             </div>
             <div
@@ -131,7 +142,7 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
             <div className="hidden md:flex items-center justify-center">
               {currentUserRole === "master" || currentUserRole === "admin" ? (
                 <button onClick={() => handleDeleteClick(user)}>
-                  <DeleteIcon className="text-[#e63946] hover:text-[#a22233] transition duration-300 cursor-pointer" />
+                  <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
                 </button>
               ) : null}
             </div>

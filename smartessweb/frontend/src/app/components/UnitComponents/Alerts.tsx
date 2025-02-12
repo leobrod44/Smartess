@@ -13,7 +13,7 @@ const Alerts = ({ alerts }: { alerts: Alert[] }) => {
   return (
     <div className="max-w-xs p-4 items-center gap-2.5">
       <div className="w-full relative pb-2.5">
-        <h3 className="text-center text-[#4b7d8d] text-l font-sequel-sans-black leading-tight tracking-tight">
+        <h3 className="text-center text-[#4b7d8d] text-l font-medium leading-tight tracking-tight">
           Alerts
         </h3>
         <div className="w-[75%] h-px absolute bg-[#4b7d8d] left-1/2 transform -translate-x-1/2" />

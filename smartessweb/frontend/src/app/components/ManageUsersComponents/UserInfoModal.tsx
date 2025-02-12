@@ -9,6 +9,7 @@ import ProjectAddressMenu from "./ProjectAddressMenu";
 import { Project } from "../../mockData";
 import { manageAccountsApi } from "@/api/page";
 import router from "next/router";
+import { showToastError, showToastSuccess } from "../Toast";
 
 interface UserInfoModalProps {
   uid: number;
@@ -68,6 +69,12 @@ function UserInfoModal({
     fetchOrgProjectsData();
   }, [addresses, currentOrg]);
 
+  const capitalizeWords = (str: string) =>
+    str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
   const handleModalClose = () => {
     setRole(initialRole);
     setAddresses(initialAddresses);
@@ -104,11 +111,17 @@ function UserInfoModal({
     setIsUserDeletion(true); // Set to true for user deletion
     setDeletePopupOpen(true);
   };
-
-  const handleConfirmDelete = () => {
-    if (isUserDeletion) {
-      onDeleteUser(uid); // Handle user deletion
-      onClose();
+  const handleConfirmDelete = async () => {
+    try {
+      if (isUserDeletion) {
+        await onDeleteUser(uid); // Handle user deletion logic
+        showToastSuccess(
+          ` ${capitalizeWords(userName)} has been successfully deleted.`
+        );
+        onClose(); // Close the modal after deletion
+      }
+    } catch {
+      showToastError("Failed to delete the user. Please try again.");
     }
   };
 
@@ -136,8 +149,7 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-  console.log("selectedProjectIds", selectedProjectIds);
-  console.log("projectIdsToDelete", projectIdsToDelete);
+  
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -262,7 +274,7 @@ function UserInfoModal({
               id="user-details-modal"
               className="text-[#254752] text-s font-sequel-sans-black mb-4"
             >
-              {userName}
+              {capitalizeWords(userName)}
             </Typography>
 
             <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
@@ -281,7 +293,7 @@ function UserInfoModal({
                 ) : (
                   <div className="flex justify-center items-center">
                     <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
-                      {role}
+                      {capitalizeWords(role)}
                     </span>
                   </div>
                 )}

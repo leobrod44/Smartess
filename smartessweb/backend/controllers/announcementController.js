@@ -144,6 +144,13 @@ exports.getAnnouncements = async (req, res) => {
         ? `${ann.user.first_name ?? ""} ${ann.user.last_name ?? ""}`.trim()
         : null;
 
+      let newCreatedAt = null;
+      if (ann.created_at) {
+        const date = new Date(ann.created_at);
+        date.setDate(date.getDate() + 1); // Add one day
+        newCreatedAt = date.toISOString().split("T")[0];
+      }
+
       return {
         announcement_id: ann.announcement_id,
         announcement_type: ann.announcement_type,
@@ -158,7 +165,7 @@ exports.getAnnouncements = async (req, res) => {
         file_urls: ann.file_urls || [],
         like_count: ann.like_count || 0,
         // Format created_at to YYYY-MM-DD or keep the original timestamp if desired
-        created_at: ann.created_at ? ann.created_at.split("T")[0] : null,
+        created_at: newCreatedAt,
       };
     });
 

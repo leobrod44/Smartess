@@ -30,6 +30,7 @@ interface AnnouncementItem {
   id: number;
   title: string;
   tag: "Organization" | "Project";
+  user_id: number;
   author: string;
   description: string;
   date: Date;
@@ -53,8 +54,13 @@ const AnnouncementPage = () => {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
-  const filterOptions = ["Most Likes", "Project Level", "Organization Level"];
-
+  const filterOptions = [
+    "Most Likes",
+    "Project Level",
+    "Organization Level",
+    "Posted by Me",
+    "Refresh Filters",
+  ];
   const handleAnnouncementAdded = async () => {
     try {
       const response = await announcementApi.getAnnouncements(userId);
@@ -68,6 +74,7 @@ const AnnouncementPage = () => {
               : "Project",
           author: ann.name ?? "",
           description: ann.content,
+          user_id: ann.user_id,
           date: new Date(ann.created_at),
           keyword: ann.keywords?.join(", ") || "",
           likes: ann.like_count || 0,
@@ -79,8 +86,12 @@ const AnnouncementPage = () => {
           proj_id: ann.proj_id || null,
         }));
 
-      setAnnouncements(fetchedAnnouncements);
-      setFilteredAnnouncements(fetchedAnnouncements);
+      const sortedAnnouncements = fetchedAnnouncements.sort(
+        (a, b) => b.date.getTime() - a.date.getTime()
+      );
+
+      setAnnouncements(sortedAnnouncements);
+      setFilteredAnnouncements(sortedAnnouncements);
     } catch (error) {
       console.error("Error re-fetching announcements after adding:", error);
     }
@@ -109,6 +120,7 @@ const AnnouncementPage = () => {
             author: ann.name ?? "",
             description: ann.content,
             date: new Date(ann.created_at),
+            user_id: ann.user_id,
             keyword: ann.keywords?.join(", ") || "",
             likes: ann.like_count || 0,
             files:
@@ -119,12 +131,16 @@ const AnnouncementPage = () => {
             proj_id: ann.proj_id,
           }));
 
+        const sortedAnnouncements = fetchedAnnouncements.sort(
+          (a, b) => b.date.getTime() - a.date.getTime()
+        );
+
         const projectFiltered = selectedProjectId
-          ? fetchedAnnouncements.filter(
+          ? sortedAnnouncements.filter(
               (announcement) =>
                 announcement.proj_id === Number(selectedProjectId)
             )
-          : fetchedAnnouncements;
+          : sortedAnnouncements;
 
         setAnnouncements(projectFiltered);
         setFilteredAnnouncements(projectFiltered);
@@ -188,6 +204,17 @@ const AnnouncementPage = () => {
           (a) => a.tag === "Organization"
         );
         break;
+      case "Posted by Me":
+        const myAnnouncements = announcements.filter(
+          (announcement) => announcement.user_id === Number(userId)
+        );
+        sortedAnnouncements = myAnnouncements;
+        break;
+
+      case "Refresh Filters":
+        sortedAnnouncements = announcements;
+        break;
+
       default:
         break;
     }
@@ -228,8 +255,7 @@ const AnnouncementPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
-
-        <div className="flex flex-col gap-4 mt-10">
+        <div className="flex flex-col gap-4">
           {currentAnnouncements.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">

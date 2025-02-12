@@ -15,7 +15,7 @@ const BackArrowButton = () => {
       style={{ cursor: "pointer" }}
     >
       <ArrowBack className="text-[#ffffff] w-[25px] h-[25px]" />
-      back to previous page
+      Back
     </div>
   );
 };

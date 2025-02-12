@@ -1,12 +1,12 @@
 "use client";
 
-import { useProjectContext } from "@/context/ProjectProvider";
 import { useEffect, useMemo, useState } from "react";
 import TicketList from "@/app/components/TicketComponents/TicketList";
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
 import { useUserContext } from "@/context/UserProvider";
+import { useProjectContext } from "@/context/ProjectProvider";
 import { ticketsListApi, APITicketList } from "@/api/dashboard/ticket/page";
 
 interface Ticket {
@@ -38,8 +38,6 @@ const transformType = (type: string): "Alert" | "Repair" | "Other" => {
       return "Alert";
     case "repair":
       return "Repair";
-    case "other":
-      return "Other";
     default:
       return "Other";
   }
@@ -76,13 +74,17 @@ const transformTicket = (apiTicketList: APITicketList): Ticket => ({
 const TicketPage = () => {
   const { userType } = useUserContext();
   const { selectedProjectId } = useProjectContext();
-  const [query, setQuery] = useState("");
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<Ticket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
-  // Fetch tickets from API
+  const [selectedWidgetFilter, setSelectedWidgetFilter] = useState<
+    "Open" | "Pending" | "Closed" | null
+  >(null);
+
   useEffect(() => {
     const fetchTickets = async () => {
       try {
@@ -109,14 +111,38 @@ const TicketPage = () => {
     fetchTickets();
   }, []);
 
-  // Filter tickets based on search and selected project
-  useEffect(() => {
-    const projectTickets = selectedProjectId
+  const projectTickets = useMemo(() => {
+    return selectedProjectId
       ? tickets.filter((ticket) => ticket.projectId === selectedProjectId)
       : tickets;
+  }, [tickets, selectedProjectId]);
 
-    setFilteredTickets(
-      projectTickets.filter((ticket) =>
+  const ticketCounts = useMemo(() => {
+    const total = projectTickets.length;
+    const pending = projectTickets.filter(
+      (ticket) => ticket.status === "Pending"
+    ).length;
+    const open = projectTickets.filter(
+      (ticket) => ticket.status === "Open"
+    ).length;
+    const closed = projectTickets.filter(
+      (ticket) => ticket.status === "Closed"
+    ).length;
+
+    return { total, pending, open, closed };
+  }, [projectTickets]);
+
+  useEffect(() => {
+    let visibleTickets = [...projectTickets];
+
+    if (selectedWidgetFilter !== null) {
+      visibleTickets = visibleTickets.filter(
+        (ticket) => ticket.status === selectedWidgetFilter
+      );
+    }
+
+    if (query.trim()) {
+      visibleTickets = visibleTickets.filter((ticket) =>
         [
           ticket.ticketId,
           ticket.name,
@@ -129,34 +155,11 @@ const TicketPage = () => {
         ].some((field) =>
           field?.toString().toLowerCase().includes(query.toLowerCase())
         )
-      )
-    );
-  }, [selectedProjectId, query, tickets]);
+      );
+    }
 
-  const handleSearch = (searchQuery: string) => {
-    setQuery(searchQuery);
-  };
-
-  // Handle removing the ticket from local state after successful API deletion
-  const handleTicketDelete = (ticketId: string) => {
-    setTickets((prevTickets) =>
-      prevTickets.filter((ticket) => ticket.ticketId !== ticketId)
-    );
-  };
-
-  const ticketCounts = useMemo(() => {
-    const total = filteredTickets.length;
-    const pending = filteredTickets.filter(
-      (ticket) => ticket.status === "Pending"
-    ).length;
-    const open = filteredTickets.filter(
-      (ticket) => ticket.status === "Open"
-    ).length;
-    const closed = filteredTickets.filter(
-      (ticket) => ticket.status === "Closed"
-    ).length;
-    return { total, pending, open, closed };
-  }, [filteredTickets]);
+    setFilteredTickets(visibleTickets);
+  }, [projectTickets, selectedWidgetFilter, query]);
 
   const handleFilterChange = (filterValue: string) => {
     const newFilteredTickets = [...filteredTickets];
@@ -199,6 +202,22 @@ const TicketPage = () => {
     setFilteredTickets(newFilteredTickets);
   };
 
+  // Handle search input
+  const handleSearch = (searchQuery: string) => {
+    setQuery(searchQuery);
+  };
+
+  // Remove a ticket from state after successful delete
+  const handleTicketDelete = (ticketId: string) => {
+    setTickets((prev) => prev.filter((t) => t.ticketId !== ticketId));
+  };
+
+  // Handle clicking on the widgets to filter by status
+  const handleWidgetClick = (status: "Open" | "Pending" | "Closed" | null) => {
+    setSelectedWidgetFilter(status);
+  };
+
+  // Spinner while loading
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -226,21 +245,25 @@ const TicketPage = () => {
             count={ticketCounts.total}
             label="Total Tickets"
             backgroundColor="bg-[#56798d]"
+            onClick={() => handleWidgetClick(null)}
           />
           <TicketWidget
             count={ticketCounts.pending}
             label="Pending Tickets"
             backgroundColor="bg-[#A6634F]"
+            onClick={() => handleWidgetClick("Pending")}
           />
           <TicketWidget
             count={ticketCounts.open}
             label="Open Tickets"
             backgroundColor="bg-[#729987]"
+            onClick={() => handleWidgetClick("Open")}
           />
           <TicketWidget
             count={ticketCounts.closed}
             label="Closed Tickets"
             backgroundColor="bg-[#CCCCCC]"
+            onClick={() => handleWidgetClick("Closed")}
           />
         </div>
       </div>

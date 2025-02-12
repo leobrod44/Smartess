@@ -33,7 +33,10 @@ const HubOwner = ({
             {owner.firstName} {owner.lastName}
             <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
             {owner.telephone
-              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(3, 6)}-${owner.telephone.slice(6)}`
+              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(
+                  3,
+                  6
+                )}-${owner.telephone.slice(6)}`
               : "Not Provided"}
             <div className="text-[#14323B] font-semibold">Email:</div>{" "}
             {owner.email}
@@ -50,12 +53,15 @@ const HubOwner = ({
           </div>
           <div className="hidden md:block">
             {owner.telephone
-              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(3, 6)}-${owner.telephone.slice(6)}`
+              ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(
+                  3,
+                  6
+                )}-${owner.telephone.slice(6)}`
               : "Not Provided"}
           </div>
           <div className="hidden md:block">{owner.email}</div>
           <div className="hidden md:flex justify-center">
-            <button className="w-[80px] h-[22px] bg-[#a6634f] rounded-md hover:bg-[#bc7862] transition duration-300 text-white text-xs font-medium">
+            <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#bc7862] transition duration-300 text-white text-xs font-medium">
               Contact
             </button>
           </div>

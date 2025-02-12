@@ -9,10 +9,16 @@ const (
 
 // TODO type AlertType string
 const (
-	AlertTypeLight   = "Light"
-	AlertTypeSensor  = "Sensor"
-	AlertTypeClimate = "Climate"
-	AlertTypeUnknown = "Unknown"
+	AlertTypeLight       = "Light"
+	AlertTypeSensor      = "Sensor"
+	AlertTypeClimate     = "Climate"
+	AlertTypeBatteryLow  = "BatteryLow"
+	AlertTypeMotion      = "Motion"
+	AlertTypeDoorOpen    = "DoorOpen"
+	AlertTypeSmoke       = "Smoke"
+	AlertTypeWater       = "Water"
+	AlertTypeTemperature = "Temperature"
+	AlertTypeUnknown     = "Unknown"
 )
 
 // TODO type AlertSeverity string

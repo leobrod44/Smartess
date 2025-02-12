@@ -4,7 +4,7 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y ffmpeg wget && rm -rf /var/lib/apt/lists/*
 
 # Download and install MediaMTX
-RUN wget -q -O /mediamtx.tar.gz https://github.com/bluenviron/mediamtx/releases/latest/download/mediamtx_v1.11.1_linux_arm64v8.tar.gz && \
+RUN wget -q -O /mediamtx.tar.gz https://github.com/bluenviron/mediamtx/releases/latest/download/mediamtx_v1.11.3_linux_arm64v8.tar.gz && \
     tar -xzf /mediamtx.tar.gz && \
     mv mediamtx /usr/local/bin/mediamtx && \
     rm /mediamtx.tar.gz

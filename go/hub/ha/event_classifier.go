@@ -60,9 +60,15 @@ func (*EventClassification) GenerateRoutingKey(event *ConciseEvent) string {
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
 var alertMappings = map[string]string{
-	"light":   structures.AlertTypeLight,
-	"sensor":  structures.AlertTypeSensor,
-	"climate": structures.AlertTypeClimate,
+	"light":       structures.AlertTypeLight,
+	"sensor":      structures.AlertTypeSensor,
+	"climate":     structures.AlertTypeClimate,
+	"battery":     structures.AlertTypeBatteryLow,
+	"motion":      structures.AlertTypeMotion,
+	"door":        structures.AlertTypeDoorOpen,
+	"smoke":       structures.AlertTypeSmoke,
+	"water":       structures.AlertTypeWater,
+	"temperature": structures.AlertTypeTemperature,
 }
 
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
