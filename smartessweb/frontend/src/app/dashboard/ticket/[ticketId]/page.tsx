@@ -13,98 +13,102 @@ import { manageAccountsApi } from "@/api/page";
 import { ticketsApi } from "@/api/dashboard/ticket/[ticketid]/page";
 
 const transformType = (type: string): "alert" | "repair" | "bug" | "other" => {
- const lowercaseType = type.toLowerCase();
- switch (lowercaseType) {
-   case "alert": return "alert";
-   case "repair": return "repair";
-   case "bug": return "bug";
-   default: return "other";
- }
+  const lowercaseType = type.toLowerCase();
+  switch (lowercaseType) {
+    case "alert": return "alert";
+    case "repair": return "repair";
+    case "bug": return "bug";
+    default: return "other";
+  }
 };
 
 const transformStatus = (status: string): "open" | "pending" | "closed" => {
- const lowercaseStatus = status.toLowerCase();
- switch (lowercaseStatus) {
-   case "open": return "open";
-   case "pending": return "pending";
-   case "closed": return "closed";
-   default: return "open";
- }
+  const lowercaseStatus = status.toLowerCase();
+  switch (lowercaseStatus) {
+    case "open": return "open";
+    case "pending": return "pending";
+    case "closed": return "closed";
+    default: return "open";
+  }
 };
 
 const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
- const router = useRouter();
- const { ticketId } = params;
- const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
- const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
- const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
- const [currentUser, setCurrentUser] = useState<CurrentUser>();
- const [isLoading, setIsLoading] = useState(true);
- const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { ticketId } = params;
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [isCloseModalOpen, setIsCloseModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<CurrentUser>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
- useEffect(() => {
-   const fetchData = async () => {
-     const token = localStorage.getItem("token");
-     if (!token) {
-       router.push("/sign-in");
-       return;
-     }
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/sign-in");
+        return;
+      }
 
-     try {
-       const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
-       setCurrentUser({
-         userId: responseCurrentUser.currentUser.userId.toString(),
-         role: responseCurrentUser.currentUser.role,
-         address: responseCurrentUser.currentUser.address,
-         firstName: responseCurrentUser.currentUser.firstName,
-         lastName: responseCurrentUser.currentUser.lastName,
-       });
+      try {
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
+        setCurrentUser({
+          userId: responseCurrentUser.currentUser.userId.toString(),
+          role: responseCurrentUser.currentUser.role,
+          address: responseCurrentUser.currentUser.address,
+          firstName: responseCurrentUser.currentUser.firstName,
+          lastName: responseCurrentUser.currentUser.lastName,
+        });
 
-       const { ticket } = await ticketsApi.getIndividualTicket(token, ticketId);
-       setSelectedTicket({
-         ticket_id: ticket.ticket_id,
-         unit_id: ticket.unit_id,
-         unit_number: ticket.unit || "",
-         project_address: ticket.project_address,  
-         title: ticket.name,
-         description: ticket.description,
-         type: transformType(ticket.type),
-         status: transformStatus(ticket.status),
-         created_at: new Date(ticket.created_at),
-         submitted_by_firstName: ticket.submitted_by_firstName,
-         submitted_by_lastName: ticket.submitted_by_lastName,
-         submitted_by_email: ticket.submitted_by_email,
-         assigned_employees: []
-       });
-       setError(null);
-     } catch (err) {
-       setError(err instanceof Error ? err.message : "An error occurred");
-       console.error("Error fetching data:", err);
-     } finally {
-       setIsLoading(false);
-     }
-   };
+        const { ticket } = await ticketsApi.getIndividualTicket(token, ticketId);
+        setSelectedTicket({
+          ticket_id: ticket.ticket_id,
+          unit_id: ticket.unit_id,
+          unit_number: ticket.unit || "",
+          project_address: ticket.project_address,  
+          title: ticket.name,
+          description: ticket.description,
+          type: transformType(ticket.type),
+          status: transformStatus(ticket.status),
+          created_at: new Date(ticket.created_at),
+          submitted_by_firstName: ticket.submitted_by_firstName,
+          submitted_by_lastName: ticket.submitted_by_lastName,
+          submitted_by_email: ticket.submitted_by_email,
+          assigned_employees: []
+        });
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+        console.error("Error fetching data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-   fetchData();
- }, [ticketId, router]);
+    fetchData();
+  }, [ticketId, router]);
 
- const handleOpenCloseTicketModal = () => setIsCloseModalOpen(true);
- const handleCloseCloseTicketModal = () => setIsCloseModalOpen(false);
+  const handleOpenCloseTicketModal = () => setIsCloseModalOpen(true);
+  const handleCloseCloseTicketModal = () => setIsCloseModalOpen(false);
 
- const handleConfirmCloseTicket = () => {
-   setIsCloseModalOpen(false);
-   try {
-     showToastSuccess("Ticket Closed successfully");
-     if (selectedTicket) {
-       setSelectedTicket({
-         ...selectedTicket,
-         status: "closed",
-       });
-     }
-   } catch (error) {
-     showToastError(error instanceof Error ? error.message : "Could not close the ticket. Please try again later.");
-   }
- };
+  const handleConfirmCloseTicket = async () => {
+    setIsCloseModalOpen(false);
+    const token = localStorage.getItem("token");
+    if (!token || !selectedTicket) return;
+
+    try {
+      await ticketsApi.closeTicket(token, selectedTicket.ticket_id);
+      showToastSuccess("Ticket closed successfully");
+      if (selectedTicket) {
+        setSelectedTicket({
+          ...selectedTicket,
+          status: "closed",
+        });
+      }
+    } catch (error) {
+      showToastError(error instanceof Error ? error.message : "Could not close the ticket. Please try again later.");
+    }
+  };
 
  const handleOpenDeleteModal = () => setIsDeleteModalOpen(true);
  const handleCloseDeleteModal = () => setIsDeleteModalOpen(false);
