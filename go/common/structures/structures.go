@@ -118,3 +118,8 @@ type TestMongoMessage struct {
 	Data      string             `bson:"content"`
 	Timestamp time.Time          `bson:"timestamp"`
 }
+
+type VideoData struct {
+	CameraID string `json:"camera_id"`
+	Content  []byte `json:"content"`
+}

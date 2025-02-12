@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	common_rabbitmq "Smartess/go/common/rabbitmq"
+	"Smartess/go/common/structures"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -9,6 +12,7 @@ import (
 )
 
 type VideoHandler struct {
+	r *common_rabbitmq.RabbitMQInstance
 }
 
 func NewVideoHandler() *VideoHandler {
@@ -16,6 +20,38 @@ func NewVideoHandler() *VideoHandler {
 }
 
 func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
+	var video structures.VideoData
+	err := json.Unmarshal(msg.Body, &video)
+	if err != nil {
+		logger.Error("Failed to unmarshal video data", zap.Error(err))
+		return
+	}
+	err = h.r.Channel.ExchangeDeclare(
+		msg.RoutingKey, // exchange name
+		"direct",       // type (use appropriate type: direct, topic, etc.)
+		true,           // durable
+		false,          // auto-deleted
+		false,          // internal
+		false,          // no-wait
+		nil,            // arguments
+	)
+	if err != nil {
+		logger.Error("Failed to declare exchange", zap.Error(err))
+		return
+	}
+	err = h.r.Channel.Publish(
+		msg.RoutingKey, // exchange
+		video.CameraID, //key
+		true,           // mandatory
+		false,          // immediate
+		amqp.Publishing{
+			ContentType: "text/plain",
+			Body:        msg.Body,
+		})
+	if err != nil {
+		logger.Error("Failed to publish video data", zap.Error(err))
+		return
+	}
 	logger.Info("Processing video segment",
 		zap.String("routing_key", msg.RoutingKey),
 		zap.Int("body_size", len(msg.Body)))
@@ -26,7 +62,7 @@ func (h *VideoHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
 	}
 
 	segmentFile := "video-segments-output.mp4"
-	err := appendToFile(segmentFile, msg.Body)
+	err = appendToFile(segmentFile, msg.Body)
 	if err != nil {
 		logger.Error("Failed to save video segment",
 			zap.String("file", segmentFile),

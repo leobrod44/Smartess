@@ -71,6 +71,7 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
+	r.Logger.Info(fmt.Sprintf("Received message: %v", message))
 	//Check if state change event
 	if message.Event.EventType != "state_changed" {
 		return false, errors.New("event is not a state change")
