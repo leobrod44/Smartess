@@ -2,9 +2,15 @@ import { BellIcon } from "@heroicons/react/20/solid";
 import React, { useState, useRef, useEffect } from "react";
 import NotificationElement from "./notificationElement";
 import { Transition } from "@headlessui/react";
-
+interface Notification {
+  id: string;
+  title: string;
+  date: string;
+  viewed: boolean;
+  ticketTitle: string;
+}
 const Notification: React.FC = () => {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [showAll, setShowAll] = useState<boolean>(false);
   const [unviewedCount, setUnviewedCount] = useState<number>(0);
@@ -52,7 +58,7 @@ const Notification: React.FC = () => {
         ];
         setNotifications(fetchedNotifications);
         const unviewedNotifications = fetchedNotifications.filter(
-          (n: any) => !n.viewed
+          (n: Notification) => !n.viewed
         );
         setUnviewedCount(unviewedNotifications.length);
       } catch (error) {
