@@ -16,7 +16,7 @@ const RegistrationPage = () => {
   const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const email= "example@gmail.com"; //to be changed to the users email address
+  const email = "example@gmail.com"; //to be changed to the users email address
 
   const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
 
@@ -80,55 +80,83 @@ const RegistrationPage = () => {
             </h3>
           </div>
 
-          <div className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3">
+          <form
+            role="form"
+            onSubmit={(e) => e.preventDefault()}
+            className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3"
+          >
             <div className="flex flex-col md:flex-row gap-4 w-full">
               <div className=" flex-col gap-1.5 flex w-full">
-                <label className="px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+                <label
+                  htmlFor="firstname"
+                  className="px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+                >
                   First name *
                 </label>
                 <input
+                  id="firstname"
                   type="text"
                   placeholder="First name"
                   className=" w-full self-stretch text-[#266472] text-l font-sequel-sans-regular  rounded-lg focus:outline-none"
                   value={firstname}
                   onChange={(e) => setUserFirstName(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-label="Enter your first name"
+                  aria-required="true"
+                  aria-invalid={!firstname ? "true" : "false"}
                 />
               </div>
 
               <div className="flex-col gap-1.5 flex w-full">
-                <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+                <label
+                  htmlFor="lastname"
+                  className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+                >
                   Last name *
                 </label>
                 <input
+                  id="lastname"
                   type="text"
                   placeholder="Last name"
                   className="w-full  self-stretch text-[#266472] text-l font-sequel-sans-regular  rounded-lg focus:outline-none"
                   value={lastname}
                   onChange={(e) => setUserLastName(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-label="Enter your last name"
+                  aria-required="true"
+                  aria-invalid={!lastname ? "true" : "false"}
                 />
               </div>
             </div>
             <div className="w-full max-w-lg flex-col  gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
-                Email address 
+              <label
+                htmlFor="email"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
+                Email address
               </label>
               <input
+                id="email"
                 type="email"
                 name="email"
                 value={email}
                 placeholder="Email address"
                 disabled
                 className="w-full rounded-lg text-[#266472] bg-[#266472]/20 text-l font-sequel-sans-regular focus:outline-none"
+                aria-label="Email address"
+                aria-disabled="true"
               />
             </div>
 
             <div className="w-full max-w-lg flex-col  gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+              <label
+                htmlFor="phone"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
                 Phone number *
               </label>
               <input
+                id="phone"
                 type="tel"
                 name="tel"
                 placeholder="Phone number"
@@ -136,26 +164,39 @@ const RegistrationPage = () => {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 onKeyDown={handleKeyDown}
+                aria-label="Enter your phone number"
+                aria-required="true"
+                aria-invalid={!validatePhoneNumber(phone) ? "true" : "false"}
               />
             </div>
 
             <div className=" w-full flex-col  gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+              <label
+                htmlFor="password"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
                 Password *
               </label>
               <div className="relative w-full">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   className="w-full rounded-lg text-[#266472] text-l font-sequel-sans-regular focus:outline-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-label="Enter your password"
+                  aria-required="true"
+                  aria-invalid={
+                    !passwordRegex.test(password) ? "true" : "false"
+                  }
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)} // Toggle visibility
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-6 w-6" />
@@ -168,22 +209,30 @@ const RegistrationPage = () => {
 
             {/* Password field */}
             <div className=" w-full flex-col  gap-1.5 flex">
-              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+              <label
+                htmlFor="confirm-password"
+                className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular"
+              >
                 Confirm Password *
               </label>
               <div className="relative w-full">
                 <input
+                  id="confirm-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Password"
                   className="w-full self-stretch  rounded-lg text-[#266472] text-l font-sequel-sans-regular focus:outline-none"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  aria-label="Confirm your password"
+                  aria-required="true"
+                  aria-invalid={password !== confirmPassword ? "true" : "false"}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)} // Toggle visibility
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
                     <EyeSlashIcon className="h-6 w-6" />
@@ -198,11 +247,12 @@ const RegistrationPage = () => {
               <button
                 className="w-full px-[149px] py-[13px] bg-[#266472] rounded-xl shadow justify-center items-center  gap-1.5 inline-flex hover:bg-[#1f505e] transition duration-300 text-center text-white text-lg font-sequel-sans-regular"
                 onClick={handleSubmit}
+                aria-label="Register"
               >
                 Register
               </button>
             </div>
-          </div>
+          </form>
         </div>
 
         <div className="w-full hidden md:block md:w-1/2">
