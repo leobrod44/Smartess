@@ -137,6 +137,7 @@ const SignInPage = () => {
           </div>
 
           <form
+            onSubmit={(e) => e.preventDefault()}
             role="form"
             className="w-full max-w-lg flex flex-col gap-3  px-6 md:px-3"
           >
