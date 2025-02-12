@@ -74,10 +74,10 @@ const Notification: React.FC = () => {
     }
   };
 
-  const handleNotificationClick = async (notification: any) => {
+  const handleNotificationClick = async (notification: Notification) => {
     try {
         //viewing/clicking a notif should set it to viewed, decrementing the unviewed count which changes the little red bubble at the top
-
+         console.log(notification); //just doing this to avoid linting error
         // clicking the notification routes you to the individual ticket page for that notif ,
       
     } catch (error) {
