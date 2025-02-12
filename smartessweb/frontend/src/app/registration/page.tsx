@@ -16,6 +16,8 @@ const RegistrationPage = () => {
   const [phone, setPhone] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const email= "example@gmail.com"; //to be changed to the users email address
+
   const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
@@ -108,6 +110,20 @@ const RegistrationPage = () => {
                 />
               </div>
             </div>
+            <div className="w-full max-w-lg flex-col  gap-1.5 flex">
+              <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
+                Email address 
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={email}
+                placeholder="Email address"
+                disabled
+                className="w-full rounded-lg text-[#266472] bg-[#266472]/20 text-l font-sequel-sans-regular focus:outline-none"
+              />
+            </div>
+
             <div className="w-full max-w-lg flex-col  gap-1.5 flex">
               <label className=" px-1 text-[#266472] text-[15px] font-sequel-sans-regular">
                 Phone number *
