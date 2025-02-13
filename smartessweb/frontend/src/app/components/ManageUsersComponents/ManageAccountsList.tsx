@@ -74,9 +74,9 @@ const ManageAccountsList = ({
       case "basic":
         return "bg-[#A6634F] text-white";
       case "admin":
-        return "bg-[#729987] text-white";
-      case "master":
         return "bg-[#CCCCCC] text-white";
+      case "master":
+        return "bg-yellow-500 text-white";
       default:
         return "bg-gray-300 text-black";
     }
