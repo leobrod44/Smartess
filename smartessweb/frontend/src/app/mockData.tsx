@@ -182,6 +182,14 @@ export interface Announcement {
   files: { name: string; url: string }[];
 }
 
+export interface SurveillanceCamera {
+  hubId: string;
+
+  projectAddress: string;
+
+  unitNumber: string;
+}
+
 export const generateMockAnnouncements = (): Announcement[] => {
   return [
     {
@@ -909,3 +917,28 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     role: "admin",
   },
 ];
+
+export const generateMockSurveillanceCameras = (): SurveillanceCamera[] => {
+  return [
+    {
+      hubId: "1x2c3v4b5n",
+      projectAddress: "1000 De La Gauchetiere",
+      unitNumber: "Unit 101",
+    },
+    {
+      hubId: "0m9n8b7v6c",
+      projectAddress: "750 Peel Street",
+      unitNumber: "Unit 201",
+    },
+    {
+      hubId: "7n6b5v4c3x",
+      projectAddress: "131 Chemin de Confieres",
+      unitNumber: "Unit 111",
+    },
+    {
+      hubId: "1z0m2x9n3c",
+      projectAddress: "1654 rue Kemmel",
+      unitNumber: "Unit 1",
+    },
+  ];
+};
