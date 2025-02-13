@@ -39,6 +39,7 @@ import { useProjectContext } from "@/context/ProjectProvider";
 import { projectApi } from "@/api/page";
 import { Project } from "../mockData";
 import { useUserContext } from "@/context/UserProvider";
+import Notification from "./notifications/notification";
 
 interface SidebarItem {
   name: string;
@@ -589,6 +590,7 @@ const DashboardNavbar = () => {
                   aria-hidden="true"
                 />
 
+                <Notification />
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative">
                   <MenuButton className="-m-1.5 flex items-center p-1.5">
