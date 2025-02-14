@@ -3,9 +3,9 @@ package ha
 import (
 	"Smartess/go/common/structures"
 	"Smartess/go/common/utils"
-	"strings"
-	"fmt"
 	logs "Smartess/go/hub/logger"
+	"fmt"
+	"strings"
 )
 
 type RoutingKeyGenerator interface {
@@ -43,7 +43,7 @@ func classifyConciseEvent(event *ConciseEvent) EventClassification {
 	if event.Attributes.DeviceClass != nil {
 		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.DeviceClass))
 	}
-	fmt.Sprintf("class: %v",classification)
+	fmt.Sprintf("class: %v", classification)
 	//TODO: Additional tags can be added here based on other attributes + context conditionals
 
 	return classification
@@ -119,7 +119,6 @@ func (*EventClassification) DemoLightMapping(webMessage *WebhookMessage, logger 
 		return "unknown"
 	}
 }
-
 
 // TODO DETERMINE SEVERITY OF ALERTS
 func determineAlertSeverity(event *WebhookMessage) string {
