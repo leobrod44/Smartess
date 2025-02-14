@@ -72,17 +72,18 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 	//Check if state change event
-	if message.Event.EventType != "state_changed" {
-		return false, errors.New("event is not a state change")
+	if message.Event.EventType != "state_changed" || message.Event.Data.EntityID!="light.hue_go_2"{
+		return false, nil
 	}
-
-	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
 	classification := &ha.EventClassification{}
+	demoType := classification.DemoLightMapping(message,r.Logger)
+	message.Event.Data.EntityID = demoType
+	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
+
 	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
 	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
 	//  TODO ADD MORE TYPE | sensors have many different types
 	alertType := ha.DetermineAlertType(conciseEvent.EntityID)
-
 	alert := structures.Alert{
 		HubIP:    os.Getenv("HUB_IP"),
 		DeviceID: message.Event.Data.EntityID,
@@ -92,7 +93,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 		TimeStamp: message.Event.Data.NewState.LastChanged,
 		Type:      alertType,
 	}
-
+	r.Logger.Info(fmt.Sprintf("%v",alert))
 	alertJson, err := json.Marshal(alert)
 	if err != nil {
 		return false, errors.New("failed to marshal alert")
