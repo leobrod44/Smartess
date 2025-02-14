@@ -72,11 +72,11 @@ func (r *EventHandler) Start(selectedHub structures.HubTypeEnum) {
 // TODO all event parsing logic here
 func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 	//Check if state change event
-	if message.Event.EventType != "state_changed" || message.Event.Data.EntityID!="light.hue_go_2"{
+	if message.Event.EventType != "state_changed" || message.Event.Data.EntityID != "light.hue_go_2" {
 		return false, nil
 	}
 	classification := &ha.EventClassification{}
-	demoType := classification.DemoLightMapping(message,r.Logger)
+	demoType := classification.DemoLightMapping(message, r.Logger)
 	message.Event.Data.EntityID = demoType
 	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
 
@@ -93,7 +93,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 		TimeStamp: message.Event.Data.NewState.LastChanged,
 		Type:      alertType,
 	}
-	r.Logger.Info(fmt.Sprintf("%v",alert))
+	r.Logger.Info(fmt.Sprintf("%v", alert))
 	alertJson, err := json.Marshal(alert)
 	if err != nil {
 		return false, errors.New("failed to marshal alert")
