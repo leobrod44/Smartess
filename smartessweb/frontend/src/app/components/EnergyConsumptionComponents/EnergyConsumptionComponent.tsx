@@ -102,89 +102,156 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
               duration-300
             "
           >
-            <div
-              className="
-                grid
-                [grid-template-columns:30%_1fr_1fr_1fr_1fr]
-                gap-4
-                w-full
-                border-b
-                border-gray-300
-                pb-2
-                items-center
-                justify-items-center
-                text-center
-              "
-            >
-              <div>Address</div>
-              <div>Unit Number</div>
-              <div>Energy Consumption</div>
-              <div>Temperature</div>
-              <div>Variation</div>
+            {/* Desktop / Tablet Layout */}
+            <div className="hidden md:block">
+              <div
+                className="
+                  grid
+                  md:[grid-template-columns:30%_1fr_1fr_1fr_1fr]
+                  gap-4
+                  w-full
+                  border-b
+                  border-gray-300
+                  pb-2
+                  items-center
+                  justify-items-center
+                  text-center
+                  font-semibold
+                "
+              >
+                <div>Address</div>
+                <div>Unit Number</div>
+                <div>Energy Consumption</div>
+                <div>Temperature</div>
+                <div>Variation</div>
+              </div>
+
+              <div
+                className="
+                  grid
+                  md:[grid-template-columns:30%_1fr_1fr_1fr_1fr]
+                  gap-4
+                  w-full
+                  pt-2
+                  items-center
+                  justify-items-center
+                  text-center
+                "
+              >
+                <div>{item.address}</div>
+                <div>{item.unitNumber}</div>
+
+                <div
+                  className={`
+                    w-[100px]
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getConsumptionColor(item.currentMonthConsumption)}
+                  `}
+                >
+                  <span className="text-base">
+                    {item.currentMonthConsumption}
+                  </span>
+                </div>
+
+                <div
+                  className={`
+                    w-[100px]
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getTemperatureColor(item.currentMonthTemperature)}
+                  `}
+                >
+                  <span className="text-base">
+                    {item.currentMonthTemperature}
+                  </span>
+                </div>
+
+                <div
+                  className={`
+                    w-[100px]
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getVariationColor(item.variation)}
+                  `}
+                >
+                  <span className="text-base">{item.variation}</span>
+                </div>
+              </div>
             </div>
 
-            <div
-              className="
-                grid
-                [grid-template-columns:30%_1fr_1fr_1fr_1fr]
-                gap-4
-                w-full
-                pt-2
-                items-center
-                justify-items-center
-                text-center
-              "
-            >
-              <div>{item.address}</div>
-              <div>{item.unitNumber}</div>
+            {/* Mobile Layout */}
+            <div className="block md:hidden">
+              <div className="grid grid-cols-2 gap-2">
+                <div className="font-semibold">Address:</div>
+                <div>{item.address}</div>
 
-              <div
-                className={`
-                  w-[100px]
-                  h-8
-                  rounded-full
-                  flex
-                  items-center
-                  justify-center
-                  text-white
-                  ${getConsumptionColor(item.currentMonthConsumption)}
-                `}
-              >
-                <span className="text-base">
-                  {item.currentMonthConsumption}
-                </span>
-              </div>
+                <div className="font-semibold">Unit Number:</div>
+                <div>{item.unitNumber}</div>
 
-              <div
-                className={`
-                  w-[100px]
-                  h-8
-                  rounded-full
-                  flex
-                  items-center
-                  justify-center
-                  text-white
-                  ${getTemperatureColor(item.currentMonthTemperature)}
-                `}
-              >
-                <span className="text-base">
-                  {item.currentMonthTemperature}
-                </span>
-              </div>
+                <div className="font-semibold">Energy:</div>
+                <div
+                  className={`
+                    w-full
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getConsumptionColor(item.currentMonthConsumption)}
+                  `}
+                >
+                  <span className="text-base">
+                    {item.currentMonthConsumption}
+                  </span>
+                </div>
 
-              <div
-                className={`
-                  w-[100px]
-                  h-8
-                  rounded-full
-                  flex
-                  items-center
-                  justify-center
-                  text-white
-                  ${getVariationColor(item.variation)}
-                `}
-              >
-                <span className="text-base">{item.variation}</span>
+                <div className="font-semibold">Temp:</div>
+                <div
+                  className={`
+                    w-full
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getTemperatureColor(item.currentMonthTemperature)}
+                  `}
+                >
+                  <span className="text-base">
+                    {item.currentMonthTemperature}
+                  </span>
+                </div>
+
+                <div className="font-semibold">Variation:</div>
+                <div
+                  className={`
+                    w-full
+                    h-8
+                    rounded-full
+                    flex
+                    items-center
+                    justify-center
+                    text-white
+                    ${getVariationColor(item.variation)}
+                  `}
+                >
+                  <span className="text-base">{item.variation}</span>
+                </div>
               </div>
             </div>
           </div>

@@ -52,10 +52,10 @@ const ConsumptionPage = () => {
 
         const fetchedEnergyConsumptions = response.energyConsumptionData.map(
           (ec) => ({
-            id: ec.id.toString(), // Ensure ID is a string
-            projId: ec.proj_id.toString(), // Ensure projId is a string
-            hubId: ec.hub_id.toString(), // Ensure hubId is a string
-            unitNumber: ec.unit_number.toString(), // Ensure unitNumber is a string
+            id: ec.id.toString(),
+            projId: ec.proj_id.toString(),
+            hubId: ec.hub_id.toString(),
+            unitNumber: ec.unit_number.toString(),
             monthlyEnergyConsumption: ec.monthly_energy_consumption,
             monthlyTemperature: ec.monthly_temperature,
             dailyEnergyConsumption: ec.daily_energy_consumption,
