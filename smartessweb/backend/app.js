@@ -22,6 +22,7 @@ const individualUnitRoutes = require("./routes/individualUnitRoutes");
 const ticketsRoutes = require("./routes/ticketsRoutes");
 const announcementsRoutes = require("./routes/announcementRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");
+const surveillanceRoutes = require("./routes/surveillanceRoutes");
 
 //Add path here
 app.use("/api/auth", authRoutes);
@@ -36,5 +37,6 @@ app.use("/api/individual-unit", individualUnitRoutes);
 app.use("/api/tickets", ticketsRoutes);
 app.use("/api/announcements", announcementsRoutes);
 app.use("/api/consumptions", consumptionRoutes);
+app.use("/api/surveillance", surveillanceRoutes);
 
 module.exports = app;

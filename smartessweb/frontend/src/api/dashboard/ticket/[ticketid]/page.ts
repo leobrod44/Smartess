@@ -40,8 +40,23 @@ interface APITicket {
       throw new Error('Failed to delete ticket');
     }
    };
-   
-   export const ticketsApi = {
+
+   const closeTicket = async (token: string, ticketId: string): Promise<void> => {
+    const response = await fetch(`http://localhost:3000/api/tickets/close-ticket/${ticketId}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to close ticket');
+    }
+  };
+  
+  
+  export const ticketsApi = {
     getIndividualTicket,
     deleteTicket,
-   };
+    closeTicket,
+  };

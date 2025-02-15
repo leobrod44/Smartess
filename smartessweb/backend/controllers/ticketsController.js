@@ -657,3 +657,73 @@ exports.getAssignedUsers = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
  };
+
+ exports.closeTicket = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id } = req.params;
+
+    if (!ticket_id) {
+      return res.status(400).json({ error: "Ticket ID is required" });
+    }
+
+    // Verify user token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get user_id from user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data" });
+    }
+
+    // Get the ticket to verify it exists and get its project ID
+    const { data: ticket, error: ticketError } = await supabase
+      .from("tickets")
+      .select("proj_id, status")
+      .eq("ticket_id", ticket_id)
+      .single();
+
+    if (ticketError || !ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+
+    // Verify user has access to this project and proper role
+    const { data: projectAccess, error: accessError } = await supabase
+      .from("org_user")
+      .select("org_user_type")
+      .eq("user_id", userData.user_id)
+      .eq("proj_id", ticket.proj_id)
+      .single();
+
+    if (accessError || !projectAccess) {
+      return res.status(403).json({ error: "User does not have access to this ticket" });
+    }
+
+    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
+      return res.status(403).json({ error: "User does not have permission to close tickets" });
+    }
+
+    // Update ticket status to closed
+    const { error: updateError } = await supabase
+      .from("tickets")
+      .update({ status: "closed" })
+      .eq("ticket_id", ticket_id);
+
+    if (updateError) {
+      return res.status(500).json({ error: "Failed to close ticket" });
+    }
+
+    res.status(200).json({ message: "Ticket successfully closed" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
