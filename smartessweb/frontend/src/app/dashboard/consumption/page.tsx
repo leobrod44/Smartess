@@ -9,13 +9,14 @@ import EnergyConsumptionComponent from "@/app/components/EnergyConsumptionCompon
 
 interface EnergyConsumption {
   id: string;
-  projId: string;
-  hubId: string;
-  unitNumber: string;
-  monthlyEnergyConsumption: number[];
-  monthlyTemperature: number[];
-  dailyEnergyConsumption: number[];
-  address: string;
+  proj_id: string;
+  hub_id: string;
+  unit_number: string;
+  created_at: string;
+  monthly_energy_consumption: number[];
+  monthly_temperature: number[];
+  daily_energy_consumption: number[];
+  projectAddress: string;
   currentMonthConsumption: number;
   currentMonthTemperature: number;
   variation: number;
@@ -50,21 +51,7 @@ const ConsumptionPage = () => {
           userId
         );
 
-        const fetchedEnergyConsumptions = response.energyConsumptionData.map(
-          (ec) => ({
-            id: ec.id.toString(),
-            projId: ec.proj_id.toString(),
-            hubId: ec.hub_id.toString(),
-            unitNumber: ec.unit_number.toString(),
-            monthlyEnergyConsumption: ec.monthly_energy_consumption,
-            monthlyTemperature: ec.monthly_temperature,
-            dailyEnergyConsumption: ec.daily_energy_consumption,
-            address: ec.address,
-            currentMonthConsumption: ec.currentMonthConsumption,
-            currentMonthTemperature: ec.currentMonthTemperature,
-            variation: ec.variation,
-          })
-        );
+        const fetchedEnergyConsumptions = response.energyConsumptionData;
 
         setEnergyConsumptions(fetchedEnergyConsumptions);
       } catch (err) {
@@ -85,7 +72,7 @@ const ConsumptionPage = () => {
   useEffect(() => {
     if (selectedProjectId) {
       setFilteredEnergyConsumptions(
-        energyConsumptions.filter((ec) => ec.projId === selectedProjectId)
+        energyConsumptions.filter((ec) => ec.proj_id === selectedProjectId)
       );
     } else {
       setFilteredEnergyConsumptions(energyConsumptions);
