@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { /*generateMockSurveillanceCameras, */Project } from "../../mockData";
 import { surveillanceApi } from "@/api/page";
 import Searchbar from "@/app/components/Searchbar";
+import { Pagination } from "@mui/material";
 
 const SurveillancePage = () => {
   const router = useRouter();
@@ -15,6 +16,7 @@ const SurveillancePage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const { selectedProjectAddress } = useProjectContext();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const unitsPerPage = 4;
 
@@ -65,6 +67,23 @@ const SurveillancePage = () => {
     setSearchQuery(query);
   };
 
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
+  const totalPages = Math.ceil(filteredUnitsByProject.length / unitsPerPage);
+  
+  const currentUnits =
+    filteredUnitsByProject.length === 0
+      ? [] // Reset to an empty array if no filtered units exist
+      : filteredUnitsByProject.slice(
+          (currentPage - 1) * unitsPerPage,
+          currentPage * unitsPerPage
+        );
+
   return (
     <div>
       <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
@@ -80,7 +99,7 @@ const SurveillancePage = () => {
           <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
             Loading surveillance data...
           </p>
-        ) : filteredUnitsByProject.length === 0 ? (
+        ) : currentUnits.length === 0 ? (
           <div className="unit-container max-w-fit sm:max-w-full mx-auto">
             <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
               No results found.
@@ -90,7 +109,7 @@ const SurveillancePage = () => {
           </div>
         ) :( 
           <div className="grid grid-cols-2 gap-4 mt-6">
-            {filteredUnitsByProject.slice(0, unitsPerPage).map((unit, index) => (
+            {currentUnits.slice(0, unitsPerPage).map((unit, index) => (
               <div key={index} className="border p-2 bg-[#4b7d8d] rounded-lg">
                 <video className="w-full h-auto" controls>
                   <source src="your-video-file.mp4" type="video/mp4" />
@@ -104,6 +123,15 @@ const SurveillancePage = () => {
             ))}
           </div>
         )}
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            className="custom-pagination"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </div>
       </div>
     </div>
   );

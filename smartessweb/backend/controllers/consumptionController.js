@@ -103,11 +103,11 @@ exports.getConsumptions = async (req, res) => {
       }
 
       // Attach the address using the map
-      const address = projectAddressMap[item.proj_id] || null;
+      const projectAddress = projectAddressMap[item.proj_id] || null;
 
       return {
         ...item,
-        address,
+        projectAddress,
         currentMonthConsumption,
         currentMonthTemperature,
         variation,
