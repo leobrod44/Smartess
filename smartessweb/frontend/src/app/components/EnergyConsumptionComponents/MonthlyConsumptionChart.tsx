@@ -7,7 +7,6 @@ import {
   Tooltip,
   Legend,
   ComposedChart,
-  Area,
   Line,
 } from "recharts";
 

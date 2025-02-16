@@ -38,8 +38,12 @@ const IndividualConsumptionPage = ({
       try {
         const response = await energyConsumptionApi.getConsumption(hubId);
         setConsumption(response.energyConsumptionData[0]);
-      } catch (err: any) {
-        setError(err.message || "Failed to fetch consumption data");
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to fetch consumption data"
+        );
       } finally {
         setLoading(false);
       }
