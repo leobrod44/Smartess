@@ -1,15 +1,17 @@
 import React, { useState, FC } from "react";
 import { Pagination } from "@mui/material";
+import Link from "next/link";
 
 interface EnergyConsumption {
   id: string;
-  projId: string;
-  hubId: string;
-  unitNumber: string;
-  monthlyEnergyConsumption: number[];
-  monthlyTemperature: number[];
-  dailyEnergyConsumption: number[];
-  address: string;
+  proj_id: string;
+  hub_id: string;
+  unit_number: string;
+  created_at: string;
+  monthly_energy_consumption: number[];
+  monthly_temperature: number[];
+  daily_energy_consumption: number[];
+  projectAddress: string;
   currentMonthConsumption: number;
   currentMonthTemperature: number;
   variation: number;
@@ -98,9 +100,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
           const variationInfo = getVariationInfo(item.variation);
 
           return (
-            <div
+            <Link
               key={item.id}
-              className="
+              href={`/dashboard/consumption/${item.hub_id}`}
+            >
+              <div
+                className="
                 bg-white
                 rounded-lg
                 shadow-md
@@ -113,11 +118,11 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                 transition 
                 duration-300
               "
-            >
-              {/* Desktop / Tablet Layout */}
-              <div className="hidden md:block">
-                <div
-                  className="
+              >
+                {/* Desktop / Tablet Layout */}
+                <div className="hidden md:block">
+                  <div
+                    className="
                     grid
                     md:[grid-template-columns:30%_1fr_1fr_1fr_1fr]
                     gap-4
@@ -130,16 +135,16 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                     text-center
                     font-semibold
                   "
-                >
-                  <div>Address</div>
-                  <div>Unit Number</div>
-                  <div>Energy Consumption</div>
-                  <div>Temperature</div>
-                  <div>Variation</div>
-                </div>
+                  >
+                    <div>Address</div>
+                    <div>Unit Number</div>
+                    <div>Energy Consumption</div>
+                    <div>Temperature</div>
+                    <div>Variation</div>
+                  </div>
 
-                <div
-                  className="
+                  <div
+                    className="
                     grid
                     md:[grid-template-columns:30%_1fr_1fr_1fr_1fr]
                     gap-4
@@ -149,12 +154,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                     justify-items-center
                     text-center
                   "
-                >
-                  <div>{item.address}</div>
-                  <div>{item.unitNumber}</div>
+                  >
+                    <div>{item.projectAddress}</div>
+                    <div>{item.unit_number}</div>
 
-                  <div
-                    className={`
+                    <div
+                      className={`
                       relative group
                       w-[100px]
                       h-8
@@ -165,12 +170,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${consumptionInfo.color}
                     `}
-                  >
-                    <span className="text-base">
-                      {item.currentMonthConsumption}
-                    </span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">
+                        {item.currentMonthConsumption}
+                      </span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -187,13 +192,13 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {consumptionInfo.label}
+                      >
+                        {consumptionInfo.label}
+                      </div>
                     </div>
-                  </div>
 
-                  <div
-                    className={`
+                    <div
+                      className={`
                       relative group
                       w-[100px]
                       h-8
@@ -204,12 +209,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${temperatureInfo.color}
                     `}
-                  >
-                    <span className="text-base">
-                      {item.currentMonthTemperature}
-                    </span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">
+                        {item.currentMonthTemperature}
+                      </span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -226,13 +231,13 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {temperatureInfo.label}
+                      >
+                        {temperatureInfo.label}
+                      </div>
                     </div>
-                  </div>
 
-                  <div
-                    className={`
+                    <div
+                      className={`
                       relative group
                       w-[100px]
                       h-8
@@ -243,10 +248,10 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${variationInfo.color}
                     `}
-                  >
-                    <span className="text-base">{item.variation}</span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">{item.variation}</span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -263,25 +268,25 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {variationInfo.label}
+                      >
+                        {variationInfo.label}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Mobile Layout */}
-              <div className="block md:hidden">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="font-semibold">Address:</div>
-                  <div>{item.address}</div>
+                {/* Mobile Layout */}
+                <div className="block md:hidden">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-semibold">Address:</div>
+                    <div>{item.projectAddress}</div>
 
-                  <div className="font-semibold">Unit Number:</div>
-                  <div>{item.unitNumber}</div>
+                    <div className="font-semibold">Unit Number:</div>
+                    <div>{item.unit_number}</div>
 
-                  <div className="font-semibold">Energy:</div>
-                  <div
-                    className={`
+                    <div className="font-semibold">Energy:</div>
+                    <div
+                      className={`
                       relative group
                       w-full
                       h-8
@@ -292,12 +297,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${consumptionInfo.color}
                     `}
-                  >
-                    <span className="text-base">
-                      {item.currentMonthConsumption}
-                    </span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">
+                        {item.currentMonthConsumption}
+                      </span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -314,14 +319,14 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {consumptionInfo.label}
+                      >
+                        {consumptionInfo.label}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="font-semibold">Temp:</div>
-                  <div
-                    className={`
+                    <div className="font-semibold">Temp:</div>
+                    <div
+                      className={`
                       relative group
                       w-full
                       h-8
@@ -332,12 +337,12 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${temperatureInfo.color}
                     `}
-                  >
-                    <span className="text-base">
-                      {item.currentMonthTemperature}
-                    </span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">
+                        {item.currentMonthTemperature}
+                      </span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -354,14 +359,14 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {temperatureInfo.label}
+                      >
+                        {temperatureInfo.label}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="font-semibold">Variation:</div>
-                  <div
-                    className={`
+                    <div className="font-semibold">Variation:</div>
+                    <div
+                      className={`
                       relative group
                       w-full
                       h-8
@@ -372,10 +377,10 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                       text-white
                       ${variationInfo.color}
                     `}
-                  >
-                    <span className="text-base">{item.variation}</span>
-                    <div
-                      className="
+                    >
+                      <span className="text-base">{item.variation}</span>
+                      <div
+                        className="
                         absolute
                         bottom-full
                         mb-1
@@ -392,13 +397,14 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
                         shadow
                         z-10
                       "
-                    >
-                      {variationInfo.label}
+                      >
+                        {variationInfo.label}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>
