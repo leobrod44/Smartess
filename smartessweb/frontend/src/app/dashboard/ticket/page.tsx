@@ -240,7 +240,7 @@ const TicketPage = () => {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6 border-2 border-black rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full mb-6  p-4">
           <TicketWidget
             count={ticketCounts.total}
             label="Total Tickets"
