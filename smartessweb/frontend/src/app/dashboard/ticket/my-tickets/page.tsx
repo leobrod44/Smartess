@@ -200,7 +200,7 @@ const AssignedTicketPage = () => {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-fit border-2 border-black rounded-lg p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-fit  p-4">
           <TicketWidget
             count={widgetStats.total}
             label="Total Tickets"
