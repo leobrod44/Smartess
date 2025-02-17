@@ -184,8 +184,6 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           role: "basic"
         }]);
       }
-  
-      showToastSuccess("User successfully unassigned from ticket");
     } catch (error) {
       showToastError(error instanceof Error ? error.message : "There was an error unassigning the user.");
       console.error(error);
