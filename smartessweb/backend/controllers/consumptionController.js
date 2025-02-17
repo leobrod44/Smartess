@@ -103,11 +103,89 @@ exports.getConsumptions = async (req, res) => {
       }
 
       // Attach the address using the map
-      const address = projectAddressMap[item.proj_id] || null;
+      const projectAddress = projectAddressMap[item.proj_id] || null;
 
       return {
         ...item,
-        address,
+        projectAddress,
+        currentMonthConsumption,
+        currentMonthTemperature,
+        variation,
+      };
+    });
+
+    return res.status(200).json({ energyConsumptionData: processedData });
+  } catch (error) {
+    console.error("Unexpected Error:", error);
+    return res.status(500).json({ error: "An unexpected error occurred." });
+  }
+};
+
+exports.getConsumption = async (req, res) => {
+  try {
+    const { hubId } = req.params;
+
+    const { data: hubData, error: hubError } = await supabase
+      .from("hub")
+      .select("proj_id")
+      .eq("hub_id", hubId)
+      .single();
+
+    if (hubError || !hubData) {
+      console.error("Hub Error:", hubError);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch project id from hub." });
+    }
+
+    const projId = hubData.proj_id;
+
+    const { data: projectData, error: projectAddressError } = await supabase
+      .from("project")
+      .select("address")
+      .eq("proj_id", projId)
+      .single();
+
+    if (projectAddressError || !projectData) {
+      console.error("Project Address Error:", projectAddressError);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch project address." });
+    }
+
+    const { data: energyConsumptionData, error: energyConsumptionError } =
+      await supabase.from("energy_consumption").select("*").eq("hub_id", hubId);
+
+    if (energyConsumptionError) {
+      console.error("Supabase Query Error:", energyConsumptionError);
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch energy consumption data." });
+    }
+
+    const currentMonth = new Date().getMonth();
+
+    const processedData = energyConsumptionData.map((item) => {
+      const currentMonthConsumption =
+        item.monthly_energy_consumption[currentMonth];
+      const currentMonthTemperature = item.monthly_temperature[currentMonth];
+
+      const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+      const previousMonthConsumption =
+        item.monthly_energy_consumption[previousMonth];
+
+      let variation = null;
+      if (previousMonthConsumption !== 0) {
+        variation =
+          ((currentMonthConsumption - previousMonthConsumption) /
+            previousMonthConsumption) *
+          100;
+        variation = parseFloat(variation.toFixed(2));
+      }
+
+      return {
+        ...item,
+        projectAddress: projectData.address,
         currentMonthConsumption,
         currentMonthTemperature,
         variation,
