@@ -13,7 +13,7 @@ const AlertWidget = ({
   const firstTwoAlerts = systemAlerts?.slice(0, 2);
 
   return (
-    <div className="flex-col bg-[#325A67] w-full rounded-[7px] text-center text-sm m-0.5">
+    <div className="flex-col bg-[#14323B] w-full rounded-[7px] text-center text-sm m-0.5 hover:scale-105">
       <div className="w-full relative">
         <h3 className="text-center text-[#fff] text-xl font-sequel-sans leading-tight tracking-tight mt-4">
           Alerts
@@ -45,7 +45,7 @@ const AlertWidget = ({
               </div>
             ))}
             <div className="flex justify-center items-center">
-              <button className="w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300 m-2">
+              <button className="w-[80px] h-[22px] bg-[#A65146] rounded-md text-white text-xs hover:bg-[#325A67] transition duration-300 m-2">
                 See All
               </button>
             </div>

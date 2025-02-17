@@ -1,3 +1,5 @@
+import { PieChart, Pie, Cell, Tooltip } from "recharts";
+
 const SystemHealthWidget = ({
   systemHealth,
 }: {
@@ -5,9 +7,18 @@ const SystemHealthWidget = ({
     systemsLive: number;
     systemsDown: number;
   } | null;
+
 }) => {
+  if (!systemHealth) return null;
+
+  const data = [
+    { name: "Live", value: systemHealth.systemsLive, color: "#729987" },
+    { name: "Down", value: systemHealth.systemsDown, color: "#A65146" },
+  ];
+
+
   return (
-    <div className="flex-col items-center bg-[#325A67] w-full rounded-[7px] m-0.5">
+    <div className="flex-col items-center bg-[#14323B] w-full rounded-[7px] m-0.5 hover:scale-105">
       <div className="w-full relative pb-0.5">
         <h3 className="text-center text-[#fff] text-xl font-sequel-sans leading-tight tracking-tight mt-4">
           System Health
@@ -15,17 +26,31 @@ const SystemHealthWidget = ({
         <div className="w-2/4 h-px absolute left-1/2 transform -translate-x-1/2 bg-[#fff]" />{" "}
       </div>
 
-      <div className="flex flex-col items-center text-center s-full text-xs p-1">
-        <div className="bg-[#729987] w-full m-2 rounded-[7px] h-24 place-content-around w-full">
-          <h3 className="text-2xl">{systemHealth?.systemsLive}</h3>
-          <h3>Systems Live</h3>
-        </div>
-        <div className="bg-[#A65146] w-full rounded-[7px] h-24 place-content-around w-full">
-          <h3 className="text-2xl">{systemHealth?.systemsDown}</h3>
-          <h3>Systems Down</h3>
-        </div>
+    <div className="flex justify-center items-center w-full">
+      <PieChart width={200} height={200}>
+        <Pie
+          data={data}
+          cx="50%"
+          cy="50%"
+          innerRadius={35}
+          outerRadius={80}
+          dataKey="value"
+          label={({ value }) => (value > 0 ? value : "")}
+          labelLine={false} 
+        >
+          {data.map((entry, index) => (
+            <Cell key={`Cell-${index}`} fill={entry.color} />
+          ))}
+        </Pie>
+        <Tooltip />
+      </PieChart>
+      </div>
+      <div className="flex flex-col items-center text-xs p-1">
+          <h3 className="text-[#729987] text-xl">{systemHealth.systemsLive} Systems Live</h3>
+          <h3 className="text-[#A65146] text-xl">{systemHealth.systemsDown} Systems Down</h3>
       </div>
     </div>
   );
 };
+
 export default SystemHealthWidget;
