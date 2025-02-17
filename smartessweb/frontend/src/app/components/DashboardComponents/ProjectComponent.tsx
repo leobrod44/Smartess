@@ -80,21 +80,21 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
               <p className="mt-1">{project.units.length}</p>
             </div>
             <div className="flex justify-center">
-              <div className="w-[78px] h-8 px-5 bg-[#729987] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
+              <div className="w-[78px] h-8 px-5 bg-[#325A67] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
                   {project.adminUsersCount}
                 </div>
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="w-[78px] h-8 px-5 bg-[#729987] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
+              <div className="w-[78px] h-8 px-5 bg-[#325A67] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
                   {project.hubUsersCount}
                 </div>
               </div>
             </div>
             <div className="flex justify-center">
-              <div className="w-[78px] h-8 px-5 bg-[#a65146] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
+              <div className="w-[78px] h-8 px-5 bg-[#325A67] rounded-[20px] justify-center items-center gap-2.5 inline-flex">
                 <div className="text-center text-white text-base leading-tight tracking-tight">
                   {project.pendingTicketsCount}
                 </div>
