@@ -1,3 +1,5 @@
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
+
 const HubOwner = ({
   owner,
 }: {
@@ -32,8 +34,9 @@ const HubOwner = ({
           <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight">
             {owner.email}
           </div>
-          <button className="w-[80px] h-[22px] bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+          <button className="w-[80px] h-[22px]  flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
             Contact
+            <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
           </button>
         </>
       ) : (
