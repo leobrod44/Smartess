@@ -74,6 +74,12 @@ const SurveillancePage = () => {
     setCurrentPage(page);
   };
 
+  const handleViewIndividualUnitSurveillance = (projectAddress: string, unitNumber: string) => {
+    router.push(
+      `../dashboard/individual-unit-surveillance/${projectAddress}/unit/${unitNumber}`
+    );
+  };
+
   const totalPages = Math.ceil(filteredUnitsByProject.length / unitsPerPage);
   
   const currentUnits =
@@ -111,7 +117,7 @@ const SurveillancePage = () => {
           <div className="grid grid-cols-2 gap-4 mt-6">
             {currentUnits.slice(0, unitsPerPage).map((unit, index) => (
               <div key={index} className="border p-2 bg-[#4b7d8d] rounded-lg">
-                <video className="w-full h-auto" controls>
+                <video className="w-full h-auto cursor-pointer" controls onClick={() => handleViewIndividualUnitSurveillance(unit.projectAddress, unit.unitNumber)}>
                   <source src="your-video-file.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
