@@ -45,7 +45,7 @@ const AlertWidget = ({
               </div>
             ))}
             <div className="flex justify-center items-center">
-              <button className="w-[80px] h-[22px] bg-[#A65146] rounded-md text-white text-xs hover:bg-[#325A67] transition duration-300 m-2">
+              <button className="w-[80px] h-[22px] bg-[#A65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300 m-2">
                 See All
               </button>
             </div>
