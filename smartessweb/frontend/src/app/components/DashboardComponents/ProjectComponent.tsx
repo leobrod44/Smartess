@@ -135,8 +135,9 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
                   key={`${project.projectId}-${unit.unitNumber}`}
                   unitNumber={unit.unitNumber}
                   projectId={project.projectId}
-                  projectAddress={project.address}
-                  onClick={handleNavToUnit}
+                  onClick={() =>
+                    handleNavToUnit(project.address, unit.unitNumber)
+                  }
                 />
               ))}
             </div>
