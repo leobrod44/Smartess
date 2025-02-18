@@ -87,49 +87,49 @@ services:
       rabbitmq-plugins enable rabbitmq_stream rabbitmq_stream_management &&
       rabbitmq-server"
 
-#  #to launch only smartess web use the following command: docker-compose up --build smartessweb
-#  smartessweb_dev:
-#    container_name: smartessweb_dev
-#    build:
-#      context: .
-#      dockerfile: smartessweb/Dockerfile.dev
-#    ports:
-#      - "3000:3000"
-#      - "3001:3001"
-#    volumes:
-#      - ./smartessweb:/app
-#      - /app/node_modules
-#      - /app/.next
-#      - /app/frontend/node_modules
-#      - /app/frontend/.next
-#    networks:
-#      - smartess_network
-#
-#  smartessweb_prod_backend:
-#    container_name: smartessweb_prod_backend
-#    build:
-#      context: .
-#      dockerfile: smartessweb/Dockerfile.prod.backend
-#    ports:
-#      - "3001:3001"
-#    environment:
-#      - NODE_ENV=production
-#    #    depends_on:
-#    #      - rabbitmq
-#    networks:
-#      - smartess_network
-#
-#  smartessweb_prod_frontend:
-#    container_name: smartessweb_prod_frontend
-#    build:
-#      context: .
-#      dockerfile: smartessweb/Dockerfile.prod.frontend
-#    ports:
-#      - "3000:3000"
-#    environment:
-#      - NODE_ENV=production
-#    networks:
-#      - smartess_network
+  #to launch only smartess web use the following command: docker-compose up --build smartessweb
+  smartessweb_dev:
+    container_name: smartessweb_dev
+    build:
+      context: .
+      dockerfile: smartessweb/Dockerfile.dev
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./smartessweb:/app
+      - /app/node_modules
+      - /app/.next
+      - /app/frontend/node_modules
+      - /app/frontend/.next
+    networks:
+      - smartess_network
+
+  smartessweb_prod_backend:
+    container_name: smartessweb_prod_backend
+    build:
+      context: .
+      dockerfile: smartessweb/Dockerfile.prod.backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    #    depends_on:
+    #      - rabbitmq
+    networks:
+      - smartess_network
+
+  smartessweb_prod_frontend:
+    container_name: smartessweb_prod_frontend
+    build:
+      context: .
+      dockerfile: smartessweb/Dockerfile.prod.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - smartess_network
 # make sure to use docker network create smartess_network for first time use
 networks:
   smartess_network:
