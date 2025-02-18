@@ -36,6 +36,7 @@ const RegistrationPage = () => {
         const data = await registrationApi.verifyToken(token);
         setEmail(data.email);
       } catch (error) {
+        console.error("Token verification error:", error);
         setTokenError("Failed to verify registration token");
         showToastError("Failed to verify registration link");
       } finally {
@@ -88,7 +89,7 @@ const RegistrationPage = () => {
         lastName: lastname,
         phone,
         password,
-        email
+        email,
       });
 
       showToastSuccess("Registered successfully!");
@@ -96,7 +97,9 @@ const RegistrationPage = () => {
         router.push("/sign-in");
       }, 1000);
     } catch (error) {
-      showToastError(error instanceof Error ? error.message : "Server error. Please try again later.");
+      showToastError(
+        error instanceof Error ? error.message : "Server error. Please try again later."
+      );
     }
   };
 
