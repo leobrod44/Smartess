@@ -12,7 +12,7 @@ services:
 #        condition: service_healthy
     environment:
       - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
-      - RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
+      #- RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
       - RABBITMQ_STREAM_URI=rabbitmq-stream://admin:admin@rabbitmq:5552/  # Connect to the RabbitMQ service in your full project
 #    volumes:
 #      - ./go/cmd/hub_camera_only/logs:/app/logs
@@ -50,6 +50,15 @@ services:
     networks:
       - smartess_network  # Use the existing network
 
+  # Mock camera rtsp stream for testing purposes
+  mock_camera:
+    container_name: mock_camera
+    build:
+      context: ../../../go/cmd/mock_camera
+    ports:
+      - "8554:8554"
+    networks:
+      - smartess_network
 # Use the existing smartess_network defined in MYFULLPROJECT
 networks:
   smartess_network:
