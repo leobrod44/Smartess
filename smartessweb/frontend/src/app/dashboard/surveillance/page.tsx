@@ -8,6 +8,7 @@ import { surveillanceApi } from "@/api/page";
 import Searchbar from "@/app/components/Searchbar";
 import { IconButton, Pagination } from "@mui/material";
 import PlayArrow from '@mui/icons-material/PlayArrow';
+
 import Image from "next/image";
 
 const SurveillancePage = () => {
@@ -86,7 +87,7 @@ const SurveillancePage = () => {
   
   const currentUnits =
     filteredUnitsByProject.length === 0
-      ? [] // Reset to an empty array if no filtered units exist
+      ? [] 
       : filteredUnitsByProject.slice(
           (currentPage - 1) * unitsPerPage,
           currentPage * unitsPerPage
@@ -117,7 +118,7 @@ const SurveillancePage = () => {
           </div>
         ) :( 
           <div className="grid grid-cols-2 gap-4 mt-6">
-            {currentUnits.slice(0, unitsPerPage).map((unit, index) => (
+            {currentUnits.slice(0, unitsPerPage).map((unit) => (
               <div key={unit.unitNumber} className="border p-2 bg-[#4b7d8d] rounded-lg cursor-pointer relative" onClick={() => handleViewIndividualUnitSurveillance(unit.projectAddress, unit.unitNumber)}>
               <div className="relative">
                 <Image
