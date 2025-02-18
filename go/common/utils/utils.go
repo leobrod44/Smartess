@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"regexp"
 	"strings"
@@ -89,4 +90,11 @@ func IsStructEmpty(s interface{}) bool {
 	}
 
 	return true
+}
+
+func ExpandEnvVariables(input string) string {
+	// Replace environment variables in ${VAR} format
+	return os.Expand(input, func(varName string) string {
+		return os.Getenv(varName)
+	})
 }

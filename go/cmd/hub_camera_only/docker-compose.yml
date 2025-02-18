@@ -1,0 +1,56 @@
+version: "3.7"
+
+services:
+  # Producer (Video stream producer sending chunks to RabbitMQ)
+  producer:
+    build:
+      context: ./ # Path to the producer Go code
+      dockerfile: ./producer/Dockerfile
+    container_name: video_producer
+#    depends_on:
+#      rabbitmq:
+#        condition: service_healthy
+    environment:
+      - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
+      - RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
+      - RABBITMQ_STREAM_URI=rabbitmq-stream://admin:admin@rabbitmq:5552/  # Connect to the RabbitMQ service in your full project
+#    volumes:
+#      - ./go/cmd/hub_camera_only/logs:/app/logs
+    networks:
+      - smartess_network  # Use the existing network
+
+  # Consumer (Receives video chunks from RabbitMQ and sends them to the frontend)
+  consumer:
+    build:
+      context: ./ # Path to the consumer Go code
+      dockerfile: ./consumer/Dockerfile
+    container_name: video_consumer
+    ports:
+      - "8082:8082"  # Publish port .... to the host machine
+#    depends_on:
+#      rabbitmq:
+#        condition: service_healthy
+    environment:
+      - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
+      - RABBITMQ_STREAM_URI=rabbitmq-stream://admin:admin@rabbitmq:5552/  # Connect to the RabbitMQ service in your full project
+
+    networks:
+      - smartess_network  # Use the existing network
+
+  # Frontend (Web UI for displaying the live video stream)
+  frontend:
+    build:
+      context: ./ # Path to the frontend code
+      dockerfile: ./frontend/Dockerfile
+    container_name: frontend_ui
+    ports:
+      - "8083:80"  # Expose port 80 to access the frontend via HTTP
+    depends_on:
+      - consumer
+    networks:
+      - smartess_network  # Use the existing network
+
+# Use the existing smartess_network defined in MYFULLPROJECT
+networks:
+  smartess_network:
+    external: true  # Reference the existing network
