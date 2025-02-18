@@ -2,43 +2,70 @@
 import AlertList from "../../components/AlertsPageComponents/AlertList";
 import { generateMockProjects } from "../../mockData";
 import Pagination from "@mui/material/Pagination";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Searchbar from "../../components/Searchbar";
-
-const itemsPerPage = 8;
+import FilterComponent from "@/app/components/FilterList";
 
 const AlertPage = () => {
-  const allAlerts = generateMockProjects().flatMap((project) =>
-    project.units.flatMap((unit) =>
-      unit.alerts.map((alert) => ({
-        ...alert,
-        unitNumber: unit.unitNumber, // Add unit number to each alert
-      }))
-    )
+  const itemsPerPage = 6;
+  const allAlerts = useMemo(
+    () =>
+      generateMockProjects().flatMap((project) =>
+        project.units.flatMap((unit) => unit.alerts)
+      ),
+    []
   );
 
-  const [filteredAlerts, setFilteredAlerts] = useState(allAlerts);
-
-  const handleSearch = (query: string) => {
-    const lowerCaseQuery = query.toLowerCase();
-
-    const filtered = allAlerts.filter((alert) => {
-      const messageMatch = new RegExp(`\\b${lowerCaseQuery}\\b`, "i").test(
-        alert.message
-      );
-      const unitMatch = alert.unitNumber.toString().includes(lowerCaseQuery);
-      const typeMatch = alert.type.toLowerCase() === lowerCaseQuery;
-
-      return messageMatch || unitMatch || typeMatch;
-    });
-    setFilteredAlerts(filtered);
-    setCurrentPage(1); // Reset pagination on search
+  const [filteredAlerts, setFilteredAlerts] = useState([...allAlerts]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const filterOptionsAlerts = [
+    "Most Recent",
+    "Least Recent",
+    "Clear All Filters",
+  ];
+  const handleFilterChange = (filterValue: string) => {
+    if (filterValue === "Clear Filters") {
+      setFilter("");
+      setSearchQuery("");
+      setCurrentPage(1);
+      setFilteredAlerts([...allAlerts]);
+    } else {
+      setFilter(filterValue);
+      setCurrentPage(1);
+    }
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  // Pagination logic
-  const totalPages = Math.ceil(filteredAlerts.length / itemsPerPage);
-  const currentItems = filteredAlerts.slice(
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const sortedFilteredAlerts = filteredAlerts
+    .filter((alert) => {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      return (
+        alert.message.toLowerCase().includes(lowerCaseQuery) ||
+        alert.unitNumber.toString().includes(lowerCaseQuery) ||
+        alert.type.toLowerCase().includes(lowerCaseQuery)
+      );
+    })
+    .sort((a, b) => {
+      if (filter === "Most Recent") {
+        return (
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      } else if (filter === "Least Recent") {
+        return (
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+      }
+      return 0;
+    });
+
+  const totalPages = Math.ceil(sortedFilteredAlerts.length / itemsPerPage);
+  const paginatedAlerts = sortedFilteredAlerts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -49,6 +76,7 @@ const AlertPage = () => {
   ) => {
     setCurrentPage(page);
   };
+
   return (
     <div className="flex border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex-col">
       <div className="flex items-center pt-4 justify-between mb-8">
@@ -56,6 +84,10 @@ const AlertPage = () => {
           Alerts
         </h1>
         <div className="flex items-center pt-2">
+          <FilterComponent
+            onFilterChange={handleFilterChange}
+            filterOptions={filterOptionsAlerts}
+          />
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
@@ -82,7 +114,7 @@ const AlertPage = () => {
           Action
         </p>
       </div>
-      <AlertList alerts={currentItems} />
+      <AlertList alerts={paginatedAlerts} />
       <div className="mt-4 flex justify-center">
         <Pagination
           className="custom-pagination"
