@@ -348,5 +348,22 @@ export const surveillanceApi = {
     }
 
     return data;
+  },
+
+  getProjectImages: async (token: string): Promise<{ images: string[] }> => {
+    const response = await fetch(`${API_URL}/surveillance/get-project-images`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch project images');
+    }
+
+    return data;
   }
 }
