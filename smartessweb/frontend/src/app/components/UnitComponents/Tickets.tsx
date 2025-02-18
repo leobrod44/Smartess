@@ -5,7 +5,7 @@ const Tickets = ({
 }) => (
   <div className="max-w-xs p-4 bg-white flex flex-col justify-start items-center">
     <div className="w-full relative pb-2.5">
-      <div className="text-center text-[#4b7d8d] text-l font-sequel-sans-black leading-tight tracking-tight">
+      <div className="text-center text-[#4b7d8d] text-l font-medium leading-tight tracking-tight">
         Tickets
       </div>
       <div className="w-[75%] h-px absolute bg-[#4b7d8d] left-1/2 transform -translate-x-1/2" />

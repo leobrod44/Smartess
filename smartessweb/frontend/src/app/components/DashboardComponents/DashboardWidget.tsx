@@ -67,10 +67,10 @@ const DashboardWidget = () => {
   }
 
   return (
-    <div className="flex flex-col md:flex-row justify-between bg-[#14323B] p-1.5 rounded-[7px] shadow-md md:max-w-full hover:bg-[#4B7D8D] transition duration-300 text-[#fff] w-full p-2.5 gap-2">
+    <div className="flex flex-col md:flex-row justify-between  p-1.5 rounded-[7px] shadow-md md:max-w-full transition duration-300 text-[#fff] w-full p-2.5 gap-2">
       <SystemOverviewWidget systemOverview={systemOverview} />
-      <AlertWidget systemAlerts={systemAlerts} />
       <SystemHealthWidget systemHealth={systemHealth} />
+      <AlertWidget systemAlerts={systemAlerts} />
     </div>
   );
 };
