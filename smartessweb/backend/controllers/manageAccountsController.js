@@ -1050,6 +1050,7 @@ exports.changeOrgUserRole = async (req, res) => {
         }
   
         const subject = `Smartess Organization Invite`;
+        const webURL = process.env.WEBSITE_URL;
   
       // HTML template for the email
       const htmlContent = `
@@ -1135,7 +1136,7 @@ exports.changeOrgUserRole = async (req, res) => {
                 <div class="instructions">
                   <p>Please follow the steps below to join our system:</p>
                   <ol>
-                    <li>Click here to complete your registration: <a href="http://localhost:3001/registration?${token}">click here</a></li>
+                    <li>Click here to complete your registration: <a href="${webURL}/registration?${token}">click here</a></li>
                     <li>Create your Smartess account or log in if you already have one.</li>
                     <li>Access your assigned projects from your dashboard.</li>
                   </ol>
