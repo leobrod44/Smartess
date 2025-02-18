@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { /*generateMockSurveillanceCameras, */Project } from "../../mockData";
 import { surveillanceApi } from "@/api/page";
 import Searchbar from "@/app/components/Searchbar";
-import { Pagination } from "@mui/material";
+import { IconButton, Pagination } from "@mui/material";
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import Image from "next/image";
 
 const SurveillancePage = () => {
   const router = useRouter();
@@ -116,16 +118,27 @@ const SurveillancePage = () => {
         ) :( 
           <div className="grid grid-cols-2 gap-4 mt-6">
             {currentUnits.slice(0, unitsPerPage).map((unit, index) => (
-              <div key={index} className="border p-2 bg-[#4b7d8d] rounded-lg">
-                <video className="w-full h-auto cursor-pointer" controls onClick={() => handleViewIndividualUnitSurveillance(unit.projectAddress, unit.unitNumber)}>
-                  <source src="your-video-file.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-                <div className="mt-2 flex justify-between">
-                  <p className="text-sm text-white">{unit.projectAddress}</p>
-                  <p className="text-sm text-white text-right">Unit {unit.unitNumber}</p>
+              <div key={unit.unitNumber} className="border p-2 bg-[#4b7d8d] rounded-lg cursor-pointer relative" onClick={() => handleViewIndividualUnitSurveillance(unit.projectAddress, unit.unitNumber)}>
+              <div className="relative">
+                <Image
+                  src={require(`../../../public/images/mock-units/${unit.projectId}.jpg`).default}
+                  alt={`Project ${unit.projectId}`}
+                  width={300}
+                  height={300}
+                  className="w-full h-auto"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <IconButton sx={{ backgroundColor: "rgba(55, 65, 81, 0.5)", borderRadius: "50%", padding: "12px"}}>
+                    <PlayArrow sx={{ color: "white", fontSize: "48px" }} />
+                  </IconButton>
                 </div>
               </div>
+              <div className="mt-2 flex justify-between text-white">
+                <p className="text-sm">{unit.projectAddress}</p>
+                <p className="text-sm">Unit {unit.unitNumber}</p>
+              </div>
+            </div>
+            
             ))}
           </div>
         )}
