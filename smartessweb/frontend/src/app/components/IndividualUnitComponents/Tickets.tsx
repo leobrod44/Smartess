@@ -9,6 +9,12 @@ interface TicketsProps {
 const Tickets = ({ tickets }: TicketsProps) => {
   const router = useRouter();
 
+  const capitalizeWords = (str: string) =>
+    str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -72,7 +78,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
               <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
               {ticket.description}
               <div className="text-[#14323B] font-semibold">Type:</div>{" "}
-              {ticket.type}
+              {capitalizeWords(ticket.type)}
               <div className="text-[#14323B] font-semibold">Status:</div>
               <div className="inline-block">
                 <span
@@ -80,7 +86,7 @@ const Tickets = ({ tickets }: TicketsProps) => {
                     ticket.status
                   )}`}
                 >
-                  {ticket.status}
+                  {capitalizeWords(ticket.status)}
                 </span>
               </div>
               <div className="text-[#14323B] font-semibold">Date:</div>{" "}
@@ -90,13 +96,16 @@ const Tickets = ({ tickets }: TicketsProps) => {
             {/* Table view for medium and larger screens */}
             <div className="hidden md:block">{ticket.ticket_id}</div>
             <div className="hidden md:block">{ticket.description}</div>
-            <div className="hidden md:block">{ticket.type}</div>
+            <div className="hidden md:block">
+              {" "}
+              {capitalizeWords(ticket.type)}
+            </div>
             <div
               className={`hidden md:block w-[78px] h-6 rounded-[20px] mx-auto text-center ${getStatusColorClasses(
                 ticket.status
               )}`}
             >
-              {ticket.status}
+              {capitalizeWords(ticket.status)}
             </div>
             <div className="hidden md:block">
               {formatDate(ticket.created_at)}
