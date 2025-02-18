@@ -23,6 +23,7 @@ const ticketsRoutes = require("./routes/ticketsRoutes");
 const announcementsRoutes = require("./routes/announcementRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");
 const surveillanceRoutes = require("./routes/surveillanceRoutes");
+const registrationRoutes = require("./routes/registrationRoutes"); 
 
 //Add path here
 app.use("/api/auth", authRoutes);
@@ -38,5 +39,7 @@ app.use("/api/tickets", ticketsRoutes);
 app.use("/api/announcements", announcementsRoutes);
 app.use("/api/consumptions", consumptionRoutes);
 app.use("/api/surveillance", surveillanceRoutes);
+app.use("/api/registration", registrationRoutes);
 
 module.exports = app;
+
