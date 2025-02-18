@@ -26,7 +26,7 @@ services:
       dockerfile: ./consumer/Dockerfile
     container_name: video_consumer
     ports:
-      - "8082:8082"  # Publish port .... to the host machine
+      - "8082:8082"  # Publish port .... to the host machine; Expose port for WebSocket or WebRTC signaling
 #    depends_on:
 #      rabbitmq:
 #        condition: service_healthy
@@ -49,7 +49,6 @@ services:
       - consumer
     networks:
       - smartess_network  # Use the existing network
-
   # Mock camera rtsp stream for testing purposes
   mock_camera:
     container_name: mock_camera
