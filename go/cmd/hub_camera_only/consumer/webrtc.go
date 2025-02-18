@@ -5,12 +5,50 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
 
 	"github.com/pion/webrtc/v3"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
 
-var peerConnection *webrtc.PeerConnection
+//var peerConnection *webrtc.PeerConnection
+
+// TODO Add a global variable to store the WebRTC peer connection
+// TODO Make configs and setups for specific exchange-mqstreams setups as well as env vars, docker vars, urls/locations (user+pwd+host+port+exchange+stream)
+func startWebRTCStream() {
+	// Build the GStreamer pipeline
+	cmd := exec.Command("gst-launch-1.0",
+		"rtmpsrc", "location=rabbitmq-stream://admin:admin@rabbitmq:5552/mqstream_video_test", //tcp://rabbitmq-server:5555/live_video",
+		"!",
+		"decodebin", "!",
+		"videoconvert", "!",
+		"vp8enc", "deadline=1", "!",
+		"rtpvp8pay", "!",
+		"webrtcbin", "name=peer")
+
+	// Log the command output for debugging purposes
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	// Run the command
+	err := cmd.Run()
+	if err != nil {
+		fmt.Printf("Error running GStreamer: %v\n", err)
+	}
+	////TODO Start the GStreamer process
+	//err = cmd.Start()
+	//if err != nil {
+	//	log.Fatalf("Failed to start GStreamer process: %s", err)
+	//}
+	//// TODO: CONSUME HERE
+
+	////TODO Wait for the GStreamer process to finish
+	//err = cmd.Wait()
+	//if err != nil {
+	//	log.Fatalf("Failed to run GStreamer: %s", err)
+	//}
+}
 
 //func main() {
 //	env, err := stream.NewEnvironment(stream.NewEnvironmentOptions().SetHost("localhost").SetPort(5555))
