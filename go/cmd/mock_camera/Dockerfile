@@ -20,4 +20,4 @@ RUN chmod +x /start_mock_camera.sh
 EXPOSE 8554
 
 # Run the startup script
-CMD ["/start_mock_camera.sh"]
+CMD ["/bin/sh", "/start_mock_camera.sh"]

@@ -31,3 +31,15 @@ const (
 func (d HubTypeEnum) String() string {
 	return [...]string{"HA_NORMAL_HUB", "LOCAL_MOCK_HUB"}[d]
 }
+
+type CameraEnum int
+
+const (
+	MAIN_CAMERA CameraEnum = iota
+	ANT_CAMERA
+	MOCK_CAMERA
+)
+
+func (d CameraEnum) String() string {
+	return [...]string{"MAIN_CAMERA", "ANT_CAMERA", "MOCK_CAMERA"}[d]
+}

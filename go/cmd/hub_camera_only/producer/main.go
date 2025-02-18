@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -11,9 +12,42 @@ import (
 	//"github.com/streadway/amqp"
 	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	stream "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
+	"gopkg.in/yaml.v3"
 )
 
+type CameraEnum int
+
+const (
+	MAIN_CAMERA CameraEnum = iota
+	ANT_CAMERA
+	MOCK_CAMERA
+)
+
+func (d CameraEnum) String() string {
+	return [...]string{"MAIN_CAMERA", "ANT_CAMERA", "MOCK_CAMERA"}[d]
+}
+
 func main() {
+	SELECTED_CAMERA := int(MOCK_CAMERA)
+
+	dir := "/app/config/cameras.yaml"
+	data, err := os.ReadFile(dir)
+	if err != nil {
+		log.Fatalf("failed to read camera yaml: %v", err)
+	}
+	var cameras map[string][]map[string]string
+	err = yaml.Unmarshal(data, &cameras)
+	if err != nil {
+		log.Fatalf("failed to unmarshal yaml: %v", err)
+	}
+	var RTSP_STREAM_URL string
+	if len(cameras["cameras"]) > SELECTED_CAMERA {
+		RTSP_STREAM_URL = cameras["cameras"][SELECTED_CAMERA]["streamURL"]
+		fmt.Println("RTSP Stream URL:", RTSP_STREAM_URL)
+	} else {
+		log.Fatalf("Invalid camera selection: %d", SELECTED_CAMERA)
+	}
+
 	// Declare Stream
 	env, err := stream.NewEnvironment(
 		stream.NewEnvironmentOptions().
@@ -73,8 +107,7 @@ func main() {
 	//}
 
 	// Capture the RTSP stream (example using ffmpeg)
-	rtspURL := os.Getenv("RTSP_STREAM_URL")
-	cmd := exec.Command("ffmpeg", "-i", rtspURL, "-f", "mpegts", "pipe:1") // Using ffmpeg to stream RTSP to stdout
+	cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mpegts", "pipe:1") // Using ffmpeg to stream RTSP to stdout
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatalf("Failed to get stdout pipe: %v", err)

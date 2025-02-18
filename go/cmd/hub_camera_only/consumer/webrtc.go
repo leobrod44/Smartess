@@ -1,15 +1,15 @@
 package main
 
 import (
-	"encoding/json"
+	_ "encoding/json"
 	"fmt"
-	"log"
-	"net/http"
+	_ "log"
+	_ "net/http"
 	"os"
 	"os/exec"
 
-	"github.com/pion/webrtc/v3"
-	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
+	_ "github.com/pion/webrtc/v3"
+	_ "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
 
 //var peerConnection *webrtc.PeerConnection

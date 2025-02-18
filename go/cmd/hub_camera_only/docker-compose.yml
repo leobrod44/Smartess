@@ -10,6 +10,8 @@ services:
 #    depends_on:
 #      rabbitmq:
 #        condition: service_healthy
+    volumes:
+      - ../../../go/hub/config:/app/config
     environment:
       - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
       #- RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1

@@ -4,8 +4,10 @@ go 1.23.2
 
 require (
 	github.com/gorilla/websocket v1.5.3
+	github.com/pion/webrtc/v3 v3.3.5
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/rabbitmq/rabbitmq-stream-go-client v1.5.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -30,7 +32,6 @@ require (
 	github.com/pion/stun v0.6.1 // indirect
 	github.com/pion/transport/v2 v2.2.10 // indirect
 	github.com/pion/turn/v2 v2.1.6 // indirect
-	github.com/pion/webrtc/v3 v3.3.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
@@ -39,5 +40,4 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
