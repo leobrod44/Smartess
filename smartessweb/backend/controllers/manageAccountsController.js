@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const supabaseAdmin = require('../config/supabase').admin;
 const { Resend } = require("resend");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -657,38 +658,43 @@ exports.removeOrgUserFromProject = async (req, res) => {
 
 exports.deleteOrgUser = async (req, res) => {
   try {
+    // 1) Validate the token
     const token = req.token;
-
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser(token);
+
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
 
+    // 2) Get the request body
     const { user_id, org_id } = req.body;
-
     if (!user_id || !org_id) {
-      return res
-        .status(400)
-        .json({ error: "user_id and org_id are required." });
+      return res.status(400).json({
+        error: "user_id and org_id are required.",
+      });
     }
 
-    // get user type from the user table using user_id
+    // 3) Fetch the user info from your "user" table (grab the email + type, etc.)
     const { data: userData, error: fetchUserError } = await supabase
       .from("user")
-      .select("type")
+      .select("email, type")
       .eq("user_id", user_id);
 
-    if (fetchUserError || !userData || userData.length === 0) {
+    if (fetchUserError) {
       console.error("Fetch User Error:", fetchUserError);
-      return res.status(500).json({ error: "Failed to retrieve user type." });
+      return res.status(500).json({ error: "Failed to retrieve user info." });
     }
 
-    const user_type = userData[0].type;
+    if (!userData || userData.length === 0) {
+      return res.status(404).json({ error: "No matching user found in system." });
+    }
 
-    // get all proj_id's for this user in the org_user table
+    const { email, type: user_type } = userData[0];
+
+    // 4) Get all proj_id's for this user in the org_user table
     const { data: projIdsData, error: fetchProjIdsError } = await supabase
       .from("org_user")
       .select("proj_id")
@@ -701,15 +707,9 @@ exports.deleteOrgUser = async (req, res) => {
     }
 
     const projIds = projIdsData.map((row) => row.proj_id);
-    console.log(user_type, projIds.length);
 
-    // if user is admin, decrement admin_users_count in projects table for all proj_ids, ignore if proj_ids contains null
-    if (
-      user_type === "admin" &&
-      projIds.length > 0 &&
-      !projIds.includes(null)
-    ) {
-      // retrieve current admin_users_count for each proj_id
+    // 5) If user is admin, decrement admin_users_count in "project" for each relevant project
+    if (user_type === "admin" && projIds.length > 0 && !projIds.includes(null)) {
       const { data: projects, error: fetchProjectsError } = await supabase
         .from("project")
         .select("proj_id, admin_users_count")
@@ -722,9 +722,10 @@ exports.deleteOrgUser = async (req, res) => {
           .json({ error: "Failed to fetch projects for admin count update." });
       }
 
-      // loop through projects and update admin_users_count
+      // Loop through projects and update admin_users_count
       for (const project of projects) {
-        const newCount = (project.admin_users_count || 0) - 1; // ensure no undefined or null values
+        const newCount = (project.admin_users_count || 0) - 1;
+
         const { error: updateCountError } = await supabase
           .from("project")
           .update({ admin_users_count: newCount })
@@ -742,7 +743,7 @@ exports.deleteOrgUser = async (req, res) => {
       }
     }
 
-    // delete the user from the org_user table
+    // 6) Delete from org_user table
     const { error: deleteOrgUserError } = await supabase
       .from("org_user")
       .delete()
@@ -751,12 +752,12 @@ exports.deleteOrgUser = async (req, res) => {
 
     if (deleteOrgUserError) {
       console.error("Delete OrgUser Error:", deleteOrgUserError);
-      return res
-        .status(500)
-        .json({ error: "Failed to remove user from the organization." });
+      return res.status(500).json({
+        error: "Failed to remove user from the organization.",
+      });
     }
 
-    // delete the user from the user table
+    // 7) Delete from your "user" table
     const { error: deleteUserError } = await supabase
       .from("user")
       .delete()
@@ -769,16 +770,50 @@ exports.deleteOrgUser = async (req, res) => {
         .json({ error: "Failed to delete user from the system." });
     }
 
-    res.status(200).json({
-      message: "User successfully removed from the organization and system.",
+    // 8) Look up the user in Supabase Auth by email (via listUsers) and delete from Auth
+    const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
+      filter: `email:eq.${email}`, // filter syntax: field:operator.value
+      page: 1,
+      perPage: 1,
+    });
+
+    if (listError) {
+      console.error("Auth listUsers Error:", listError);
+      return res
+        .status(500)
+        .json({ error: "Failed to find the user in Supabase Auth by email." });
+    }
+
+    if (!listData?.users || listData.users.length === 0) {
+      console.warn(`No matching Auth user found with email: ${email}`);
+      // If you consider this an error, do:
+      return res.status(404).json({
+        error: `No Auth user found with email: ${email}. User deleted from custom tables anyway.`,
+      });
+    }
+
+    const userAuthUUID = listData.users[0].id;
+
+    // Finally, delete from Supabase Auth
+    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userAuthUUID);
+    if (deleteAuthError) {
+      console.error("Delete Auth User Error:", deleteAuthError);
+      return res.status(500).json({
+        error: "Failed to delete user from Supabase authentication.",
+      });
+    }
+
+    return res.status(200).json({
+      message:
+        "User successfully removed from org_user, user table, and Supabase Auth.",
     });
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Internal server error." });
+    return res.status(500).json({ error: "Internal server error." });
   }
 };
 
-(exports.changeOrgUserRole = async (req, res) => {
+exports.changeOrgUserRole = async (req, res) => {
   try {
     const token = req.token;
 
@@ -831,7 +866,9 @@ exports.deleteOrgUser = async (req, res) => {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error." });
   }
-}),
+};
+
+
   /**
    * Handles sending an invitation email to a user for joining Smartess projects.
    *
@@ -852,11 +889,13 @@ exports.deleteOrgUser = async (req, res) => {
    *
    * @throws {Error} If an error occurs while sending the email, it logs the error and returns a 500 response.
    */
-  (exports.sendInvite = async (req, res) => {
+  
+  exports.sendInvite = async (req, res) => {
     try {
       const { email, role, sender_name } = req.body;
       let projects = [];
-
+  
+      // Parse projects from request body
       if (req.body.projects) {
         if (typeof req.body.projects === "string") {
           projects = req.body.projects
@@ -870,130 +909,264 @@ exports.deleteOrgUser = async (req, res) => {
           .filter((key) => key.startsWith("projects["))
           .map((key) => req.body[key]);
       }
-
-      const subject = `Smartess Organization Invite:`;
-
-      // Simple HTML template for the email
+  
+      // First, check if user already exists
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from("user")
+        .select("user_id")
+        .eq("email", email)
+        .single();
+  
+      if (userCheckError && userCheckError.code !== "PGRST116") { // PGRST116 is "not found" error
+        console.error("Error checking existing user:", userCheckError);
+        return res.status(500).json({ error: "Failed to check existing usgit aer." });
+      }
+  
+      let userId;
+  
+      if (!existingUser) {
+        // Create new user in user table - user_id will be auto-generated
+        const { data: newUser, error: createUserError } = await supabase
+          .from("user")
+          .insert([{
+            email: email,
+            first_name : "Invitation",
+            last_name : "Pending"
+          }])
+          .select();
+  
+        if (createUserError) {
+          console.error("Error creating user:", createUserError);
+          return res.status(500).json({ error: "Failed to create user." });
+        }
+  
+        if (!newUser || newUser.length === 0) {
+          return res.status(500).json({ error: "User creation failed - no user returned." });
+        }
+  
+        userId = newUser[0].user_id; // Get the auto-generated user_id from the first (and only) created user
+      } else {
+        userId = existingUser.user_id;
+      }
+  
+      // Get project IDs from project addresses
+      const { data: projectData, error: projectError } = await supabase
+        .from("project")
+        .select("proj_id, org_id")
+        .in("address", projects);
+  
+      if (projectError) {
+        console.error("Error fetching projects:", projectError);
+        return res.status(500).json({ error: "Failed to fetch project data." });
+      }
+  
+      if (!projectData || projectData.length === 0) {
+        return res.status(404).json({ error: "No matching projects found." });
+      }
+  
+      // Create entries in org_user table for each project
+      const orgUserEntries = projectData.map(project => ({
+        user_id: userId,
+        org_id: project.org_id,
+        proj_id: project.proj_id,
+        org_user_type: role
+      }));
+  
+      // Insert all org_user entries
+      const { error: orgUserError } = await supabase
+        .from("org_user")
+        .insert(orgUserEntries);
+  
+      if (orgUserError) {
+        console.error("Error creating org_user entries:", orgUserError);
+        
+        // If org_user creation fails, cleanup the user if we just created them
+        if (!existingUser) {
+          await supabase
+            .from("user")
+            .delete()
+            .eq("user_id", userId);
+        }
+        
+        return res.status(500).json({ error: "Failed to associate user with projects." });
+      }
+  
+      // If role is admin, increment admin_users_count for each project
+      if (role === 'admin') {
+        const updatePromises = projectData.map(async (project) => {
+          const { data: currentProject } = await supabase
+            .from("project")
+            .select("admin_users_count")
+            .eq("proj_id", project.proj_id)
+            .single();
+  
+          const newCount = (currentProject?.admin_users_count || 0) + 1;
+  
+          return supabase
+            .from("project")
+            .update({ admin_users_count: newCount })
+            .eq("proj_id", project.proj_id);
+        });
+  
+        await Promise.all(updatePromises);
+      }
+  
+            // Generate a secure token using UUID v4
+        const { v4: uuidv4 } = require('uuid');
+        const token = uuidv4();
+  
+        // First delete any existing rows for this email and task
+        const { error: deleteError } = await supabase
+          .from('temp_acc_access')
+          .delete()
+          .match({ task: 'registration', email: email });
+  
+        if (deleteError) {
+          console.error("Error deleting existing token:", deleteError);
+          return res.status(500).json({ error: "Failed to update access token." });
+        }
+  
+        // Insert new token
+        const { error: insertError } = await supabase
+          .from('temp_acc_access')
+          .insert([{
+            token_id: token,
+            task: 'registration',
+            email: email
+          }]);
+  
+        if (insertError) {
+          console.error("Error storing token:", insertError);
+          
+          // If token creation fails, cleanup the user if we just created them
+          if (!existingUser) {
+            await supabase
+              .from("user")
+              .delete()
+              .eq("user_id", userId);
+          }
+          
+          return res.status(500).json({ error: "Failed to create access token." });
+        }
+  
+        const subject = `Smartess Organization Invite`;
+        const webURL = process.env.WEBSITE_URL;
+  
+      // HTML template for the email
       const htmlContent = `
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <title>You have been invited to join Smartess</title>
-                <style>
-                  body {
-                    margin: 0;
-                    padding: 0;
-                    font-family: Arial, sans-serif;
-                    background-color: #f8f9fa;
-                    color: #333333;
-                    line-height: 1.6;
-                  }
-                  .email-wrapper {
-                    width: 100%;
-                    background-color: #f8f9fa;
-                    padding: 20px 0;
-                  }
-                  .email-container {
-                    max-width: 600px;
-                    margin: 0 auto;
-                    background-color: #ffffff;
-                    border-radius: 8px;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                    overflow: hidden;
-                  }
-                  .email-header {
-                    background-color: #4b7d8d;
-                    padding: 20px;
-                    text-align: center;
-                    color: #ffffff;
-                  }
-                  .email-header h1 {
-                    margin: 0;
-                    font-size: 24px;
-                    font-weight: bold;
-                  }
-                  .email-body {
-                    padding: 20px;
-                    color: #333333;
-                  }
-                  .email-body p {
-                    margin: 10px 0;
-                  }
-                  .email-body .highlight {
-                    font-weight: bold;
-                    color: #4b7d8d;
-                  }
-                  .email-footer {
-                    text-align: center;
-                    padding: 10px;
-                    background-color: #1f505e;
-                    color: #ffffff;
-                    font-size: 12px;
-                  }
-                  .project-list {
-                    padding-left: 20px;
-                    margin: 10px 0;
-                 }
-                 .instructions {
-                  margin-top: 20px;
-                  padding: 15px;
-                  background-color: #e9f5f8;
-                  border-left: 4px solid #4b7d8d;
-                }
-                </style>
-              </head>
-              <body>
-                <div class="email-wrapper">
-                  <div class="email-container">
-                    <div class="email-body">
-                      <p> Hello, </p>
-                      <p> You have been invited by ${sender_name} to join the following projects: </p>
-
-                      <ul class="project-list">
-                           ${projects
-                             .map((project) => `<li>${project}</li>`)
-                             .join("")} 
-                      </ul> 
-                      <p> As a <span class="highlight">${role}</span> user. </p>
-                        <div class="instructions">
-                          <p>Please follow the steps below to join our system:</p>
-                          
-                            <ol>
-                                <li>Click the invitation link provided in this email.</li>
-                                <li>Create your Smartess account or log in if you already have one.</li>
-                                <li>Access your assigned projects from your dashboard.</li>
-                            </ol>
-                        </div>        
-                    </div>
-                    <div class="email-footer">
-                      &copy; ${new Date().getFullYear()} Smartess. All rights reserved.
-                    </div>
-                  </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>You have been invited to join Smartess</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif;
+              background-color: #f8f9fa;
+              color: #333333;
+              line-height: 1.6;
+            }
+            .email-wrapper {
+              width: 100%;
+              background-color: #f8f9fa;
+              padding: 20px 0;
+            }
+            .email-container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+            }
+            .email-header {
+              background-color: #4b7d8d;
+              padding: 20px;
+              text-align: center;
+              color: #ffffff;
+            }
+            .email-header h1 {
+              margin: 0;
+              font-size: 24px;
+              font-weight: bold;
+            }
+            .email-body {
+              padding: 20px;
+              color: #333333;
+            }
+            .email-body p {
+              margin: 10px 0;
+            }
+            .email-body .highlight {
+              font-weight: bold;
+              color: #4b7d8d;
+            }
+            .email-footer {
+              text-align: center;
+              padding: 10px;
+              background-color: #1f505e;
+              color: #ffffff;
+              font-size: 12px;
+            }
+            .project-list {
+              padding-left: 20px;
+              margin: 10px 0;
+            }
+            .instructions {
+              margin-top: 20px;
+              padding: 15px;
+              background-color: #e9f5f8;
+              border-left: 4px solid #4b7d8d;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="email-wrapper">
+            <div class="email-container">
+              <div class="email-body">
+                <p>Hello,</p>
+                <p>You have been invited by ${sender_name} to join the following projects:</p>
+                <ul class="project-list">
+                  ${projects.map((project) => `<li>${project}</li>`).join("")}
+                </ul>
+                <p>As a <span class="highlight">${role}</span> user.</p>
+                <div class="instructions">
+                  <p>Please follow the steps below to join our system:</p>
+                  <ol>
+                    <li>Click here to complete your registration: <a href="${webURL}/registration?${token}">click here</a></li>
+                    <li>Create your Smartess account or log in if you already have one.</li>
+                    <li>Access your assigned projects from your dashboard.</li>
+                  </ol>
                 </div>
-              </body>
-              </html>
-            `;
-
-      console.log(htmlContent);
-
-      // Send the email to the  address provided
+              </div>
+              <div class="email-footer">
+                &copy; ${new Date().getFullYear()} Smartess. All rights reserved.
+              </div>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+  
+      // Send the email
       await resend.emails.send({
         from: `Smartess <support@${process.env.RESEND_DOMAIN}>`,
         to: email,
         subject,
         html: htmlContent,
       });
-
-      // Send a success response
+  
       return res.status(200).json({
-        message: "Email sent successfully to " + email,
+        message: "User created and email sent successfully to " + email
       });
     } catch (error) {
-      console.error("Failed to send email:", error);
-      return res
-        .status(500)
-        .json({ message: "Failed to send email.", error: error.message });
+      console.error("Failed to process invitation:", error);
+      return res.status(500).json({
+        message: "Failed to process invitation.",
+        error: error.message
+      });
     }
-  });
+  };
