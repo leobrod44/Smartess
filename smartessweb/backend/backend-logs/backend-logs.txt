@@ -1228,3 +1228,67 @@
 2025-02-17 20:47:42 - Server is running on port 3000
 2025-02-17 20:48:20 - Server is initializing...
 2025-02-17 20:48:20 - Server is running on port 3000
+2025-02-17 22:29:10 - Server is initializing...
+2025-02-17 22:29:11 - Server is running on port 3000
+2025-02-17 22:53:34 - Server is initializing...
+2025-02-17 22:53:34 - Server is running on port 3000
+2025-02-17 22:54:01 - Server is initializing...
+2025-02-17 22:54:01 - Server is running on port 3000
+2025-02-17 22:54:46 - Server is initializing...
+2025-02-17 22:54:46 - Server is running on port 3000
+2025-02-18 11:03:42 - Server is initializing...
+2025-02-18 11:03:42 - Server is running on port 3000
+2025-02-18 11:06:39 - Server is initializing...
+2025-02-18 11:06:39 - Server is running on port 3000
+2025-02-18 11:06:47 - fetched successfully
+2025-02-18 11:06:47 - fetched successfully
+2025-02-18 11:07:20 - Server is initializing...
+2025-02-18 11:07:20 - Server is running on port 3000
+2025-02-18 11:07:24 - Fetched image URLs: 
+2025-02-18 11:07:24 - Fetched image URLs: 
+2025-02-18 11:09:36 - Fetched image URLs: 
+2025-02-18 11:09:36 - Fetched image URLs: 
+2025-02-18 11:11:01 - Server is initializing...
+2025-02-18 11:11:01 - Server is running on port 3000
+2025-02-18 11:16:21 - Fetched image URLs: ,,,,
+2025-02-18 11:16:21 - Fetched image URLs: ,,,,
+2025-02-18 11:17:10 - Server is initializing...
+2025-02-18 11:17:10 - Server is running on port 3000
+2025-02-18 11:17:27 - Server is initializing...
+2025-02-18 11:17:27 - Server is running on port 3000
+2025-02-18 11:17:36 - Server is initializing...
+2025-02-18 11:17:36 - Server is running on port 3000
+2025-02-18 11:18:03 - Fetched image URLs: ,,,,
+2025-02-18 11:18:04 - Fetched image URLs: ,,,,
+2025-02-18 11:20:32 - Fetched image URLs: ,,,,
+2025-02-18 11:20:32 - Fetched image URLs: ,,,,
+2025-02-18 11:21:00 - Server is initializing...
+2025-02-18 11:21:01 - Server is running on port 3000
+2025-02-18 11:21:05 - Public URL object for 1.jpg: [object Object]
+2025-02-18 11:21:05 - Public URL object for 2.jpg: [object Object]
+2025-02-18 11:21:05 - Public URL object for 3.jpg: [object Object]
+2025-02-18 11:21:05 - Public URL object for 4.jpg: [object Object]
+2025-02-18 11:21:05 - Public URL object for .emptyFolderPlaceholder: [object Object]
+2025-02-18 11:21:05 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:21:06 - Public URL object for 1.jpg: [object Object]
+2025-02-18 11:21:06 - Public URL object for 2.jpg: [object Object]
+2025-02-18 11:21:06 - Public URL object for 3.jpg: [object Object]
+2025-02-18 11:21:06 - Public URL object for 4.jpg: [object Object]
+2025-02-18 11:21:06 - Public URL object for .emptyFolderPlaceholder: [object Object]
+2025-02-18 11:21:06 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:08 - Server is initializing...
+2025-02-18 11:22:08 - Server is running on port 3000
+2025-02-18 11:22:14 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:14 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:35 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:35 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:49 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 11:22:50 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 15:18:19 - Server is initializing...
+2025-02-18 15:18:19 - Server is running on port 3000
+2025-02-18 15:18:48 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 15:18:50 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 15:20:27 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 15:20:27 - Fetched image URLs: https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/1.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/2.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/3.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/4.jpg,https://binhqkhubflsxgrlvppg.supabase.co/storage/v1/object/public/Images/mock-project-images/.emptyFolderPlaceholder
+2025-02-18 15:20:45 - Server is initializing...
+2025-02-18 15:20:45 - Server is running on port 3000
