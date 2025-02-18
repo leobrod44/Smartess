@@ -33,7 +33,6 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to initialize EventHandler: " + err.Error())
 	}
-
 	// Declare the topic exchange
 	err = instance.Channel.ExchangeDeclare(
 		common_rabbitmq.Test0AlertRoutingKey, // name of the exchange

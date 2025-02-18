@@ -67,6 +67,7 @@ services:
       - "15672:15672" # management
       - "15674:15674" # web stomp
       - "15675:15675" # stomp
+      - "5552:5552" # stream
     volumes:
       - ./data:/var/lib/rabbitmq
     environment:
@@ -84,6 +85,7 @@ services:
     command: >
       bash -c "
       rabbitmq-plugins enable rabbitmq_web_stomp &&
+      rabbitmq-plugins enable rabbitmq_stream rabbitmq_stream_management &&
       rabbitmq-server"
 
   #to launch only smartess web use the following command: docker-compose up --build smartessweb

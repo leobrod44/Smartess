@@ -58,7 +58,7 @@ const AlertList = ({ alerts }: AlertListProps) => {
     <div className="space-y-4">
       {alerts.map((alert, index) => (
         <div
-          key={alert.id}
+          key={`${alert.id}-${alert.unitNumber}-${index}`}
           className={`grid grid-cols-7 items-center p-4 transition-all duration-200 ${
             index % 2 === 0 ? "bg-white" : "bg-gray-100"
           }`}

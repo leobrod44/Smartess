@@ -3,6 +3,7 @@ import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import { Pagination } from "@mui/material";
 import Unit from "../Unit";
 import { Project } from "../../mockData";
+import { useRouter } from "next/navigation";
 
 interface ProjectInfoProps {
   projects: Project[];
@@ -11,7 +12,7 @@ interface ProjectInfoProps {
 export default function ProjectInfo({ projects }: ProjectInfoProps) {
   const [showUnits, setShowUnits] = useState<number | null>(null); // Track which project is toggled open
   const [page, setPage] = useState(1); // Track the current page
-
+  const router = useRouter();
   const handleToggle = (index: number) => {
     setShowUnits(showUnits === index ? null : index);
   };
@@ -31,6 +32,12 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
     startIndex,
     startIndex + projectsPerPage
   );
+
+  const handleNavToUnit = (projectAddress: string, unitNumber: string) => {
+    router.push(
+      `../dashboard/individual-unit/${projectAddress}/unit/${unitNumber}`
+    );
+  };
 
   return (
     <div className="w-full">
@@ -128,6 +135,9 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
                   key={`${project.projectId}-${unit.unitNumber}`}
                   unitNumber={unit.unitNumber}
                   projectId={project.projectId}
+                  onClick={() =>
+                    handleNavToUnit(project.address, unit.unitNumber)
+                  }
                 />
               ))}
             </div>

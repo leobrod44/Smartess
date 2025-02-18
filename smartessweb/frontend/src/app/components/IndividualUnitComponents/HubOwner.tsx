@@ -1,5 +1,11 @@
 import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
+const capitalizeWords = (str: string) =>
+  str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
 const HubOwner = ({
   owner,
 }: {
@@ -32,7 +38,7 @@ const HubOwner = ({
           {/* Stacked View for Small Screens */}
           <div className="md:hidden text-center">
             <div className="text-[#14323B] font-semibold">User:</div>{" "}
-            {owner.firstName} {owner.lastName}
+            {capitalizeWords(`${owner.firstName} ${owner.lastName}`)}
             <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
             {owner.telephone
               ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(
@@ -52,7 +58,7 @@ const HubOwner = ({
 
           {/* Table View for Medium and Larger Screens */}
           <div className="hidden md:block">
-            {owner.firstName} {owner.lastName}
+            {capitalizeWords(`${owner.firstName} ${owner.lastName}`)}
           </div>
           <div className="hidden md:block">
             {owner.telephone
