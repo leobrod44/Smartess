@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/websocket"
+	amqp "github.com/rabbitmq/amqp091-go"
 
 	//"github.com/streadway/amqp"
 	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
@@ -16,7 +17,7 @@ func main() {
 	// Declare Stream
 	env, err := stream.NewEnvironment(
 		stream.NewEnvironmentOptions().
-			SetUri(os.Getenv("RABBITMQ_URI")),
+			SetUri(os.Getenv("RABBITMQ_STREAM_URI")),
 	)
 	if err != nil {
 		log.Fatalf("Failed to create stream environment: %v", err)

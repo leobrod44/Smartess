@@ -1,21 +1,23 @@
 package main
 
 import (
-	amqp "github.com/rabbitmq/amqp091-go"
-	//"github.com/streadway/amqp"
-	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
-	stream "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 	"log"
 	"os"
 	"os/exec"
 	"time"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+
+	//"github.com/streadway/amqp"
+	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
+	stream "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
 
 func main() {
 	// Declare Stream
 	env, err := stream.NewEnvironment(
 		stream.NewEnvironmentOptions().
-			SetUri(os.Getenv("RABBITMQ_URI")),
+			SetUri(os.Getenv("RABBITMQ_STREAM_URI")),
 	)
 	if err != nil {
 		log.Fatalf("Failed to create stream environment: %v", err)
