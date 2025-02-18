@@ -3,4 +3,5 @@ go 1.23.2
 use (
 	.
 	./go
+	go/cmd/hub_camera_only
 )
