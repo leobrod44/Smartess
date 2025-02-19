@@ -7,8 +7,7 @@ import (
 	"os/exec"
 	"time"
 
-	amqp "github.com/rabbitmq/amqp091-go"
-
+	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	//"github.com/streadway/amqp"
 	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	stream "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
@@ -67,32 +66,38 @@ func main() {
 
 	//todo defer stream.Close()
 
-	// Connect to RabbitMQ server
-	conn, err := amqp.Dial(os.Getenv("RABBITMQ_URI"))
+	producer, err := env.NewProducer("video_stream", nil)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+		log.Fatalf("Failed to create stream producer: %v", err)
 	}
-	defer conn.Close()
+	defer producer.Close()
 
-	channel, err := conn.Channel()
-	if err != nil {
-		log.Fatalf("Failed to open a channel: %v", err)
-	}
-	defer channel.Close()
-
-	// Declare the stream
-	err = channel.ExchangeDeclare(
-		"video_exchange", // Exchange name
-		"direct",         // Type
-		true,             // Durable
-		false,            // Auto-delete
-		false,            // Internal
-		false,            // No-wait
-		nil,              // Arguments
-	)
-	if err != nil {
-		log.Fatalf("Failed to declare an exchange: %v", err)
-	}
+	//// Connect to RabbitMQ server
+	//conn, err := amqp.Dial(os.Getenv("RABBITMQ_URI"))
+	//if err != nil {
+	//	log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	//}
+	//defer conn.Close()
+	//
+	//channel, err := conn.Channel()
+	//if err != nil {
+	//	log.Fatalf("Failed to open a channel: %v", err)
+	//}
+	//defer channel.Close()
+	//
+	//// Declare the stream
+	//err = channel.ExchangeDeclare(
+	//	"video_exchange", // Exchange name
+	//	"direct",         // Type
+	//	true,             // Durable
+	//	false,            // Auto-delete
+	//	false,            // Internal
+	//	false,            // No-wait
+	//	nil,              // Arguments
+	//)
+	//if err != nil {
+	//	log.Fatalf("Failed to declare an exchange: %v", err)
+	//}
 
 	//// Declare Stream
 	//err = channel.StreamDeclare(
@@ -131,18 +136,9 @@ func main() {
 		videoChunk := buf[:n]
 
 		// Publish video chunk to the stream
-		err = channel.Publish(
-			"video_exchange", // Exchange
-			"video_key",      // Routing key
-			false,            // Mandatory
-			false,            // Immediate
-			amqp.Publishing{
-				ContentType: "application/octet-stream",
-				Body:        videoChunk,
-			},
-		)
+		err = producer.Send(amqp.NewMessage(videoChunk))
 		if err != nil {
-			log.Fatalf("Failed to publish a message: %v", err)
+			log.Fatalf("Failed to publish a message to the stream: %v", err)
 		}
 		log.Printf("Sent video chunk to stream")
 		time.Sleep(1 * time.Second) // Simulate real-time video chunk sending
