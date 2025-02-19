@@ -79,7 +79,7 @@ const ManagePasswordModal = ({
           </button>
           <div className="flex justify-center">
             <h2 className="text-4xl text-[#30525E] pt-10 font-sequel-sans font-extrabold">
-              Manage Password
+              Modify Password
             </h2>
           </div>
           <div className="flex justify-center text-[#254752] text-xs mb-5">
