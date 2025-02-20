@@ -104,7 +104,7 @@ const ManagePasswordModal = ({
                 name="newPassword"
                 value={newPassword}
                 onChange={handleNewPasswordInput}
-                className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-3/5"
+                className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-2/4"
               />
             </div>
             <div className="flex items-center gap-4">
@@ -114,7 +114,7 @@ const ManagePasswordModal = ({
                 </label>
               </div>
 
-              <div className="relative w-3/5">
+              <div className="relative w-2/4">
                 <input
                   type={showNewPassword ? "text" : "password"}
                   name="confirmNewPassword"
