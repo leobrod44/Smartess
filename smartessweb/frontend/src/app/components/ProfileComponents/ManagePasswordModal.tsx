@@ -1,6 +1,4 @@
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import Visibility from "@mui/icons-material/Visibility";
-import { IconButton } from "@mui/material";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import React from "react";
 import { useState } from "react";
 import { showToastError, showToastSuccess } from "../Toast";
@@ -8,11 +6,11 @@ import { showToastError, showToastSuccess } from "../Toast";
 const ManagePasswordModal = ({
   isOpen,
   onClose,
-  onReset,
+  onResetPassword,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onReset: (password: string) => void;
+  onResetPassword: (password: string) => void;
 }) => {
   const [showNewPassword, setshowNewPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -60,7 +58,7 @@ const ManagePasswordModal = ({
     }
 
     showToastSuccess("Reset email has been sent");
-    onReset(confirmNewPassword);
+    onResetPassword(confirmNewPassword);
     setNewPassword("");
     setConfirmNewPassword("");
   };
@@ -124,13 +122,22 @@ const ManagePasswordModal = ({
                   onChange={handleConfirmNewPasswordInput}
                   className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 pr-10 w-full"
                 />
-                <IconButton
-                  type="button"
-                  onClick={() => setshowNewPassword(!showNewPassword)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#266472]"
-                >
-                  {showNewPassword ? <Visibility /> : <VisibilityOff />}
-                </IconButton>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setshowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#266472] hover:text-[#1f505e] transition duration-300"
+                    aria-label={
+                      showNewPassword ? "Hide Password" : "Show password"
+                    }
+                  >
+                    {showNewPassword ? (
+                      <EyeSlashIcon className="h-6 w-6" />
+                    ) : (
+                      <EyeIcon className="h-6 w-6" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
