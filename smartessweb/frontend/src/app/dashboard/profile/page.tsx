@@ -20,18 +20,18 @@ export const currentUser = {
 };
 
 const ProfilePage = () => {
-  const [isForgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [isManagePasswordOpen, setManagePasswordOpen] = useState(false);
 
   const handleOpenModal = () => {
-    setForgotPasswordOpen(true);
+    setManagePasswordOpen(true);
   };
 
   const handleCloseModal = () => {
-    setForgotPasswordOpen(false);
+    setManagePasswordOpen(false);
   };
 
   const handlePasswordReset = () => {
-    setForgotPasswordOpen(false);
+    setManagePasswordOpen(false);
   };
 
   return (
@@ -55,9 +55,9 @@ const ProfilePage = () => {
         </div>
       </div>
       {/* isForgotPasswordOpen Modal */}
-      {isForgotPasswordOpen && (
+      {isManagePasswordOpen && (
         <ManagePasswordModal
-          isOpen={isForgotPasswordOpen}
+          isOpen={isManagePasswordOpen}
           onClose={handleCloseModal}
           onReset={handlePasswordReset}
         />
