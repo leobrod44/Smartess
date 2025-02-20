@@ -110,11 +110,23 @@ func main() {
 	//if err != nil {
 	//	log.Fatalf("Failed to declare a stream: %v", err)
 	//}
-	RTSP_STREAM_URL = "rtsp://localhost:8554/live" //TODO remove this line
+	//TODO RTSP_STREAM_URL = "rtsp://localhost:8554/live" ??
+
 	// Capture the RTSP stream (example using ffmpeg)
-	cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mpegts", "pipe:1") // Using ffmpeg to stream RTSP to stdout
+	//cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mpegts", "pipe:1") // Using ffmpeg to stream RTSP to stdout
 	//cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-c:v", "libx264", "-c:a", "aac", "-f", "mp4", "pipe:1")
 	//cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mp4", "pipe:1")
+	cmd := exec.Command("ffmpeg",
+		"-i", RTSP_STREAM_URL,
+		"-c:v", "libx264",
+		"-preset", "ultrafast",
+		"-tune", "zerolatency",
+		"-profile:v", "baseline",
+		"-level", "3.0",
+		"-c:a", "aac",
+		"-f", "mp4",
+		"-movflags", "frag_keyframe+empty_moov+default_base_moof",
+		"pipe:1")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatalf("Failed to get stdout pipe: %v", err)
@@ -143,7 +155,7 @@ func main() {
 			log.Fatalf("Failed to publish a message to the stream: %v", err)
 		}
 		log.Printf("Sent video chunk to stream")
-		time.Sleep(1 * time.Second) // Simulate real-time video chunk sending
+		time.Sleep(500 * time.Millisecond) // Simulate real-time video chunk sending
 	}
 	if err := cmd.Wait(); err != nil {
 		log.Fatalf("Error waiting for ffmpeg: %v", err)
