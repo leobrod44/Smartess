@@ -16,6 +16,8 @@ COPY bunnies.mp4 /bunnies.mp4
 COPY start_mock_camera.sh /start_mock_camera.sh
 RUN chmod +x /start_mock_camera.sh
 
+#TODO: "RUN sed -i 's/\r$//' start_mock_camera.sh"  to work on non-Unix systems
+
 # Expose RTSP port
 EXPOSE 8554
 

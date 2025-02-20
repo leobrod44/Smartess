@@ -54,6 +54,8 @@ services:
       - consumer
     networks:
       - smartess_network  # Use the existing network
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # Mount frontend directory
   # Mock camera rtsp stream for testing purposes
   mock_camera:
     container_name: mock_camera

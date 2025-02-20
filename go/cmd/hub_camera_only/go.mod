@@ -5,7 +5,6 @@ go 1.23.2
 require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/pion/webrtc/v3 v3.3.5
-	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/rabbitmq/rabbitmq-stream-go-client v1.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
