@@ -38,10 +38,11 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func main() {
-	// Declare Stream
 	env, err := stream.NewEnvironment(
 		stream.NewEnvironmentOptions().
-			SetUri(os.Getenv("RABBITMQ_STREAM_URI")),
+			SetUri(os.Getenv("RABBITMQ_STREAM_URI")).
+			SetMaxConsumersPerClient(10).
+			SetMaxProducersPerClient(10),
 	)
 	if err != nil {
 		log.Fatalf("Failed to create stream environment: %v", err)
@@ -50,7 +51,8 @@ func main() {
 	defer env.Close()
 
 	err = env.DeclareStream("video_stream", &stream.StreamOptions{
-		MaxLengthBytes: stream.ByteCapacity{}.GB(1),
+		MaxLengthBytes:      stream.ByteCapacity{}.GB(1), // Increased buffer size
+		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
 	})
 	if err != nil {
 		log.Fatalf("Failed to declare a stream: %v", err)

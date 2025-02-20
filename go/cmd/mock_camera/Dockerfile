@@ -17,6 +17,7 @@ COPY start_mock_camera.sh /start_mock_camera.sh
 RUN chmod +x /start_mock_camera.sh
 
 #TODO: "RUN sed -i 's/\r$//' start_mock_camera.sh"  to work on non-Unix systems
+#TODO "RUN sudo ufw allow 8554" to allow RTSP port of mock camera
 
 # Expose RTSP port
 EXPOSE 8554
