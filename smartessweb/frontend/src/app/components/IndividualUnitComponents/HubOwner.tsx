@@ -1,3 +1,11 @@
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
+
+const capitalizeWords = (str: string) =>
+  str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
 const HubOwner = ({
   owner,
 }: {
@@ -30,7 +38,7 @@ const HubOwner = ({
           {/* Stacked View for Small Screens */}
           <div className="md:hidden text-center">
             <div className="text-[#14323B] font-semibold">User:</div>{" "}
-            {owner.firstName} {owner.lastName}
+            {capitalizeWords(`${owner.firstName} ${owner.lastName}`)}
             <div className="text-[#14323B] font-semibold">Telephone:</div>{" "}
             {owner.telephone
               ? `${owner.telephone.slice(0, 3)}-${owner.telephone.slice(
@@ -41,15 +49,16 @@ const HubOwner = ({
             <div className="text-[#14323B] font-semibold">Email:</div>{" "}
             {owner.email}
             <p>
-              <button className="ml-2 mt-2 w-[80px] h-[22px] bg-[#a6634f] rounded-md hover:bg-[#bc7862] transition duration-300 text-white text-xs font-medium">
+              <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
                 Contact
+                <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
               </button>
             </p>
           </div>
 
           {/* Table View for Medium and Larger Screens */}
           <div className="hidden md:block">
-            {owner.firstName} {owner.lastName}
+            {capitalizeWords(`${owner.firstName} ${owner.lastName}`)}
           </div>
           <div className="hidden md:block">
             {owner.telephone
@@ -61,8 +70,9 @@ const HubOwner = ({
           </div>
           <div className="hidden md:block">{owner.email}</div>
           <div className="hidden md:flex justify-center">
-            <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#bc7862] transition duration-300 text-white text-xs font-medium">
+            <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
               Contact
+              <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
             </button>
           </div>
         </div>

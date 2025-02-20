@@ -109,16 +109,28 @@ export interface Alert {
     | "Smoke Alarm Activated"
     | "Water Leak Detected"
     | "Thermostat > 25°C"
-    | "No Battery In Device"
-    | "Carbon Monoxide Detected"
-    | "Window Opened"
-    | "Door Unlocked";
+    | "Low Battery In Device"
+    | "Sensor Activated"
+    | "Door Opened"
+    | "Motion Detected"
+    | "Door Unlocked"
+    | "Light On"
+    | "Climate Alert"
+    | "Unknown Alert";
+
+  type:
+    | "Light"
+    | "Sensor"
+    | "Climate"
+    | "BatteryLow"
+    | "Motion"
+    | "DoorOpen"
+    | "Smoke"
+    | "Water"
+    | "Temperature"
+    | "Unknown";
 
   timestamp: Date;
-
-  resolved: boolean;
-
-  icon: string;
 }
 
 export interface Ticket {
@@ -151,7 +163,7 @@ export interface Ticket {
 // Function to generate mock projects
 
 export interface Announcement {
-  id:string;
+  id: string;
 
   title: string;
 
@@ -170,10 +182,18 @@ export interface Announcement {
   files: { name: string; url: string }[];
 }
 
+export interface SurveillanceCamera {
+  hubId: string;
+
+  projectAddress: string;
+
+  unitNumber: string;
+}
+
 export const generateMockAnnouncements = (): Announcement[] => {
   return [
     {
-      id:"1",
+      id: "1",
       title: "1000 de la guachetiere",
       keyword: "REPAIR",
       date: new Date("2024-11-28"),
@@ -186,7 +206,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
     },
 
     {
-       id:"2",
+      id: "2",
       title: "Organization",
       keyword: "GENERAL",
       date: new Date("2024-11-28"),
@@ -202,7 +222,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
       ],
     },
     {
-      id:"3",
+      id: "3",
       title: "Organization",
       keyword: "EMERGENCY",
       date: new Date("2024-11-30"),
@@ -214,7 +234,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
       files: [{ name: "dummy.jpg", url: "https://placehold.co/100" }],
     },
     {
-      id:"4",
+      id: "4",
       title: "150 Rue Peel",
       keyword: "RENOVATION",
       date: new Date("2024-10-30"),
@@ -231,7 +251,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
       ],
     },
     {
-      id:"5",
+      id: "5",
       title: "150 Rue Peel",
       keyword: "REPAIR",
       date: new Date("2024-10-30"),
@@ -252,7 +272,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
       ],
     },
     {
-      id:"6",
+      id: "6",
       title: "1000 de la guachetiere",
       keyword: "REPAIR",
       date: new Date("2024-12-12"),
@@ -552,11 +572,9 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Smoke Alarm Activated",
 
+    type: "Smoke",
+
     timestamp: new Date("2024-12-15T14:30:00"),
-
-    resolved: false,
-
-    icon: "smoke-alarm-icon-url",
   },
 
   {
@@ -568,11 +586,9 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Water Leak Detected",
 
+    type: "Water",
+
     timestamp: new Date("2024-03-02T11:12:00"),
-
-    resolved: false,
-
-    icon: "water-leak-icon-url", // Replace with actual icon URL or class
   },
 
   {
@@ -584,11 +600,9 @@ const generateMockAlerts = (): Alert[] => [
 
     message: "Thermostat > 25°C",
 
+    type: "Temperature",
+
     timestamp: new Date("2024-04-10T10:49"),
-
-    resolved: true,
-
-    icon: "thermostat-icon-url", // Replace with actual icon URL or class
   },
 
   {
@@ -598,16 +612,94 @@ const generateMockAlerts = (): Alert[] => [
 
     projectId: "b10294",
 
-    message: "No Battery In Device",
+    message: "Low Battery In Device",
+
+    type: "BatteryLow",
 
     timestamp: new Date("2024-08-11T10:15:00"),
+  },
+  {
+    id: "5",
 
-    resolved: false,
+    unitNumber: "101",
 
-    icon: "battery-icon-url", // Replace with actual icon URL or class
+    projectId: "b10294",
+
+    message: "Sensor Activated",
+
+    type: "Sensor",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
   },
 
-  // Add more alerts as needed...
+  {
+    id: "6",
+
+    unitNumber: "101",
+
+    projectId: "b10294",
+
+    message: "Door Opened",
+
+    type: "DoorOpen",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
+  },
+  {
+    id: "7",
+
+    unitNumber: "101",
+
+    projectId: "b10294",
+
+    message: "Motion Detected",
+
+    type: "Motion",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
+  },
+
+  {
+    id: "8",
+
+    unitNumber: "101",
+
+    projectId: "b10294",
+
+    message: "Climate Alert",
+
+    type: "Climate",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
+  },
+
+  {
+    id: "9",
+
+    unitNumber: "101",
+
+    projectId: "b10294",
+
+    message: "Unknown Alert",
+
+    type: "Unknown",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
+  },
+
+  {
+    id: "10",
+
+    unitNumber: "101",
+
+    projectId: "b10294",
+
+    message: "Light On",
+
+    type: "Light",
+
+    timestamp: new Date("2024-08-11T10:15:00"),
+  },
 ];
 
 //extra functions simply tochange the names to test the search bar-----------------------------------
@@ -825,3 +917,28 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     role: "admin",
   },
 ];
+
+export const generateMockSurveillanceCameras = (): SurveillanceCamera[] => {
+  return [
+    {
+      hubId: "1x2c3v4b5n",
+      projectAddress: "1000 De La Gauchetiere",
+      unitNumber: "Unit 101",
+    },
+    {
+      hubId: "0m9n8b7v6c",
+      projectAddress: "750 Peel Street",
+      unitNumber: "Unit 201",
+    },
+    {
+      hubId: "7n6b5v4c3x",
+      projectAddress: "131 Chemin de Confieres",
+      unitNumber: "Unit 111",
+    },
+    {
+      hubId: "1z0m2x9n3c",
+      projectAddress: "1654 rue Kemmel",
+      unitNumber: "Unit 1",
+    },
+  ];
+};

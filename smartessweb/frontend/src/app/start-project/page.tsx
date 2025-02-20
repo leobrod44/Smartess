@@ -23,7 +23,7 @@ const StartProjectPage = () => {
   };
 
   const validatePhoneNumber = (phoneNumber: string) => {
-    const phoneRegex = /^\d{3}-\d{3}-\d{4}$/;
+    const phoneRegex = /^(\d{3}-\d{3}-\d{4}|\d{10})$/;
     return phoneRegex.test(phoneNumber);
   };
 

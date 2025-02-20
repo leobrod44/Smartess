@@ -1,9 +1,182 @@
+"use client";
+
+import { useProjectContext } from "@/context/ProjectProvider";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { /*generateMockSurveillanceCameras, */Project } from "../../mockData";
+import { surveillanceApi } from "@/api/page";
+import Searchbar from "@/app/components/Searchbar";
+import { IconButton, Pagination } from "@mui/material";
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import Image from "next/image";
+
 const SurveillancePage = () => {
+  const router = useRouter();
+  // const videoFrames = Array(16).fill(null);
+  // const mockData = generateMockSurveillanceCameras();
+  const [isLoading, setIsLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectImages, setProjectImages] = useState<{ [projectId: string]: string }>({});
+  const { selectedProjectAddress } = useProjectContext();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const unitsPerPage = 4;
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+const fetchData = async () => {
+      setIsLoading(true);
+
+      try {
+        const responseProjects = await surveillanceApi.getUserProjects(token);
+        setProjects(responseProjects.projects);
+
+        const responseImages = await surveillanceApi.getProjectImages(token);
+
+        const imagesMap = responseImages.images.reduce((acc, imageUrl) => {
+          const fileName = imageUrl.split("/").pop()?.split(".")[0]; 
+          if (fileName) {
+            acc[fileName] = imageUrl;
+          }
+          return acc;
+        }, {} as { [projectId: string]: string });
+    
+        setProjectImages(imagesMap);
+      } catch (error) {
+        console.error("Error fetching surveillance data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [router]);
+
+  const allUnits = projects.flatMap((project) =>
+    project.units.map((unit) => ({
+      ...unit,
+      projectAddress: project.address,
+      pendingTickets: unit.tickets.pending,
+    }))
+  );
+  console.log("Project Images:", projectImages);
+
+  const filteredUnitsByProject = allUnits.filter((unit) => {  
+    const effectiveProjectAddress = selectedProjectAddress || "ALL PROJECTS";
+    const normalizedSearchQuery = searchQuery.toLowerCase().trim();
+  
+    const matchesProjectAddress =
+      effectiveProjectAddress === "ALL PROJECTS" ||
+      unit.projectAddress === effectiveProjectAddress;
+  
+    const matchesSearchQuery =
+      unit.projectAddress.toLowerCase().includes(normalizedSearchQuery) ||
+      String(unit.unitNumber).toLowerCase().includes(normalizedSearchQuery) ||
+      `unit ${unit.unitNumber}`.toLowerCase().includes(normalizedSearchQuery);
+  
+    return matchesProjectAddress && matchesSearchQuery;
+  });
+  
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
+  const handleViewIndividualUnitSurveillance = (projectAddress: string, unitNumber: string) => {
+    router.push(
+      `../dashboard/individual-unit-surveillance/${projectAddress}/unit/${unitNumber}`
+    );
+  };
+
+  const totalPages = Math.ceil(filteredUnitsByProject.length / unitsPerPage);
+  
+  const currentUnits =
+    filteredUnitsByProject.length === 0
+      ? [] 
+      : filteredUnitsByProject.slice(
+          (currentPage - 1) * unitsPerPage,
+          currentPage * unitsPerPage
+        );
+
   return (
     <div>
-      <h1>Surveillance Page</h1>
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
+        <div className="flex flex-row justify-between">
+          <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
+            Surveillance Page
+          </h2>
+          <div className="flex flex-row">
+            <Searchbar onSearch={handleSearch} />
+          </div>
+        </div>
+        { isLoading ? (
+          <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+            Loading surveillance data...
+          </p>
+        ) : currentUnits.length === 0 ? (
+          <div className="unit-container max-w-fit sm:max-w-full mx-auto">
+            <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
+              No results found.
+              <br />
+              Please adjust your filters or search criteria.
+            </p>
+          </div>
+        ) :( 
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {currentUnits.slice(0, unitsPerPage).map((unit) => (
+              <div key={unit.unitNumber} className="border p-2 bg-[#4b7d8d] rounded-lg cursor-pointer relative" onClick={() => handleViewIndividualUnitSurveillance(unit.projectAddress, unit.unitNumber)}>
+                <div className="relative">
+                  {projectImages[unit.projectId.toString()] && (
+                    <Image
+                      src={projectImages[unit.projectId.toString()]} 
+                      alt={`Project ${unit.projectId}`}
+                      width={300}
+                      height={300}
+                      unoptimized={true}
+                      className="w-full h-auto"
+                    />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <IconButton sx={{ backgroundColor: "rgba(55, 65, 81, 0.5)", borderRadius: "50%", padding: "12px" }}>
+                      <PlayArrow sx={{ color: "white", fontSize: "48px" }} />
+                    </IconButton>
+                  </div>
+                </div>
+              <div className="mt-2 flex justify-between text-white">
+                <p className="text-sm">{unit.projectAddress}</p>
+                <p className="text-sm">Unit {unit.unitNumber}</p>
+              </div>
+            </div>
+            
+            ))}
+          </div>
+        )}
+        <div className="mt-4 flex justify-center">
+          <Pagination
+            className="custom-pagination"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </div>
+      </div>
     </div>
   );
+
 };
 
 export default SurveillancePage;

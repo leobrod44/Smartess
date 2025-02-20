@@ -55,6 +55,7 @@ services:
     environment:
       RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
       MONGO_STRING: mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+    env_file: .env
     networks:
       - smartess_network
 
@@ -66,6 +67,7 @@ services:
       - "15672:15672" # management
       - "15674:15674" # web stomp
       - "15675:15675" # stomp
+      - "5552:5552" # stream
     volumes:
       - ./data:/var/lib/rabbitmq
     environment:
@@ -83,6 +85,7 @@ services:
     command: >
       bash -c "
       rabbitmq-plugins enable rabbitmq_web_stomp &&
+      rabbitmq-plugins enable rabbitmq_stream rabbitmq_stream_management &&
       rabbitmq-server"
 
   #to launch only smartess web use the following command: docker-compose up --build smartessweb

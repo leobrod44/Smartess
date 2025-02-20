@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/20/solid";
 import { Ticket } from "../../mockData";
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 interface IndividualTicketProps {
   ticket: Ticket;
@@ -29,7 +30,9 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
     };
   }, [ticket.description]);
 
-  const handleToggle = () => { setShowFullText((prev) => !prev);  };
+  const handleToggle = () => {
+    setShowFullText((prev) => !prev);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -75,10 +78,9 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
             Submitted by: {ticket.submitted_by_firstName}{" "}
             {ticket.submitted_by_lastName}
           </div>
-          <button className="px-[17px] py-2 bg-[#729987] rounded-[20px] flex justify-center items-center hover:bg-[#5C7A6B] transition duration-300">
-            <div className="text-center text-white text-m font-sequel-sans leading-3">
-              Contact
-            </div>
+          <button className=" mt-1 w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
+            Contact
+            <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
           </button>
         </div>
       </div>

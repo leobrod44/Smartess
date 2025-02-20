@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import DeleteConfirmation from "../ManageUsersComponents/DeleteConfirmation";
 import { individualUnitApi } from "@/api/page";
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 interface HubUsersProps {
   hubUsers: HubUser[];
@@ -17,6 +18,12 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
   const [selectedUser, setSelectedUser] = useState<HubUser | null>(null);
   const token = localStorage.getItem("token");
   const [activeHubUsers, setActiveHubUsers] = useState<HubUser[]>(hubUsers);
+
+  const capitalizeWords = (str: string) =>
+    str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
 
   const handleDeleteClick = (user: HubUser) => {
     setSelectedUser(user);
@@ -86,7 +93,7 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center rounded-lg border p-2">
               <div className="text-[#14323B] font-semibold">User:</div>{" "}
-              {user.firstName} {user.lastName}
+              {capitalizeWords(`${user.firstName} ${user.lastName}`)}
               <div className="text-[#14323B] font-semibold">
                 Telephone:
               </div>{" "}
@@ -99,8 +106,9 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
               <div className="text-[#14323B] font-semibold">Email:</div>{" "}
               {user.email}
               <p>
-                <button className="ml-2 mt-2 w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+                <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
                   Contact
+                  <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
                 </button>
               </p>
               {currentUserRole === "master" || currentUserRole === "admin" ? (
@@ -118,7 +126,7 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
 
             {/* Table view for medium and larger screens */}
             <div className="hidden md:flex items-center justify-center">
-              {user.firstName} {user.lastName}
+              {capitalizeWords(`${user.firstName} ${user.lastName}`)}
             </div>
             <div className="hidden md:flex items-center justify-center">
               {user.telephone
@@ -135,8 +143,9 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
               {user.email}
             </div>
             <div className="hidden md:flex items-center justify-center">
-              <button className="w-[80px] h-[22px] bg-[#729987] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+              <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
                 Contact
+                <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
               </button>
             </div>
             <div className="hidden md:flex items-center justify-center">

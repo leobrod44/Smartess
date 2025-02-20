@@ -1,9 +1,15 @@
 "use client";
 
-import Battery20Icon from "@mui/icons-material/Battery20";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import WaterDamageIcon from "@mui/icons-material/WaterDamage";
-import ThermostatIcon from "@mui/icons-material/Thermostat";
-import UpcomingIcon from "@mui/icons-material/Upcoming";
+import DeviceThermostatIcon from "@mui/icons-material/DeviceThermostat";
+import BatteryAlertIcon from "@mui/icons-material/BatteryAlert";
+import AcUnitIcon from "@mui/icons-material/AcUnit";
+import DoorBackIcon from "@mui/icons-material/DoorBack";
+import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
+import SensorsIcon from "@mui/icons-material/Sensors";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import WbIncandescentIcon from "@mui/icons-material/WbIncandescent";
 
 import type { Alert } from "../../mockData";
 
@@ -65,10 +71,16 @@ const Alert = ({ alerts }: AlertProps) => {
               <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
               {alert.message}
               <div className="hidden md:block flex justify-center items-center">
-                {alert.message === "Smoke Alarm Activated" && <UpcomingIcon />}
-                {alert.message === "Water Leak Detected" && <WaterDamageIcon />}
-                {alert.message === "Thermostat > 25°C" && <ThermostatIcon />}
-                {alert.message === "No Battery In Device" && <Battery20Icon />}
+                {alert.type === "Light" && <WbIncandescentIcon />}
+                {alert.type === "Sensor" && <SensorsIcon />}
+                {alert.type === "Climate" && <AcUnitIcon />}
+                {alert.type === "BatteryLow" && <BatteryAlertIcon />}
+                {alert.type === "Motion" && <DirectionsRunIcon />}
+                {alert.type === "DoorOpen" && <DoorBackIcon />}
+                {alert.type === "Smoke" && <LocalFireDepartmentIcon />}
+                {alert.type === "Water" && <WaterDamageIcon />}
+                {alert.type === "Temperature" && <DeviceThermostatIcon />}
+                {alert.type === "Unknown" && <HelpOutlineIcon />}
               </div>
               <div className="text-[#14323B] font-semibold">Date:</div>{" "}
               {formatDate(alert.timestamp)}
@@ -82,10 +94,16 @@ const Alert = ({ alerts }: AlertProps) => {
 
             {/* Image not loading here */}
             <div className="hidden md:block flex justify-center items-center">
-              {alert.message === "Smoke Alarm Activated" && <UpcomingIcon />}
-              {alert.message === "Water Leak Detected" && <WaterDamageIcon />}
-              {alert.message === "Thermostat > 25°C" && <ThermostatIcon />}
-              {alert.message === "No Battery In Device" && <Battery20Icon />}
+              {alert.type === "Light" && <WbIncandescentIcon />}
+              {alert.type === "Sensor" && <SensorsIcon />}
+              {alert.type === "Climate" && <AcUnitIcon />}
+              {alert.type === "BatteryLow" && <BatteryAlertIcon />}
+              {alert.type === "Motion" && <DirectionsRunIcon />}
+              {alert.type === "DoorOpen" && <DoorBackIcon />}
+              {alert.type === "Smoke" && <LocalFireDepartmentIcon />}
+              {alert.type === "Water" && <WaterDamageIcon />}
+              {alert.type === "Temperature" && <DeviceThermostatIcon />}
+              {alert.type === "Unknown" && <HelpOutlineIcon />}
             </div>
             <div className="hidden md:block">{formatDate(alert.timestamp)}</div>
             <div className="hidden md:block">{formatTime(alert.timestamp)}</div>

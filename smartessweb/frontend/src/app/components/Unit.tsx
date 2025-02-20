@@ -17,12 +17,14 @@ interface UnitComponentProps {
   unitNumber: string;
   projectId: string;
   isTest?: boolean;
+  onClick?: () => void;
 }
 
 const UnitComponent = ({
   unitNumber,
   projectId,
   isTest = false,
+  onClick,
 }: UnitComponentProps) => {
   const [hubUsers, setHubUsers] = useState<HubUser[]>([]);
   const [tickets, setTickets] = useState<TicketsType>({
@@ -93,7 +95,7 @@ const UnitComponent = ({
     return (
       <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
         <div className="w-full h-full unit-title text-white text-l flex justify-center">
-          <button className="w-full font-sequel-sans-black">
+          <button className="w-full font-sequel-sans-black" onClick={onClick}>
             Unit {unitNumber}
           </button>
         </div>
@@ -116,7 +118,7 @@ const UnitComponent = ({
   return (
     <div className="unit-container bg-[#4b7d8d] p-[5px] rounded-[7px] shadow-xl max-w-fit sm:max-w-full mx-auto hover:bg-[#1f505e] transition duration-300">
       <div className="w-full h-full unit-title text-white text-l flex justify-center">
-        <button className="w-full font-sequel-sans-black">
+        <button className="w-full font-sequel-sans-black" onClick={onClick}>
           Unit {unitNumber}
         </button>
       </div>
