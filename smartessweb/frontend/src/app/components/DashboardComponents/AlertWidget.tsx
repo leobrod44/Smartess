@@ -1,3 +1,5 @@
+"use client";
+import { useRouter } from "next/navigation";
 interface SystemAlerts {
   alertType: string;
   unitAddress: string;
@@ -9,6 +11,7 @@ const AlertWidget = ({
 }: {
   systemAlerts: SystemAlerts[] | null;
 }) => {
+  const router = useRouter();
   //show only the first two alerts in the list for cleanliness
   const firstTwoAlerts = systemAlerts?.slice(0, 2);
 
@@ -45,7 +48,10 @@ const AlertWidget = ({
               </div>
             ))}
             <div className="flex justify-center items-center">
-              <button className="w-[80px] h-[22px] bg-[#A65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300 m-2">
+              <button
+                className="w-[80px] h-[22px] bg-[#A65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300 m-2"
+                onClick={() => router.push("dashboard/alerts")}
+              >
                 See All
               </button>
             </div>
