@@ -1,16 +1,42 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gorilla/websocket"
+	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	//"github.com/streadway/amqp"
 	//amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	stream "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 )
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+var clients = make(map[*websocket.Conn]bool)
+
+func handleWS(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println("Failed to upgrade WebSocket:", err)
+		return
+	}
+	defer conn.Close()
+	clients[conn] = true
+	log.Println("New WebSocket connection")
+
+	// Keep connection alive
+	for {
+		if _, _, err := conn.ReadMessage(); err != nil {
+			log.Println("WebSocket closed:", err)
+			delete(clients, conn)
+			break
+		}
+	}
+}
 func main() {
 	// Declare Stream
 	env, err := stream.NewEnvironment(
@@ -55,10 +81,24 @@ func main() {
 	//	log.Fatalf("Failed to declare a stream: %v", err)
 	//}
 
+	//messagesHandler := func(consumerContext stream.ConsumerContext, message *amqp.Message) {
+	//	fmt.Printf("Stream: %s - Received message\n", consumerContext.Consumer.GetStreamName())
+	//}
 	messagesHandler := func(consumerContext stream.ConsumerContext, message *amqp.Message) {
-		fmt.Printf("Stream: %s - Received message\n", consumerContext.Consumer.GetStreamName())
+		for client := range clients {
+			// Flatten the [][]byte to a single []byte
+			var flattenedData []byte
+			for _, chunk := range message.Data {
+				flattenedData = append(flattenedData, chunk...)
+			}
+			err := client.WriteMessage(websocket.BinaryMessage, flattenedData)
+			if err != nil {
+				log.Println("Error sending data to WebSocket:", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
 	}
-
 	consumer, err := env.NewConsumer("video_stream", messagesHandler,
 		stream.NewConsumerOptions().SetOffset(stream.OffsetSpecification{}.First()))
 	if err != nil {
@@ -66,7 +106,11 @@ func main() {
 	}
 	defer consumer.Close()
 
-	select {}
+	// select {}
+	// WebSocket server
+	http.HandleFunc("/ws", handleWS)
+	log.Println("WebSocket server started on :8082")
+	log.Fatal(http.ListenAndServe(":8082", nil))
 }
 
 ////// WebSocket setup for frontend connection

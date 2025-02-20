@@ -110,9 +110,11 @@ func main() {
 	//if err != nil {
 	//	log.Fatalf("Failed to declare a stream: %v", err)
 	//}
-
+	RTSP_STREAM_URL = "rtsp://localhost:8554/live" //TODO remove this line
 	// Capture the RTSP stream (example using ffmpeg)
 	cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mpegts", "pipe:1") // Using ffmpeg to stream RTSP to stdout
+	//cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-c:v", "libx264", "-c:a", "aac", "-f", "mp4", "pipe:1")
+	//cmd := exec.Command("ffmpeg", "-i", RTSP_STREAM_URL, "-f", "mp4", "pipe:1")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatalf("Failed to get stdout pipe: %v", err)
