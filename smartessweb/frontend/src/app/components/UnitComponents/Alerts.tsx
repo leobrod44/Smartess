@@ -1,10 +1,11 @@
+"use client";
 import { Alert } from "@/app/mockData";
+import { useRouter } from "next/navigation";
 
 const Alerts = ({ alerts }: { alerts: Alert[] }) => {
+  const router = useRouter();
   //show the 2 most recent alerts in the list by their date
-  const recentAlerts = [...alerts]
-    .slice(0, 2);
-
+  const recentAlerts = [...alerts].slice(0, 2);
 
   const capitalizeMessage = (message: string) => {
     return message.toUpperCase();
@@ -34,7 +35,10 @@ const Alerts = ({ alerts }: { alerts: Alert[] }) => {
             ))}
 
             {/* Show the button only if there are alerts */}
-            <button className="w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300">
+            <button
+              className="w-[80px] h-[22px] bg-[#a65146] rounded-md text-white text-xs hover:bg-[#8e4135] transition duration-300 "
+              onClick={() => router.push("/dashboard/alerts")}
+            >
               See All
             </button>
           </>

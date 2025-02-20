@@ -4,13 +4,24 @@ import UnitComponent from "@/app/components/Unit";
 import { generateMockProjects } from "@/app/mockData";
 
 const mockProjects = generateMockProjects();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: jest.fn(), // Mock push function
+  }),
+}));
 
 describe("UnitComponent", () => {
   const projectId = mockProjects[0].projectId; // Get the first project
   const unitNumber = mockProjects[0].units[0].unitNumber; // Get the first unit
 
   it("renders the correct owner information", async () => {
-    render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true}  />);
+    render(
+      <UnitComponent
+        unitNumber={unitNumber}
+        projectId={projectId}
+        isTest={true}
+      />
+    );
 
     // Wait for the owner name to appear in the document
     await waitFor(() => {
@@ -20,7 +31,13 @@ describe("UnitComponent", () => {
   });
 
   it("renders the correct unit number", async () => {
-    render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true}  />);
+    render(
+      <UnitComponent
+        unitNumber={unitNumber}
+        projectId={projectId}
+        isTest={true}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/101/i)).toBeInTheDocument();
@@ -28,7 +45,13 @@ describe("UnitComponent", () => {
   });
 
   it("renders the users", async () => {
-    render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true} />);
+    render(
+      <UnitComponent
+        unitNumber={unitNumber}
+        projectId={projectId}
+        isTest={true}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/K. Long/i)).toBeInTheDocument();
@@ -36,7 +59,13 @@ describe("UnitComponent", () => {
   });
 
   it("renders the correct tickets information", async () => {
-    render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true}  />);
+    render(
+      <UnitComponent
+        unitNumber={unitNumber}
+        projectId={projectId}
+        isTest={true}
+      />
+    );
 
     await waitFor(() => {
       expect(
@@ -55,7 +84,13 @@ describe("UnitComponent", () => {
   });
 
   it("renders the correct alerts", async () => {
-    render(<UnitComponent unitNumber={unitNumber} projectId={projectId}  isTest={true}  />);
+    render(
+      <UnitComponent
+        unitNumber={unitNumber}
+        projectId={projectId}
+        isTest={true}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.getByText(/water leak detected/i)).toBeInTheDocument();

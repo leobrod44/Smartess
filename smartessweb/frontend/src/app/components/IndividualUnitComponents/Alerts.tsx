@@ -10,7 +10,7 @@ import DirectionsRunIcon from "@mui/icons-material/DirectionsRun";
 import SensorsIcon from "@mui/icons-material/Sensors";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import WbIncandescentIcon from "@mui/icons-material/WbIncandescent";
-
+import { useRouter } from "next/navigation";
 import type { Alert } from "../../mockData";
 
 interface AlertProps {
@@ -18,6 +18,7 @@ interface AlertProps {
 }
 
 const Alert = ({ alerts }: AlertProps) => {
+  const router = useRouter();
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
@@ -111,7 +112,10 @@ const Alert = ({ alerts }: AlertProps) => {
         ))}
       </div>
       <div className="flex justify-center">
-        <button className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium">
+        <button
+          className="w-[150px] h-[30px] mt-6 bg-[#266472] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-medium"
+          onClick={() => router.push("/dashboard/alerts")}
+        >
           Manage Alerts
         </button>
       </div>
