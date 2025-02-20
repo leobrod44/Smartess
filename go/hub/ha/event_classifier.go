@@ -43,7 +43,6 @@ func classifyConciseEvent(event *ConciseEvent) EventClassification {
 	if event.Attributes.DeviceClass != nil {
 		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.DeviceClass))
 	}
-	fmt.Sprintf("class: %v", classification)
 	//TODO: Additional tags can be added here based on other attributes + context conditionals
 
 	return classification
