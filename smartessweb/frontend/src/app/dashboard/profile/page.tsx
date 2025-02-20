@@ -38,9 +38,9 @@ const ProfilePage = () => {
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8">
       <div className="flex flex-col justify-between">
         <div className="flex flex-row">
-          <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-3">
+          <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-3">
             <h4>Profile</h4>
-          </h2>
+          </div>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-normal gap-4">
@@ -54,12 +54,12 @@ const ProfilePage = () => {
           />
         </div>
       </div>
-      {/* isForgotPasswordOpen Modal */}
+      {/* ModifyPassword Modal */}{" "}
       {isManagePasswordOpen && (
         <ManagePasswordModal
           isOpen={isManagePasswordOpen}
           onClose={handleCloseModal}
-          onReset={handlePasswordReset}
+          onResetPassword={handlePasswordReset}
         />
       )}
     </div>
