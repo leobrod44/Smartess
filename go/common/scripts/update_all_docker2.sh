@@ -8,7 +8,9 @@ directories=(
     "$PROJECT_ROOT/go/cmd/hub"            # hub directory
     "$PROJECT_ROOT/go/cmd/mockhub"        # mockhub directory
 )
-
+#docker-compose pull
+#docker-compose build --no-cache
+#docker-compose up -d --force-recreate
 # Loop through each directory and run Docker Compose commands
 for dir in "${directories[@]}"; do
     echo "Project root: $PROJECT_ROOT"
