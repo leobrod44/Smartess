@@ -51,7 +51,7 @@ func main() {
 	defer env.Close()
 
 	err = env.DeclareStream("video_stream", &stream.StreamOptions{
-		MaxLengthBytes:      stream.ByteCapacity{}.GB(1), // Increased buffer size
+		MaxLengthBytes:      stream.ByteCapacity{}.GB(2), // Increased buffer size
 		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
 	})
 	if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -36,19 +37,33 @@ func newFFmpegConfig(input string) *FFmpegConfig {
 	return &FFmpegConfig{
 		input: input,
 		options: []string{
-			"-c:v", "libx264",
-			"-preset", "veryfast",
+			"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
+			"-preset", "ultrafast", //"veryfast", // Adjust tradeoff between encoding speed and compression efficiency; faster encoding comes at cost of larger file size
 			"-tune", "zerolatency",
 			"-profile:v", "baseline",
 			"-level", "3.0",
-			"-maxrate", "2000k",
-			"-bufsize", "4000k",
-			"-g", "20",
-			"-keyint_min", "20",
+
+			"-pix_fmt", "yuv420p",
+			"-maxrate", "2000k", //"2000k",
+			"-bufsize", "2000k", //"4000k",
+			//todo "-crf", "28",                    // Balance quality and bitrate
+
+			// Frame settings
+			//todo "-r", "15",                      // Frame rate - adjust based on camera
+			//todo "-vsync", "passthrough",         // Maintain timing
+
+			//GOP settings
+			"-g", "30",
+			"-keyint_min", "30",
+
+			// Forcing keyframe interval
+			"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
+			"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
 			"-sc_threshold", "0",
+			"-an", //"-c:a", "aac",
 			"-f", "mp4",
-			"-an", // No audio
-			"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
+			"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", //+faststart",
+			"-frag_duration", "1000000", // 1 second fragments
 			//"-fragment_duration", "500000",
 			//"-stimeout", "10000000", // 10 second timeout for RTSP
 			//"-rtsp_transport", "tcp", // Force TCP for more reliable connection
@@ -86,7 +101,7 @@ func setupStreamEnvironment(rabbitMQURI string) (*stream.Environment, *stream.Pr
 	}
 
 	err = env.DeclareStream("video_stream", &stream.StreamOptions{
-		MaxLengthBytes:      stream.ByteCapacity{}.GB(1),
+		MaxLengthBytes:      stream.ByteCapacity{}.GB(2),
 		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
 	})
 	if err != nil {
@@ -114,42 +129,71 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 		return fmt.Errorf("failed to start ffmpeg: %v", err)
 	}
 
+	// Create a buffered reader for more efficient reading
+	reader := bufio.NewReaderSize(stdout, 1024*1024)
+
 	buf := make([]byte, 1024*1024) //512*1024)
-	errorChan := make(chan error, 1)
-
-	go func() {
-		for {
-			n, err := stdout.Read(buf)
-			if err != nil {
-				errorChan <- fmt.Errorf("error reading from RTSP stream: %v", err)
-				return
-			}
-			if n == 0 {
-				continue
-			}
-
-			videoChunk := buf[:n]
-			if err := producer.Send(amqp.NewMessage(videoChunk)); err != nil {
-				errorChan <- fmt.Errorf("failed to publish message: %v", err)
-				return
-			}
-			log.Printf("Sent video chunk (%d bytes) to stream", n)
+	//errorChan := make(chan error, 1)
+	//
+	//go func() {
+	//	for {
+	//		n, err := stdout.Read(buf)
+	//		if err != nil {
+	//			errorChan <- fmt.Errorf("error reading from RTSP stream: %v", err)
+	//			return
+	//		}
+	//		if n == 0 {
+	//			continue
+	//		}
+	//
+	//		videoChunk := buf[:n]
+	//		if err := producer.Send(amqp.NewMessage(videoChunk)); err != nil {
+	//			errorChan <- fmt.Errorf("failed to publish message: %v", err)
+	//			return
+	//		}
+	//		log.Printf("Sent video chunk (%d bytes) to stream", n)
+	//		time.Sleep(50 * time.Millisecond)
+	//	}
+	//}()
+	//
+	//// Wait for either an error or the command to finish
+	//select {
+	//case err := <-errorChan:
+	//	cmd.Process.Kill()
+	//	cmd.Wait()
+	//	return err
+	//case err := <-func() chan error {
+	//	c := make(chan error, 1)
+	//	go func() { c <- cmd.Wait() }()
+	//	return c
+	//}():
+	//	return err
+	//}
+	for {
+		n, err := reader.Read(buf)
+		if err != nil {
+			log.Printf("Error reading from RTSP stream: %v", err)
+			break
 		}
-	}()
+		if n == 0 {
+			continue // Empty chunk, skip it
+		}
 
-	// Wait for either an error or the command to finish
-	select {
-	case err := <-errorChan:
-		cmd.Process.Kill()
-		cmd.Wait()
-		return err
-	case err := <-func() chan error {
-		c := make(chan error, 1)
-		go func() { c <- cmd.Wait() }()
-		return c
-	}():
+		videoChunk := buf[:n]
+
+		// Publish video chunk to the stream
+		err = producer.Send(amqp.NewMessage(videoChunk))
+		if err != nil {
+			log.Fatalf("Failed to publish a message to the stream: %v", err)
+		}
+		log.Printf("Sent video chunk (%d bytes) to stream...", n)
+		time.Sleep(30 * time.Millisecond) // Simulate real-time video chunk sending
+	}
+	if err := cmd.Wait(); err != nil {
+		log.Fatalf("Error waiting for ffmpeg: %v", err)
 		return err
 	}
+	return nil
 }
 
 func main() {
