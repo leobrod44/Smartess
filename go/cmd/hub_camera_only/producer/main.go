@@ -27,50 +27,136 @@ func (d CameraEnum) String() string {
 
 // FFmpegConfig holds the configuration for FFmpeg streaming
 type FFmpegConfig struct {
-	input      string
-	options    []string
-	maxRetries int
-	retryDelay time.Duration
+	input                  string
+	options                []string
+	maxRetries             int
+	retryDelay             time.Duration
+	bufferPostSendInterval time.Duration
+	bufferReaderSize       int
 }
 
-func newFFmpegConfig(input string) *FFmpegConfig {
-	return &FFmpegConfig{
-		input: input,
-		options: []string{
-			"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
-			"-preset", "ultrafast", //"veryfast", // Adjust tradeoff between encoding speed and compression efficiency; faster encoding comes at cost of larger file size
-			"-tune", "zerolatency",
-			"-profile:v", "baseline",
-			"-level", "3.0",
+// TODO Turn this into docker valid Go argparse to input when running Producer container driver and/or builder
+// TODO (As versatile named arguments in the main() of this producer/main.go)
+func newFFmpegConfig(input string, selectedCameraEnum CameraEnum) *FFmpegConfig {
+	switch selectedCameraEnum {
+	case ANT_CAMERA, MAIN_CAMERA:
+		return &FFmpegConfig{
+			input: input,
+			options: []string{
+				// RTSP Transport settings
+				"-rtsp_transport", "tcp",
+				"-buffer_size", "1024000",
+				"-probesize", "50M",
+				"-analyzeduration", "20000000",
+				"-avoid_negative_ts", "make_zero",
 
-			"-pix_fmt", "yuv420p",
-			"-maxrate", "2000k", //"2000k",
-			"-bufsize", "2000k", //"4000k",
-			//todo "-crf", "28",                    // Balance quality and bitrate
+				// Video encoding settings
+				"-c:v", "libx264",
+				"-preset", "fast",
+				"-crf", "23",
+				"-r", "15",
+				"-g", "30",
 
-			// Frame settings
-			//todo "-r", "15",                      // Frame rate - adjust based on camera
-			//todo "-vsync", "passthrough",         // Maintain timing
+				// Audio settings
+				"-b:a", "64k",
 
-			//GOP settings
-			"-g", "30",
-			"-keyint_min", "30",
+				// Output format settings
+				"-f", "mp4",
+				"-movflags", "frag_keyframe+empty_moov+default_base_moof",
+				"-reset_timestamps", "1",
+			},
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 100 * time.Millisecond, // Increased interval
+			bufferReaderSize:       1024000,                // Match buffer_size from ffmpeg
+		}
+		//return &FFmpegConfig{
+		//	input: input,
+		//	options: []string{
+		//		// Video codec settings
+		//		"-c:v", "libx264",
+		//		"-preset", "ultrafast",
+		//		"-tune", "zerolatency",
+		//		"-profile:v", "high", // Changed from baseline to match camera's High profile
+		//
+		//		// Frame and buffer settings
+		//		"-pix_fmt", "yuv420p",
+		//		"-maxrate", "4000k", // Increased for 1080p
+		//		"-bufsize", "8000k", // Doubled buffer size
+		//
+		//		// Frame rate settings
+		//		"-r", "15", // Match camera's 15 fps
+		//		"-vsync", "passthrough",
+		//
+		//		// GOP settings - adjusted for 15fps
+		//		"-g", "15", // Changed to match fps
+		//		"-keyint_min", "15", // Changed to match fps
+		//		"-force_key_frames", "expr:gte(t,n_forced*2)", // Force keyframe every 2 seconds
+		//
+		//		// Handle audio properly
+		//		"-c:a", "aac", // Changed from -an to properly handle audio
+		//		"-b:a", "128k", // Reasonable audio bitrate
+		//
+		//		// Output format settings
+		//		"-f", "mp4",
+		//		"-movflags", "frag_keyframe+empty_moov+default_base_moof",
+		//		"-frag_duration", "1000000",
+		//
+		//		// RTSP specific settings
+		//		"-rtsp_transport", "tcp", // Force TCP for more reliable connection
+		//		"-stimeout", "5000000", // 5 second timeout
+		//	},
+		//	maxRetries:             5,
+		//	retryDelay:             5 * time.Second,
+		//	bufferPostSendInterval: 60 * time.Millisecond,
+		//	bufferReaderSize:       2 * 1024 * 1024,
+		//}
+	case MOCK_CAMERA:
 
-			// Forcing keyframe interval
-			"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
-			"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
-			"-sc_threshold", "0",
-			"-an", //"-c:a", "aac",
-			"-f", "mp4",
-			"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", //+faststart",
-			"-frag_duration", "1000000", // 1 second fragments
-			//"-fragment_duration", "500000",
-			//"-stimeout", "10000000", // 10 second timeout for RTSP
-			//"-rtsp_transport", "tcp", // Force TCP for more reliable connection
-		},
-		maxRetries: 5,
-		retryDelay: 5 * time.Second,
+		return &FFmpegConfig{
+			input: input,
+			options: []string{
+				"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
+				"-preset", "ultrafast", //"veryfast", // Adjust tradeoff between encoding speed and compression efficiency; faster encoding comes at cost of larger file size
+				"-tune", "zerolatency",
+				"-profile:v", "baseline",
+				"-level", "3.0",
+
+				"-pix_fmt", "yuv420p",
+				"-maxrate", "2000k", //"2000k",
+				"-bufsize", "2000k", //"4000k",
+				//todo "-crf", "28",                    // Balance quality and bitrate
+
+				// Frame settings
+				//todo "-r", "15",                      // Frame rate - adjust based on camera
+				//todo "-vsync", "passthrough",         // Maintain timing
+
+				//GOP settings
+				"-g", "30",
+				"-keyint_min", "30",
+
+				// Forcing keyframe interval
+				"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
+				"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
+				"-sc_threshold", "0",
+				"-an", //"-c:a", "aac",
+				"-f", "mp4",
+				"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", //+faststart",
+				"-frag_duration", "1000000", // 1 second fragments
+				//"-fragment_duration", "500000",
+				//"-stimeout", "10000000", // 10 second timeout for RTSP
+				//"-rtsp_transport", "tcp", // Force TCP for more reliable connection
+			},
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 30 * time.Millisecond,
+			bufferReaderSize:       1024 * 1024,
+		}
+	default:
+		log.Fatalf("Invalid camera selection: %d", selectedCameraEnum)
+		return nil
 	}
+
 }
 
 func (c *FFmpegConfig) buildCommand() *exec.Cmd {
@@ -130,9 +216,9 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 	}
 
 	// Create a buffered reader for more efficient reading
-	reader := bufio.NewReaderSize(stdout, 1024*1024)
+	reader := bufio.NewReaderSize(stdout, config.bufferReaderSize) //1024*1024)
 
-	buf := make([]byte, 1024*1024) //512*1024)
+	buf := make([]byte, config.bufferReaderSize) //512*1024)
 	//errorChan := make(chan error, 1)
 	//
 	//go func() {
@@ -176,6 +262,8 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 			break
 		}
 		if n == 0 {
+			log.Printf("Zero bytes read, continuing...")
+			time.Sleep(10 * time.Millisecond)
 			continue // Empty chunk, skip it
 		}
 
@@ -187,7 +275,7 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 			log.Fatalf("Failed to publish a message to the stream: %v", err)
 		}
 		log.Printf("Sent video chunk (%d bytes) to stream...", n)
-		time.Sleep(30 * time.Millisecond) // Simulate real-time video chunk sending
+		time.Sleep(config.bufferPostSendInterval) //30 * time.Millisecond) // Simulate real-time video chunk sending
 	}
 	if err := cmd.Wait(); err != nil {
 		log.Fatalf("Error waiting for ffmpeg: %v", err)
@@ -197,7 +285,8 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 }
 
 func main() {
-	SELECTED_CAMERA := int(MOCK_CAMERA)
+	SELECTED_CAMERA_ENUM := ANT_CAMERA // MOCK_CAMERA
+	SELECTED_CAMERA := int(SELECTED_CAMERA_ENUM)
 
 	// Read camera configuration
 	dir := "/app/config/cameras.yaml"
@@ -232,7 +321,7 @@ func main() {
 	defer producer.Close()
 
 	// Configure FFmpeg
-	config := newFFmpegConfig(RTSP_STREAM_URL)
+	config := newFFmpegConfig(RTSP_STREAM_URL, SELECTED_CAMERA_ENUM)
 
 	// Main retry loop
 	for retries := 0; retries < config.maxRetries; retries++ {

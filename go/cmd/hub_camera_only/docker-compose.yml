@@ -12,9 +12,10 @@ services:
 #        condition: service_healthy
     volumes:
       - ../../../go/hub/config:/app/config
-    depends_on:
-      mock_camera:
-        condition: service_healthy
+      - ./data:/tmp/data
+#    depends_on:
+#      mock_camera:
+#        condition: service_healthy
     environment:
       - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
       #- RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
