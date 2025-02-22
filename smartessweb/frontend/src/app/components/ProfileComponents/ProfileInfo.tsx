@@ -1,5 +1,6 @@
 const ProfileInfo = ({
   currentUser,
+  onOpenModal,
 }: {
   currentUser: {
     firstName: string;
@@ -7,6 +8,7 @@ const ProfileInfo = ({
     email: string;
     phoneNumber: string;
   };
+  onOpenModal: () => void;
 }) => {
   return (
     <div className="flex flex-col  w-full h-[680px] gap-2 drop-shadow-2xl">
@@ -95,13 +97,16 @@ const ProfileInfo = ({
                 </div>
                 <div>
                   <h1 className="font-sequel-sans text-[#000] text-l pt-8">
-                    ******
+                    ********
                   </h1>
                 </div>
               </div>
 
               <div className="flex flex-row justify-end items-center pt-5">
-                <button className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs hover:bg-[#1f505e] transition duration-300 rounded-md">
+                <button
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs hover:bg-[#1f505e] transition duration-300 rounded-md"
+                  onClick={onOpenModal}
+                >
                   Manage
                 </button>
               </div>

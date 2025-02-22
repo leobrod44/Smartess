@@ -19,6 +19,12 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
   const token = localStorage.getItem("token");
   const [activeHubUsers, setActiveHubUsers] = useState<HubUser[]>(hubUsers);
 
+  const capitalizeWords = (str: string) =>
+    str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
   const handleDeleteClick = (user: HubUser) => {
     setSelectedUser(user);
     setIsPopupOpen(true);
@@ -87,7 +93,7 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
             {/* Stacked view for small screens */}
             <div className="md:hidden text-center rounded-lg border p-2">
               <div className="text-[#14323B] font-semibold">User:</div>{" "}
-              {user.firstName} {user.lastName}
+              {capitalizeWords(`${user.firstName} ${user.lastName}`)}
               <div className="text-[#14323B] font-semibold">
                 Telephone:
               </div>{" "}
@@ -120,7 +126,7 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
 
             {/* Table view for medium and larger screens */}
             <div className="hidden md:flex items-center justify-center">
-              {user.firstName} {user.lastName}
+              {capitalizeWords(`${user.firstName} ${user.lastName}`)}
             </div>
             <div className="hidden md:flex items-center justify-center">
               {user.telephone

@@ -219,3 +219,47 @@ exports.getUserProjects = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.getProjectImages = async (req, res) => {
+  try {
+    const token = req.token;
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const { data, error } = await supabase.storage
+      .from("Images")
+      .list("mock-project-images");
+
+    if (error) {
+      console.error("Error fetching images:", error);
+      return res.status(500).json({ error: "Failed to fetch images." });
+    }
+
+    if (!data || data.length === 0) {
+      console.warn("No images found in storage.");
+      return res.json({ images: [] });
+    }
+
+    const imageUrls = data
+    .filter((file) => file.name !== "mock-project-images/.emptyFolderPlaceholder") // Filter out the placeholder
+    .map((file) => {
+      const publicUrlObj = supabase.storage
+        .from("Images")
+        .getPublicUrl(`mock-project-images/${file.name}`);
+      return publicUrlObj.data.publicUrl;
+    });
+
+    res.json({ images: imageUrls });
+    
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
