@@ -14,7 +14,6 @@ type AddUserProps = {
 export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("basic");
   const { userFirstName, userLastName } = useUserContext();
@@ -46,7 +45,6 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
     setEmail("");
     setRole("basic");
     setSelectedProjects([]);
-    setSelectedProjectIds([]);
   };
 
   const handleProjectSelect = (project: {
@@ -55,20 +53,11 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   }) => {
     if (!selectedProjects.includes(project.address)) {
       setSelectedProjects((prev) => [...prev, project.address]);
-      setSelectedProjectIds((prev) => [...prev, project.projectId]);
     }
   };
 
   const handleRemoveProject = (address: string) => {
     setSelectedProjects((prev) => prev.filter((a) => a !== address));
-
-    const project = projects.find((proj) => proj.address === address);
-    if (project) {
-      setSelectedProjectIds((prev) =>
-        prev.filter((id) => id !== Number(project.projectId))
-      );
-    }
-    //console.log("Selected Project IDs:", selectedProjectIds);
   };
 
   const unlinkedProjects = projects
