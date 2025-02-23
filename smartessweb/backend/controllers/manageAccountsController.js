@@ -366,21 +366,18 @@ exports.assignOrgUserToProject = async (req, res) => {
         // If only one row exists, update its proj_id with the first element of proj_ids
         const firstProjId = proj_ids[0];
 
-        // // Increment admin_users_count if org_user_type is admin
-        if (org_user_type === "admin") {
-          const { data: project, error: fetchProjectError } = await supabase
-            .from("project")
-            .select("admin_users_count")
-            .eq("proj_id", firstProjId)
-            .single();
+        const { data: project, error: fetchProjectError } = await supabase
+          .from("project")
+          .select("admin_users_count")
+          .eq("proj_id", firstProjId)
+          .single();
 
-          if (!fetchProjectError && project) {
-            const newCount = (project.admin_users_count || 0) + 1;
-            await supabase
-              .from("project")
-              .update({ admin_users_count: newCount })
-              .eq("proj_id", firstProjId);
-          }
+        if (!fetchProjectError && project) {
+          const newCount = (project.admin_users_count || 0) + 1;
+          await supabase
+            .from("project")
+            .update({ admin_users_count: newCount })
+            .eq("proj_id", firstProjId);
         }
 
         const { error: updateError } = await supabase
@@ -401,21 +398,18 @@ exports.assignOrgUserToProject = async (req, res) => {
           const additionalProjIds = proj_ids.slice(1);
 
           const insertPromises = additionalProjIds.map(async (proj_id) => {
-            // Increment admin_users_count if org_user_type is admin
-            if (org_user_type === "admin") {
-              const { data: project, error: fetchProjectError } = await supabase
-                .from("project")
-                .select("admin_users_count")
-                .eq("proj_id", proj_id)
-                .single();
+            const { data: project, error: fetchProjectError } = await supabase
+              .from("project")
+              .select("admin_users_count")
+              .eq("proj_id", proj_id)
+              .single();
 
-              if (!fetchProjectError && project) {
-                const newCount = (project.admin_users_count || 0) + 1;
-                await supabase
-                  .from("project")
-                  .update({ admin_users_count: newCount })
-                  .eq("proj_id", proj_id);
-              }
+            if (!fetchProjectError && project) {
+              const newCount = (project.admin_users_count || 0) + 1;
+              await supabase
+                .from("project")
+                .update({ admin_users_count: newCount })
+                .eq("proj_id", proj_id);
             }
 
             return supabase.from("org_user").insert([
@@ -448,21 +442,18 @@ exports.assignOrgUserToProject = async (req, res) => {
 
     // If more than one row exists, proceed with inserting new rows
     const insertPromises = proj_ids.map(async (proj_id) => {
-      // Increment admin_users_count if org_user_type is admin
-      if (org_user_type === "admin") {
-        const { data: project, error: fetchProjectError } = await supabase
-          .from("project")
-          .select("admin_users_count")
-          .eq("proj_id", proj_id)
-          .single();
+      const { data: project, error: fetchProjectError } = await supabase
+        .from("project")
+        .select("admin_users_count")
+        .eq("proj_id", proj_id)
+        .single();
 
-        if (!fetchProjectError && project) {
-          const newCount = (project.admin_users_count || 0) + 1;
-          await supabase
-            .from("project")
-            .update({ admin_users_count: newCount })
-            .eq("proj_id", proj_id);
-        }
+      if (!fetchProjectError && project) {
+        const newCount = (project.admin_users_count || 0) + 1;
+        await supabase
+          .from("project")
+          .update({ admin_users_count: newCount })
+          .eq("proj_id", proj_id);
       }
 
       return supabase.from("org_user").insert([
@@ -543,34 +534,35 @@ exports.removeOrgUserFromProject = async (req, res) => {
     const totalRows = rows.length;
 
     if (totalRows === proj_ids.length) {
-      // Delete all but one row, and set the last row's proj_id to null
+      // Fetch all projects associated with proj_ids
+      const updateCountsPromises = proj_ids.map(async (proj_id) => {
+        const { data: project, error: fetchProjectError } = await supabase
+          .from("project")
+          .select("admin_users_count")
+          .eq("proj_id", proj_id)
+          .single();
+    
+        if (!fetchProjectError && project) {
+          const newCount = Math.max((project.admin_users_count || 0) - 1, 0);
+          await supabase
+            .from("project")
+            .update({ admin_users_count: newCount })
+            .eq("proj_id", proj_id);
+        }
+      });
+    
+      await Promise.all(updateCountsPromises); // Wait for all updates
+    
+      // Now delete all but one row
       const rowToKeep = rows[0];
-
+    
       if (!rowToKeep) {
         return res.status(400).json({ error: "Invalid proj_ids provided." });
       }
-
-      // Delete all rows matching proj_ids except the one to keep
+    
       const deletePromises = proj_ids
         .filter((proj_id) => proj_id !== rowToKeep.proj_id)
-        .map(async (proj_id) => {
-          // Decrease admin count if user is admin
-          if (user_type === "admin") {
-            const { data: project, error: fetchProjectError } = await supabase
-              .from("project")
-              .select("admin_users_count")
-              .eq("proj_id", proj_id)
-              .single();
-
-            if (!fetchProjectError && project) {
-              const newCount = (project.admin_users_count || 0) - 1;
-              await supabase
-                .from("project")
-                .update({ admin_users_count: newCount })
-                .eq("proj_id", proj_id);
-            }
-          }
-
+        .map((proj_id) => {
           return supabase
             .from("org_user")
             .delete()
@@ -578,32 +570,32 @@ exports.removeOrgUserFromProject = async (req, res) => {
             .eq("org_id", org_id)
             .eq("proj_id", proj_id);
         });
-
+    
       const deleteResults = await Promise.all(deletePromises);
       const deleteError = deleteResults.find((result) => result.error);
-
+    
       if (deleteError) {
         console.error("Delete Error:", deleteError.error);
         return res
           .status(500)
           .json({ error: "Failed to remove user from project(s)." });
       }
-
-      // Update the remaining row to set proj_id to null
+    
+      // Finally, update the remaining row
       const { error: updateError } = await supabase
         .from("org_user")
         .update({ proj_id: null })
         .eq("user_id", user_id)
         .eq("org_id", org_id)
         .eq("proj_id", rowToKeep.proj_id);
-
+    
       if (updateError) {
         console.error("Update Error:", updateError);
         return res.status(500).json({
           error: "Failed to update remaining org_user proj_id to null.",
         });
       }
-
+    
       return res.status(200).json({
         message:
           "User successfully removed from projects and last proj_id set to null.",
@@ -612,21 +604,18 @@ exports.removeOrgUserFromProject = async (req, res) => {
 
     // Delete only the provided proj_ids
     const deletePromises = proj_ids.map(async (proj_id) => {
-      // Decrease admin count if user is admin
-      if (user_type === "admin") {
-        const { data: project, error: fetchProjectError } = await supabase
-          .from("project")
-          .select("admin_users_count")
-          .eq("proj_id", proj_id)
-          .single();
+      const { data: project, error: fetchProjectError } = await supabase
+        .from("project")
+        .select("admin_users_count")
+        .eq("proj_id", proj_id)
+        .single();
 
-        if (!fetchProjectError && project) {
-          const newCount = (project.admin_users_count || 0) - 1;
-          await supabase
-            .from("project")
-            .update({ admin_users_count: newCount })
-            .eq("proj_id", proj_id);
-        }
+      if (!fetchProjectError && project) {
+        const newCount = (project.admin_users_count || 0) - 1;
+        await supabase
+          .from("project")
+          .update({ admin_users_count: newCount })
+          .eq("proj_id", proj_id);
       }
 
       return supabase
@@ -708,8 +697,8 @@ exports.deleteOrgUser = async (req, res) => {
 
     const projIds = projIdsData.map((row) => row.proj_id);
 
-    // 5) If user is admin, decrement admin_users_count in "project" for each relevant project
-    if (user_type === "admin" && projIds.length > 0 && !projIds.includes(null)) {
+    // 5) Decrement admin_users_count in "project" table for each relevant project
+    if (projIds.length > 0 && !projIds.includes(null)) {
       const { data: projects, error: fetchProjectsError } = await supabase
         .from("project")
         .select("proj_id, admin_users_count")
@@ -991,25 +980,23 @@ exports.changeOrgUserRole = async (req, res) => {
         return res.status(500).json({ error: "Failed to associate user with projects." });
       }
   
-      // If role is admin, increment admin_users_count for each project
-      if (role === 'admin') {
-        const updatePromises = projectData.map(async (project) => {
-          const { data: currentProject } = await supabase
-            .from("project")
-            .select("admin_users_count")
-            .eq("proj_id", project.proj_id)
-            .single();
-  
-          const newCount = (currentProject?.admin_users_count || 0) + 1;
-  
-          return supabase
-            .from("project")
-            .update({ admin_users_count: newCount })
-            .eq("proj_id", project.proj_id);
-        });
-  
-        await Promise.all(updatePromises);
-      }
+      // Increment admin_users_count for each project
+      const updatePromises = projectData.map(async (project) => {
+        const { data: currentProject } = await supabase
+          .from("project")
+          .select("admin_users_count")
+          .eq("proj_id", project.proj_id)
+          .single();
+
+        const newCount = (currentProject?.admin_users_count || 0) + 1;
+
+        return supabase
+          .from("project")
+          .update({ admin_users_count: newCount })
+          .eq("proj_id", project.proj_id);
+      });
+
+      await Promise.all(updatePromises);
   
             // Generate a secure token using UUID v4
         const { v4: uuidv4 } = require('uuid');
