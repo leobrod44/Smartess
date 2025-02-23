@@ -11,7 +11,7 @@ import { useState } from "react";
 
 export const currentUser = {
   userId: "12345",
-  role: "master",
+  role: "basic",
   address: ["123 Main St", "Suite 400"],
   firstName: "Admin",
   lastName: "Admina",
