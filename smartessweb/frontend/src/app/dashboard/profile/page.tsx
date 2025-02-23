@@ -3,6 +3,7 @@
 import ProfileCard from "@/app/components/ProfileComponents/ProfileCard";
 import ProfileInfo from "@/app/components/ProfileComponents/ProfileInfo";
 import ManagePasswordModal from "@/app/components/ProfileComponents/ManagePasswordModal";
+import ManagePhoneNumberModal from "@/app/components/ProfileComponents/ManagePhoneNumberModal";
 import { useState } from "react";
 
 /*
@@ -21,17 +22,32 @@ export const currentUser = {
 
 const ProfilePage = () => {
   const [isManagePasswordOpen, setManagePasswordOpen] = useState(false);
+  const [isManagePhoneNumberOpen, setManagePhoneNumberOpen] = useState(false);
 
-  const handleOpenModal = () => {
+  // Modal handler for password
+  const handlePasswordOpenModal = () => {
     setManagePasswordOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const handlePasswordCloseModal = () => {
     setManagePasswordOpen(false);
   };
 
   const handlePasswordReset = () => {
     setManagePasswordOpen(false);
+  };
+
+  // Modal handler for phone number
+  const handlePhoneNumberOpenModal = () => {
+    setManagePhoneNumberOpen(true);
+  };
+
+  const handlePhoneNumberCloseModal = () => {
+    setManagePhoneNumberOpen(false);
+  };
+
+  const handlePhoneNumberReset = () => {
+    setManagePhoneNumberOpen(false);
   };
 
   return (
@@ -50,7 +66,8 @@ const ProfilePage = () => {
           {/* Left panel */}
           <ProfileInfo
             currentUser={currentUser}
-            onOpenModal={handleOpenModal}
+            onOpenPassword={handlePasswordOpenModal}
+            onOpenPhoneNumber={handlePhoneNumberOpenModal}
           />
         </div>
       </div>
@@ -58,8 +75,16 @@ const ProfilePage = () => {
       {isManagePasswordOpen && (
         <ManagePasswordModal
           isOpen={isManagePasswordOpen}
-          onClose={handleCloseModal}
+          onClose={handlePasswordCloseModal}
           onResetPassword={handlePasswordReset}
+        />
+      )}
+      {/* PhoneNumber Modal */}
+      {isManagePhoneNumberOpen && (
+        <ManagePhoneNumberModal
+          isOpen={isManagePhoneNumberOpen}
+          onClose={handlePhoneNumberCloseModal}
+          onResetPhoneNumber={handlePhoneNumberReset}
         />
       )}
     </div>
