@@ -2,25 +2,19 @@ import Link from "next/link";
 import { useState } from "react";
 import { Pagination } from "@mui/material";
 import ResolveTicketModal from "./ResolveTicketModal";
-import { showToastSuccess } from "@/app/components/Toast";
+import { showToastSuccess, showToastError } from "@/app/components/Toast";
+import { ticketResolutionApi, APIAssignedTicket } from "@/api/components/TicketsComponents/AssignedTicketsList";
 
-interface Ticket {
-  ticketId: string;
-  projectId: string;
-  unitId: string;
-  name: string;
-  description: string;
-  type: string;
-  unit: string;
-  status: string;
-  date: string;
-  isResolved: boolean;
-}
-
-const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
+const AssignedTicketList = ({ 
+  tickets,
+  onRefresh 
+}: { 
+  tickets: APIAssignedTicket[];
+  onRefresh: () => void;
+}) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<APIAssignedTicket | null>(null);
   const ticketsPerPage = 20;
 
   const handleChangePage = (
@@ -30,22 +24,41 @@ const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
     setPage(value);
   };
 
-  const handleResolveClick = (ticket: Ticket) => {
+  const handleResolveClick = (ticket: APIAssignedTicket) => {
     setSelectedTicket(ticket);
     setModalOpen(true);
   };
 
-  const handleResolveConfirm = () => {
+  const handleResolveConfirm = async () => {
     if (selectedTicket) {
-      if (selectedTicket.isResolved) {
-        showToastSuccess(
-          `Ticket ${selectedTicket.ticketId} has been marked as unresolved.`
-        );
-      } else {
-        showToastSuccess(
-          `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
-        );
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found');
+        }
+
+        await ticketResolutionApi.updateTicketResolution(token, {
+          ticket_id: selectedTicket.ticketId,
+          status: selectedTicket.isResolved ? 'unresolved' : 'resolved'
+        });
+
+        if (selectedTicket.isResolved) {
+          showToastSuccess(
+            `Ticket ${selectedTicket.ticketId} has been marked as unresolved.`
+          );
+        } else {
+          showToastSuccess(
+            `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
+          );
+        }
+        
+        onRefresh();
+        
+      } catch (error) {
+        console.error('Error updating ticket status:', error);
+        showToastError(error instanceof Error ? error.message : 'Failed to update ticket status');
       }
+      
       setModalOpen(false);
     }
   };

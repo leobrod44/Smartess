@@ -16,21 +16,21 @@ const AssignedTicketPage = () => {
   const [query, setQuery] = useState("");
   const [widgetFilter, setWidgetFilter] = useState<WidgetFilter>("all");
 
-  useEffect(() => {
-    const fetchAssignedTickets = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("Token not found in localStorage.");
-        return;
-      }
-      try {
-        const data = await assignedTicketsApi.getAssignedTickets(token);
-        setTickets(data.tickets);
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
-      }
-    };
+  const fetchAssignedTickets = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("Token not found in localStorage.");
+      return;
+    }
+    try {
+      const data = await assignedTicketsApi.getAssignedTickets(token);
+      setTickets(data.tickets);
+    } catch (error) {
+      console.error("Error fetching tickets:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchAssignedTickets();
   }, []);
 
@@ -172,7 +172,10 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList tickets={displayedTickets} />
+      <AssignedTicketList 
+        tickets={displayedTickets} 
+        onRefresh={fetchAssignedTickets}
+      />
     </div>
   );
 };
