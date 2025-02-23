@@ -727,3 +727,102 @@ exports.getAssignedUsers = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+exports.getAssignedTicketsForUser = async (req, res) => {
+  try {
+    const token = req.token;
+
+    // Verify user token and get user info
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Retrieve the user record to get the user_id
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
+
+    // Fetch ticket assignments for this user
+    const { data: assignments, error: assignmentError } = await supabase
+      .from("tickets_assignments")
+      .select("ticket_id, resolved_status")
+      .eq("assigned_to_user_id", userData.user_id);
+    if (assignmentError) {
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch ticket assignments." });
+    }
+
+    // Return empty array if no assignments found
+    if (!assignments || assignments.length === 0) {
+      return res.json({ tickets: [] });
+    }
+
+    // Create a map for quick lookup of resolved_status by ticket_id
+    const assignmentMap = {};
+    assignments.forEach((assignment) => {
+      assignmentMap[assignment.ticket_id] = assignment.resolved_status;
+    });
+
+    // Extract ticket IDs from assignments
+    const ticketIds = assignments.map((a) => a.ticket_id);
+
+    // Fetch ticket details from tickets table
+    const { data: ticketsData, error: ticketsError } = await supabase
+      .from("tickets")
+      .select(
+        `ticket_id, proj_id, hub_id, description, description_detailed, type, status, created_at`
+      )
+      .in("ticket_id", ticketIds);
+    if (ticketsError) {
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch tickets data." });
+    }
+
+    // Get unique hub IDs from tickets to fetch unit numbers
+    const hubIds = [...new Set(ticketsData.map((ticket) => ticket.hub_id))];
+    const { data: hubsData, error: hubsError } = await supabase
+      .from("hub")
+      .select("hub_id, unit_number")
+      .in("hub_id", hubIds);
+    if (hubsError) {
+      return res.status(500).json({ error: "Failed to fetch hub data." });
+    }
+
+    // Format each ticket to match the Ticket interface
+    const formattedTickets = ticketsData.map((ticket) => {
+      const hub = hubsData.find((h) => h.hub_id === ticket.hub_id);
+      const formattedDate = new Date(ticket.created_at)
+        .toISOString()
+        .split("T")[0]; // Format: YYYY-MM-DD
+      return {
+        ticketId: ticket.ticket_id,
+        projectId: ticket.proj_id,
+        unitId: ticket.hub_id,
+        name: ticket.description,
+        description: ticket.description_detailed,
+        type: ticket.type,
+        unit: hub ? hub.unit_number : null,
+        status: ticket.status,
+        date: formattedDate,
+        isResolved: assignmentMap[ticket.ticket_id] === "resolved",
+      };
+    });
+
+    // Return the formatted tickets
+    res.json({ tickets: formattedTickets });
+  } catch (error) {
+    console.error("Error in getAssignedTicketsForUser:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
