@@ -3,30 +3,18 @@ import { useState } from "react";
 import { Pagination } from "@mui/material";
 import ResolveTicketModal from "./ResolveTicketModal";
 import { showToastSuccess, showToastError } from "@/app/components/Toast";
-
-interface Ticket {
-  ticketId: string;
-  projectId: string;
-  unitId: string;
-  name: string;
-  description: string;
-  type: string;
-  unit: string;
-  status: string;
-  date: string;
-  isResolved: boolean;
-}
+import { ticketResolutionApi, APIAssignedTicket } from "@/api/components/TicketsComponents/AssignedTicketsList";
 
 const AssignedTicketList = ({ 
   tickets,
   onRefresh 
 }: { 
-  tickets: Ticket[];
+  tickets: APIAssignedTicket[];
   onRefresh: () => void;
 }) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [selectedTicket, setSelectedTicket] = useState<APIAssignedTicket | null>(null);
   const ticketsPerPage = 20;
 
   const handleChangePage = (
@@ -36,7 +24,7 @@ const AssignedTicketList = ({
     setPage(value);
   };
 
-  const handleResolveClick = (ticket: Ticket) => {
+  const handleResolveClick = (ticket: APIAssignedTicket) => {
     setSelectedTicket(ticket);
     setModalOpen(true);
   };
@@ -44,24 +32,15 @@ const AssignedTicketList = ({
   const handleResolveConfirm = async () => {
     if (selectedTicket) {
       try {
-        const endpoint = 'http://localhost:3000/api/tickets/update-ticket-resolution';
-
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            ticket_id: selectedTicket.ticketId,
-            status: selectedTicket.isResolved ? 'unresolved' : 'resolved'
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to update ticket status');
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No token found');
         }
+
+        await ticketResolutionApi.updateTicketResolution(token, {
+          ticket_id: selectedTicket.ticketId,
+          status: selectedTicket.isResolved ? 'unresolved' : 'resolved'
+        });
 
         if (selectedTicket.isResolved) {
           showToastSuccess(
@@ -73,8 +52,7 @@ const AssignedTicketList = ({
           );
         }
         
-        // Refresh the tickets list
-        onRefresh()
+        onRefresh();
         
       } catch (error) {
         console.error('Error updating ticket status:', error);
