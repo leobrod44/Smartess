@@ -980,7 +980,7 @@ exports.changeOrgUserRole = async (req, res) => {
         return res.status(500).json({ error: "Failed to associate user with projects." });
       }
   
-      // If role is admin, increment admin_users_count for each project
+      // Increment admin_users_count for each project
       const updatePromises = projectData.map(async (project) => {
         const { data: currentProject } = await supabase
           .from("project")
