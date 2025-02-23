@@ -6,116 +6,49 @@ import AssignedTicketList from "@/app/components/TicketComponents/AssignedTicket
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
-
-interface Ticket {
-  ticketId: string;
-  projectId: string;
-  unitId: string;
-  name: string;
-  description: string;
-  type: "Alert" | "Repair" | "Other";
-  unit: string;
-  status: "Open" | "Pending" | "Closed";
-  date: string;
-  isResolved: boolean;
-}
-
-const tickets: Ticket[] = [
-  {
-    ticketId: "t1",
-    projectId: "1",
-    unitId: "101",
-    name: "TICKET-001",
-    description: "Fix broken window",
-    type: "Repair",
-    unit: "101",
-    status: "Open",
-    date: "2024-11-15",
-    isResolved: false,
-  },
-  {
-    ticketId: "t2",
-    projectId: "1",
-    unitId: "102",
-    name: "TICKET-002",
-    description: "Upgrade kitchen appliances",
-    type: "Other",
-    unit: "102",
-    status: "Pending",
-    date: "2024-11-14",
-    isResolved: true,
-  },
-  {
-    ticketId: "t3",
-    projectId: "1",
-    unitId: "103",
-    name: "TICKET-003",
-    description: "Repaint walls after tenant move-out",
-    type: "Repair",
-    unit: "103",
-    status: "Closed",
-    date: "2024-11-13",
-    isResolved: true,
-  },
-  {
-    ticketId: "t4",
-    projectId: "2",
-    unitId: "104",
-    name: "TICKET-004",
-    description: "Repair leaky faucet in bathroom",
-    type: "Repair",
-    unit: "104",
-    status: "Open",
-    date: "2024-11-12",
-    isResolved: false,
-  },
-  {
-    ticketId: "t5",
-    projectId: "2",
-    unitId: "105",
-    name: "TICKET-005",
-    description: "Install new security cameras",
-    type: "Other",
-    unit: "105",
-    status: "Pending",
-    date: "2024-11-11",
-    isResolved: false,
-  },
-];
+import { assignedTicketsApi, APITicket } from "@/api/dashboard/ticket/my-tickets/page";
 
 type WidgetFilter = "all" | "resolved" | "unresolved";
 
 const AssignedTicketPage = () => {
   const { selectedProjectId } = useProjectContext();
+  const [tickets, setTickets] = useState<APITicket[]>([]);
   const [query, setQuery] = useState("");
   const [widgetFilter, setWidgetFilter] = useState<WidgetFilter>("all");
 
-  const filterOptionsTicket = [
-    "Ticket A-Z",
-    "Status",
-    "Most Recent",
-    "Least Recent",
-    "Most Important",
-    "Least Important",
-  ];
+  useEffect(() => {
+    const fetchAssignedTickets = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found in localStorage.");
+        return;
+      }
+      try {
+        const data = await assignedTicketsApi.getAssignedTickets(token);
+        setTickets(data.tickets);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+      }
+    };
+
+    fetchAssignedTickets();
+  }, []);
 
   const projectTickets = useMemo(() => {
     if (!selectedProjectId) return tickets;
     return tickets.filter(
       (ticket) => ticket.projectId === String(selectedProjectId)
     );
-  }, [selectedProjectId]);
+  }, [tickets, selectedProjectId]);
 
   const widgetStats = useMemo(() => {
     const total = projectTickets.length;
-    const resolved = projectTickets.filter(
-      (ticket) => ticket.isResolved
-    ).length;
+    const resolved = projectTickets.filter((ticket) => ticket.isResolved).length;
     const unresolved = total - resolved;
     return { total, resolved, unresolved };
   }, [projectTickets]);
 
-  const [displayedTickets, setDisplayedTickets] = useState<Ticket[]>([]);
+  const [displayedTickets, setDisplayedTickets] = useState<APITicket[]>([]);
 
   useEffect(() => {
     let tempTickets = [...projectTickets];
@@ -155,8 +88,7 @@ const AssignedTicketPage = () => {
         newDisplayedTickets.sort((a, b) => {
           const statusOrder: Record<string, number> = { false: 0, true: 1 };
           return (
-            statusOrder[String(a.isResolved)] -
-            statusOrder[String(b.isResolved)]
+            statusOrder[String(a.isResolved)] - statusOrder[String(b.isResolved)]
           );
         });
         break;
@@ -200,7 +132,7 @@ const AssignedTicketPage = () => {
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-fit  p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-fit p-4">
           <TicketWidget
             count={widgetStats.total}
             label="Total Tickets"
@@ -228,7 +160,14 @@ const AssignedTicketPage = () => {
         <div className="flex items-center space-x-4">
           <FilterComponent
             onFilterChange={handleFilterChange}
-            filterOptions={filterOptionsTicket}
+            filterOptions={[
+              "Ticket A-Z",
+              "Status",
+              "Most Recent",
+              "Least Recent",
+              "Most Important",
+              "Least Important",
+            ]}
           />
           <Searchbar onSearch={handleSearch} />
         </div>
