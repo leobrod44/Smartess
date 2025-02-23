@@ -67,7 +67,7 @@ function UserInfoModal({
     };
 
     fetchOrgProjectsData();
-  }, [addresses, currentOrg]);
+  }, [addresses, currentOrg, token]);
 
   const capitalizeWords = (str: string) =>
     str

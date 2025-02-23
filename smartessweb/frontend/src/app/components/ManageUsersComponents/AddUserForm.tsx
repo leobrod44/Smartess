@@ -1,11 +1,9 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
-import { generateMockProjects, Project } from "../../mockData";
+import { Project } from "../../mockData";
 import ProjectAddressMenu from "./ProjectAddressMenu";
 import { showToastError, showToastSuccess } from "../Toast";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { manageAccountsApi } from "@/api/page";
+import { manageAccountsApi, projectApi } from "@/api/page";
 import { useUserContext } from "@/context/UserProvider";
 
 type AddUserProps = {
@@ -16,21 +14,37 @@ type AddUserProps = {
 export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
-  const [selectedProjectIds, setSelectedProjectIds] = useState<number[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("basic");
-  const { userFirstName, userLastName } = useUserContext(); // Fetch the logged in users' name
+  const { userFirstName, userLastName } = useUserContext();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const mockProjects = generateMockProjects();
-    setProjects(mockProjects);
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          showToastError("Authentication token not found");
+          return;
+        }
+        
+        const response = await projectApi.getUserProjects(token);
+        setProjects(response.projects);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+        showToastError("Failed to fetch projects");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjects();
   }, []);
 
   const resetForm = () => {
     setEmail("");
     setRole("basic");
     setSelectedProjects([]);
-    setSelectedProjectIds([]);
   };
 
   const handleProjectSelect = (project: {
@@ -39,20 +53,11 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
   }) => {
     if (!selectedProjects.includes(project.address)) {
       setSelectedProjects((prev) => [...prev, project.address]);
-      setSelectedProjectIds((prev) => [...prev, project.projectId]);
     }
   };
 
   const handleRemoveProject = (address: string) => {
     setSelectedProjects((prev) => prev.filter((a) => a !== address));
-
-    const project = projects.find((proj) => proj.address === address);
-    if (project) {
-      setSelectedProjectIds((prev) =>
-        prev.filter((id) => id !== Number(project.projectId))
-      );
-    }
-    console.log("Selected Project IDs:", selectedProjectIds);
   };
 
   const unlinkedProjects = projects
@@ -105,7 +110,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
     }
 
     try {
-      const token = localStorage.getItem("token"); // Fetch token from local storage
+      const token = localStorage.getItem("token");
       if (!token) {
         showToastError("No token provided");
         return;
@@ -122,7 +127,7 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
         formData.append(`projects[${index}]`, project);
       });
 
-      await manageAccountsApi.sendInvite(token, formData); //send email
+      await manageAccountsApi.sendInvite(token, formData);
       resetForm();
       showToastSuccess("Invitation Sent!");
       onClose();
@@ -196,30 +201,35 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
               <p className="block text-sm font-medium text-[#30525E]">
                 Select Projects <span className="text-red-500">*</span>
               </p>
-              <ProjectAddressMenu
-                unlinkedProjects={unlinkedProjects}
-                onSelectProject={handleProjectSelect}
-              />
-              {/* Render Selected Projects */}
-              <div className="flex flex-col gap-2 mt-4">
-                {selectedProjects.map((address, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between border p-2 rounded-md shadow-sm"
-                  >
-                    <span>{address}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleRemoveProject(address);
-                      }}
-                    >
-                      <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900 " />
-                    </button>
+              {isLoading ? (
+                <div className="text-center py-4">Loading projects...</div>
+              ) : (
+                <>
+                  <ProjectAddressMenu
+                    unlinkedProjects={unlinkedProjects}
+                    onSelectProject={handleProjectSelect}
+                  />
+                  <div className="flex flex-col gap-2 mt-4">
+                    {selectedProjects.map((address, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between border p-2 rounded-md shadow-sm"
+                      >
+                        <span>{address}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleRemoveProject(address);
+                          }}
+                        >
+                          <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -227,7 +237,8 @@ export default function AddUserModal({ isOpen, onClose }: AddUserProps) {
               <button
                 type="button"
                 onClick={handleSendInvitation}
-                className="flex-1 rounded-md bg-[#254752] px-4 py-2 font-medium text-white shadow-sm hover:bg-[#14323B]"
+                disabled={isLoading}
+                className="flex-1 rounded-md bg-[#254752] px-4 py-2 font-medium text-white shadow-sm hover:bg-[#14323B] disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Send Invitation
               </button>
