@@ -826,3 +826,55 @@ exports.getAssignedTicketsForUser = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.updateTicketResolutionStatus = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id, status } = req.body;
+
+    if (!ticket_id || !status || !['resolved', 'unresolved'].includes(status)) {
+      return res.status(400).json({ error: "Invalid request data" });
+    }
+
+    // Verify user token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get user_id from the user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+      
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
+
+    // Update the assignment status
+    const { error: updateError } = await supabase
+      .from("tickets_assignments")
+      .update({ resolved_status: status })
+      .match({
+        ticket_id,
+        assigned_to_user_id: userData.user_id,
+        resolved_status: status === 'resolved' ? 'unresolved' : 'resolved'
+      });
+
+    if (updateError) {
+      return res.status(500).json({ 
+        error: `Failed to mark ticket as ${status}.` 
+      });
+    }
+
+    res.status(200).json({ 
+      message: `Ticket marked as ${status}.` 
+    });
+    
+  } catch (error) {
+    console.error(`Error in updateTicketResolutionStatus:`, error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};

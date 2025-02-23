@@ -2,7 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Pagination } from "@mui/material";
 import ResolveTicketModal from "./ResolveTicketModal";
-import { showToastSuccess } from "@/app/components/Toast";
+import { showToastSuccess, showToastError } from "@/app/components/Toast";
 
 interface Ticket {
   ticketId: string;
@@ -17,7 +17,13 @@ interface Ticket {
   isResolved: boolean;
 }
 
-const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
+const AssignedTicketList = ({ 
+  tickets,
+  onRefresh 
+}: { 
+  tickets: Ticket[];
+  onRefresh: () => void;
+}) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -35,17 +41,46 @@ const AssignedTicketList = ({ tickets }: { tickets: Ticket[] }) => {
     setModalOpen(true);
   };
 
-  const handleResolveConfirm = () => {
+  const handleResolveConfirm = async () => {
     if (selectedTicket) {
-      if (selectedTicket.isResolved) {
-        showToastSuccess(
-          `Ticket ${selectedTicket.ticketId} has been marked as unresolved.`
-        );
-      } else {
-        showToastSuccess(
-          `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
-        );
+      try {
+        const endpoint = 'http://localhost:3000/api/tickets/update-ticket-resolution';
+
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({
+            ticket_id: selectedTicket.ticketId,
+            status: selectedTicket.isResolved ? 'unresolved' : 'resolved'
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to update ticket status');
+        }
+
+        if (selectedTicket.isResolved) {
+          showToastSuccess(
+            `Ticket ${selectedTicket.ticketId} has been marked as unresolved.`
+          );
+        } else {
+          showToastSuccess(
+            `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
+          );
+        }
+        
+        // Refresh the tickets list
+        onRefresh()
+        
+      } catch (error) {
+        console.error('Error updating ticket status:', error);
+        showToastError(error instanceof Error ? error.message : 'Failed to update ticket status');
       }
+      
       setModalOpen(false);
     }
   };
