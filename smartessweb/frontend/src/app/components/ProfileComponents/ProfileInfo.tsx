@@ -12,10 +12,10 @@ const ProfileInfo = ({
 }) => {
   return (
     <div className="flex flex-col  w-full h-[680px] gap-2 drop-shadow-2xl">
-      <div className="flex flex-col justify-center items-center bg-[#266472] rounded-t-lg w-full  h-[60px]"></div>
+      <div className="flex flex-col justify-center items-center bg-[#1f505e] rounded-t-lg w-full  h-[60px]"></div>
       <div className="flex flex-row justify-center items-left bg-white rounded w-full h-full">
         {/* Outter card */}
-        <div className="flex flex-col justify-center w-5/6 h-3/5">
+        <div className="flex flex-col justify-center w-5/6 h-4/5">
           {/* Inner row */}
           <div className="p-2 border-b">
             <div className="flex flex-row justify-between">
@@ -114,7 +114,7 @@ const ProfileInfo = ({
           </div>
         </div>
       </div>
-      <div className="flex flex-col justify-center items-center bg-[#266472] rounded-b-lg w-full h-[60px] "></div>
+      <div className="flex flex-col justify-center items-center bg-[#1f505e] rounded-b-lg w-full h-[60px] "></div>
     </div>
   );
 };
