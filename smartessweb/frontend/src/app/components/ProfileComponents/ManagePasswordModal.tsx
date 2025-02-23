@@ -57,7 +57,7 @@ const ManagePasswordModal = ({
       return;
     }
 
-    showToastSuccess("Reset email has been sent");
+    showToastSuccess("Password has been changed");
     onResetPassword(confirmNewPassword);
     setNewPassword("");
     setConfirmNewPassword("");
