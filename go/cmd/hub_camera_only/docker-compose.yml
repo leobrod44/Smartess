@@ -10,9 +10,15 @@ services:
 #    depends_on:
 #      rabbitmq:
 #        condition: service_healthy
+    volumes:
+      - ../../../go/hub/config:/app/config
+      - ./data:/tmp/data
+#    depends_on:
+#      mock_camera:
+#        condition: service_healthy
     environment:
       - RABBITMQ_URI=amqp://admin:admin@rabbitmq:5672/  # Connect to the RabbitMQ service in your full project
-      - RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
+      #- RTSP_STREAM_URL=rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1
       - RABBITMQ_STREAM_URI=rabbitmq-stream://admin:admin@rabbitmq:5552/  # Connect to the RabbitMQ service in your full project
 #    volumes:
 #      - ./go/cmd/hub_camera_only/logs:/app/logs
@@ -26,7 +32,7 @@ services:
       dockerfile: ./consumer/Dockerfile
     container_name: video_consumer
     ports:
-      - "8082:8082"  # Publish port .... to the host machine
+      - "8082:8082"  # Publish port .... to the host machine; Expose port for WebSocket or WebRTC signaling
 #    depends_on:
 #      rabbitmq:
 #        condition: service_healthy
@@ -49,7 +55,23 @@ services:
       - consumer
     networks:
       - smartess_network  # Use the existing network
-
+    volumes:
+      - ./frontend/static:/usr/share/nginx/html #./frontend:/usr/share/nginx/html  # Mount frontend directory
+  # Mock camera rtsp stream for testing purposes
+  mock_camera:
+    container_name: mock_camera
+    build:
+      context: ../../../go/cmd/mock_camera
+    ports:
+      - "8554:8554"
+    healthcheck:
+      test: [ "CMD", "ffmpeg", "-i", "rtsp://mock_camera:8554/live", "-t", "1", "-f", "null", "/dev/null" ]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
+    networks:
+      - smartess_network
 # Use the existing smartess_network defined in MYFULLPROJECT
 networks:
   smartess_network:

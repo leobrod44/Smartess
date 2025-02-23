@@ -40,7 +40,6 @@ func Init() (RabbitMQServer, error) {
 	}
 
 	var consumers []handlers.QueueConsumer
-
 	for _, exchangeConfig := range instance.Config.Exchanges {
 		logger.Info("Exchange: ", zap.Any("exchange", exchangeConfig))
 		err = instance.Channel.ExchangeDeclare(
