@@ -1,0 +1,386 @@
+<!--<!DOCTYPE html>-->
+<!--<html>-->
+<!--<head>-->
+<!--    <title>RTSP Stream Viewer</title>-->
+<!--    <style>-->
+<!--        .container {-->
+<!--            max-width: 800px;-->
+<!--            margin: 20px auto;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--        video {-->
+<!--            width: 100%;-->
+<!--            max-width: 800px;-->
+<!--            border: 1px solid #ccc;-->
+<!--        }-->
+<!--        #status {-->
+<!--            margin: 10px 0;-->
+<!--            padding: 10px;-->
+<!--            background: #f0f0f0;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <video id="videoPlayer" controls autoplay ></video>-->
+<!--&lt;!&ndash;todo    playsinline&ndash;&gt;-->
+<!--    <div id="status">Initializing...</div>-->
+<!--</div>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>-->
+<!--<script>-->
+<!--    var hls = new Hls();-->
+<!--    hls.loadSource('http://example.com/live/stream.m3u8');-->
+<!--    hls.attachMedia(document.getElementById('videoPlayer'));-->
+<!--</script>-->
+<!--<script>-->
+<!--    const status = document.getElementById('status');-->
+<!--    function showStatus(message, color="#d0d5d0") {-->
+<!--        status.textContent = message;-->
+<!--        status.style.backgroundColor = color;-->
+<!--        console.log(message);-->
+<!--    }-->
+
+<!--    const video = document.getElementById('videoPlayer');-->
+<!--    // let mediaSource = null;-->
+<!--    // let sourceBuffer = null;-->
+<!--    // let ws = null;-->
+<!--    let isSourceBufferValid = false;-->
+
+
+<!--    const mediaSource = new MediaSource();-->
+<!--    video.src = URL.createObjectURL(mediaSource);-->
+
+<!--    const ws = new WebSocket(`ws://${window.location.hostname}:8082/ws`);-->
+
+<!--    ws.onopen = () => {-->
+<!--        showStatus('Connected to stream', '#d4edda');-->
+<!--    };-->
+
+<!--    ws.onclose = () => {-->
+<!--        showStatus('Connection lost - reconnecting...', '#fff3cd');-->
+
+<!--        //TODO setTimeout(connectWebSocket, 2000);-->
+<!--    };-->
+
+<!--    ws.onerror = (error) => {-->
+<!--        showStatus('WebSocket error: ' + error.toString(), '#f8d7da');-->
+<!--    };-->
+
+
+
+<!--    // function cleanupMediaSource() {-->
+<!--    //     if (sourceBuffer && mediaSource && mediaSource.readyState === 'open') {-->
+<!--    //         isSourceBufferValid = false;-->
+<!--    //         try {-->
+<!--    //             mediaSource.removeSourceBuffer(sourceBuffer);-->
+<!--    //         } catch (e) {-->
+<!--    //             console.log('Error removing source buffer:', e);-->
+<!--    //         }-->
+<!--    //     }-->
+<!--    //     if (mediaSource && mediaSource.readyState === 'open') {-->
+<!--    //         try {-->
+<!--    //             mediaSource.endOfStream();-->
+<!--    //         } catch (e) {-->
+<!--    //             console.log('Error ending media stream:', e);-->
+<!--    //         }-->
+<!--    //     }-->
+<!--    //     sourceBuffer = null;-->
+<!--    //     mediaSource = null;-->
+<!--    // }-->
+
+<!--    // function startPlayback() {-->
+<!--    //     // Cleanup existing media source if any-->
+<!--    //     cleanupMediaSource();-->
+<!--    //     console.warn("START PLAYBACK... TODO: REINIT MEDIA SOURCE");-->
+<!--    //     // Create new MediaSource-->
+<!--    //     mediaSource = new MediaSource();-->
+<!--    //     video.src = URL.createObjectURL(mediaSource);-->
+<!--    //-->
+<!--    //     mediaSource.addEventListener('sourceopen', () => {-->
+<!--    //         showStatus('MediaSource opened, connecting to WebSocket...');-->
+<!--    //-->
+<!--    //         try {-->
+<!--    //             sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');-->
+<!--    //             sourceBuffer.mode = 'sequence';-->
+<!--    //             isSourceBufferValid = true;-->
+<!--    //             connectWebSocket();-->
+<!--    //         } catch (e) {-->
+<!--    //             showStatus('Error setting up video player: ' + e.message);-->
+<!--    //             cleanupMediaSource();-->
+<!--    //         }-->
+<!--    //     });-->
+<!--    //-->
+<!--    //     mediaSource.addEventListener('sourceended', () => {-->
+<!--    //         isSourceBufferValid = false;-->
+<!--    //         showStatus('Stream ended');-->
+<!--    //     });-->
+<!--    //-->
+<!--    //     mediaSource.addEventListener('sourceclose', () => {-->
+<!--    //         isSourceBufferValid = false;-->
+<!--    //         showStatus('MediaSource closed');-->
+<!--    //     });-->
+<!--    // }-->
+<!--    mediaSource.addEventListener('sourceopen', () => {-->
+<!--        showStatus('MediaSource opened, connecting to WebSocket...');-->
+
+<!--        let sourceBuffer;-->
+
+<!--        try {-->
+<!--            sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42E01E,mp4a.40.2"');-->
+<!--            sourceBuffer.mode = 'sequence';-->
+<!--            isSourceBufferValid = true;-->
+<!--            //todo connectWebSocket();-->
+<!--        } catch (e) {-->
+<!--            showStatus('Error setting up video player: ' + e.message);-->
+<!--            //todo cleanupMediaSource();-->
+<!--            return;-->
+<!--        }-->
+<!--        ws.binaryType = "arraybuffer";-->
+
+<!--        // Handling incoming WebSocket messages-->
+<!--        ws.onmessage = (event) => {-->
+<!--            if (sourceBuffer.updating || !event.data) return;-->
+
+<!--            console.log("Received data:", event.data);  // Log received data-->
+<!--            try {-->
+<!--                // Append the data to the sourceBuffer-->
+<!--                sourceBuffer.appendBuffer(new Uint8Array(event.data));-->
+<!--            } catch (e) {-->
+<!--                console.error("Error appending buffer:", e);-->
+<!--            }-->
+<!--        //    const data = event.data;-->
+<!--        //     if (data instanceof Blob) {-->
+<!--        //     data.arrayBuffer().then(buffer => {-->
+<!--        //         if (sourceBuffer && !sourceBuffer.updating) {-->
+<!--        //             try {-->
+<!--        //                 if (!appendToSourceBuffer(buffer)) {-->
+<!--        //                     console.warn('SafeBuffer-Append failed, try to restart playback/Re Init MediaSource');-->
+<!--        //                     //TODO startPlayback();-->
+<!--        //                 }-->
+<!--        //             } catch (e) {-->
+<!--        //                 console.error('Error processing video chunk:', e);-->
+<!--        //             }-->
+<!--        //         }-->
+<!--        //     });-->
+<!--        // }-->
+<!--        };-->
+<!--        sourceBuffer.addEventListener('updateend', () => {-->
+<!--            console.log("Buffer updated");-->
+<!--            if (sourceBuffer.buffered.length > 0 && sourceBuffer.buffered.end(0) > 0) {-->
+<!--                loadingMessage.style.display = "none";  // Hide loading message when video is ready-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+
+<!--    mediaSource.addEventListener('sourceended', () => {-->
+<!--        isSourceBufferValid = false;-->
+<!--        showStatus('Stream ended');-->
+<!--    });-->
+
+<!--    mediaSource.addEventListener('sourceclose', () => {-->
+<!--        isSourceBufferValid = false;-->
+<!--        showStatus('MediaSource closed');-->
+<!--    });-->
+
+<!--    function appendToSourceBuffer(buffer) {-->
+<!--        isSourceBufferValid = true; // TODO temporary-->
+<!--        if (!isSourceBufferValid || !sourceBuffer || !mediaSource) {-->
+<!--            showStatus(`SafeBufferAppend Precondition FAIL!-->
+<!--                        \r\nSourceBuffer Null: ${! sourceBuffer}-->
+<!--                        \r\nMediaSource Null: ${! mediaSource}-->
+<!--                        \r\nSB Invalid: ${! isSourceBufferValid}`,-->
+<!--                '#f8d7da');-->
+<!--            return false;-->
+<!--        }-->
+
+<!--        try {-->
+<!--            if (!sourceBuffer.updating){ // TODO && mediaSource.readyState === 'open') {-->
+<!--                sourceBuffer.appendBuffer(buffer);-->
+<!--                return true;-->
+<!--            }-->
+<!--            showStatus(`SafeBufferAppend FAIL!-->
+<!--                        \r\nSourceBuffer is Updating: ${ sourceBuffer.updating}-->
+<!--                        \r\nMediaSource ReadyState not Open: ${ mediaSource.readyState !== 'open'} (${mediaSource.readyState})`,-->
+<!--                '#f8d7da');-->
+<!--        } catch (e) {-->
+<!--            console.error('Error appending buffer:', e);-->
+<!--            if (isSourceBufferValid && mediaSource.readyState === 'open' && !sourceBuffer.updating) {-->
+<!--                try {-->
+<!--                    const currentTime = video.currentTime;-->
+<!--                    // Only remove if we have enough buffer-->
+<!--                    if (currentTime > 2) {-->
+<!--                        sourceBuffer.remove(0, currentTime - 2);-->
+<!--                    }-->
+<!--                    // TODO If successful, return special True state ??-->
+<!--                } catch (removeError) {-->
+<!--                    console.warn('Buffer removal failed:', removeError);-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--        return false;-->
+<!--    }-->
+
+<!--    // function connectWebSocket() {-->
+<!--    //     // if (ws) { //&& ws.readyState === WebSocket.OPEN) {-->
+<!--    //     //     ws.close();-->
+<!--    //     // }-->
+<!--    //-->
+<!--    //     const ws = new WebSocket(`ws://${window.location.hostname}:8082/ws`);-->
+<!--    //-->
+<!--    //     ws.onopen = () => {-->
+<!--    //         showStatus('Connected to stream', '#d4edda');-->
+<!--    //     };-->
+<!--    //-->
+<!--    //     ws.onclose = () => {-->
+<!--    //         showStatus('Connection lost - reconnecting...', '#fff3cd');-->
+<!--    //-->
+<!--    //         //TODO setTimeout(connectWebSocket, 2000);-->
+<!--    //     };-->
+<!--    //-->
+<!--    //     ws.onerror = (error) => {-->
+<!--    //         showStatus('WebSocket error: ' + error.toString(), '#f8d7da');-->
+<!--    //     };-->
+<!--    //-->
+<!--    //     // ws.onmessage = async (event) => {-->
+<!--    //     //     if (!(event.data instanceof Blob)) return;-->
+<!--    //     //-->
+<!--    //     //     try {-->
+<!--    //     //         const buffer = await event.data.arrayBuffer();-->
+<!--    //     //         if (!appendToSourceBuffer(buffer)) {-->
+<!--    //     //             // If append failed, try to restart playback-->
+<!--    //     //             startPlayback();-->
+<!--    //     //         }-->
+<!--    //     //     } catch (e) {-->
+<!--    //     //         console.error('Error processing video chunk:', e);-->
+<!--    //     //     }-->
+<!--    //     // };-->
+<!--    //     ws.onmessage = (event) => {-->
+<!--    //         const data = event.data;-->
+<!--    //         if (data instanceof Blob) {-->
+<!--    //             data.arrayBuffer().then(buffer => {-->
+<!--    //                 if (sourceBuffer && !sourceBuffer.updating) {-->
+<!--    //                     try {-->
+<!--    //                         if (!appendToSourceBuffer(buffer)) {-->
+<!--    //                             console.warn('SafeBuffer-Append failed, try to restart playback/Re Init MediaSource');-->
+<!--    //                             //TODO startPlayback();-->
+<!--    //                         }-->
+<!--    //                     } catch (e) {-->
+<!--    //                         console.error('Error processing video chunk:', e);-->
+<!--    //                     }-->
+<!--    //                 }-->
+<!--    //             });-->
+<!--    //         }-->
+<!--    //     };-->
+<!--    // }-->
+
+<!--    // Handle page visibility-->
+<!--    // document.addEventListener('visibilitychange', () => {-->
+<!--    //     if (document.hidden) {-->
+<!--    //         if (ws) {-->
+<!--    //             ws.close();-->
+<!--    //         }-->
+<!--    //         cleanupMediaSource();-->
+<!--    //     } else {-->
+<!--    //         startPlayback();-->
+<!--    //     }-->
+<!--    // });-->
+<!--    // Logging any errors with the video player-->
+<!--    video.onerror = (error) => {-->
+<!--        console.error("Video player error:", error);-->
+<!--    };-->
+<!--    // Start playback when page loads-->
+<!--    // startPlayback();-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html>&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Live Video Stream</title>&ndash;&gt;-->
+<!--&lt;!&ndash;    <style>&ndash;&gt;-->
+<!--&lt;!&ndash;        .video-container {&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            max-width: 800px;&ndash;&gt;-->
+<!--&lt;!&ndash;            margin: 20px auto;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;        video {&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            border: 1px solid #ccc;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;        .status {&ndash;&gt;-->
+<!--&lt;!&ndash;            text-align: center;&ndash;&gt;-->
+<!--&lt;!&ndash;            margin: 10px 0;&ndash;&gt;-->
+<!--&lt;!&ndash;            padding: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;            background-color: #f0f0f0;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;    </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body>&ndash;&gt;-->
+<!--&lt;!&ndash;<div class="video-container">&ndash;&gt;-->
+<!--&lt;!&ndash;    <video id="videoPlayer" controls autoplay></video>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div id="status" class="status">Connecting to stream...</div>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
+<!--&lt;!&ndash;<script>&ndash;&gt;-->
+<!--&lt;!&ndash;    const video = document.getElementById('videoPlayer');&ndash;&gt;-->
+<!--&lt;!&ndash;    const statusElement = document.getElementById('status');&ndash;&gt;-->
+<!--&lt;!&ndash;    let mediaSource;&ndash;&gt;-->
+<!--&lt;!&ndash;    let sourceBuffer;&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Set up MediaSource&ndash;&gt;-->
+<!--&lt;!&ndash;    function initMediaSource() {&ndash;&gt;-->
+<!--&lt;!&ndash;        mediaSource = new MediaSource();&ndash;&gt;-->
+<!--&lt;!&ndash;        video.src = URL.createObjectURL(mediaSource);&ndash;&gt;-->
+
+<!--&lt;!&ndash;        mediaSource.addEventListener('sourceopen', () => {&ndash;&gt;-->
+<!--&lt;!&ndash;            // Using MP2T (MPEG-TS) codec as it's commonly used with RTSP/streaming&ndash;&gt;-->
+<!--&lt;!&ndash;            sourceBuffer = mediaSource.addSourceBuffer('video/mp2t');&ndash;&gt;-->
+<!--&lt;!&ndash;            sourceBuffer.mode = 'sequence';&ndash;&gt;-->
+<!--&lt;!&ndash;            connectWebSocket();&ndash;&gt;-->
+<!--&lt;!&ndash;        });&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Connect to WebSocket&ndash;&gt;-->
+<!--&lt;!&ndash;    function connectWebSocket() {&ndash;&gt;-->
+<!--&lt;!&ndash;        const ws = new WebSocket('ws://' + window.location.hostname + ':8082/ws');&ndash;&gt;-->
+
+<!--&lt;!&ndash;        ws.onopen = () => {&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.textContent = 'Connected to stream';&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.style.backgroundColor = '#d4edda';&ndash;&gt;-->
+<!--&lt;!&ndash;        };&ndash;&gt;-->
+
+<!--&lt;!&ndash;        ws.onmessage = (event) => {&ndash;&gt;-->
+<!--&lt;!&ndash;            const data = event.data;&ndash;&gt;-->
+<!--&lt;!&ndash;            if (data instanceof Blob) {&ndash;&gt;-->
+<!--&lt;!&ndash;                data.arrayBuffer().then(buffer => {&ndash;&gt;-->
+<!--&lt;!&ndash;                    if (!sourceBuffer.updating) {&ndash;&gt;-->
+<!--&lt;!&ndash;                        try {&ndash;&gt;-->
+<!--&lt;!&ndash;                            sourceBuffer.appendBuffer(buffer);&ndash;&gt;-->
+<!--&lt;!&ndash;                        } catch (e) {&ndash;&gt;-->
+<!--&lt;!&ndash;                            console.error('Error appending buffer:', e);&ndash;&gt;-->
+<!--&lt;!&ndash;                            if (mediaSource.readyState === 'open') {&ndash;&gt;-->
+<!--&lt;!&ndash;                                sourceBuffer.remove(0, video.currentTime);&ndash;&gt;-->
+<!--&lt;!&ndash;                            }&ndash;&gt;-->
+<!--&lt;!&ndash;                        }&ndash;&gt;-->
+<!--&lt;!&ndash;                    }&ndash;&gt;-->
+<!--&lt;!&ndash;                });&ndash;&gt;-->
+<!--&lt;!&ndash;            }&ndash;&gt;-->
+<!--&lt;!&ndash;        };&ndash;&gt;-->
+
+<!--&lt;!&ndash;        ws.onclose = () => {&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.textContent = 'Connection lost. Reconnecting...';&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.style.backgroundColor = '#fff3cd';&ndash;&gt;-->
+<!--&lt;!&ndash;            setTimeout(connectWebSocket, 2000);&ndash;&gt;-->
+<!--&lt;!&ndash;        };&ndash;&gt;-->
+
+<!--&lt;!&ndash;        ws.onerror = (error) => {&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.textContent = 'Connection error';&ndash;&gt;-->
+<!--&lt;!&ndash;            statusElement.style.backgroundColor = '#f8d7da';&ndash;&gt;-->
+<!--&lt;!&ndash;            console.error('WebSocket error:', error);&ndash;&gt;-->
+<!--&lt;!&ndash;        };&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
+<!--&lt;!&ndash;    // Initialize everything&ndash;&gt;-->
+<!--&lt;!&ndash;    initMediaSource();&ndash;&gt;-->
+<!--&lt;!&ndash;</script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
