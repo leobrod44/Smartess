@@ -2,6 +2,7 @@ import { Individual } from "@/app/mockData";
 import React, { useState } from "react";
 import UnassignConfirmModal from "../ConfirmationModals/UnassignConfirmModal";
 import { showToastSuccess, showToastError } from "@/app/components/Toast";
+import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 interface AssignedUserProps {
   Individual: Individual;
@@ -57,8 +58,9 @@ function AssignedUser({ Individual, onUnassignClick }: AssignedUserProps) {
       </div>
 
       <div className="flex-1 flex justify-center">
-        <button className="py-1 bg-[#729987] rounded-[20px] justify-center items-center hover:bg-[#5C7A6B] transition duration-300 px-3  text-center text-white text-xs font-['Sequel Sans']">
+        <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
           Contact
+          <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
         </button>
       </div>
 
