@@ -12,19 +12,19 @@ import { useRouter } from "next/navigation";
 import { manageAccountsApi } from "@/api/page";
 import { ticketsApi } from "@/api/dashboard/ticket/[ticketid]/page";
 
-const transformType = (type: string): "alert" | "repair" | "bug" | "other" => {
-  const lowercaseType = type.toLowerCase();
-  switch (lowercaseType) {
-    case "alert": return "alert";
-    case "repair": return "repair";
-    case "bug": return "bug";
-    default: return "other";
+const transformType = (type: string): "Alert" | "Repair" | "Bug" | "Other" => {
+  const uppercaseType = type.toUpperCase();
+  switch (uppercaseType) {
+    case "alert": return "Alert";
+    case "repair": return "Repair";
+    case "bug": return "Bug";
+    default: return "Other";
   }
 };
 
 const transformStatus = (status: string): "Open" | "Pending" | "Closed" => {
-  const lowercaseStatus = status.toLowerCase();
-  switch (lowercaseStatus) {
+  const uppercaseType = status.toUpperCase();
+  switch (uppercaseType) {
     case "open": return "Open";
     case "pending": return "Pending";
     case "closed": return "Closed";
