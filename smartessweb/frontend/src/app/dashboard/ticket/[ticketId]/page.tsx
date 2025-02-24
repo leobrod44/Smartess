@@ -22,13 +22,13 @@ const transformType = (type: string): "alert" | "repair" | "bug" | "other" => {
   }
 };
 
-const transformStatus = (status: string): "open" | "pending" | "closed" => {
+const transformStatus = (status: string): "Open" | "Pending" | "Closed" => {
   const lowercaseStatus = status.toLowerCase();
   switch (lowercaseStatus) {
-    case "open": return "open";
-    case "pending": return "pending";
-    case "closed": return "closed";
-    default: return "open";
+    case "open": return "Open";
+    case "pending": return "Pending";
+    case "closed": return "Closed";
+    default: return "Open";
   }
 };
 
