@@ -3,6 +3,8 @@ package ha
 import (
 	"Smartess/go/common/structures"
 	"Smartess/go/common/utils"
+	logs "Smartess/go/hub/logger"
+	"fmt"
 	"strings"
 )
 
@@ -41,7 +43,6 @@ func classifyConciseEvent(event *ConciseEvent) EventClassification {
 	if event.Attributes.DeviceClass != nil {
 		classification.Tags = append(classification.Tags, utils.NormalizeStringToTag(*event.Attributes.DeviceClass))
 	}
-
 	//TODO: Additional tags can be added here based on other attributes + context conditionals
 
 	return classification
@@ -91,6 +92,31 @@ func (*EventClassification) GenerateAlertRoutingKey(consiseEvent *ConciseEvent, 
 		routingKey += "." + tag
 	}
 	return routingKey
+}
+func (*EventClassification) DemoLightMapping(webMessage *WebhookMessage, logger *logs.Logger) string {
+	color, _ := webMessage.Event.Data.NewState.Attributes["rgb_color"].([]interface{})
+	logger.Info(fmt.Sprintf("%v", color))
+	colorStr := fmt.Sprintf("[%v %v %v]", int(color[0].(float64)), int(color[1].(float64)), int(color[2].(float64)))
+	switch colorStr {
+	case "[238 254 255]":
+		return structures.AlertTypeLight
+	case "[255 42 225]":
+		return structures.AlertTypeSensor
+	case "[123 255 66]":
+		return structures.AlertTypeClimate
+	case "[255 72 15]":
+		return structures.AlertTypeBatteryLow
+	case "[105 9 255]":
+		return structures.AlertTypeDoorOpen
+	case "[255 51 0]":
+		return structures.AlertTypeSmoke
+	case "[61 134 255]":
+		return structures.AlertTypeWater
+	case "[255 196 103]":
+		return structures.AlertTypeTemperature
+	default:
+		return "unknown"
+	}
 }
 
 // TODO DETERMINE SEVERITY OF ALERTS
