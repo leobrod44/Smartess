@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { manageAccountsApi } from "@/api/page";
 import { ticketAssignApis } from "@/api/components/IndividualTicketPageComponents/ManageTicketAssignment";
 
-
 interface ManageTicketProps {
   ticket: Ticket;
   onStatusUpdate: (newStatus: "open" | "pending" | "closed") => void;
@@ -36,8 +35,8 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         const users = await ticketAssignApis.getAssignedUsers(ticket.ticket_id);
         setAssignedUsers(users);
       } catch (error) {
-        console.error('Error:', error);
-        showToastError('Failed to load assigned users');
+        console.error("Error:", error);
+        showToastError("Failed to load assigned users");
       }
     };
 
@@ -53,7 +52,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
     const fetchData = async () => {
       try {
-        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(token);
+        const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
+          token
+        );
         const tempCurrentUser = responseCurrentUser.currentUser;
         setCurrentUser({
           userId: tempCurrentUser.userId.toString(),
@@ -72,11 +73,13 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   useEffect(() => {
     const fetchAvailableUsers = async () => {
       try {
-        const users = await ticketAssignApis.getAssignableEmployees(ticket.ticket_id);
+        const users = await ticketAssignApis.getAssignableEmployees(
+          ticket.ticket_id
+        );
         setAvailableUsers(users);
       } catch (error) {
-        console.error('Error:', error);
-        showToastError('Failed to load available employees');
+        console.error("Error:", error);
+        showToastError("Failed to load available employees");
       }
     };
 
@@ -100,40 +103,51 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const handleAssignUser = async (selectedUsers: Individual[]) => {
     try {
       if (assignedUsers.length + selectedUsers.length > MAX_USERS) {
-        showToastError(`Cannot assign more than ${MAX_USERS} users to this ticket.`);
+        showToastError(
+          `Cannot assign more than ${MAX_USERS} users to this ticket.`
+        );
         return;
       }
-  
+
       // Get the IDs of selected users
-      const userIds = selectedUsers.map(user => user.individualId);
-      
+      const userIds = selectedUsers.map((user) => user.individualId);
+
       // Make the API call
       await ticketAssignApis.assignUsersToTicket(ticket.ticket_id, userIds);
-  
+
       // After successful API call, update local state
-      const newAssignedUsers: AssignedUser[] = selectedUsers.map(user => ({
+      const newAssignedUsers: AssignedUser[] = selectedUsers.map((user) => ({
         userId: user.individualId,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: "",  // You might want to include email in the API response
-        resolved: false
+        email: "", // You might want to include email in the API response
+        resolved: false,
       }));
-  
-      setAssignedUsers(prev => [...prev, ...newAssignedUsers]);
+
+      setAssignedUsers((prev) => [...prev, ...newAssignedUsers]);
       onStatusUpdate("pending");
       setIsModalOpen(false);
-  
-      setAvailableUsers(prevUsers => 
-        prevUsers.filter(user => !selectedUsers.some(selected => 
-          selected.individualId === user.individualId
-        ))
+
+      setAvailableUsers((prevUsers) =>
+        prevUsers.filter(
+          (user) =>
+            !selectedUsers.some(
+              (selected) => selected.individualId === user.individualId
+            )
+        )
       );
-  
+
       selectedUsers.forEach((user) => {
-        showToastSuccess(`Assigned ${user.firstName} ${user.lastName} successfully!`);
+        showToastSuccess(
+          `Assigned ${user.firstName} ${user.lastName} successfully!`
+        );
       });
     } catch (error) {
-      showToastError(error instanceof Error ? error.message : "There was an error while assigning the user(s).");
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "There was an error while assigning the user(s)."
+      );
       console.error(error);
     }
   };
@@ -150,10 +164,10 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
         email: "",
-        resolved: false
+        resolved: false,
       };
 
-      setAssignedUsers(prev => [...prev, newAssignedUser]);
+      setAssignedUsers((prev) => [...prev, newAssignedUser]);
 
       setAvailableUsers((prevAvailableUsers) =>
         prevAvailableUsers.filter(
@@ -172,20 +186,29 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const handleUnassignUser = async (userId: number) => {
     try {
       await ticketAssignApis.unassignUserFromTicket(ticket.ticket_id, userId);
-  
-      setAssignedUsers(prev => prev.filter(user => user.userId !== userId));
-      const unassignedUser = assignedUsers.find(user => user.userId === userId);
-  
+
+      setAssignedUsers((prev) => prev.filter((user) => user.userId !== userId));
+      const unassignedUser = assignedUsers.find(
+        (user) => user.userId === userId
+      );
+
       if (unassignedUser) {
-        setAvailableUsers(prev => [...prev, {
-          individualId: unassignedUser.userId,
-          firstName: unassignedUser.firstName,
-          lastName: unassignedUser.lastName,
-          role: "basic"
-        }]);
+        setAvailableUsers((prev) => [
+          ...prev,
+          {
+            individualId: unassignedUser.userId,
+            firstName: unassignedUser.firstName,
+            lastName: unassignedUser.lastName,
+            role: "basic",
+          },
+        ]);
       }
     } catch (error) {
-      showToastError(error instanceof Error ? error.message : "There was an error unassigning the user.");
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "There was an error unassigning the user."
+      );
       console.error(error);
     }
   };
@@ -207,14 +230,14 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
               </div>
 
               {assignedUsers.map((user, index) => (
-                <AssignedUserClosedTicket 
-                  key={index} 
+                <AssignedUserClosedTicket
+                  key={index}
                   Individual={{
                     individualId: user.userId,
                     firstName: user.firstName,
                     lastName: user.lastName,
-                    role: "basic"
-                  }} 
+                    role: "basic",
+                  }}
                 />
               ))}
             </>
@@ -270,7 +293,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                   individualId: user.userId,
                   firstName: user.firstName,
                   lastName: user.lastName,
-                  role: "basic"
+                  role: "basic",
                 }}
                 onUnassignClick={handleUnassignUser}
               />
@@ -278,6 +301,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
             {assignedUsers.length < MAX_USERS && (
               <div className="flex justify-center mt-3">
+                
                 <button
                   className="px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                   onClick={handleOpenModal}
