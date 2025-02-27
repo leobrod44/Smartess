@@ -3,9 +3,10 @@ package rtsp
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	logs "Smartess/go/hub/logger"
+	"bytes"
 	"fmt"
-	"log"
 	"strings"
+	"sync"
 
 	"os"
 	"os/exec"
@@ -67,10 +68,11 @@ type Cameras struct {
 	CameraConfigs []CameraConfig `yaml:"cameras"`
 }
 type StreamContext struct {
-	dataChan  chan []byte
-	errChan   chan error
-	retries   int
-	directory string
+	dataChan    chan []byte
+	errChan     chan error
+	doneChannel chan struct{}
+	retries     int
+	directory   string
 }
 
 func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (RtspProcessor, error) {
@@ -98,16 +100,12 @@ func Init(instance *common_rabbitmq.RabbitMQInstance, logger *logs.Logger) (Rtsp
 func (rtsp *RtspProcessor) Start() {
 	rtsp.Logger.Info("Starting RTSP Processor")
 	rtsp.Logger.Info(fmt.Sprintf("Cameras: %v", rtsp.cameras))
+
+	var wg sync.WaitGroup // WaitGroup to wait for all streams
+
 	for _, camera := range rtsp.cameras.CameraConfigs {
-		rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream %s", camera.Name))
-		// Validate RTSP stream before proceeding
-		rtsp.Logger.Info(fmt.Sprintf("1.11"))
-		// if err := validateRTSPStream(camera.StreamURL); err != nil {
-		// 	rtsp.Logger.Error(fmt.Sprintf("Failed to validate RTSP stream: %v", err))
-		// }
-		rtsp.Logger.Info(fmt.Sprintf("1.1"))
 		// Setup RabbitMQ stream environment
-		env, producer, err := setupStreamEnvironment(camera.Name, "rabbitmq-stream://admin:admin@rabbitmq:5552/") // TODO clean setupStreamEnvironment(camera.StreamURL)
+		env, producer, err := setupStreamEnvironment(camera.Name, "rabbitmq-stream://admin:admin@rabbitmq:5552/")
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Failed to setup stream environment: %v", err))
 			panic(err)
@@ -115,52 +113,104 @@ func (rtsp *RtspProcessor) Start() {
 
 		defer env.Close()
 		defer producer.Close()
+
 		// Configure FFmpeg
 		ctx := StreamContext{
-			dataChan:  make(chan []byte),
-			errChan:   make(chan error),
-			retries:   0,
-			directory: "/tmp/data/" + camera.Name,
+			dataChan:    make(chan []byte),
+			errChan:     make(chan error),
+			doneChannel: make(chan struct{}),
+			retries:     0,
+			directory:   "/tmp/data/" + camera.Name,
 		}
 
 		config, err := rtsp.newFFmpegConfig(camera)
-
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Failed to create FFmpeg config: %v", err))
 			panic(err)
 		}
+
 		// Main retry loop
 		for ctx.retries = 0; ctx.retries < config.maxRetries; ctx.retries++ {
 			if ctx.retries > 0 {
 				rtsp.Logger.Warn(fmt.Sprintf("Reconnecting RTSP stream %s (%d/%d)", camera.Name, ctx.retries+1, config.maxRetries))
 				time.Sleep(config.retryDelay)
 			}
+
 			// Create the temporary directory if it doesn't exist
 			err := os.MkdirAll(ctx.directory, 0755)
 			if err != nil {
-				// Log and return error if directory creation fails
 				ctx.errChan <- fmt.Errorf("error waiting for FFmpeg: %v", err)
 				return
 			}
-
-			cmd := config.buildCommand()
+			cmd := exec.Command("ffmpeg",
+				"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+				"-i", camera.StreamURL, // Input RTSP stream
+				"-buffer_size", "1024000", // Set buffer size
+				"-probesize", "50M", // Increase probe size
+				"-analyzeduration", "20000000", // Increase analyze duration
+				"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
+				"-c:v", "libx264", // Compress using H.264 codec
+				"-preset", "fast", // Use fast preset for encoding
+				"-crf", "23", // Control quality (lower = better)
+				"-r", "15", // Force frame rate
+				"-g", "30", // Set keyframe interval
+				"-b:a", "64k", // Set audio bitrate
+				"-f", "segment", // Enable segmentation
+				"-segment_time", "10", // Segment duration
+				"-reset_timestamps", "1", // Reset timestamps for each segment
+				"-segment_format", "mp4", // Output format
+				"-segment_list", fmt.Sprintf("%s/segments.m3u8", ctx.directory), // HLS playlist
+				"-segment_list_type", "m3u8", // HLS format
+				"-segment_list_size", "0", // Unlimited segments
+				"-segment_list_flags", "+live", // Make it a live playlist
+				fmt.Sprintf("%s/segment-%%03d.mp4", ctx.directory), // Segment output
+			)
+			time.Sleep(time.Second)
 
 			rtsp.Logger.Info(fmt.Sprintf("Starting FFmpeg for stream %s", camera.Name))
-			if err := cmd.Start(); err != nil {
-				ctx.errChan <- fmt.Errorf("error starting FFmpeg for stream %s: %v", camera.Name, err)
-			}
 			rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
-			if err := cmd.Wait(); err != nil {
-				log.Fatalf("Error waiting for ffmpeg: %v", err)
-				ctx.errChan <- fmt.Errorf("error waiting for FFmpeg: %v", err)
-				return
+
+			ffmpegOutput := &bytes.Buffer{}
+			cmd.Stdout = ffmpegOutput
+			cmd.Stderr = ffmpegOutput
+
+			err = cmd.Start()
+			if err != nil {
+				rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 			}
+
+			rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
 		}
 
-		go rtsp.streamRTSP(&camera, &ctx)
-		go rtsp.sendData(&ctx, producer)
+		rtsp.Logger.Info(fmt.Sprintf("beanus %s", camera.Name))
+
+		// Add to WaitGroup before launching goroutines
+		wg.Add(3)
+
+		go func(cam CameraConfig, ctx *StreamContext) {
+			defer wg.Done()
+			rtsp.streamRTSP(&cam, ctx)
+		}(camera, &ctx)
+
+		go func(ctx *StreamContext, producer *stream.Producer) {
+			defer wg.Done()
+			rtsp.sendData(ctx, producer)
+		}(&ctx, producer)
+
+		go func(ctx *StreamContext, camName string) {
+			defer wg.Done()
+			<-ctx.doneChannel
+			close(ctx.dataChan)
+			close(ctx.errChan)
+			rtsp.Logger.Info(fmt.Sprintf("RTSP stream %s completed", camName))
+		}(&ctx, camera.Name)
+
+		rtsp.Logger.Info(fmt.Sprintf("beanus done %s", camera.Name))
 	}
 
+	// Wait for all streams to finish before exiting
+	wg.Wait()
+	rtsp.Logger.Info("All RTSP streams have completed")
 }
 
 // ----------------------------------------------------------------------
@@ -457,49 +507,7 @@ func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) 
 
 		time.Sleep(time.Duration(camera.SegmentTime))
 	}
-	// Create a buffered reader for more efficient reading
-	// reader := bufio.NewReaderSize(stdout, config.bufferReaderSize) //1024*1024)
-	// rtsp.Logger.Info(fmt.Sprintf("Starting RTSP stream: %v", cmd.String()))
-	// buf := make([]byte, config.bufferReaderSize) //512*1024)
-	// for {
-	// 	rtsp.Logger.Info(fmt.Sprintf("Reading buffer"))
-	// 	n, err := reader.Read(buf)
-	// 	rtsp.Logger.Info(fmt.Sprintf("Buffer read"))
-	// 	if err != nil {
-	// 		rtsp.Logger.Error(fmt.Sprintf("Error reading from RTSP stream: %v", err))
-	// 		break
-	// 	}
-	// 	if n == 0 {
-	// 		rtsp.Logger.Warn("Zero bytes read, continuing...")
-	// 		time.Sleep(10 * time.Millisecond)
-	// 		continue // Empty chunk, skip it
-	// 	}
 
-	// 	videoChunk := buf[:n]
-	// 	hubID := os.Getenv("HUB_ID")
-	// 	streamName := fmt.Sprintf("video_stream.hub_id.%s.%s", hubID, "tapo C200")
-
-	// 	// Publish video chunk to the stream
-	// 	err = rtsp.instance.Channel.Publish(
-	// 		"",
-	// 		streamName,
-	// 		false, // Mandatory
-	// 		false, // Immediate
-	// 		amqp.Publishing{
-	// 			ContentType: "application/octet-stream", // Type of the content
-	// 			Body:        videoChunk,                 // Content (segment file data)
-	// 		})
-	// 	if err != nil {
-	// 		rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
-	// 	}
-	// 	log.Printf("Sent video chunk (%d bytes) to stream...", n)
-	// 	time.Sleep(config.bufferPostSendInterval) //30 * time.Millisecond) // Simulate real-time video chunk sending
-	// }
-	// if err := cmd.Wait(); err != nil {
-	// 	log.Fatalf("Error waiting for ffmpeg: %v", err)
-	// 	return err
-	// }
-	// return nil
 }
 
 func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
