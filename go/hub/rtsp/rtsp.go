@@ -140,7 +140,7 @@ func (rtsp *RtspProcessor) Start() {
 			err := os.MkdirAll(ctx.directory, 0755)
 			if err != nil {
 				ctx.errChan <- fmt.Errorf("error waiting for FFmpeg: %v", err)
-				return
+				continue
 			}
 			cmd := exec.Command("ffmpeg",
 				"-rtsp_transport", "tcp", // Use TCP for RTSP transport
@@ -177,6 +177,8 @@ func (rtsp *RtspProcessor) Start() {
 			err = cmd.Start()
 			if err != nil {
 				rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
+			} else {
+				break
 			}
 
 			rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
@@ -483,25 +485,11 @@ func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) 
 				}
 				rtsp.Logger.Info((fmt.Sprintf("Publishing segment to queue: %v", segmentFilePath)))
 				ctx.dataChan <- segmentFileContent
-
-				// err = rtsp.instance.Channel.Publish(
-				// 	"video_stream", // Default exchange
-				// 	fmt.Sprintf("video_stream.hubid.%s", camera.Name), // Routing key (queue name)
-				// 	false, // Mandatory
-				// 	false, // Immediate
-				// 	amqp.Publishing{
-				// 		ContentType: "application/octet-stream", // Type of the content
-				// 		Body:        segmentFileContent,         // Content (segment file data)
-				// 	})
-				// if err != nil {
-				// 	rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
-				// }
 				err = os.Remove(segmentFilePath)
 				if err != nil {
 					rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
 					continue
 				}
-				rtsp.Logger.Info(fmt.Sprintf("Published segment to queue: %v", segmentFilePath))
 			}
 		}
 
@@ -518,7 +506,7 @@ func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Produce
 			if err != nil {
 				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %Wv", err))
 			}
-			rtsp.Logger.Info(fmt.Sprintf("Published segment to queue: %v", segmentFileContent))
+			rtsp.Logger.Info(fmt.Sprintf("Published segment to stream: %v", segmentFileContent))
 			break
 
 		case err := <-ctx.errChan:
