@@ -1,12 +1,15 @@
 cameras:
   - name: "tapo C200"
+    type: "REAL"
     streamURL: "rtsp://tapoadmin:tapoadmin@192.168.0.99:554/stream1"
     segment_time: 10
 
   - name: "tapo C200 ant"
+    type: "ANT"
     streamURL: "rtsp://tapoadmin2:tapoadmin2@192.168.2.187:554/stream1" # TODO LAN SAFETY: "rtsp://${TAPO_USER}:${TAPO_PASS}@NAT_PUB_IP:554/stream1" using utils.ExpandEnvVariables
     segment_time: 10
 
   - name: "mock_camera"
+    type: "MOCK"
     streamURL: "rtsp://mock_camera:8554/live"
     segment_time: 3
