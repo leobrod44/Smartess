@@ -2,6 +2,14 @@ import Image from "next/image";
 import Logo from "../../../public/images/building_straight.png";
 
 const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
+  // Logs selected image file to be uploaded
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("Selected file:", file);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-between sm:w-3/4 h-[680px] gap-2 drop-shadow-2xl ">
       <div className="flex flex-col justify-center items-center bg-[#1f505e] rounded-t-lg w-full h-[54.5px]"></div>
@@ -22,7 +30,12 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
             <div className="flex justify-center pb-10">
               <label className="cursor-pointer bg-[#266472] hover:bg-[#1f505e] w-28 h-8 text-white text-xs text-center hover:bg-[#1f505e] transition duration-300 rounded-md pt-2 pb-6">
                 Upload Image
-                <input type="file" accept="image/*" className="hidden" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
               </label>
             </div>
             <div className="font-sequel-sans-black text-[#4B7D8D] border-b w-1/3 text-center text-l p-2">
