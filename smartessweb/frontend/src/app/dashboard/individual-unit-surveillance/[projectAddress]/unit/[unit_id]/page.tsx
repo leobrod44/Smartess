@@ -1,5 +1,6 @@
 "use client";
 
+import BackArrowButton from "@/app/components/BackArrowBtn";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -45,7 +46,7 @@ return (
       <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
         Unit {unit_id}
       </h1>
-      
+      <BackArrowButton />
       {/* Video Section */}
       <div className="my-5 flex justify-center">
         <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl relative">
