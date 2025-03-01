@@ -110,8 +110,16 @@ func (rtsp *RtspProcessor) Start() {
 			panic(err)
 		}
 
-		defer env.Close()
-		defer producer.Close()
+		defer func() {
+			if err := env.Close(); err != nil {
+				rtsp.Logger.Error(fmt.Sprintf("Failed to close stream environment: %v", err))
+			}
+		}()
+		defer func() {
+			if err := producer.Close(); err != nil {
+				rtsp.Logger.Error(fmt.Sprintf("Failed to close producer: %v", err))
+			}
+		}()
 
 		// Configure FFmpeg
 		ctx := StreamContext{
@@ -302,13 +310,19 @@ func setupStreamEnvironment(camera string, rabbitMQURI string) (*stream.Environm
 		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
 	})
 	if err != nil {
-		env.Close()
+		err := env.Close()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to close stream environment: %v", err)
+		}
 		return nil, nil, fmt.Errorf("failed to declare stream: %v", err)
 	}
 
 	producer, err := env.NewProducer(streamName, nil)
 	if err != nil {
-		env.Close()
+		err := env.Close()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to close stream environment: %v", err)
+		}
 		return nil, nil, fmt.Errorf("failed to create producer: %v", err)
 	}
 
@@ -371,7 +385,7 @@ func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Produce
 
 		case err := <-ctx.errChan:
 			rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
-			continue
+			break
 		}
 	}
 }
