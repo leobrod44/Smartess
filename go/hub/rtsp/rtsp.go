@@ -371,21 +371,18 @@ func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) 
 	}
 
 }
-
 func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
 	for {
 		select {
 		case segmentFileContent := <-ctx.dataChan:
 			err := producer.Send(stream_amqp.NewMessage(segmentFileContent))
 			if err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %Wv", err))
+				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err)) // corrected format string
 			}
 			rtsp.Logger.Info(fmt.Sprintf("Published %v bytes to stream %v", len(segmentFileContent), producer.GetStreamName()))
-			break
 
 		case err := <-ctx.errChan:
 			rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
-			break
 		}
 	}
 }
