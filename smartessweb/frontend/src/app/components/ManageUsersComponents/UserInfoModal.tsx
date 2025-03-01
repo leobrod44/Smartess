@@ -292,7 +292,15 @@ function UserInfoModal({
                   </div>
                 ) : (
                   <div className="flex justify-center items-center">
-                    <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
+                    <span
+                      className={`inline-block px-4 py-1 text-white rounded-full ${
+                        role === "master"
+                          ? "bg-yellow-500"
+                          : role === "admin"
+                          ? "bg-[#CCCCCC]"
+                          : "bg-[#A6634F]"
+                      }`}
+                    >
                       {capitalizeWords(role)}
                     </span>
                   </div>
