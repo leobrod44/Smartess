@@ -17,7 +17,7 @@ export default function UnitPage({
   const decodedAddress = decodeURIComponent(projectAddress);
 
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [connectionStatus, setConnectionStatus] = useState("Connected");
+  const [connectionStatus, setConnectionStatus] = useState("Connected.");
 
 //   const [loading, setLoading] = useState(true);
 
@@ -28,6 +28,7 @@ export default function UnitPage({
       router.push("/sign-in");
       return;
     }
+    setConnectionStatus("Connected");
   }, [router]);
 
 //   if (loading) {
