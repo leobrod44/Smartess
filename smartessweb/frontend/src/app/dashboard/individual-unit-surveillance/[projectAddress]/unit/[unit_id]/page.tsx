@@ -3,6 +3,8 @@
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import Replay5Icon from '@mui/icons-material/Replay5';
+import Forward5Icon from '@mui/icons-material/Forward5';
 
 export default function UnitPage({
   params,
@@ -60,9 +62,23 @@ return (
               playsInline 
             />
           </div>
-
-
         </div>
+      </div>
+
+      {/* Video Control Buttons */}
+      <div className="flex justify-center gap-4 mt-4">
+        <button 
+          onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 5; }}
+          className="p-2 bg-[#325a67] text-white rounded-full hover:bg-[#274650] transition cursor-pointer"
+        >
+          <Replay5Icon fontSize="large" />
+        </button>
+        <button 
+          onClick={() => { if (videoRef.current) videoRef.current.currentTime += 5; }}
+          className="p-2 bg-[#325a67] text-white rounded-full hover:bg-[#274650] transition cursor-pointer"
+        >
+          <Forward5Icon fontSize="large" />
+        </button>
       </div>
 
       <div className="border border-black rounded-lg mt-4 bg-[#4b7d8d]">
