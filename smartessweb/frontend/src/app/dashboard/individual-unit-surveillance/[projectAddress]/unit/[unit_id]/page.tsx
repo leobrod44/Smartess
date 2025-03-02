@@ -2,7 +2,7 @@
 
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Replay5Icon from '@mui/icons-material/Replay5';
 import Forward5Icon from '@mui/icons-material/Forward5';
 
@@ -17,6 +17,8 @@ export default function UnitPage({
   const decodedAddress = decodeURIComponent(projectAddress);
 
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [connectionStatus, setConnectionStatus] = useState("Connected");
+
 //   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,44 +52,47 @@ return (
         Unit {unit_id}
       </h1>
 
-{/* Video Section */}
-<div className="my-5 flex justify-center">
-  <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl">
-    <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full">
-      
-      {/* Video (Full Width) */}
-      <video 
-        ref={videoRef} 
-        className="w-full border border-gray-300 rounded-lg"
-        controls 
-        autoPlay 
-        playsInline 
-      />
+      {/* Video Section */}
+      <div className="my-5 flex justify-center">
+        <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl">
+          <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full">
+            
+            {/* Video (Full Width) */}
+            <video 
+              ref={videoRef} 
+              className="w-full border border-gray-300 rounded-lg"
+              controls 
+              autoPlay 
+              playsInline 
+            />
 
-      {/* Buttons Below Video */}
-      <div className="mt-3 flex justify-center gap-4">
-        <button 
-          onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 5; }}
-          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
-        >
-          <Replay5Icon fontSize="large" />
-        </button>
-        
-        <button 
-          onClick={() => { if (videoRef.current) videoRef.current.currentTime += 5; }}
-          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
-        >
-          <Forward5Icon fontSize="large" />
-        </button>
+            {/* Controls & Status Row */}
+            <div className="mt-3 w-full flex justify-center relative">
+              
+              {/* Centered Buttons */}
+              <div className="flex gap-4">
+                <button className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer">
+                  <Replay5Icon fontSize="large" />
+                </button>
+                
+                <button className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer">
+                  <Forward5Icon fontSize="large" />
+                </button>
+              </div>
+
+              {/* Status Widget (Far Right) */}
+              <div className="absolute right-2 bg-white px-3 py-1 rounded-lg shadow flex items-center gap-2 border">
+                <span className="text-sm font-bold">
+                  {connectionStatus === "Connected" ? "Connected" : "Disconnected"}
+                </span>
+                <div 
+                  className={`w-3.5 h-3.5 rounded-full ${connectionStatus === "Connected" ? "bg-green-500" : "bg-red-500"}`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-    </div>
-  </div>
-</div>
-
-
-
-
 
       <div className="border border-black rounded-lg mt-4 bg-[#4b7d8d]">
         <div className="grid grid-cols-2 gap-4 h-full">
