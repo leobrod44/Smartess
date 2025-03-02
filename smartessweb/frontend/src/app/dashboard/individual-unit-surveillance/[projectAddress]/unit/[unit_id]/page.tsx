@@ -3,6 +3,8 @@
 import BackArrowButton from "@/app/components/BackArrowBtn";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
+import Replay5Icon from '@mui/icons-material/Replay5';
+import Forward5Icon from '@mui/icons-material/Forward5';
 
 export default function UnitPage({
   params,
@@ -47,23 +49,45 @@ return (
       <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
         Unit {unit_id}
       </h1>
+
+{/* Video Section */}
+<div className="my-5 flex justify-center">
+  <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl">
+    <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full">
+      
+      {/* Video (Full Width) */}
+      <video 
+        ref={videoRef} 
+        className="w-full border border-gray-300 rounded-lg"
+        controls 
+        autoPlay 
+        playsInline 
+      />
+
+      {/* Buttons Below Video */}
+      <div className="mt-3 flex justify-center gap-4">
+        <button 
+          onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 5; }}
+          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
+        >
+          <Replay5Icon fontSize="large" />
+        </button>
         
-      {/* Video Section */}
-      <div className="my-5 flex justify-center">
-        <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl relative">
-          <div className="bg-white rounded-lg p-2">
-            <video 
-              ref={videoRef} 
-              className="w-full border border-gray-300 rounded-lg"
-              controls 
-              autoPlay 
-              playsInline 
-            />
-          </div>
-
-
-        </div>
+        <button 
+          onClick={() => { if (videoRef.current) videoRef.current.currentTime += 5; }}
+          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
+        >
+          <Forward5Icon fontSize="large" />
+        </button>
       </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
 
       <div className="border border-black rounded-lg mt-4 bg-[#4b7d8d]">
         <div className="grid grid-cols-2 gap-4 h-full">
