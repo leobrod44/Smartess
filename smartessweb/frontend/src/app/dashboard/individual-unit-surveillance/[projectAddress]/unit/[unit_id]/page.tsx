@@ -49,37 +49,45 @@ return (
       <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
         Unit {unit_id}
       </h1>
-        
-      {/* Video Section */}
-      <div className="my-5 flex justify-center">
-        <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl relative">
-          <div className="bg-white rounded-lg p-2">
-            <video 
-              ref={videoRef} 
-              className="w-full border border-gray-300 rounded-lg"
-              controls 
-              autoPlay 
-              playsInline 
-            />
-          </div>
-        </div>
-      </div>
 
-      {/* Video Control Buttons */}
-      <div className="flex justify-center gap-4 mt-4">
+{/* Video Section */}
+<div className="my-5 flex justify-center">
+  <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl">
+    <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full">
+      
+      {/* Video (Full Width) */}
+      <video 
+        ref={videoRef} 
+        className="w-full border border-gray-300 rounded-lg"
+        controls 
+        autoPlay 
+        playsInline 
+      />
+
+      {/* Buttons Below Video */}
+      <div className="mt-3 flex justify-center gap-4">
         <button 
           onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 5; }}
-          className="p-2 bg-[#325a67] text-white rounded-full hover:bg-[#274650] transition cursor-pointer"
+          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
         >
           <Replay5Icon fontSize="large" />
         </button>
+        
         <button 
           onClick={() => { if (videoRef.current) videoRef.current.currentTime += 5; }}
-          className="p-2 bg-[#325a67] text-white rounded-full hover:bg-[#274650] transition cursor-pointer"
+          className="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-75 transition cursor-pointer"
         >
           <Forward5Icon fontSize="large" />
         </button>
       </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
 
       <div className="border border-black rounded-lg mt-4 bg-[#4b7d8d]">
         <div className="grid grid-cols-2 gap-4 h-full">
