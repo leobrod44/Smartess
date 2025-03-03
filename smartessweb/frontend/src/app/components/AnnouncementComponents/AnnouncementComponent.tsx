@@ -7,7 +7,7 @@ import {
 import "swiper/css";
 import ImageCarousel from "../ImageCarousel";
 import Image from "next/image";
-import dashboardLogo from "@/public/images/dashboardLogo.png";
+import pfp from "@/public/images/Default_pfp.jpg";
 
 interface AnnouncementComponentProps {
   title: string;
@@ -103,13 +103,9 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
       {/* Profile picture, author section and tag section*/}
       <div className=" w-full flex items-center justify-between">
         <div className="flex items-center">
-          <Image
-            className="h-8 w-8 rounded-full bg-gray-50"
-            src={dashboardLogo}
-            alt=""
-          />
+          <Image className="h-8 w-8 rounded-full bg-gray-50" src={pfp} alt="" />
           <span
-            className="ml-4 text-sm font-semibold leading-6 text-gray-900"
+            className="ml-4 text-sm font-semibold leading-6 text-gray-600"
             aria-hidden="true"
           >
             {author}
