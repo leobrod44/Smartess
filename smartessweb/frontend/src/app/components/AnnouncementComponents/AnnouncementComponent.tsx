@@ -6,6 +6,8 @@ import {
 } from "@mui/icons-material";
 import "swiper/css";
 import ImageCarousel from "../ImageCarousel";
+import Image from "next/image";
+import pfp from "@/public/images/Default_pfp.jpg";
 
 interface AnnouncementComponentProps {
   title: string;
@@ -90,7 +92,7 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
 
   return (
     <div className="w-full rounded-md px-3 pt-4 flex-col justify-start items-start gap-3 inline-flex shadow border-2 border-[#254752]/20 shadow-xl">
-      {/* Header Section */}
+      {/* Header Section - project/organization name and date of posting*/}
       <div className="w-full justify-between items-center inline-flex">
         <div className="text-black text-xl font-sequel-sans-black">{title}</div>
         <div className="text-black text-xs font-sequel-sans">
@@ -98,8 +100,18 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
         </div>
       </div>
 
-      {/* Tag and Author Section */}
-      <div className="w-full justify-between items-center inline-flex">
+      {/* Profile picture, author section and tag section*/}
+      <div className=" w-full flex items-center justify-between">
+        <div className="flex items-center">
+          <Image className="h-8 w-8 rounded-full bg-gray-50" src={pfp} alt="" />
+          <span
+            className="ml-4 text-sm font-semibold leading-6 text-gray-600"
+            aria-hidden="true"
+          >
+            {author}
+          </span>
+        </div>
+        {/* Tag Section */}
         <div className="justify-start items-start gap-2 inline-flex">
           <div
             className={`px-3 py-1 rounded-[10px] flex items-center justify-center ${
@@ -108,13 +120,12 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
           >
             <span className="text-white text-xs font-sequel-sans">{tag}</span>
           </div>
-          <div className="px-3 py-1 text-black text-xs font-sequel-sans">
-            {author}
-          </div>
         </div>
-        <div className="text-[#254752] text-md font-sequel-sans-black">
-          {keyword}
-        </div>
+      </div>
+
+      {/*Date */}
+      <div className="text-[#254752] text-md font-sequel-sans-black">
+        {keyword}
       </div>
 
       {/* Description Section */}
