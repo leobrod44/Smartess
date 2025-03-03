@@ -10,6 +10,8 @@ import { Project } from "../../mockData";
 import { manageAccountsApi } from "@/api/page";
 import router from "next/router";
 import { showToastError, showToastSuccess } from "../Toast";
+import Image from "next/image";
+import pfp from "@/public/images/Default_pfp.jpg";
 
 interface UserInfoModalProps {
   uid: number;
@@ -149,7 +151,7 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-  
+
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -269,14 +271,22 @@ function UserInfoModal({
           </button>
 
           <div className="flex flex-col items-center justify-center">
-            <Typography
-              variant="h6"
-              id="user-details-modal"
-              className="text-[#254752] text-s font-sequel-sans-black mb-4"
-            >
-              {capitalizeWords(userName)}
-            </Typography>
+              <Image
+                width={150}
+                height={300}
+                className="rounded-full bg-gray-50 pb-3"
+                src={pfp}
+                alt="User Profile Pic"
+              />
 
+              <Typography
+                variant="h6"
+                id="user-details-modal"
+                className="text-[#254752] text-s font-sequel-sans-black mb-4"
+              >
+                {capitalizeWords(userName)}
+              </Typography>
+           
             <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
               <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
                 Role
