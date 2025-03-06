@@ -69,7 +69,7 @@ exports.getUserProjects = async (req, res) => {
         // Fetch unit numbers for each project
         const { data: hubs, error: hubError } = await supabase
           .from("hub")
-          .select("hub_id, unit_number")
+          .select("hub_id, unit_number, camera_status")
           .eq("proj_id", project.proj_id)
           .order("unit_number", { ascending: true });
 
@@ -187,6 +187,7 @@ exports.getUserProjects = async (req, res) => {
             return {
               projectId: project.proj_id,
               unitNumber: hub.unit_number,
+              cameraStatus: hub.camera_status,
               hubUsers: users.filter((user) => user !== null),
               tickets: ticketStats,
               owner,
