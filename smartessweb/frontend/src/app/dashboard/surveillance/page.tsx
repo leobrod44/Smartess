@@ -33,7 +33,7 @@ const SurveillancePage = () => {
       return;
     }
 
-const fetchData = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
 
       try {
@@ -95,6 +95,7 @@ const fetchData = async () => {
   
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (
