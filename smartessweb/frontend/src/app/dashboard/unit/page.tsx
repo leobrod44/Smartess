@@ -126,12 +126,12 @@ const UnitPage = () => {
         );
 
   return (
-    <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
+    <>
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen">
         <div className="flex flex-row justify-between">
           <div className="flex flex-row">
             <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
-              <h4>Units</h4>
+              Units
             </h2>
           </div>
           {/* Filtering and searching div */}
@@ -179,7 +179,7 @@ const UnitPage = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
