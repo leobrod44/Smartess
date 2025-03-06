@@ -96,6 +96,8 @@ export interface Unit {
   owner: Owner;
 
   alerts: Alert[];
+
+  cameraStatus?: "live" | "disconnected";
 }
 
 export interface Alert {
