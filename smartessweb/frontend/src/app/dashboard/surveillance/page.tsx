@@ -113,7 +113,7 @@ const fetchData = async () => {
 
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
+      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8">
         <div className="flex flex-row justify-between">
           <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
             Surveillance Page
