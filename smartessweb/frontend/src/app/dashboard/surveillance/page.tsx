@@ -143,7 +143,7 @@ const fetchData = async () => {
           <div className="flex justify-center px-4">
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-4 w-full max-w-[100%] mt-2">
               <SurveillanceWidget
-                count={filteredUnitsByProject.length}
+                count={allUnits.length}
                 label="Total Cameras"
                 backgroundColor="bg-[#56798d]"
                 onClick={handleClickTotal}
