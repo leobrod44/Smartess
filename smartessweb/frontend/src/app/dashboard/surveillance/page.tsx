@@ -99,6 +99,7 @@ const SurveillancePage = () => {
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (
