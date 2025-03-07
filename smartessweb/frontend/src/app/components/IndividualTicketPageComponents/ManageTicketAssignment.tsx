@@ -190,7 +190,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
   const handleUnassignUser = async (userId: number) => {
     try {
-      await ticketAssignApis.unassignUserFromTicket(ticket.ticket_id, userId);
+      await ticketAssignApis.unassignUserFromTicket(
+        ticket.ticket_id,
+        userId,
+        currentUserId
+      );
 
       setAssignedUsers((prev) => prev.filter((user) => user.userId !== userId));
       const unassignedUser = assignedUsers.find(

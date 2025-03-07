@@ -89,7 +89,8 @@ const assignUsersToTicket = async (
 
 const unassignUserFromTicket = async (
   ticketId: string,
-  userId: number
+  userId: number,
+  assignedByUserId: string
 ): Promise<void> => {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No token found");
@@ -103,6 +104,7 @@ const unassignUserFromTicket = async (
     body: JSON.stringify({
       ticket_id: parseInt(ticketId),
       user_id: userId,
+      assigned_by_user_id: assignedByUserId,
     }),
   });
 

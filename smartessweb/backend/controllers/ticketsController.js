@@ -641,9 +641,10 @@ exports.assignUsersToTicket = async (req, res) => {
 exports.unassignUserFromTicket = async (req, res) => {
   try {
     const token = req.token;
-    const { ticket_id, user_id } = req.body;
+    const { ticket_id, user_id, assigned_by_user_id } = req.body;
 
-    if (!ticket_id || !user_id) {
+    // Validate input: ticket_id, user_id, and assigned_by_user_id must be provided
+    if (!ticket_id || !user_id || !assigned_by_user_id) {
       return res.status(400).json({ error: "Invalid request data" });
     }
 
@@ -667,7 +668,7 @@ exports.unassignUserFromTicket = async (req, res) => {
 
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
-      .select("proj_id, status")
+      .select("proj_id, status, description")
       .eq("ticket_id", ticket_id)
       .single();
 
@@ -710,7 +711,24 @@ exports.unassignUserFromTicket = async (req, res) => {
       return res.status(500).json({ error: "Failed to unassign user" });
     }
 
-    // Check if this was the last assignment
+    const notifications = {
+      notification_to_user_id: user_id,
+      notification_type: "unnassignment",
+      ticket_id: ticket_id,
+      ticket_description: ticket.description,
+      assigned_to_user_id: user_id,
+      assigned_by_user_id: assigned_by_user_id,
+    };
+
+    const { error: notificationInsertError } = await supabase
+      .from("tickets_notifications")
+      .insert(notifications);
+    if (notificationInsertError) {
+      return res
+        .status(500)
+        .json({ error: "Failed to create unassignment notification" });
+    }
+
     const { data: remainingAssignments, error: checkError } = await supabase
       .from("tickets_assignments")
       .select("assigned_to_user_id")
