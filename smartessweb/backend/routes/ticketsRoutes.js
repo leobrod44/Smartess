@@ -11,6 +11,7 @@ const {
   getAssignedTicketsForUser,
   updateTicketResolutionStatus,
   getTicketNotifications,
+  updateTicketNotification,
 } = require("../controllers/ticketsController");
 const { verifyToken } = require("../middleware/middleware");
 
@@ -38,6 +39,11 @@ router.post(
   verifyToken,
   updateTicketResolutionStatus
 );
-router.get("/get-notifications", verifyToken, getTicketNotifications);
+router.get("/get-ticket-notifications", verifyToken, getTicketNotifications);
+router.post(
+  "/update-ticket-notification",
+  verifyToken,
+  updateTicketNotification
+);
 
 module.exports = router;

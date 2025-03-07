@@ -3,12 +3,14 @@ import React, { useState, useRef, useEffect } from "react";
 import NotificationElement from "./notificationElement";
 import { Transition } from "@headlessui/react";
 import { ticketNotificationsApi } from "@/api/components/TicketNotifications";
+import { useRouter } from "next/navigation";
 
 interface Notification {
   id: string;
   title: string;
   date: string;
   viewed: boolean;
+  ticket_id: string;
   ticket_description: string;
 }
 
@@ -17,6 +19,7 @@ interface NotificationProps {
 }
 
 const Notification: React.FC<NotificationProps> = ({ token }) => {
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState<boolean>(false);
   const [showAll, setShowAll] = useState<boolean>(false);
@@ -54,14 +57,18 @@ const Notification: React.FC<NotificationProps> = ({ token }) => {
               title,
               date: notif.created_at,
               viewed: notif.is_seen,
+              ticket_id: notif.ticket_id,
               ticket_description: `Ticket ID#${notif.ticket_id}: ${notif.ticket_description}`,
             };
           }
         );
 
-        transformedNotifications.sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
+        transformedNotifications.sort((a, b) => {
+          if (a.viewed === b.viewed) {
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+          }
+          return a.viewed ? 1 : -1;
+        });
 
         setNotifications(transformedNotifications);
 
@@ -91,10 +98,11 @@ const Notification: React.FC<NotificationProps> = ({ token }) => {
 
   const handleNotificationClick = async (notification: Notification) => {
     try {
-      // When a notification is clicked, mark it as viewed and route to the corresponding ticket page.
-      console.log("Notification clicked:", notification);
-      // For example, call an API to mark the notification as viewed.
-      // Then, navigate to the ticket's detail page.
+      await ticketNotificationsApi.updateTicketNotification(
+        token,
+        notification.ticket_id
+      );
+      router.push(`/dashboard/ticket/${notification.ticket_id}`);
     } catch (error) {
       console.error("Error handling notification click:", error);
     }

@@ -14,20 +14,42 @@ export interface TicketNotification {
 
 export const ticketNotificationsApi = {
   getNotifications: async (token: string): Promise<TicketNotification[]> => {
-    const response = await fetch(`${API_URL}/tickets/get-notifications`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
-
+    const response = await fetch(
+      `${API_URL}/tickets/get-ticket-notifications`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
     const data = await response.json();
-
     if (!response.ok) {
       throw new Error(data.error || "Failed to fetch ticket notifications");
     }
-
     return data;
+  },
+  updateTicketNotification: async (
+    token: string,
+    ticket_id: string
+  ): Promise<void> => {
+    const response = await fetch(
+      `${API_URL}/tickets/update-ticket-notification`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ticket_id }),
+      }
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        data.error || "Failed to update ticket resolution status"
+      );
+    }
   },
 };

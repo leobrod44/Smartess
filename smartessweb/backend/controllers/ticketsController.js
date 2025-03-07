@@ -1077,3 +1077,51 @@ exports.getTicketNotifications = async (req, res) => {
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.updateTicketNotification = async (req, res) => {
+  try {
+    const token = req.token;
+    const { ticket_id } = req.body;
+
+    if (!ticket_id) {
+      return res.status(400).json({ error: "Invalid request data" });
+    }
+
+    // Verify user token
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Get user_id from the user table
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+
+    if (userError || !userData) {
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
+
+    const { error: updateError } = await supabase
+      .from("tickets_notifications")
+      .update({ is_seen: true })
+      .eq("ticket_id", ticket_id)
+      .eq("notification_to_user_id", userData.user_id);
+
+    if (updateError) {
+      return res
+        .status(500)
+        .json({ error: "Failed to mark notification as seen." });
+    }
+
+    res.status(200).json({ message: "Notification marked as seen." });
+  } catch (error) {
+    console.error("Error in updateTicketNotification:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
