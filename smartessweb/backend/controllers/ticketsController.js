@@ -1028,3 +1028,52 @@ exports.updateTicketResolutionStatus = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+exports.getTicketNotifications = async (req, res) => {
+  try {
+    // Extract the token from the request
+    const token = req.token;
+
+    // Authenticate the user using the provided token
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    // Retrieve user details from the "user" table using the email from the authenticated user
+    const { data: userData, error: userError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", user.email)
+      .single();
+    if (userError) {
+      console.error("User Error:", userError);
+      return res.status(500).json({ error: "Failed to fetch user data." });
+    }
+    if (!userData) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    // Retrieve notifications for the user from the "tickets_notifications" table.
+    // Note: Corrected table name from "tickets_notification" to "tickets_notifications"
+    const { data: userNotifications, error: userNotificationError } =
+      await supabase
+        .from("tickets_notifications")
+        .select("*")
+        .eq("notification_to_user_id", userData.user_id);
+    if (userNotificationError) {
+      console.error("Notification Error:", userNotificationError);
+      return res.status(500).json({ error: "Failed to fetch notifications." });
+    }
+
+    // Return the retrieved notifications in the response
+    return res.status(200).json(userNotifications);
+  } catch (error) {
+    // Log unexpected errors and return a generic internal server error response
+    console.error("Error in getTicketNotifications:", error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
