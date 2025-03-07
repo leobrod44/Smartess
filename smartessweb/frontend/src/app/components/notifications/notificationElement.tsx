@@ -1,12 +1,13 @@
 import React from "react";
-import { ExclamationCircleIcon } from '@heroicons/react/20/solid';
+import { ExclamationCircleIcon } from "@heroicons/react/20/solid";
+
 interface NotificationProps {
   notification: {
     id: string;
     title: string;
     date: string;
     viewed: boolean;
-    ticketTitle:string;
+    ticket_description: string;
   };
   onClick: () => void;
 }
@@ -23,19 +24,34 @@ const formatDate = (datetime: string): string => {
   });
 };
 
-const NotificationElement: React.FC<NotificationProps> = ({ notification, onClick }) => {
+const NotificationElement: React.FC<NotificationProps> = ({
+  notification,
+  onClick,
+}) => {
   return (
     <div
-      className={`flex flex-col justify-between p-3 border-b border-gray-400 w-full cursor-pointer transition duration-200 ${notification.viewed ? "bg-white" : "bg-[#56798d]/10 hover:bg-[#56798d]/20"}`}
+      className={`flex flex-col justify-between p-3 border-b border-gray-400 w-full cursor-pointer transition duration-200 ${
+        notification.viewed
+          ? "bg-white"
+          : "bg-[#56798d]/10 hover:bg-[#56798d]/20"
+      }`}
       onClick={onClick}
     >
       <div className="flex justify-between items-center">
-        <div className=" font-semibold text-[#254752]  text-xs">{notification.title}</div>
+        <div className="font-semibold text-[#254752] text-xs">
+          {notification.title}
+        </div>
       </div>
-      <div className="text-xs text-[#325A67] mt-2">{notification.ticketTitle}</div>
+      <div className="text-xs text-[#325A67] mt-2">
+        {notification.ticket_description}
+      </div>
       <div className="flex items-center mt-2">
-        {!notification.viewed && <ExclamationCircleIcon className="text-[#325A67] mr-2 w-4 h-4" />}
-        <div className="text-xs text-gray-700">{formatDate(notification.date)}</div>
+        {!notification.viewed && (
+          <ExclamationCircleIcon className="text-[#325A67] mr-2 w-4 h-4" />
+        )}
+        <div className="text-xs text-gray-700">
+          {formatDate(notification.date)}
+        </div>
       </div>
     </div>
   );
