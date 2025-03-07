@@ -71,12 +71,13 @@ exports.getDashboardWidgets = async (req, res) => {
         const { data: adminUsers, error: adminError } = await supabase
             .from('org_user')
             .select('user_id')
-            .in('org_id', orgIds)
-            .eq('org_user_type', 'admin');
+            .in('org_id', orgIds);
 
         if (adminError) {
             return res.status(500).json({ error: 'Failed to fetch admin users.' });
         }
+
+        const uniqueAdminUsers = [...new Set(adminUsers.map(user => user.user_id))];
 
         // Get pending tickets count
         const { data: tickets, error: ticketsError } = await supabase
@@ -122,7 +123,7 @@ exports.getDashboardWidgets = async (req, res) => {
                 projects: projects.length,
                 totalUnits: hubs.length,
                 pendingTickets: tickets.length,
-                totalAdminUsers: adminUsers.length,
+                totalAdminUsers: uniqueAdminUsers.length,
             },
             alerts: alerts,
             systemHealth: systemHealth,  // Added system health stats
