@@ -28,6 +28,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const MAX_USERS = 3;
   const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
+  const currentUserId = currentUser?.userId as string;
 
   useEffect(() => {
     const fetchAssignedUsers = async () => {
@@ -113,7 +114,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
       const userIds = selectedUsers.map((user) => user.individualId);
 
       // Make the API call
-      await ticketAssignApis.assignUsersToTicket(ticket.ticket_id, userIds);
+      await ticketAssignApis.assignUsersToTicket(
+        ticket.ticket_id,
+        userIds,
+        currentUserId
+      );
 
       // After successful API call, update local state
       const newAssignedUsers: AssignedUser[] = selectedUsers.map((user) => ({
@@ -301,7 +306,6 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
             {assignedUsers.length < MAX_USERS && (
               <div className="flex justify-center mt-3">
-                
                 <button
                   className="px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                   onClick={handleOpenModal}

@@ -211,7 +211,10 @@ exports.fetchIndividualTicket = async (req, res) => {
     }
 
     // Verify user token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -230,7 +233,8 @@ exports.fetchIndividualTicket = async (req, res) => {
     // Fetch the ticket with all its details
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
-      .select(`
+      .select(
+        `
         ticket_id,
         proj_id,
         hub_id,
@@ -240,7 +244,8 @@ exports.fetchIndividualTicket = async (req, res) => {
         status,
         created_at,
         submitted_by_user_id
-      `)
+      `
+      )
       .eq("ticket_id", ticket_id)
       .single();
 
@@ -257,7 +262,9 @@ exports.fetchIndividualTicket = async (req, res) => {
       .single();
 
     if (accessError || !projectAccess) {
-      return res.status(403).json({ error: "User does not have access to this ticket" });
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
     }
 
     // Get hub (unit) information
@@ -268,23 +275,24 @@ exports.fetchIndividualTicket = async (req, res) => {
       .single();
 
     if (hubError || !hubData) {
-      return res.status(500).json({ error: "Failed to fetch unit information" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch unit information" });
     }
 
     // Get submitter info
     const { data: submitterData, error: submitterError } = await supabase
-    .from("user")
-    .select("first_name, last_name, email")
-    .eq("user_id", ticket.submitted_by_user_id)
-    .single();
+      .from("user")
+      .select("first_name, last_name, email")
+      .eq("user_id", ticket.submitted_by_user_id)
+      .single();
 
     // Get project address
     const { data: projectData, error: projectError } = await supabase
-    .from("project")
-    .select("address")
-    .eq("proj_id", ticket.proj_id)
-    .single();
-
+      .from("project")
+      .select("address")
+      .eq("proj_id", ticket.proj_id)
+      .single();
 
     // Format the response
     const formattedTicket = {
@@ -300,7 +308,7 @@ exports.fetchIndividualTicket = async (req, res) => {
       submitted_by_firstName: submitterData.first_name,
       submitted_by_lastName: submitterData.last_name,
       submitted_by_email: submitterData.email,
-      project_address: projectData.address
+      project_address: projectData.address,
     };
 
     res.json({ ticket: formattedTicket });
@@ -316,7 +324,10 @@ exports.getAssignableEmployees = async (req, res) => {
     const { ticket_id } = req.params;
 
     // Verify user token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -352,11 +363,15 @@ exports.getAssignableEmployees = async (req, res) => {
       .single();
 
     if (accessError || !projectAccess) {
-      return res.status(403).json({ error: "User does not have access to this ticket" });
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
     }
 
-    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
-      return res.status(403).json({ error: "User does not have permission to assign tickets" });
+    if (!["admin", "master"].includes(projectAccess.org_user_type)) {
+      return res
+        .status(403)
+        .json({ error: "User does not have permission to assign tickets" });
     }
 
     // Get already assigned user IDs
@@ -366,25 +381,31 @@ exports.getAssignableEmployees = async (req, res) => {
       .eq("ticket_id", ticket_id);
 
     if (assignmentError) {
-      return res.status(500).json({ error: "Failed to fetch ticket assignments" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch ticket assignments" });
     }
 
-    const assignedUserIds = assignments ? assignments.map(a => a.assigned_to_user_id) : [];
+    const assignedUserIds = assignments
+      ? assignments.map((a) => a.assigned_to_user_id)
+      : [];
 
     // Get all employees for this project
     const { data: orgUsers, error: orgUsersError } = await supabase
       .from("org_user")
       .select("user_id, org_user_type")
       .eq("proj_id", ticket.proj_id)
-      .in("org_user_type", ['basic', 'admin', 'master']);
+      .in("org_user_type", ["basic", "admin", "master"]);
 
     if (orgUsersError) {
       return res.status(500).json({ error: "Failed to fetch employees" });
     }
 
     // Filter out already assigned users
-    const unassignedOrgUsers = orgUsers.filter(user => !assignedUserIds.includes(user.user_id));
-    const userIds = unassignedOrgUsers.map(user => user.user_id);
+    const unassignedOrgUsers = orgUsers.filter(
+      (user) => !assignedUserIds.includes(user.user_id)
+    );
+    const userIds = unassignedOrgUsers.map((user) => user.user_id);
 
     // Get employee details
     const { data: employees, error: employeesError } = await supabase
@@ -393,17 +414,21 @@ exports.getAssignableEmployees = async (req, res) => {
       .in("user_id", userIds);
 
     if (employeesError) {
-      return res.status(500).json({ error: "Failed to fetch employee details" });
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch employee details" });
     }
 
-    const formattedEmployees = employees.map(emp => {
-      const orgUser = unassignedOrgUsers.find(ou => ou.user_id === emp.user_id);
+    const formattedEmployees = employees.map((emp) => {
+      const orgUser = unassignedOrgUsers.find(
+        (ou) => ou.user_id === emp.user_id
+      );
       return {
         employeeId: emp.user_id,
         firstName: emp.first_name,
         lastName: emp.last_name,
         email: emp.email,
-        role: orgUser.org_user_type
+        role: orgUser.org_user_type,
       };
     });
 
@@ -418,247 +443,286 @@ exports.getAssignedUsers = async (req, res) => {
   try {
     const token = req.token;
     const { ticket_id } = req.params;
- 
+
     // Validate token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) return res.status(401).json({ error: "Invalid token" });
- 
+
     // Get assignments for this ticket from tickets_assignments table
     const { data: assignments, error: assignmentError } = await supabase
-      .from('tickets_assignments')
-      .select(`
+      .from("tickets_assignments")
+      .select(
+        `
         assigned_to_user_id,
         resolved_status
-      `)
-      .eq('ticket_id', ticket_id);
- 
+      `
+      )
+      .eq("ticket_id", ticket_id);
+
     if (assignmentError) {
       return res.status(500).json({ error: "Failed to fetch assignments" });
     }
- 
+
     // Return empty array if no assignments found
     if (!assignments.length) {
       return res.json({ assignedUsers: [] });
     }
- 
+
     // Get user IDs from assignments
-    const userIds = assignments.map(a => a.assigned_to_user_id);
- 
+    const userIds = assignments.map((a) => a.assigned_to_user_id);
+
     // Fetch user details for assigned users
     const { data: users, error: userError } = await supabase
-      .from('user')
-      .select('user_id, first_name, last_name, email')
-      .in('user_id', userIds);
- 
+      .from("user")
+      .select("user_id, first_name, last_name, email")
+      .in("user_id", userIds);
+
     if (userError) {
       return res.status(500).json({ error: "Failed to fetch user details" });
     }
- 
+
     // Combine user details with assignment status
-    const assignedUsers = assignments.map(assignment => {
-      const user = users.find(u => u.user_id === assignment.assigned_to_user_id);
+    const assignedUsers = assignments.map((assignment) => {
+      const user = users.find(
+        (u) => u.user_id === assignment.assigned_to_user_id
+      );
       return {
         userId: user.user_id,
         firstName: user.first_name,
         lastName: user.last_name,
         email: user.email,
-        resolved: assignment.resolved_status
+        resolved: assignment.resolved_status,
       };
     });
- 
+
     res.json({ assignedUsers });
- 
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
- };
+};
 
- exports.assignUsersToTicket = async (req, res) => {
+exports.assignUsersToTicket = async (req, res) => {
   try {
     const token = req.token;
-    const { ticket_id, user_ids } = req.body;
- 
-    if (!ticket_id || !user_ids || !Array.isArray(user_ids)) {
+    const { ticket_id, user_ids, assigned_by_user_id } = req.body;
+
+    if (
+      !ticket_id ||
+      !user_ids ||
+      !Array.isArray(user_ids) ||
+      !assigned_by_user_id
+    ) {
       return res.status(400).json({ error: "Invalid request data" });
     }
- 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
- 
+
     const { data: userData, error: userError } = await supabase
       .from("user")
       .select("user_id")
       .eq("email", user.email)
       .single();
- 
+
     if (userError || !userData) {
       return res.status(500).json({ error: "Failed to fetch user data" });
     }
- 
+
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
       .select("proj_id, status")
       .eq("ticket_id", ticket_id)
       .single();
- 
+
     if (ticketError || !ticket) {
       return res.status(404).json({ error: "Ticket not found" });
     }
- 
+
     if (ticket.status === "closed") {
-      return res.status(400).json({ error: "Cannot assign users to a closed ticket" });
+      return res
+        .status(400)
+        .json({ error: "Cannot assign users to a closed ticket" });
     }
- 
+
     const { data: projectAccess, error: accessError } = await supabase
       .from("org_user")
       .select("org_user_type")
       .eq("user_id", userData.user_id)
       .eq("proj_id", ticket.proj_id)
       .single();
- 
+
     if (!projectAccess) {
-      return res.status(403).json({ error: "User does not have access to this ticket" });
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
     }
- 
-    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
-      return res.status(403).json({ error: "User does not have permission to assign tickets" });
+
+    if (!["admin", "master"].includes(projectAccess.org_user_type)) {
+      return res
+        .status(403)
+        .json({ error: "User does not have permission to assign tickets" });
     }
- 
+
     const { data: currentAssignments, error: countError } = await supabase
       .from("tickets_assignments")
       .select("assigned_to_user_id")
       .eq("ticket_id", ticket_id);
- 
+
     if (countError) {
-      return res.status(500).json({ error: "Failed to check current assignments" });
+      return res
+        .status(500)
+        .json({ error: "Failed to check current assignments" });
     }
- 
-    const totalAssignments = (currentAssignments?.length || 0) + user_ids.length;
+
+    const totalAssignments =
+      (currentAssignments?.length || 0) + user_ids.length;
     if (totalAssignments > 3) {
-      return res.status(400).json({ error: "Maximum 3 users can be assigned to a ticket" });
+      return res
+        .status(400)
+        .json({ error: "Maximum 3 users can be assigned to a ticket" });
     }
- 
-    const assignments = user_ids.map(user_id => ({
+
+    const assignments = user_ids.map((user_id) => ({
       ticket_id,
       assigned_to_user_id: user_id,
-      resolved_status: "unresolved"
+      assigned_by_user_id,
+      resolved_status: "unresolved",
     }));
- 
+
     const { error: insertError } = await supabase
       .from("tickets_assignments")
       .insert(assignments);
- 
+
     if (insertError) {
       return res.status(500).json({ error: "Failed to assign users" });
     }
- 
+
     const { error: updateError } = await supabase
       .from("tickets")
       .update({ status: "pending" })
       .eq("ticket_id", ticket_id);
- 
+
     if (updateError) {
       return res.status(500).json({ error: "Failed to update ticket status" });
     }
- 
+
     res.status(200).json({ message: "Users successfully assigned to ticket" });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
- };
+};
 
- exports.unassignUserFromTicket = async (req, res) => {
+exports.unassignUserFromTicket = async (req, res) => {
   try {
     const token = req.token;
     const { ticket_id, user_id } = req.body;
- 
+
     if (!ticket_id || !user_id) {
       return res.status(400).json({ error: "Invalid request data" });
     }
- 
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
- 
+
     const { data: userData, error: userError } = await supabase
       .from("user")
       .select("user_id")
       .eq("email", user.email)
       .single();
- 
+
     if (userError || !userData) {
       return res.status(500).json({ error: "Failed to fetch user data" });
     }
- 
+
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
       .select("proj_id, status")
       .eq("ticket_id", ticket_id)
       .single();
- 
+
     if (ticketError || !ticket) {
       return res.status(404).json({ error: "Ticket not found" });
     }
- 
+
     if (ticket.status === "closed") {
-      return res.status(400).json({ error: "Cannot unassign users from a closed ticket" });
+      return res
+        .status(400)
+        .json({ error: "Cannot unassign users from a closed ticket" });
     }
- 
+
     const { data: projectAccess, error: accessError } = await supabase
       .from("org_user")
       .select("org_user_type")
       .eq("user_id", userData.user_id)
       .eq("proj_id", ticket.proj_id)
       .single();
- 
+
     if (!projectAccess) {
-      return res.status(403).json({ error: "User does not have access to this ticket" });
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
     }
- 
-    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
-      return res.status(403).json({ error: "User does not have permission to unassign users" });
+
+    if (!["admin", "master"].includes(projectAccess.org_user_type)) {
+      return res
+        .status(403)
+        .json({ error: "User does not have permission to unassign users" });
     }
- 
+
     const { error: deleteError } = await supabase
       .from("tickets_assignments")
       .delete()
       .eq("ticket_id", ticket_id)
       .eq("assigned_to_user_id", user_id);
- 
+
     if (deleteError) {
       return res.status(500).json({ error: "Failed to unassign user" });
     }
- 
+
     // Check if this was the last assignment
     const { data: remainingAssignments, error: checkError } = await supabase
       .from("tickets_assignments")
       .select("assigned_to_user_id")
       .eq("ticket_id", ticket_id);
- 
+
     if (!checkError && remainingAssignments.length === 0) {
       // Update ticket status to open if no assignments remain
       const { error: updateError } = await supabase
         .from("tickets")
         .update({ status: "open" })
         .eq("ticket_id", ticket_id);
- 
+
       if (updateError) {
-        return res.status(500).json({ error: "Failed to update ticket status" });
+        return res
+          .status(500)
+          .json({ error: "Failed to update ticket status" });
       }
     }
- 
-    res.status(200).json({ message: "User successfully unassigned from ticket" });
+
+    res
+      .status(200)
+      .json({ message: "User successfully unassigned from ticket" });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
- };
+};
 
- exports.closeTicket = async (req, res) => {
+exports.closeTicket = async (req, res) => {
   try {
     const token = req.token;
     const { ticket_id } = req.params;
@@ -668,7 +732,10 @@ exports.getAssignedUsers = async (req, res) => {
     }
 
     // Verify user token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -704,11 +771,15 @@ exports.getAssignedUsers = async (req, res) => {
       .single();
 
     if (accessError || !projectAccess) {
-      return res.status(403).json({ error: "User does not have access to this ticket" });
+      return res
+        .status(403)
+        .json({ error: "User does not have access to this ticket" });
     }
 
-    if (!['admin', 'master'].includes(projectAccess.org_user_type)) {
-      return res.status(403).json({ error: "User does not have permission to close tickets" });
+    if (!["admin", "master"].includes(projectAccess.org_user_type)) {
+      return res
+        .status(403)
+        .json({ error: "User does not have permission to close tickets" });
     }
 
     // Update ticket status to closed
@@ -754,7 +825,9 @@ exports.getAssignedTicketsForUser = async (req, res) => {
     // Fetch ticket assignments for this user
     const { data: assignments, error: assignmentError } = await supabase
       .from("tickets_assignments")
-      .select("ticket_id, resolved_status")
+      .select(
+        "ticket_id, resolved_status, assigned_by_user_id, assigned_to_user_id"
+      )
       .eq("assigned_to_user_id", userData.user_id);
     if (assignmentError) {
       return res
@@ -767,10 +840,14 @@ exports.getAssignedTicketsForUser = async (req, res) => {
       return res.json({ tickets: [] });
     }
 
-    // Create a map for quick lookup of resolved_status by ticket_id
+    // Create a map for quick lookup of resolved_status and assigned_by_user_id by ticket_id
     const assignmentMap = {};
     assignments.forEach((assignment) => {
-      assignmentMap[assignment.ticket_id] = assignment.resolved_status;
+      assignmentMap[assignment.ticket_id] = {
+        resolved_status: assignment.resolved_status,
+        assigned_by_user_id: assignment.assigned_by_user_id,
+        assigned_to_user_id: assignment.assigned_to_user_id,
+      };
     });
 
     // Extract ticket IDs from assignments
@@ -784,9 +861,7 @@ exports.getAssignedTicketsForUser = async (req, res) => {
       )
       .in("ticket_id", ticketIds);
     if (ticketsError) {
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch tickets data." });
+      return res.status(500).json({ error: "Failed to fetch tickets data." });
     }
 
     // Get unique hub IDs from tickets to fetch unit numbers
@@ -815,7 +890,10 @@ exports.getAssignedTicketsForUser = async (req, res) => {
         unit: hub ? hub.unit_number : null,
         status: ticket.status,
         date: formattedDate,
-        isResolved: assignmentMap[ticket.ticket_id] === "resolved",
+        isResolved:
+          assignmentMap[ticket.ticket_id].resolved_status === "resolved",
+        assignedByUserId: assignmentMap[ticket.ticket_id].assigned_by_user_id,
+        assignedToUserId: assignmentMap[ticket.ticket_id].assigned_to_user_id,
       };
     });
 
@@ -832,12 +910,15 @@ exports.updateTicketResolutionStatus = async (req, res) => {
     const token = req.token;
     const { ticket_id, status } = req.body;
 
-    if (!ticket_id || !status || !['resolved', 'unresolved'].includes(status)) {
+    if (!ticket_id || !status || !["resolved", "unresolved"].includes(status)) {
       return res.status(400).json({ error: "Invalid request data" });
     }
 
     // Verify user token
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
@@ -848,7 +929,7 @@ exports.updateTicketResolutionStatus = async (req, res) => {
       .select("user_id")
       .eq("email", user.email)
       .single();
-      
+
     if (userError || !userData) {
       return res.status(500).json({ error: "Failed to fetch user data." });
     }
@@ -860,19 +941,18 @@ exports.updateTicketResolutionStatus = async (req, res) => {
       .match({
         ticket_id,
         assigned_to_user_id: userData.user_id,
-        resolved_status: status === 'resolved' ? 'unresolved' : 'resolved'
+        resolved_status: status === "resolved" ? "unresolved" : "resolved",
       });
 
     if (updateError) {
-      return res.status(500).json({ 
-        error: `Failed to mark ticket as ${status}.` 
+      return res.status(500).json({
+        error: `Failed to mark ticket as ${status}.`,
       });
     }
 
-    res.status(200).json({ 
-      message: `Ticket marked as ${status}.` 
+    res.status(200).json({
+      message: `Ticket marked as ${status}.`,
     });
-    
   } catch (error) {
     console.error(`Error in updateTicketResolutionStatus:`, error);
     res.status(500).json({ error: "Internal server error." });
