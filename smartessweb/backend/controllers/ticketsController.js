@@ -538,7 +538,7 @@ exports.assignUsersToTicket = async (req, res) => {
 
     const { data: ticket, error: ticketError } = await supabase
       .from("tickets")
-      .select("proj_id, status")
+      .select("proj_id, description, status")
       .eq("ticket_id", ticket_id)
       .single();
 
@@ -597,12 +597,29 @@ exports.assignUsersToTicket = async (req, res) => {
       resolved_status: "unresolved",
     }));
 
-    const { error: insertError } = await supabase
+    const { error: assignmentInsertError } = await supabase
       .from("tickets_assignments")
       .insert(assignments);
 
-    if (insertError) {
+    if (assignmentInsertError) {
       return res.status(500).json({ error: "Failed to assign users" });
+    }
+
+    const notifications = user_ids.map((user_id) => ({
+      notification_to_user_id: user_id,
+      notification_type: "assignment",
+      ticket_id: ticket_id,
+      ticket_description: ticket.description,
+      assigned_to_user_id: user_id,
+      assigned_by_user_id: assigned_by_user_id,
+    }));
+
+    const { error: notificationsInsertError } = await supabase
+      .from("tickets_notifications")
+      .insert(notifications);
+
+    if (notificationsInsertError) {
+      return res.status(500).json({ error: "Failed to create notifications" });
     }
 
     const { error: updateError } = await supabase
@@ -934,27 +951,62 @@ exports.updateTicketResolutionStatus = async (req, res) => {
       return res.status(500).json({ error: "Failed to fetch user data." });
     }
 
-    // Update the assignment status
+    const { data: assignmentRecord, error: assignmentError } = await supabase
+      .from("tickets_assignments")
+      .select("*")
+      .eq("ticket_id", ticket_id)
+      .eq("assigned_to_user_id", userData.user_id)
+      .single();
+    if (assignmentError || !assignmentRecord) {
+      return res
+        .status(500)
+        .json({ error: "Failed to fetch ticket assignment." });
+    }
+
+    if (assignmentRecord.resolved_status === status) {
+      return res
+        .status(400)
+        .json({ error: `Ticket is already marked as ${status}.` });
+    }
+
     const { error: updateError } = await supabase
       .from("tickets_assignments")
       .update({ resolved_status: status })
-      .match({
-        ticket_id,
-        assigned_to_user_id: userData.user_id,
-        resolved_status: status === "resolved" ? "unresolved" : "resolved",
-      });
-
+      .eq("ticket_id", ticket_id)
+      .eq("assigned_to_user_id", userData.user_id);
     if (updateError) {
-      return res.status(500).json({
-        error: `Failed to mark ticket as ${status}.`,
-      });
+      return res
+        .status(500)
+
+        .json({ error: `Failed to mark ticket as ${status}.` });
     }
 
-    res.status(200).json({
-      message: `Ticket marked as ${status}.`,
-    });
+    const { data: ticketData, error: ticketDataError } = await supabase
+      .from("tickets")
+      .select("description")
+      .eq("ticket_id", ticket_id)
+      .single();
+
+    const ticketDescription = ticketData ? ticketData.description : "";
+
+    const notificationType = status;
+
+    const { error: notificationError } = await supabase
+      .from("tickets_notifications")
+      .insert({
+        notification_to_user_id: assignmentRecord.assigned_by_user_id,
+        notification_type: notificationType,
+        ticket_id: ticket_id,
+        ticket_description: ticketDescription,
+        assigned_to_user_id: userData.user_id,
+        assigned_by_user_id: assignmentRecord.assigned_by_user_id,
+      });
+    if (notificationError) {
+      return res.status(500).json({ error: "Failed to create notification." });
+    }
+    res.status(200).json({ message: `Ticket marked as ${status}.` });
   } catch (error) {
-    console.error(`Error in updateTicketResolutionStatus:`, error);
+    console.error("Error in updateTicketResolutionStatus:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 };
