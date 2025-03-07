@@ -2,7 +2,10 @@ import { BellIcon } from "@heroicons/react/20/solid";
 import React, { useState, useRef, useEffect } from "react";
 import NotificationElement from "./notificationElement";
 import { Transition } from "@headlessui/react";
-import { ticketNotificationsApi } from "@/api/components/TicketNotifications";
+import {
+  TicketNotification,
+  ticketNotificationsApi,
+} from "@/api/components/TicketNotifications";
 import { useRouter } from "next/navigation";
 
 interface Notification {
@@ -32,7 +35,7 @@ const Notification: React.FC<NotificationProps> = ({ token }) => {
         const data = await ticketNotificationsApi.getNotifications(token);
 
         const transformedNotifications: Notification[] = data.map(
-          (notif: any) => {
+          (notif: TicketNotification) => {
             let title = "";
 
             switch (notif.notification_type) {
