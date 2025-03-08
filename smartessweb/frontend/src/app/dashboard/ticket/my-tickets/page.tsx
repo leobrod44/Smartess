@@ -6,7 +6,10 @@ import AssignedTicketList from "@/app/components/TicketComponents/AssignedTicket
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
-import { assignedTicketsApi, APITicket } from "@/api/dashboard/ticket/my-tickets/page";
+import {
+  assignedTicketsApi,
+  APITicket,
+} from "@/api/dashboard/ticket/my-tickets/page";
 
 type WidgetFilter = "all" | "resolved" | "unresolved";
 
@@ -43,7 +46,9 @@ const AssignedTicketPage = () => {
 
   const widgetStats = useMemo(() => {
     const total = projectTickets.length;
-    const resolved = projectTickets.filter((ticket) => ticket.isResolved).length;
+    const resolved = projectTickets.filter(
+      (ticket) => ticket.isResolved
+    ).length;
     const unresolved = total - resolved;
     return { total, resolved, unresolved };
   }, [projectTickets]);
@@ -70,7 +75,9 @@ const AssignedTicketPage = () => {
           ticket.unit,
           ticket.status,
           ticket.date,
-        ].some((field) => field.toLowerCase().includes(query.toLowerCase()))
+        ].some((field) =>
+          field?.toString().toLowerCase().includes(query.toLowerCase())
+        )
       );
     }
 
@@ -88,7 +95,8 @@ const AssignedTicketPage = () => {
         newDisplayedTickets.sort((a, b) => {
           const statusOrder: Record<string, number> = { false: 0, true: 1 };
           return (
-            statusOrder[String(a.isResolved)] - statusOrder[String(b.isResolved)]
+            statusOrder[String(a.isResolved)] -
+            statusOrder[String(b.isResolved)]
           );
         });
         break;
@@ -172,8 +180,8 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList 
-        tickets={displayedTickets} 
+      <AssignedTicketList
+        tickets={displayedTickets}
         onRefresh={fetchAssignedTickets}
       />
     </div>
