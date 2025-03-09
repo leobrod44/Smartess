@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Label } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Label } from "recharts";
 
 interface ConnectionSpeedModalProps {
   data: { time: string; value: number }[];

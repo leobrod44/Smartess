@@ -38,6 +38,27 @@ export default function IndividualUnitSurveillancePage({
   //const lastLatencyUpdateRef = useRef<number>(0);
   // ------------------------------------------------------------------------------
 
+
+// -ESLINT -------
+setCurrentLatency(Math.floor(Math.random() * 200) + 50);  // Random latency between 50 and 250 ms
+setLatencyData([
+  { time: "00:00", value: Math.floor(Math.random() * 200) + 50 },
+  { time: "00:01", value: Math.floor(Math.random() * 200) + 50 },
+  { time: "00:02", value: Math.floor(Math.random() * 200) + 50 },
+]);  // Random latency data
+
+setCurrentSpeed(Math.floor(Math.random() * 1000) + 100);  // Random speed between 100 and 1100 kbps
+setSpeedData([
+  { time: "00:00", value: Math.floor(Math.random() * 1000) + 100 },
+  { time: "00:01", value: Math.floor(Math.random() * 1000) + 100 },
+  { time: "00:02", value: Math.floor(Math.random() * 1000) + 100 },
+]);  // Random speed data
+
+setIsConnected(Math.random() > 0.5);
+//-------------------------------
+
+
+
   // const [loading, setLoading] = useState(true);
   useEffect(() => {
     const token = localStorage.getItem("token");
