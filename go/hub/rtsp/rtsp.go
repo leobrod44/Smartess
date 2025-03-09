@@ -329,6 +329,11 @@ func setupStreamEnvironment(camera string, rabbitMQURI string) (*stream.Environm
 	return env, producer, nil
 }
 
+// TODO HLS 1: If the stream abruptly stops and so segments.m3u8 playlist is not getting updated anymore, append at its EOF a "#EXT-X-ENDLIST" tag
+
+// TODO HLS 2: segments.m3u8 should be utf8-standard encoded... to ensure this, use the following command:
+// TODO	"iconv -f ISO-8859-1 -t utf-8 -c segments.m3u8 > segments.m3u8.tmp && mv segments.m3u8.tmp segments.m3u8"
+// TODO	OR "iconv -f US-ASCII -t UTF-8 segments.m3u8 > utf8_segments.m3u8" OR "sed -i '1s/^/\xEF\xBB\xBF/' segments.m3u8" "sed 's/\r$//' segments.m3u8 > segments2.m3u8"
 func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) {
 
 	for {
@@ -357,13 +362,13 @@ func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) 
 					rtsp.Logger.Error(fmt.Sprintf("Error retrieving file stats for %v: %v", filePath, err))
 					continue
 				}
-				rtsp.Logger.Info(fmt.Sprintf("File size: %d bytes", fileInfo.Size()))
+				rtsp.Logger.Info(fmt.Sprintf("File size: %d bytes !!", fileInfo.Size()))
 				ctx.dataChan <- segmentFileContent
-				err = os.Remove(segmentFilePath)
-				if err != nil {
-					rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
-					continue
-				}
+				//err = os.Remove(segmentFilePath)
+				//if err != nil {
+				//	rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
+				//	continue
+				//}
 			}
 		}
 
