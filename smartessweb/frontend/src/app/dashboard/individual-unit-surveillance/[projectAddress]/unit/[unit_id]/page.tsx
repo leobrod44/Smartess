@@ -199,7 +199,7 @@ export default function IndividualUnitSurveillancePage({
           mediaSourceRef.current.endOfStream();
         }
       } catch (e) {
-        console.log('Cleanup error - continuing');
+        console.log('Cleanup error - continuing', e);
       }
       
       sourceBufferRef.current = null;
@@ -240,7 +240,7 @@ export default function IndividualUnitSurveillancePage({
             return true;
           }
         } catch (e) {
-          // Silently continue on trim errors
+          console.log('Buffer trim error', e);
         }
       }
       return false;
@@ -270,7 +270,7 @@ export default function IndividualUnitSurveillancePage({
           }
         }
       } catch (e) {
-        console.log('Buffer append error - resetting');
+        console.log('Buffer append error - resetting', e);
         // Clear pending buffers and restart
         pendingBuffersRef.current = [];
         restartPlayback();
@@ -292,7 +292,7 @@ export default function IndividualUnitSurveillancePage({
         try {
           wsRef.current.close();
         } catch (e) {
-          // Ignore close errors
+          console.log('Error closing WebSocket', e);
         }
         wsRef.current = null;
       }
@@ -355,8 +355,8 @@ export default function IndividualUnitSurveillancePage({
           // Only connect to WebSocket once source buffer is ready
           connectWebSocket();
           setConnectionTimer();
-        } catch (e: any) {
-          console.log('MediaSource setup error - trying alternative codec');
+        } catch (e: unknown) {
+          console.log('MediaSource setup error - trying alternative codec', e);
           
           try {
             // Fallback codec
@@ -371,7 +371,7 @@ export default function IndividualUnitSurveillancePage({
             
             connectWebSocket();
             setConnectionTimer();
-          } catch (e2: any) {
+          } catch (e2: unknown) {
             showStatus('Unable to initialize video player');
             cleanupMediaSource();
           }
@@ -402,7 +402,7 @@ export default function IndividualUnitSurveillancePage({
         try {
           wsRef.current.close();
         } catch (e) {
-          // Ignore close errors
+          console.log('Error closing WebSocket', e);
         }
       }
 
@@ -575,7 +575,7 @@ export default function IndividualUnitSurveillancePage({
             }
           }
         } catch (e) {
-          console.log('Error processing video chunk');
+          console.log('Error processing video chunk', e);
         }
       };
     }
@@ -694,7 +694,7 @@ export default function IndividualUnitSurveillancePage({
         try {
           wsRef.current.close();
         } catch (e) {
-          // Ignore close errors
+          console.log('Error closing WebSocket', e);
         }
       }
     };
@@ -712,7 +712,7 @@ export default function IndividualUnitSurveillancePage({
         try {
           wsRef.current.close();
         } catch (e) {
-          // Ignore close errors
+          console.log('Error closing WebSocket', e);
         }
         wsRef.current = null;
       }
