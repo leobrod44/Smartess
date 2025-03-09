@@ -372,6 +372,7 @@ export default function IndividualUnitSurveillancePage({
             connectWebSocket();
             setConnectionTimer();
           } catch (e2: unknown) {
+            console.log('MediaSource setup error - aborting', e2);
             showStatus('Unable to initialize video player');
             cleanupMediaSource();
           }
