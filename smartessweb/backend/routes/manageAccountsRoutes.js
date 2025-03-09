@@ -31,6 +31,5 @@ router.post(
 router.post("/change-org-user-role", verifyToken, changeOrgUserRole);
 router.post("/delete-org-user", verifyToken, deleteOrgUser);
 router.post("/invite-user-email", verifyToken, upload.none(), sendInvite);
-router.post("/reset-password", upload.none(), sendPasswordReset);
 
 module.exports = router;

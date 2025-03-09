@@ -14,7 +14,7 @@ export const passwordResetApi = {
     const formData = new FormData();
     formData.append('email', data.email);
     
-    const response = await fetch(`${API_URL}/manage-accounts/reset-password`, {
+    const response = await fetch(`${API_URL}/reset-password/reset-password`, {
       method: 'POST',
       body: formData,
     });
