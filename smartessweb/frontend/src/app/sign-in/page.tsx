@@ -25,14 +25,6 @@ const SignInPage = () => {
     setForgotPasswordOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setForgotPasswordOpen(false);
-  };
-
-  const handlePassworReset = () => {
-    setForgotPasswordOpen(false);
-  };
-
   const {
     setUserId,
     setUserEmail,
@@ -197,19 +189,21 @@ const SignInPage = () => {
 
             {/* Forgot password link */}
             <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-5 w-full">
-              <a
-                className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
+              <button
+                type="button"
+                className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer bg-transparent border-none"
                 onClick={handleOpenModal}
                 aria-label="Forgot your password?"
               >
                 Forgot your password?
-              </a>
+              </button>
               {/* Forgot Password Modal Component */}
-              <ForgotPasswordModal
-                isOpen={isForgotPasswordOpen}
-                onClose={handleCloseModal}
-                onReset={handlePassworReset}
-              />
+              {isForgotPasswordOpen && (
+                <ForgotPasswordModal
+                  isOpen={isForgotPasswordOpen}
+                  onClose={() => setForgotPasswordOpen(false)}
+                />
+              )}
             </div>
 
             <div className=" w-full max-w-lg py-5 flex flex-col justify-center items-center  gap-1.5">
