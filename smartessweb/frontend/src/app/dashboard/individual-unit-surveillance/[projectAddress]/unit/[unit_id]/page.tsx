@@ -780,6 +780,19 @@ export default function IndividualUnitSurveillancePage({
     }
   };
 
+  const handleReturnToLive = () => {
+    if (videoRef.current && sourceBufferRef.current) {
+      const buffered = sourceBufferRef.current.buffered;
+      if (buffered.length > 0) {
+        // Seek to near the end of the buffer
+        videoRef.current.currentTime = buffered.end(buffered.length - 1) - 0.5;
+      }
+      setIsLive(true);
+    } else {
+      restartPlaybackRef.current(true);
+    }
+  };
+
   const handleOpenConnectionSpeedModal = () => {
     setConnectionSpeedModalOpen(true);
   };
@@ -841,6 +854,19 @@ export default function IndividualUnitSurveillancePage({
 
               {/* Controls & Status Row */}
               <div className="mt-3 w-full flex justify-center relative items-center">
+                {/* Live Indicator */}
+                {!isLive && (
+                  <button 
+                    onClick={handleReturnToLive}
+                    className="absolute left-2 flex items-center bg-black text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-700"
+                  >
+                    <div className="w-3 h-3 mr-2 flex items-center justify-center">
+                      <div className="border-t-2 border-l-2 border-white w-2 h-2 rotate-[-45deg]"></div>
+                    </div>
+                    Return to Live
+                  </button>
+                )}
+
                 {/* Centered Buttons */}
                 <div className="flex gap-2 sm:gap-4 ml-2 sm:ml-4">
                   <button 
