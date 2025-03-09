@@ -5,7 +5,7 @@ import Link from "next/link";
 import logo from "@/public/images/logo.png";
 import Toast, { showToastError, showToastSuccess } from "../components/Toast";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {useSearchParams } from "next/navigation";
 import { IconButton } from "@mui/material";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Visibility from "@mui/icons-material/Visibility";
