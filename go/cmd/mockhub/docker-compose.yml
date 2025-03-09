@@ -14,13 +14,18 @@ services:
       - ./data:/tmp/data
     networks:
       - smartess_network
-
   mock_camera:
     container_name: mock_camera
     build:
       context: ../../../go/cmd/mock_camera
     ports:
       - "8554:8554"
+    healthcheck:
+      test: [ "CMD", "ffmpeg", "-i", "rtsp://mock_camera:8554/live", "-t", "1", "-f", "null", "/dev/null" ]
+      interval: 30s
+      retries: 5
+      start_period: 10s
+      timeout: 5s
     networks:
       - smartess_network
 networks:
