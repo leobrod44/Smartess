@@ -15,8 +15,6 @@ export default function IndividualUnitSurveillancePage({
 }) {
   const { projectAddress, unit_id } = params;
 
-  // const [loading, setLoading] = useState(true);
-
   const router = useRouter();
   const decodedAddress = decodeURIComponent(projectAddress);
 
@@ -806,15 +804,6 @@ export default function IndividualUnitSurveillancePage({
   const handleCloseLatencyModal = () => {
     setLatencyModalOpen(false);
   };
-
-
-  //   if (loading) {
-  //     return (
-  //       <div className="flex justify-center items-center h-screen">
-  //         <div className="text-[#14323B] text-lg">Loading unit surveillance page...</div>
-  //       </div>
-  //     );
-  //   }
 
   return (
     <div>
