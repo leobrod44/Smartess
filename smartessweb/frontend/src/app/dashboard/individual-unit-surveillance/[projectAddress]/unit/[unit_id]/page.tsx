@@ -15,8 +15,6 @@ export default function IndividualUnitSurveillancePage({
 }) {
   const { projectAddress, unit_id } = params;
 
-  // const [loading, setLoading] = useState(true);
-
   const router = useRouter();
   const decodedAddress = decodeURIComponent(projectAddress);
 
@@ -158,7 +156,7 @@ export default function IndividualUnitSurveillancePage({
       return;
     }
 
-    // -ESLINT ------- delete later
+    // dummy data -------------------------------------------------------------------------------------- delete this later
     setCurrentLatency(Math.floor(Math.random() * 200) + 50);  // Random latency between 50 and 250 ms
     setLatencyData([
       { time: "00:00", value: Math.floor(Math.random() * 200) + 50 },
@@ -174,9 +172,7 @@ export default function IndividualUnitSurveillancePage({
     ]);  // Random speed data
 
     setIsConnected(Math.random() > 0.5);
-    //-------------------------------
-
-
+    //---------------------------------------------------------------------------------------------------------
 
     const MAX_RECONNECT_ATTEMPTS = 20; // Increased for more resilience
     const BUFFER_WINDOW = 30.0; // Increased buffer window to support rewind functionality
@@ -809,18 +805,9 @@ export default function IndividualUnitSurveillancePage({
     setLatencyModalOpen(false);
   };
 
-
-  //   if (loading) {
-  //     return (
-  //       <div className="flex justify-center items-center h-screen">
-  //         <div className="text-[#14323B] text-lg">Loading unit surveillance page...</div>
-  //       </div>
-  //     );
-  //   }
-
   return (
     <div>
-      <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 max-h-screen flex flex-col">
         {/* Back Arrow Button */}
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-[#325a67] text-[35px] leading-10 tracking-tight">
@@ -832,11 +819,11 @@ export default function IndividualUnitSurveillancePage({
           Unit {unit_id}
         </h1>
 
-        {/* Video Section */}
-        <div className="my-5 flex justify-center">
-          <div className="rounded-lg bg-[#4b7d8d] p-2 w-full max-w-2xl">
-            <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full">
-              {/* Video (Full Width) */}
+        <div className="my-5 flex flex-col md:flex-row gap-4 justify-between">
+          {/* Left side - Video */}
+          <div className="rounded-lg bg-[#4b7d8d] p-2 w-full md:w-3/4 h-full"> 
+            <div className="bg-white rounded-lg p-2 flex flex-col items-center w-full h-full">
+              {/* Video */}
               <video 
                 ref={videoRef} 
                 className="w-full border border-gray-300 rounded-lg"
@@ -896,41 +883,62 @@ export default function IndividualUnitSurveillancePage({
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Title & Description */}
-        {!isConnected && (
-          <>
-            <div className="text-center text-black mb-2">
-              <h2 className="text-2xl font-bold">Data Overview - Click to view graphs</h2>
+          {/* Right side - Speed and Latency */}
+          <div className="w-full md:w-1/4 flex flex-col gap-3 h-full">
+            <div className="text-center text-black mb-1">
+              <h2 className="text-lg font-bold">Data Overview</h2>
+              <p className="text-xs text-gray-600">Click to view detailed graphs</p>
             </div>
-            <div className="rounded-lg bg-[#4b7d8d] max-w-[550px] w-full mx-auto max-h-[100px]">
-              <div className="grid grid-cols-2 gap-1 h-full text-black">
-                {/* Speed Section */}
+
+            {/* Make each section flex-grow to distribute height */}
+            <div className="flex flex-col gap-3 flex-grow">
+              {/* Speed Section */}
+              <div className="rounded-lg bg-[#4b7d8d] p-1 flex-grow">
                 <div
-                  className="rounded-lg p-2 cursor-pointer hover:bg-[#325a67] flex max-h-[100px]"
-                  onClick={() => handleOpenConnectionSpeedModal()}
+                  className="bg-white rounded-lg p-3 text-center cursor-pointer hover:bg-gray-50 transition h-full flex flex-col justify-center"
+                  onClick={handleOpenConnectionSpeedModal}
                 >
-                  <div className="bg-white rounded-lg p-4 text-center flex flex-col justify-center w-full h-full">
-                    <h2 className="text-xl font-bold">Connection Speed</h2>
-                    <p className="text-lg">{currentSpeed} kbps</p>
+                  <h2 className="text-lg font-bold">Connection Speed</h2>
+                  <p className="text-2xl font-semibold mt-1">{currentSpeed} kbps</p>
+                  <div className="h-20 mt-1 flex-grow flex items-end">
+                    <div className="h-full w-full flex items-end">
+                      {speedData.slice(-8).map((item, index) => (
+                        <div 
+                          key={index} 
+                          className="flex-1 mx-0.5 bg-blue-500"
+                          style={{ height: `${Math.min(80, (item.value / 1000) * 80)}%` }}
+                        ></div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Buffer Health Section */}
+              {/* Latency Section */}
+              <div className="rounded-lg bg-[#4b7d8d] p-1 flex-grow">
                 <div
-                  className="rounded-lg p-2 cursor-pointer hover:bg-[#325a67] flex max-h-[100px]"
+                  className="bg-white rounded-lg p-3 text-center cursor-pointer hover:bg-gray-50 transition h-full flex flex-col justify-center"
                   onClick={handleOpenLatencyModal}
                 >
-                  <div className="bg-white rounded-lg p-4 text-center flex flex-col justify-center w-full h-full">
-                    <h2 className="text-xl font-bold">Latency</h2>
-                    <p className="text-lg">{currentLatency} ms</p>
+                  <h2 className="text-lg font-bold">Latency</h2>
+                  <p className="text-2xl font-semibold mt-1">{currentLatency} ms</p>
+                  <div className="h-20 mt-1 flex-grow flex items-end">
+                    <div className="h-full w-full flex items-end">
+                      {latencyData.slice(-8).map((item, index) => (
+                        <div 
+                          key={index} 
+                          className="flex-1 mx-0.5 bg-green-500"
+                          style={{ height: `${Math.min(80, (item.value / 250) * 80)}%` }}
+                        ></div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </>
-        )}
+          </div>
+        </div>
 
         {/* Graph Modal */}
         {isConnectionSpeedModalOpen && (
