@@ -20,8 +20,6 @@ const ResetPasswordPage = () => {
   const [userEmail, setUserEmail] = useState("");
   const [token, setToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Verify token when component mounts
