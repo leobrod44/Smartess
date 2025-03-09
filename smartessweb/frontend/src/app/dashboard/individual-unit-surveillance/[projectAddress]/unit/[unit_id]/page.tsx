@@ -730,7 +730,7 @@ export default function IndividualUnitSurveillancePage({
       }
     };
   
-  }, [router, showStatus, handleSeekToTimestamp]);
+  }, [router, isLive, showStatus, handleSeekToTimestamp]);
 
   const handleSeekBackward = () => {
     if (videoRef.current) {
