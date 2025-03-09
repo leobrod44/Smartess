@@ -25,14 +25,6 @@ const SignInPage = () => {
     setForgotPasswordOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setForgotPasswordOpen(false);
-  };
-
-  const handlePassworReset = () => {
-    setForgotPasswordOpen(false);
-  };
-
   const {
     setUserId,
     setUserEmail,
