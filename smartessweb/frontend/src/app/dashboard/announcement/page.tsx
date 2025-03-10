@@ -9,6 +9,7 @@ import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useUserContext } from "@/context/UserProvider";
 import { useProjectContext } from "@/context/ProjectProvider";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 interface AnnouncementApiData {
   announcement_id: number;
@@ -53,6 +54,7 @@ const AnnouncementPage = () => {
   const announcementsPerPage = 5;
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
+  const [query, setQuery] = useState("");
 
   const filterOptions = [
     "Most Likes",
@@ -183,6 +185,7 @@ const AnnouncementPage = () => {
         tagMatch
       );
     });
+    setQuery(query);
     setFilteredAnnouncements(filtered);
     setCurrentPage(1);
   };
@@ -259,11 +262,7 @@ const AnnouncementPage = () => {
           {currentAnnouncements.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
-                <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-                  No results found.
-                  <br />
-                  Please adjust your filters or search criteria.
-                </p>
+                <NoResultsFound searchItem={query} />
               </div>
             </div>
           ) : (
