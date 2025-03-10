@@ -263,7 +263,24 @@ const AnnouncementPage = () => {
             <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
               Loading ...
             </p>
+          ) : announcements.length === 0 ? (
+            // No announcements at all
+            <div className="unit-container max-w-fit sm:max-w-full mx-auto text-center">
+              <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 p-6">
+                <p className="text-[#325a67] text-lg">
+                  No announcements available.
+                </p>
+                <p className="text-gray-500">Be the first to post one!</p>
+                <button
+                  onClick={openModal}
+                  className="mt-4 px-4 py-2 bg-[#254752] text-white rounded-lg hover:bg-[#14323B] transition duration-300"
+                >
+                  Create Announcement
+                </button>
+              </div>
+            </div>
           ) : currentAnnouncements.length === 0 ? (
+            //no filtered announcements
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
                 <NoResultsFound searchItem={query} />
