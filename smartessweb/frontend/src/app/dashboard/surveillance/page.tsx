@@ -10,6 +10,7 @@ import { IconButton, Pagination } from "@mui/material";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import SurveillanceWidget from "@/app/components/SurveillanceComponents/SurveillanceWidget";
 import Image from "next/image";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 const SurveillancePage = () => {
   const router = useRouter();
@@ -180,12 +181,8 @@ const SurveillancePage = () => {
             Loading surveillance data...
           </p>
         ) : currentUnits.length === 0 ? (
-          <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-            <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-              No results found.
-              <br />
-              Please adjust your filters or search criteria.
-            </p>
+          <div className="unit-container max-w-fit sm:max-w-full mx-auto mt-10">
+            <NoResultsFound searchItem={searchQuery}/>
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 mt-3">
