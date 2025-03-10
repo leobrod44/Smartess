@@ -150,9 +150,11 @@ const UnitPage = () => {
             <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
               Loading units...
             </p>
+          ) : allUnits.length === 0 ? (
+            <p> No data available</p>
           ) : currentUnits.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-              <NoResultsFound searchItem={searchQuery}/>
+              <NoResultsFound searchItem={searchQuery} />
             </div>
           ) : (
             /* Mapping of Filtered units by project selected in navar */
