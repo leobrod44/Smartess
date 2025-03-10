@@ -180,9 +180,13 @@ const SurveillancePage = () => {
           <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
             Loading surveillance data...
           </p>
-        ) : currentUnits.length === 0 ? (
+        ) : currentUnits.length === 0 && searchQuery === "" ? (
+          //initially there is no data
+          <p>No data available </p>
+        ) : currentUnits.length === 0 && searchQuery !== "" ? (
+          //no data when searching
           <div className="unit-container max-w-fit sm:max-w-full mx-auto mt-10">
-            <NoResultsFound searchItem={searchQuery}/>
+            <NoResultsFound searchItem={searchQuery} />
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-4 mt-3">
