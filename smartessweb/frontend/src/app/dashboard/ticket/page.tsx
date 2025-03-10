@@ -280,7 +280,9 @@ const TicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      {filteredTickets.length === 0 ? (
+      {tickets.length === 0 ? (
+        <p>No data available</p>
+      ) : filteredTickets.length === 0 ? (
         <NoResultsFound searchItem={query} />
       ) : (
         <TicketList
