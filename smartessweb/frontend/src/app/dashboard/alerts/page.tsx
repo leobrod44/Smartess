@@ -5,6 +5,7 @@ import Pagination from "@mui/material/Pagination";
 import { useState, useMemo } from "react";
 import Searchbar from "../../components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 const AlertPage = () => {
   const itemsPerPage = 6;
@@ -16,6 +17,8 @@ const AlertPage = () => {
     []
   );
 
+  //onnce backend is being added, please add the loading state in the try/catch/finally when you are getting the data from db..
+  //all alerts frorm db should be saved to all alerts
   const [filteredAlerts, setFilteredAlerts] = useState([...allAlerts]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filter, setFilter] = useState("");
@@ -114,7 +117,13 @@ const AlertPage = () => {
           Action
         </p>
       </div>
-      <AlertList alerts={paginatedAlerts} />
+      {allAlerts.length === 0 ? (
+        <p> No data available</p>
+      ) : sortedFilteredAlerts.length === 0 ? (
+        <NoResultsFound searchItem={searchQuery} />
+      ) : (
+        <AlertList alerts={paginatedAlerts} />
+      )}
       <div className="mt-4 flex justify-center">
         <Pagination
           className="custom-pagination"

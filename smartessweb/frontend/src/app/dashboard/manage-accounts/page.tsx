@@ -11,15 +11,7 @@ import { useRouter } from "next/navigation";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { manageAccountsApi } from "@/api/page";
 import AddUserModal from "@/app/components/ManageUsersComponents/AddUserForm";
-
-/*  Mock current organization user data, this is different from the data 
-    displayed on the page (all organization users) which you can find in the mockData.tsx
-    This data is only used for the logic of displaying different UI
-    based on the current user role (master,admn, or basic) and addresses -
-     only organization users that share the same addresses as currentUser
-    are displayed in the page as they should belong to the same organizations 
-    ie: currentUser is an organization user currently logged into the system 
-*/
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 const ManageUsersPage = () => {
   const router = useRouter();
@@ -33,7 +25,7 @@ const ManageUsersPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentOrg, setCurrentOrg] = useState<number | undefined>(undefined);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 8;
 
   // Add roles to filter options
@@ -131,6 +123,7 @@ const ManageUsersPage = () => {
 
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
           token
         );
@@ -164,7 +157,7 @@ const ManageUsersPage = () => {
       } catch (err) {
         console.error("Error fetching organization users:", err);
       } finally {
-        //setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -287,28 +280,43 @@ const ManageUsersPage = () => {
           </>
         )}
       </div>
-
       <div className="flex-grow">
-        {currentItems.map(({ user, addresses }) => {
-          const addressString =
-            addresses.length > 1
-              ? `${addresses[0]} (+${addresses.length - 1} more)`
-              : addresses[0];
+        {isLoading ? (
+          <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+            Loading ...
+          </p>
+        ) : currentItems.length === 0 && searchQuery === "" ? (
+          <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+            No Data Available
+          </p>
+        ) : filteredUsers.length === 0 && searchQuery !== "" ? (
+          <div className="unit-container max-w-fit sm:max-w-full mx-auto">
+            <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
+              <NoResultsFound searchItem={searchQuery} />
+            </div>
+          </div>
+        ) : (
+          currentItems.map(({ user, addresses }) => {
+            const addressString =
+              addresses.length > 1
+                ? `${addresses[0]} (+${addresses.length - 1} more)`
+                : addresses[0];
 
-          return (
-            <ManageAccountsList
-              key={user.individualId}
-              uid={user.individualId}
-              address={addressString}
-              userName={`${user.firstName} ${user.lastName}`}
-              permission={user.role}
-              currentUserRole={currentUser?.role || "basic"}
-              addresses={addresses || []}
-              currentOrg={currentOrg}
-              onUserDeleted={handleRemoveUser}
-            />
-          );
-        })}
+            return (
+              <ManageAccountsList
+                key={user.individualId}
+                uid={user.individualId}
+                address={addressString}
+                userName={`${user.firstName} ${user.lastName}`}
+                permission={user.role}
+                currentUserRole={currentUser?.role || "basic"}
+                addresses={addresses || []}
+                currentOrg={currentOrg}
+                onUserDeleted={handleRemoveUser}
+              />
+            );
+          })
+        )}
       </div>
       <div className="mt-4 flex justify-center">
         <Pagination

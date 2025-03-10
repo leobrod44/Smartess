@@ -8,6 +8,7 @@ import Searchbar from "@/app/components/Searchbar";
 import { useUserContext } from "@/context/UserProvider";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { ticketsListApi, APITicketList } from "@/api/dashboard/ticket/page";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 interface Ticket {
   ticketId: string;
@@ -279,11 +280,17 @@ const TicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <TicketList
-        tickets={filteredTickets}
-        userType={userType}
-        onTicketDelete={handleTicketDelete}
-      />
+      {tickets.length === 0 ? (
+        <p>No data available</p>
+      ) : filteredTickets.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <TicketList
+          tickets={filteredTickets}
+          userType={userType}
+          onTicketDelete={handleTicketDelete}
+        />
+      )}
     </div>
   );
 };
