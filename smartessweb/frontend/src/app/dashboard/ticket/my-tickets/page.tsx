@@ -10,6 +10,7 @@ import {
   assignedTicketsApi,
   APITicket,
 } from "@/api/dashboard/ticket/my-tickets/page";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 type WidgetFilter = "all" | "resolved" | "unresolved";
 
@@ -18,6 +19,7 @@ const AssignedTicketPage = () => {
   const [tickets, setTickets] = useState<APITicket[]>([]);
   const [query, setQuery] = useState("");
   const [widgetFilter, setWidgetFilter] = useState<WidgetFilter>("all");
+  const [isLoading, setLoading] = useState(false);
 
   const fetchAssignedTickets = async () => {
     const token = localStorage.getItem("token");
@@ -26,8 +28,10 @@ const AssignedTicketPage = () => {
       return;
     }
     try {
+      setLoading(true);
       const data = await assignedTicketsApi.getAssignedTickets(token);
       setTickets(data.tickets);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }
@@ -137,6 +141,15 @@ const AssignedTicketPage = () => {
   const handleClickResolved = () => setWidgetFilter("resolved");
   const handleClickUnresolved = () => setWidgetFilter("unresolved");
 
+  // Spinner while loading
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex justify-center">
@@ -180,10 +193,17 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList
-        tickets={displayedTickets}
-        onRefresh={fetchAssignedTickets}
-      />
+
+      {tickets.length === 0 ? (
+        <p> No data available</p>
+      ) : displayedTickets.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <AssignedTicketList
+          tickets={displayedTickets}
+          onRefresh={fetchAssignedTickets}
+        />
+      )}
     </div>
   );
 };

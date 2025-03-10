@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { Project } from "../../mockData";
 import { unitsApi } from "@/api/page";
 import { useRouter } from "next/navigation";
-
+import NoResultsFound from "@/app/components/NoResultsFound";
 const unitsPerPage = 3;
 
 const UnitPage = () => {
@@ -150,13 +150,11 @@ const UnitPage = () => {
             <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
               Loading units...
             </p>
+          ) : allUnits.length === 0 ? (
+            <p> No data available</p>
           ) : currentUnits.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-              <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-                No results found.
-                <br />
-                Please adjust your filters or search criteria.
-              </p>
+              <NoResultsFound searchItem={searchQuery} />
             </div>
           ) : (
             /* Mapping of Filtered units by project selected in navar */

@@ -172,6 +172,7 @@ const ConsumptionPage = () => {
       </div>
       <EnergyConsumptionComponent
         energyConsumptions={filteredEnergyConsumptions}
+        query={query}
       />
     </div>
   );
