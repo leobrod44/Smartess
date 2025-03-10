@@ -147,7 +147,9 @@ const DashboardPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      {filteredProjects.length === 0 ? (
+      {projects.length === 0 ? (
+        <p>No data available</p>
+      ) : filteredProjects.length === 0 ? (
         <NoResultsFound searchItem={query} />
       ) : (
         <ProjectComponent projects={filteredProjects} />
