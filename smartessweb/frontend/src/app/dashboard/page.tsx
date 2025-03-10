@@ -9,6 +9,7 @@ import FilterComponent from "../components/FilterList";
 import { Project } from "../mockData";
 import { projectApi } from "@/api/page";
 import { useProjectContext } from "@/context/ProjectProvider";
+import NoResultsFound from "../components/NoResultsFound";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { selectedProjectId } = useProjectContext();
+  const [query, setQuery] = useState("");
 
   const filterOptionsDashboard = [
     "Address A-Z",
@@ -83,6 +85,7 @@ const DashboardPage = () => {
     });
 
     setFilteredProjects(filtered);
+    setQuery(query);
   };
 
   const handleFilterChange = (filterValue: string) => {
@@ -144,7 +147,11 @@ const DashboardPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <ProjectComponent projects={filteredProjects} />
+      {filteredProjects.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <ProjectComponent projects={filteredProjects} />
+      )}
     </div>
   );
 };
