@@ -82,7 +82,9 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   );
   const totalPages = Math.ceil(energyConsumptions.length / ITEMS_PER_PAGE);
 
-  if (energyConsumptions.length === 0) {
+  if (energyConsumptions.length === 0 && query.trim() === "") {
+    return <p>No data available</p>;
+  } else if (itemsToDisplay.length === 0 && query.trim() !== "") {
     return <NoResultsFound searchItem={query} />;
   }
 
