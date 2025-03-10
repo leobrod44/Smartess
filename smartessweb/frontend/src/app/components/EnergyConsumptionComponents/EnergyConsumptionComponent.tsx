@@ -1,6 +1,7 @@
 import React, { useState, FC } from "react";
 import { Pagination } from "@mui/material";
 import Link from "next/link";
+import NoResultsFound from "../NoResultsFound";
 
 interface EnergyConsumption {
   id: string;
@@ -19,6 +20,7 @@ interface EnergyConsumption {
 
 interface EnergyConsumptionProps {
   energyConsumptions: EnergyConsumption[];
+  query: string;
 }
 
 function getConsumptionInfo(consumption: number) {
@@ -62,6 +64,7 @@ const ITEMS_PER_PAGE = 6;
 
 const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   energyConsumptions,
+  query,
 }) => {
   const [page, setPage] = useState(1);
 
@@ -80,11 +83,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   const totalPages = Math.ceil(energyConsumptions.length / ITEMS_PER_PAGE);
 
   if (energyConsumptions.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No data available
-      </div>
-    );
+    return <NoResultsFound searchItem={query} />;
   }
 
   return (
@@ -100,10 +99,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
           const variationInfo = getVariationInfo(item.variation);
 
           return (
-            <Link
-              key={item.id}
-              href={`/dashboard/consumption/${item.hub_id}`}
-            >
+            <Link key={item.id} href={`/dashboard/consumption/${item.hub_id}`}>
               <div
                 className="
                 bg-white
