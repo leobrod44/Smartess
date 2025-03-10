@@ -45,6 +45,8 @@ const AnnouncementPage = () => {
   const { selectedProjectId } = useProjectContext();
   const { userId } = useUserContext();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [filteredAnnouncements, setFilteredAnnouncements] = useState<
     AnnouncementItem[]
@@ -110,6 +112,7 @@ const AnnouncementPage = () => {
 
     const fetchAnnouncements = async () => {
       try {
+        setIsLoading(true);
         const response = await announcementApi.getAnnouncements(userId);
         const fetchedAnnouncements: AnnouncementItem[] =
           response.announcements.map((ann: AnnouncementApiData) => ({
@@ -146,6 +149,7 @@ const AnnouncementPage = () => {
 
         setAnnouncements(projectFiltered);
         setFilteredAnnouncements(projectFiltered);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching announcements:", error);
       }
@@ -154,10 +158,6 @@ const AnnouncementPage = () => {
     fetchAnnouncements();
     setIsMounted(true);
   }, [router, userId, selectedProjectId]);
-
-  if (!isMounted) {
-    return <p>Loading...</p>;
-  }
 
   const handleSearch = (query: string) => {
     const filtered = announcements.filter((announcement) => {
@@ -259,7 +259,11 @@ const AnnouncementPage = () => {
           </div>
         </div>
         <div className="flex flex-col gap-4">
-          {currentAnnouncements.length === 0 ? (
+          {isLoading ? (
+            <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+              Loading ...
+            </p>
+          ) : currentAnnouncements.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
                 <NoResultsFound searchItem={query} />
