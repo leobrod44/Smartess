@@ -285,7 +285,11 @@ const ManageUsersPage = () => {
           <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
             Loading ...
           </p>
-        ) : currentItems.length === 0 ? (
+        ) : currentItems.length === 0 && searchQuery === "" ? (
+          <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+            No Data Available
+          </p>
+        ) : filteredUsers.length === 0 && searchQuery !== "" ? (
           <div className="unit-container max-w-fit sm:max-w-full mx-auto">
             <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
               <NoResultsFound searchItem={searchQuery} />
