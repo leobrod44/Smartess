@@ -55,7 +55,6 @@ const AnnouncementPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 5;
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
   const [query, setQuery] = useState("");
 
   const filterOptions = [
@@ -156,7 +155,6 @@ const AnnouncementPage = () => {
     };
 
     fetchAnnouncements();
-    setIsMounted(true);
   }, [router, userId, selectedProjectId]);
 
   const handleSearch = (query: string) => {
