@@ -45,7 +45,7 @@ const UnitComponent = ({
 
   return (
     <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-      <div className=" shadow-2xl bg-[#fff] rounded-[7px] w-full mb-2">
+      <div className=" shadow-xl shadow-[#4B7D8D]/60 bg-[#fff] rounded-[7px] w-full mb-2">
         <div className="text-[#4B7D8D] text-xxl font-sequel-sans-black text-center text-2xl pt-8">
           {projectAddress}
         </div>
