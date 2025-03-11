@@ -171,7 +171,8 @@ const ConsumptionPage = () => {
         </div> 
       </div>
       <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight"> View and manage the energy consumption data across all units in your organization. Use the Project Filter on the left or the search bar  and filter above to narrow down results.</h2>
-       
+      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight py-2"> <span className="text-[#325a67] font-bold"> TIP:</span> Click on a unit to view its detailed information.</h2>
+    
       <EnergyConsumptionComponent
         energyConsumptions={filteredEnergyConsumptions}
         query={query}
