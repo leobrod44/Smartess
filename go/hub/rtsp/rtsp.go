@@ -102,6 +102,22 @@ func (rtsp *RtspProcessor) Start() {
 			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
 
+		cmdMotion := exec.Command("ffmpeg",
+			"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+			"-i", streamURL, // Input RTSP stream
+			"-flush_packets", "1", // Flush packets
+			"-vf", "select='gt(scene,0)',metadata=print:file=/motion/motion.log", // Filter: scene detection
+			"-f", "null", "-", // Discard output
+		)
+		time.Sleep(time.Second)
+
+		rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmdMotion.String()))
+
+		err = cmdMotion.Start()
+		if err != nil {
+			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for motion detection %s: %v", camera.Name, err))
+		}
+
 		go func(tmpDir string) {
 			for {
 				files, err := os.ReadDir(tmpDir)
