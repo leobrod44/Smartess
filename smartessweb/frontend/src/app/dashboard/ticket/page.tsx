@@ -280,7 +280,7 @@ const TicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-2">View and manage the tickets across your organization.</h2>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-2">View and manage the tickets across your organization. Click on a ticket name below to access its detailed information.</h2>
     
       {tickets.length === 0 ? (
         <p>No data available</p>

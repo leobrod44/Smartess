@@ -193,7 +193,7 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-2">View and manage the tickets that have been assigned to you. Mark them as resolved or unresolved to update their status.</h2>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-2">View and manage the tickets that have been assigned to you. Mark them as resolved or unresolved to update their status. Click on a ticket name below to access its detailed information.</h2>
     
 
       {tickets.length === 0 ? (
