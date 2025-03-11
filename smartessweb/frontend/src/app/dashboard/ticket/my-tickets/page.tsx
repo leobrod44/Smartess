@@ -175,7 +175,7 @@ const AssignedTicketPage = () => {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-10 tracking-tight">
+        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-2 tracking-tight">
           Your Tickets
         </div>
         <div className="flex items-center space-x-4">
@@ -193,6 +193,8 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-2">View and manage the tickets that have been assigned to you. Mark them as resolved or unresolved to update their status.</h2>
+    
 
       {tickets.length === 0 ? (
         <p> No data available</p>
