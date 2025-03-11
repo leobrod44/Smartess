@@ -239,8 +239,8 @@ const ManageUsersPage = () => {
   };
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="flex items-center pt-4 justify-between mb-8">
+    <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="flex items-center pt-4 justify-between">
         <div className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Manage Your Organization Users
         </div>
@@ -252,6 +252,8 @@ const ManageUsersPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
+      <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">View and manage the employees across your organization.  Access their information and manage their assignment to projects and their privileges. </h2>
+    
 
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
