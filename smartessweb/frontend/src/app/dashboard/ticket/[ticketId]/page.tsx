@@ -180,10 +180,10 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
 
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
         <div className="flex items-center justify-between pb-4">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
-            Ticket Information
+            Detailed Ticket Information
           </div>
           <BackArrowButton />
         </div>
@@ -193,7 +193,7 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
             <IndividualTicket ticket={selectedTicket} />
             {currentUser && currentUser.role !== "basic" && (
               <>
-                <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-5">
+                <div className="text-[#325a67] text-[30px] leading-10 tracking-tight pt-10 pb-3">
                   Manage Ticket Assignment
                 </div>
                 <ManageTicketAssignment
