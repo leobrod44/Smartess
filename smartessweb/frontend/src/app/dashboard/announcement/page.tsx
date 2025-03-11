@@ -243,7 +243,7 @@ const AnnouncementPage = () => {
 
   return (
     <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
         <div className="flex items-center justify-between">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
             Announcements
@@ -256,6 +256,10 @@ const AnnouncementPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
+
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">View the history of announcements that have been sent to tenants across your organization. Send your own announcement by clicking the plus button. </h2>
+    
+
         <div className="flex flex-col gap-4">
           {isLoading ? (
             <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
