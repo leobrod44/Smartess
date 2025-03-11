@@ -23,6 +23,8 @@ FROM alpine:latest
 # Install ffmpeg and netcat (nc) in the final image
 RUN apk add --no-cache ffmpeg netcat-openbsd
 
+RUN apk add coreutils
+
 WORKDIR /root/
 COPY --from=builder /app/main .
 

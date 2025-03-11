@@ -169,216 +169,34 @@ func (rtsp *RtspProcessor) Start() {
 			cmd.Stdout = ffmpegOutput
 			cmd.Stderr = ffmpegOutput
 
-			err = cmd.Start()
-			if err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
-			} else {
-				break
-			}
-
-			rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmd.String()))
-		}
-		// Add to WaitGroup before launching goroutines
-		wg.Add(3)
-
-		go func(cam CameraConfig, ctx *StreamContext) {
-			defer wg.Done()
-			rtsp.streamRTSP(&cam, ctx)
-		}(camera, &ctx)
-
-		// Special reserved queue for sending the name of camera (i.e. the name of its assigned RabbitMQ Stream)
-		// This is done in parallel to other RTSP processor task once when starting everything initially
-		go func(ctx *StreamContext, producer *stream.Producer) {
-			defer wg.Done()
-
-			streamName := producer.GetStreamName()
-			routingKey := streamName
-			if strings.HasPrefix(streamName, "video_stream.hub_id") {
-				routingKey = "videostream.hubid" + streamName[len("video_stream.hub_id"):]
-			}
-			err = rtsp.instance.Channel.Publish(
-				"videostream", // exchange
-				routingKey,    //key
-				true,          // mandatory
-				false,         // immediate
-				amqp.Publishing{
-					ContentType: "text/plain",
-					Body:        []byte(streamName),
-				})
-			if err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Error publishing streamName: %v", err))
-			}
-
-			rtsp.sendData(ctx, producer)
-		}(&ctx, producer)
-
-		go func(ctx *StreamContext, camName string) {
-			defer wg.Done()
-			<-ctx.doneChannel
-			close(ctx.dataChan)
-			close(ctx.errChan)
-			rtsp.Logger.Info(fmt.Sprintf("RTSP stream %s completed", camName))
-		}(&ctx, camera.Name)
-	}
-
-	// Wait for all streams to finish before exiting
-	wg.Wait()
-	rtsp.Logger.Info("All RTSP streams have completed")
-}
-
-func (rtsp *RtspProcessor) Close() {
-	rtsp.client.Close()
-}
-
-// FFmpegConfig holds the configuration for FFmpeg streaming
-type FFmpegConfig struct {
-	options                []string
-	maxRetries             int
-	retryDelay             time.Duration
-	bufferPostSendInterval time.Duration
-	bufferReaderSize       int
-}
-
-// TODO Turn this into docker valid Go argparse to input when running Producer container driver and/or builder
-// TODO (As versatile named arguments in the main() of this producer/main.go)
-func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, error) {
-	tmpDir := "/tmp/data/" + camera.Name
-
-	err := os.MkdirAll(tmpDir, 0755)
-	if err != nil {
-		// Log and return error if directory creation fails
-		return nil, fmt.Errorf("error creating directory %v: %v", tmpDir, err)
-	}
-	STANDARD_OPTIONS := []string{
-		// RTSP Transport settings
-		"-rtsp_transport", "tcp", // Use TCP for RTSP transport
-		"-i", camera.StreamURL, // Input RTSP stream
-		"-buffer_size", "1024000", // Set buffer size
-		"-probesize", "50M", // Increase probe size
-		"-analyzeduration", "20000000", // Increase analyze duration
-		"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
-
-		// Video encoding settings
-		"-c:v", "libx264", // Compress using H.264 codec
-		"-preset", "fast", // Use fast preset for encoding
-		"-crf", "23", // Control quality (lower = better)
-		"-r", "15", // Force frame rate
-		"-g", "30", // Set keyframe interval
-
-		// Audio settings
-		"-b:a", "64k", // Set audio bitrate
-
-		// Output format settings
-		"-f", "segment", // Enable segmentation
-		"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
-		"-segment_format", "mp4", // Output format
-		"-reset_timestamps", "1", // Reset timestamps for each segment
-		"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
-		"-segment_list_type", "m3u8", // HLS format
-		"-segment_list_size", "0", // Unlimited segments
-		"-segment_list_flags", "+live", // Make it a live playlist
-		fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
-	}
-	switch camera.Type {
-	case ANT, REAL:
-		return &FFmpegConfig{
-			options:                STANDARD_OPTIONS,
-			maxRetries:             1,
-			retryDelay:             5 * time.Second,
-			bufferPostSendInterval: 100 * time.Millisecond, // Increased interval
-			bufferReaderSize:       1024000,                // Match buffer_size from ffmpeg
-		}, nil
-	case MOCK:
-		return &FFmpegConfig{
-			options:                STANDARD_OPTIONS,
-			maxRetries:             5,
-			retryDelay:             5 * time.Second,
-			bufferPostSendInterval: 30 * time.Millisecond,
-			bufferReaderSize:       1024000, // Match buffer_size from ffmpeg
-		}, nil
-	case ANTMOCK:
-		return &FFmpegConfig{
-			options: []string{
-				"-rtsp_transport", "tcp", // Ensure stable RTSP stream transport
-				"-i", camera.StreamURL,
-				"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
-				"-preset", "ultrafast", // Adjust tradeoff between encoding speed and compression efficiency
-				"-tune", "zerolatency", // Reduce latency
-				"-profile:v", "baseline", // Set baseline profile
-				"-level", "3.0", // Set level to 3.0
-
-				"-pix_fmt", "yuv420p", // Pixel format
-				"-maxrate", "2000k", // Maximum bitrate
-				"-bufsize", "2000k", // Buffer size
-
-				// GOP settings
-				"-g", "30",
-				"-keyint_min", "30", // Set minimum keyframe interval
-
-				// Forcing keyframe interval
-				"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
-				"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
-				"-sc_threshold", "0",
-				"-an",       // Disable audio codec
-				"-f", "mp4", // Output format
-				"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", // Enable faststart for streaming
-				"-frag_duration", "1000000", // Fragment duration (1 second)
-			},
-			maxRetries:             5,
-			retryDelay:             5 * time.Second,
-			bufferPostSendInterval: 30 * time.Millisecond,
-			bufferReaderSize:       1024 * 1024,
-		}, nil
-	default:
-		return nil, fmt.Errorf("invalid camera selection: %d", camera.Type)
-	}
-}
-
-func (c *FFmpegConfig) buildCommand() *exec.Cmd {
-	return exec.Command("ffmpeg", c.options...)
-}
-
-func setupStreams(camera string, env *stream.Environment) (*stream.Producer, error) {
-	hubID := os.Getenv("HUB_IP")
-	streamName := fmt.Sprintf("video_stream.hub_id.%s.%s", hubID, camera)
-
-	err := env.DeclareStream(streamName, &stream.StreamOptions{
-		MaxLengthBytes:      stream.ByteCapacity{}.GB(2),
-		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
-	})
-	if err != nil {
-		err := env.Close()
+		err = cmd.Start()
 		if err != nil {
-			return nil, fmt.Errorf("failed to close stream environment: %v", err)
+			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for stream %s: %v", camera.Name, err))
 		}
-		return nil, fmt.Errorf("failed to declare stream: %v", err)
-	}
 
-	producer, err := env.NewProducer(streamName, nil)
-	if err != nil {
-		err := env.Close()
+		cmdMotion := exec.Command("ffmpeg",
+			"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+			"-i", streamURL, // Input RTSP stream
+			"-flush_packets", "1", // Flush packets
+			"-vf", "select='gt(scene,0)',metadata=print:file=/motion/motion.log", // Filter: scene detection
+			"-f", "null", "-", // Discard output
+		)
+		time.Sleep(time.Second)
+
+		rtsp.Logger.Info(fmt.Sprintf("FFmpeg command: %v", cmdMotion.String()))
+
+		err = cmdMotion.Start()
 		if err != nil {
-			return nil, fmt.Errorf("failed to close stream environment: %v", err)
+			rtsp.Logger.Error(fmt.Sprintf("Error starting FFmpeg for motion detection %s: %v", camera.Name, err))
 		}
-		return nil, fmt.Errorf("failed to create producer: %v", err)
-	}
 
-	return producer, nil
-}
-
-// TODO HLS 1: If the stream abruptly stops and so segments.m3u8 playlist is not getting updated anymore, append at its EOF a "#EXT-X-ENDLIST" tag
-
-// TODO HLS 2: segments.m3u8 should be utf8-standard encoded... to ensure this, use the following command:
-// TODO	"iconv -f ISO-8859-1 -t utf-8 -c segments.m3u8 > segments.m3u8.tmp && mv segments.m3u8.tmp segments.m3u8"
-// TODO	OR "iconv -f US-ASCII -t UTF-8 segments.m3u8 > utf8_segments.m3u8" OR "sed -i '1s/^/\xEF\xBB\xBF/' segments.m3u8" "sed 's/\r$//' segments.m3u8 > segments2.m3u8"
-func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) {
-
-	for {
-		files, err := os.ReadDir(ctx.directory)
-		if err != nil {
-			ctx.errChan <- fmt.Errorf("error reading directory %v: %v", ctx.directory, err)
-			return
-		}
+		go func(tmpDir string) {
+			for {
+				files, err := os.ReadDir(tmpDir)
+				if err != nil {
+					rtsp.Logger.Error(fmt.Sprintf("Error reading directory %v: %v", tmpDir, err))
+					return
+				}
 
 		for _, file := range files {
 			if file.IsDir() {
