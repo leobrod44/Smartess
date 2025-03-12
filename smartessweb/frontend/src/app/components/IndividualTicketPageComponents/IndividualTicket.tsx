@@ -47,7 +47,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
   };
 
   return (
-    <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6">
+    <div className="w-full px-2.5 bg-white rounded-md shadow-2xl shadow-[#325a67] pb-6 mb-10">
       <div className="w-full px-[13px] pt-6 flex items-center justify-between">
         <div className="flex flex-col items-start">
           <div className="text-[#254752] text-[30px] font-sequel-sans-black">
@@ -66,7 +66,7 @@ function IndividualTicket({ ticket }: IndividualTicketProps) {
         </div>
       </div>
 
-      <div className="w-full pt-6 px-4 flex flex-col items-start">
+      <div className="w-full pt-3 px-4 flex flex-col items-start">
         <div className="text-[#14323b] text-l font-bold font-sequel-sans-light leading-8">
           Ticket ID: {ticket.ticket_id}
         </div>

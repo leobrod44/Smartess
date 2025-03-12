@@ -33,7 +33,7 @@ const AddressDropdown: React.FC<AddressDropdownProps> = ({ projects }) => {
     <div className="w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3b5c6b]"
+        className="inline-flex w-full justify-between items-center gap-x-1.5 rounded-md bg-[#254752] px-2 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#3b5c6b]"
       >
         {selectedProjectAddress || "ALL PROJECTS"}
         {isOpen ? (

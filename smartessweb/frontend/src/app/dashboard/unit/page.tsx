@@ -127,11 +127,11 @@ const UnitPage = () => {
 
   return (
     <>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen">
+      <div className=" mx-4 lg:mx-8  min-h-screen flex flex-col min-h-screen">
         <div className="flex flex-row justify-between">
           <div className="flex flex-row">
             <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
-              Units
+              Units Page
             </h2>
           </div>
           {/* Filtering and searching div */}
@@ -145,6 +145,7 @@ const UnitPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight"> View and manage all of the units in your organization. Use the Project Filter on the left or the search bar  and filter above to narrow down results.</h2>
         <div className="p-[10px] rounded-[7px] w-full mx-auto mt-4">
           {isLoading ? (
             <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
