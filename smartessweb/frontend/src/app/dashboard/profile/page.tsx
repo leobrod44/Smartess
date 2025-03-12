@@ -55,7 +55,7 @@ const ProfilePage = () => {
       <div className="flex flex-col justify-between">
         <div className="flex flex-row">
           <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-3">
-            <h4>Profile</h4>
+            <h4>Your Profile Page</h4>
           </div>
         </div>
 

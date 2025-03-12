@@ -129,10 +129,11 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
+    <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
+      <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
         Welcome to Your Dashboard
       </div>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-4">View and manage information about your organization&apos;s overall health, and the projects within it.</h2>
       <DashboardWidget />
 
       <div className="flex items-center pt-4 justify-between">
@@ -147,6 +148,7 @@ const DashboardPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
+      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4"> <span className="text-[#325a67] font-bold"> TIP:</span> Use the Project Filter on the left, or the search bar and filter above to narrow results.</h2>
       {projects.length === 0 ? (
         <p>No data available</p>
       ) : filteredProjects.length === 0 ? (

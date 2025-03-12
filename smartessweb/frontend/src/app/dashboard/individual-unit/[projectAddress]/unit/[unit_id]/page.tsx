@@ -89,9 +89,9 @@ export default function UnitPage({
 
   return (
     <div>
-      <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+      <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
         {/* Back Arrow Button */}
-        <div className="flex items center justify-between mb-4">
+        <div className="flex items center justify-between mb-2">
           <h1 className="text-[#325a67] text-[35px] leading-10 tracking-tight">
             {address}
           </h1>
