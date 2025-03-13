@@ -21,7 +21,7 @@ RUN wget -q -O /mediamtx.tar.gz https://github.com/bluenviron/mediamtx/releases/
     rm /mediamtx.tar.gz
 
 # Copy the video file
-COPY bunnies.mp4 /bunnies.mp4
+COPY traffic.mp4 /traffic.mp4
 
 # Start both RTSP server and ffmpeg using a script
 COPY start_mock_camera.sh /start_mock_camera.sh
