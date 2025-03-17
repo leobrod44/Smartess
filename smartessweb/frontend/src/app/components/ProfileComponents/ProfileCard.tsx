@@ -1,12 +1,31 @@
+"use client";
+
 import Image from "next/image";
 import Logo from "../../../public/images/building_straight.png";
+import { manageAccountsApi } from "@/api/page";
+import { showToastError, showToastSuccess } from "../Toast";
 
 const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
-  // Logs selected image file to be uploaded
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Selected file:", file);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("Token not found in local storage");
+        return;
+      }
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        await manageAccountsApi.storeProfilePictureApi(token, formData);
+        showToastSuccess("Profile picture uploaded successfully.");
+      } catch (error) {
+        console.log(error);
+        showToastError("Error uploading profile picture:");
+      }
     }
   };
 
@@ -28,7 +47,7 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
           </div>
           <div className="flex flex-col items-center bg-white rounded-b-lg w-full h-4/5 p-2">
             <div className="flex justify-center pb-10">
-              <label className="cursor-pointer bg-[#266472] hover:bg-[#1f505e] w-28 h-8 text-white text-xs text-center hover:bg-[#1f505e] transition duration-300 rounded-md pt-2 pb-6">
+              <label className="cursor-pointer bg-[#266472] hover:bg-[#1f505e] w-28 h-8 text-white text-xs text-center transition duration-300 rounded-md pt-2 pb-6">
                 Upload Image
                 <input
                   type="file"
@@ -41,27 +60,23 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
             <div className="font-sequel-sans-black text-[#4B7D8D] border-b w-1/3 text-center text-l p-2">
               <h1>Role</h1>
             </div>
-            <div>
-              <div className="flex justify-center pt-3">
-                {currentUser.role === "master" && (
-                  <div className="bg-[#EBB305] w-28 text-white text-sm rounded-md p-1">
-                    <h1 className="text-center">Master</h1>
+            <div className="flex justify-center pt-3">
+              {currentUser.role === "master" && (
+                <div className="bg-[#EBB305] w-28 text-white text-sm rounded-md p-1">
+                  <h1 className="text-center">Master</h1>
+                </div>
+              )}
+              {currentUser.role === "admin" && (
+                <div className="bg-[#ccc] w-28 text-white text-sm rounded-md p-1">
+                  <h1 className="text-center">Admin</h1>
+                </div>
+              )}
+              {currentUser.role !== "master" &&
+                currentUser.role !== "admin" && (
+                  <div className="bg-[#A6634F] w-28 text-white text-sm rounded-md p-1">
+                    <h1 className="text-center">Basic</h1>
                   </div>
                 )}
-
-                {currentUser.role === "admin" && (
-                  <div className="bg-[#ccc] w-28 text-white text-sm rounded-md p-1">
-                    <h1 className="text-center">Admin</h1>
-                  </div>
-                )}
-
-                {currentUser.role !== "master" &&
-                  currentUser.role !== "admin" && (
-                    <div className="bg-[#A6634F] w-28 text-white text-sm rounded-md p-1">
-                      <h1 className="text-center">Basic</h1>
-                    </div>
-                  )}
-              </div>
             </div>
           </div>
         </div>
@@ -69,4 +84,5 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
     </div>
   );
 };
+
 export default ProfileCard;

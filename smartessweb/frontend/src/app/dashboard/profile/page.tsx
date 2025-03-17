@@ -60,10 +60,10 @@ const ProfilePage = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-normal gap-4">
-          {/* Right panel */}
+          {/* Left panel */}
           <ProfileCard currentUser={currentUser} />
 
-          {/* Left panel */}
+          {/* Right panel */}
           <ProfileInfo
             currentUser={currentUser}
             onOpenPassword={handlePasswordOpenModal}
