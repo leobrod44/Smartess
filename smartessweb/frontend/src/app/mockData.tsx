@@ -831,18 +831,21 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 2,
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
+    profilePictureUrl: null,
   },
   {
     individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
+    profilePictureUrl: null,
   },
 ];
 
@@ -853,12 +856,14 @@ const generateMockProjectUsers2 = (): Individual[] => [
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
+    profilePictureUrl: null,
   },
   {
     individualId: 4,
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 
@@ -868,12 +873,14 @@ const generateMockProjectUsers3 = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 
@@ -883,48 +890,56 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 12,
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 7,
     firstName: "Kellie",
     lastName: "Bells",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 8,
     firstName: "Kaitlyn",
     lastName: "Jingle",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 9,
     firstName: "Timothy",
     lastName: "Brown",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 10,
     firstName: "Bob",
     lastName: "Blinker",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 11,
     firstName: "Sarah",
     lastName: "Michaels",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 
