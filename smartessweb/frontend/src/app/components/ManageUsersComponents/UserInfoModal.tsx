@@ -278,13 +278,12 @@ function UserInfoModal({
 
           <div className="flex flex-col items-center justify-center">
             <Image
-              width={100}
-              height={40}
-              className="rounded-full bg-gray-50 pb-3"
               src={profilePictureUrl || pfp}
               alt="User Profile Pic"
+              width={100}
+              height={100}
+              className="rounded-full object-cover w-[100px] h-[100px]"
             />
-
             <Typography
               variant="h6"
               id="user-details-modal"
