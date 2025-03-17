@@ -5,22 +5,19 @@ import ProfileInfo from "@/app/components/ProfileComponents/ProfileInfo";
 import ManagePasswordModal from "@/app/components/ProfileComponents/ManagePasswordModal";
 import ManagePhoneNumberModal from "@/app/components/ProfileComponents/ManagePhoneNumberModal";
 import { useState } from "react";
-
-/*
-  Current user is used for testing of Static UI
-*/
-
-export const currentUser = {
-  userId: "12345",
-  role: "master",
-  address: ["123 Main St", "Suite 400"],
-  firstName: "Admin",
-  lastName: "Admina",
-  email: "Admina@cs.smartess.ca",
-  phoneNumber: "514-444-1234",
-};
+import { useUserContext } from "@/context/UserProvider";
 
 const ProfilePage = () => {
+  const {
+    userId,
+    userEmail,
+    userFirstName,
+    userLastName,
+    userType,
+    userProfilePicture,
+    userPhoneNumber,
+  } = useUserContext();
+
   const [isManagePasswordOpen, setManagePasswordOpen] = useState(false);
   const [isManagePhoneNumberOpen, setManagePhoneNumberOpen] = useState(false);
 
@@ -50,6 +47,17 @@ const ProfilePage = () => {
     setManagePhoneNumberOpen(false);
   };
 
+  const currentUser = {
+    userId: userId,
+    role: userType,
+    address: [],
+    firstName: userFirstName,
+    lastName: userLastName,
+    email: userEmail,
+    phoneNumber: userPhoneNumber,
+    profilePicture: userProfilePicture,
+  };
+
   return (
     <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8">
       <div className="flex flex-col justify-between">
@@ -60,10 +68,10 @@ const ProfilePage = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-normal gap-4">
-          {/* Right panel */}
+          {/* Left panel */}
           <ProfileCard currentUser={currentUser} />
 
-          {/* Left panel */}
+          {/* Right panel */}
           <ProfileInfo
             currentUser={currentUser}
             onOpenPassword={handlePasswordOpenModal}

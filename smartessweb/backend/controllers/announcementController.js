@@ -72,7 +72,8 @@ exports.getAnnouncements = async (req, res) => {
           created_at,
           user:user_id (
             first_name,
-            last_name
+            last_name,
+            profile_picture_url
           ),
           organization:org_id (
             name
@@ -113,7 +114,8 @@ exports.getAnnouncements = async (req, res) => {
           created_at,
           user:user_id (
             first_name,
-            last_name
+            last_name,
+            profile_picture_url
           ),
           organization:org_id (
             name
@@ -155,6 +157,7 @@ exports.getAnnouncements = async (req, res) => {
         announcement_id: ann.announcement_id,
         announcement_type: ann.announcement_type,
         user_id: ann.user_id,
+        user_profile_picture: ann.user?.profile_picture_url || null,
         name: fullName,
         org_id: ann.org_id || null,
         org_name: ann.organization ? ann.organization.name : null,

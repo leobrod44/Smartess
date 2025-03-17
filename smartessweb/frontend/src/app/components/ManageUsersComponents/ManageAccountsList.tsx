@@ -13,6 +13,7 @@ interface ManageAccountsListProps {
   currentUserRole: "admin" | "basic" | "master"; // Current user's role
   addresses: string[];
   currentOrg: number | undefined;
+  profilePictureUrl: string | null;
   onUserDeleted?: (uid: number) => void;
 }
 const capitalizeWords = (str: string) =>
@@ -26,6 +27,7 @@ const ManageAccountsList = ({
   userName,
   permission,
   currentUserRole,
+  profilePictureUrl,
   addresses, // Destructure addresses
   currentOrg,
   onUserDeleted,
@@ -108,7 +110,10 @@ const ManageAccountsList = ({
 
         {/* Render the edit icon only if the current user has the "master" or "admin" role */}
         {(currentUserRole === "master" || currentUserRole === "admin") && (
-          <div className="ml-4" onClick={handleOpenModal}>
+          <div
+            className="ml-4"
+            onClick={handleOpenModal}
+          >
             <EditIcon className="text-[#30525E] cursor-pointer" />
           </div>
         )}
@@ -125,6 +130,7 @@ const ManageAccountsList = ({
         addresses={addresses}
         currentUserRole={currentUserRole} // Pass currentUserRole for role-based logic
         currentOrg={currentOrg}
+        profilePictureUrl={profilePictureUrl}
         onDeleteUser={(uid) => {
           deleteOrgUser(uid);
           console.log("User deleted");

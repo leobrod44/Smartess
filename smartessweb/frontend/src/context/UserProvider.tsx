@@ -16,11 +16,15 @@ interface UserContextProps {
   userFirstName: string;
   userLastName: string;
   userType: string;
+  userProfilePicture: string;
+  userPhoneNumber: string;
   setUserId: Dispatch<SetStateAction<string>>;
   setUserEmail: Dispatch<SetStateAction<string>>;
   setUserFirstName: Dispatch<SetStateAction<string>>;
   setUserLastName: Dispatch<SetStateAction<string>>;
   setUserType: Dispatch<SetStateAction<string>>;
+  setUserProfilePicture: Dispatch<SetStateAction<string>>;
+  setUserPhoneNumber: Dispatch<SetStateAction<string>>;
 }
 
 // Create the context with default undefined
@@ -33,6 +37,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userFirstName, setUserFirstName] = useState<string>("");
   const [userLastName, setUserLastName] = useState<string>("");
   const [userType, setUserType] = useState<string>("");
+  const [userProfilePicture, setUserProfilePicture] = useState<string>("");
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>("");
 
   const value = {
     userId,
@@ -40,11 +46,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     userFirstName,
     userLastName,
     userType,
+    userProfilePicture,
+    userPhoneNumber,
     setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,
     setUserType,
+    setUserProfilePicture,
+    setUserPhoneNumber,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

@@ -1,5 +1,8 @@
 const supabase = require("../config/supabase");
-const supabaseAdmin = require('../config/supabase').admin;
+const supabaseAdmin = require("../config/supabase").admin;
+const fs = require("fs");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const { Resend } = require("resend");
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -18,7 +21,9 @@ exports.getCurrentUser = async (req, res) => {
 
     const { data: userData, error: userError } = await supabase
       .from("user")
-      .select("user_id")
+      .select(
+        "user_id, email, first_name, last_name, phone_number, profile_picture_url"
+      )
       .eq("email", user.email)
       .single();
 
@@ -67,12 +72,110 @@ exports.getCurrentUser = async (req, res) => {
           ? role
           : "basic",
       address: addresses,
+      firstName: userData.first_name,
+      lastName: userData.last_name,
+      email: userData.email,
+      phoneNumber: userData.phone_number,
+      profilePictureUrl: userData.profile_picture_url,
     };
 
     res.json({ currentUser: formattedCurrentUser });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+exports.storeProfilePicture = async (req, res) => {
+  try {
+    const token = req.token;
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    const { data: userData, error: dbError } = await supabase
+      .from("user")
+      .select("user_id, email, first_name, last_name, type")
+      .eq("email", user.email)
+      .single();
+
+    if (dbError) {
+      return res.status(500).json({ error: "Database query failed" });
+    }
+
+    if (!userData) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Use req.file since upload.single("file") is used.
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    const file = req.file;
+    const filePath = path.resolve(file.path);
+    const ext = path.extname(file.originalname);
+    const uniqueFileName = `${uuidv4()}${ext}`;
+
+    // Upload file to the "avatars" bucket
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from("avatars")
+      .upload(`users/${uniqueFileName}`, fs.readFileSync(filePath), {
+        contentType: file.mimetype,
+      });
+
+    // Remove temporary uploaded file from server only if the upload was successful
+    fs.unlinkSync(filePath);
+
+    if (uploadError) {
+      console.error("Error uploading to Supabase Storage:", uploadError);
+      return res
+        .status(500)
+        .json({ message: "File upload error", error: uploadError });
+    }
+
+    // Retrieve the public URL from the same bucket, using `supabaseAdmin`
+    const { data: publicUrlData } = supabaseAdmin.storage
+      .from("avatars")
+      .getPublicUrl(`users/${uniqueFileName}`);
+
+    const publicUrl = publicUrlData?.publicUrl || null;
+
+    if (!publicUrl) {
+      console.error("Error retrieving public URL.");
+      return res
+        .status(500)
+        .json({ message: "Failed to retrieve public URL." });
+    }
+
+    // Update the user's record with the new profile picture URL
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from("user")
+      .update({ profile_picture_url: publicUrl })
+      .eq("user_id", userData.user_id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Update Error:", updateError);
+      return res
+        .status(500)
+        .json({ message: "Failed to update user", error: updateError });
+    }
+
+    return res.status(200).json({ profilePictureUrl: publicUrl });
+  } catch (error) {
+    console.error("Server Error:", error);
+    return res.status(500).json({
+      message: "Server error storing profile picture",
+      error: error.message,
+    });
   }
 };
 
@@ -177,7 +280,7 @@ exports.getOrgIndividualsData = async (req, res) => {
 
     const { data: individualData, error: fetchError } = await supabase
       .from("user")
-      .select("user_id, first_name, last_name")
+      .select("user_id, first_name, last_name, profile_picture_url")
       .in("user_id", userIds);
 
     if (fetchError) {
@@ -202,6 +305,7 @@ exports.getOrgIndividualsData = async (req, res) => {
         firstName: user.first_name,
         lastName: user.last_name,
         role: orgUser?.org_user_type || "basic", // default to basic if no role is found
+        profilePictureUrl: user.profile_picture_url,
       };
     });
 
@@ -541,7 +645,7 @@ exports.removeOrgUserFromProject = async (req, res) => {
           .select("admin_users_count")
           .eq("proj_id", proj_id)
           .single();
-    
+
         if (!fetchProjectError && project) {
           const newCount = Math.max((project.admin_users_count || 0) - 1, 0);
           await supabase
@@ -550,16 +654,16 @@ exports.removeOrgUserFromProject = async (req, res) => {
             .eq("proj_id", proj_id);
         }
       });
-    
+
       await Promise.all(updateCountsPromises); // Wait for all updates
-    
+
       // Now delete all but one row
       const rowToKeep = rows[0];
-    
+
       if (!rowToKeep) {
         return res.status(400).json({ error: "Invalid proj_ids provided." });
       }
-    
+
       const deletePromises = proj_ids
         .filter((proj_id) => proj_id !== rowToKeep.proj_id)
         .map((proj_id) => {
@@ -570,17 +674,17 @@ exports.removeOrgUserFromProject = async (req, res) => {
             .eq("org_id", org_id)
             .eq("proj_id", proj_id);
         });
-    
+
       const deleteResults = await Promise.all(deletePromises);
       const deleteError = deleteResults.find((result) => result.error);
-    
+
       if (deleteError) {
         console.error("Delete Error:", deleteError.error);
         return res
           .status(500)
           .json({ error: "Failed to remove user from project(s)." });
       }
-    
+
       // Finally, update the remaining row
       const { error: updateError } = await supabase
         .from("org_user")
@@ -588,14 +692,14 @@ exports.removeOrgUserFromProject = async (req, res) => {
         .eq("user_id", user_id)
         .eq("org_id", org_id)
         .eq("proj_id", rowToKeep.proj_id);
-    
+
       if (updateError) {
         console.error("Update Error:", updateError);
         return res.status(500).json({
           error: "Failed to update remaining org_user proj_id to null.",
         });
       }
-    
+
       return res.status(200).json({
         message:
           "User successfully removed from projects and last proj_id set to null.",
@@ -678,7 +782,9 @@ exports.deleteOrgUser = async (req, res) => {
     }
 
     if (!userData || userData.length === 0) {
-      return res.status(404).json({ error: "No matching user found in system." });
+      return res
+        .status(404)
+        .json({ error: "No matching user found in system." });
     }
 
     const { email, type: user_type } = userData[0];
@@ -760,11 +866,12 @@ exports.deleteOrgUser = async (req, res) => {
     }
 
     // 8) Look up the user in Supabase Auth by email (via listUsers) and delete from Auth
-    const { data: listData, error: listError } = await supabaseAdmin.auth.admin.listUsers({
-      filter: `email:eq.${email}`, // filter syntax: field:operator.value
-      page: 1,
-      perPage: 1,
-    });
+    const { data: listData, error: listError } =
+      await supabaseAdmin.auth.admin.listUsers({
+        filter: `email:eq.${email}`, // filter syntax: field:operator.value
+        page: 1,
+        perPage: 1,
+      });
 
     if (listError) {
       console.error("Auth listUsers Error:", listError);
@@ -784,7 +891,8 @@ exports.deleteOrgUser = async (req, res) => {
     const userAuthUUID = listData.users[0].id;
 
     // Finally, delete from Supabase Auth
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userAuthUUID);
+    const { error: deleteAuthError } =
+      await supabaseAdmin.auth.admin.deleteUser(userAuthUUID);
     if (deleteAuthError) {
       console.error("Delete Auth User Error:", deleteAuthError);
       return res.status(500).json({
@@ -857,190 +965,194 @@ exports.changeOrgUserRole = async (req, res) => {
   }
 };
 
+/**
+ * Handles sending an invitation email to a user for joining Smartess projects.
+ *
+ * This function extracts the recipient's email, role, sender's name, and selected projects
+ * from the request body, formats an HTML email, and sends the invitation using Resend.
+ *
+ * @param {Object} req - The HTTP request object containing:
+ *   @property {string} req.body.email - The recipient's email address.
+ *   @property {string} req.body.role - The role assigned to the user.
+ *   @property {string} req.body.sender_name - The name of the sender inviting the user.
+ *   @property {Object} req.body - Contains project information under dynamic keys (e.g., "projects[0]", "projects[1]").
+ *
+ * @param {Object} res - The HTTP response object used to return success or error messages.
+ *
+ * @returns {Response} - A JSON response:
+ *   - `{ message: "Email sent successfully." }` on success (HTTP 200).
+ *   - `{ message: "Failed to send email.", error: error.message }` on failure (HTTP 500).
+ *
+ * @throws {Error} If an error occurs while sending the email, it logs the error and returns a 500 response.
+ */
 
-  /**
-   * Handles sending an invitation email to a user for joining Smartess projects.
-   *
-   * This function extracts the recipient's email, role, sender's name, and selected projects
-   * from the request body, formats an HTML email, and sends the invitation using Resend.
-   *
-   * @param {Object} req - The HTTP request object containing:
-   *   @property {string} req.body.email - The recipient's email address.
-   *   @property {string} req.body.role - The role assigned to the user.
-   *   @property {string} req.body.sender_name - The name of the sender inviting the user.
-   *   @property {Object} req.body - Contains project information under dynamic keys (e.g., "projects[0]", "projects[1]").
-   *
-   * @param {Object} res - The HTTP response object used to return success or error messages.
-   *
-   * @returns {Response} - A JSON response:
-   *   - `{ message: "Email sent successfully." }` on success (HTTP 200).
-   *   - `{ message: "Failed to send email.", error: error.message }` on failure (HTTP 500).
-   *
-   * @throws {Error} If an error occurs while sending the email, it logs the error and returns a 500 response.
-   */
-  
-  exports.sendInvite = async (req, res) => {
-    try {
-      const { email, role, sender_name } = req.body;
-      let projects = [];
-  
-      // Parse projects from request body
-      if (req.body.projects) {
-        if (typeof req.body.projects === "string") {
-          projects = req.body.projects
-            .split(",")
-            .map((project) => project.trim());
-        } else {
-          projects = req.body.projects;
-        }
+exports.sendInvite = async (req, res) => {
+  try {
+    const { email, role, sender_name } = req.body;
+    let projects = [];
+
+    // Parse projects from request body
+    if (req.body.projects) {
+      if (typeof req.body.projects === "string") {
+        projects = req.body.projects
+          .split(",")
+          .map((project) => project.trim());
       } else {
-        projects = Object.keys(req.body)
-          .filter((key) => key.startsWith("projects["))
-          .map((key) => req.body[key]);
+        projects = req.body.projects;
       }
-  
-      // First, check if user already exists
-      const { data: existingUser, error: userCheckError } = await supabase
+    } else {
+      projects = Object.keys(req.body)
+        .filter((key) => key.startsWith("projects["))
+        .map((key) => req.body[key]);
+    }
+
+    // First, check if user already exists
+    const { data: existingUser, error: userCheckError } = await supabase
+      .from("user")
+      .select("user_id")
+      .eq("email", email)
+      .single();
+
+    if (userCheckError && userCheckError.code !== "PGRST116") {
+      // PGRST116 is "not found" error
+      console.error("Error checking existing user:", userCheckError);
+      return res
+        .status(500)
+        .json({ error: "Failed to check existing usgit aer." });
+    }
+
+    let userId;
+
+    if (!existingUser) {
+      // Create new user in user table - user_id will be auto-generated
+      const { data: newUser, error: createUserError } = await supabase
         .from("user")
-        .select("user_id")
-        .eq("email", email)
-        .single();
-  
-      if (userCheckError && userCheckError.code !== "PGRST116") { // PGRST116 is "not found" error
-        console.error("Error checking existing user:", userCheckError);
-        return res.status(500).json({ error: "Failed to check existing usgit aer." });
-      }
-  
-      let userId;
-  
-      if (!existingUser) {
-        // Create new user in user table - user_id will be auto-generated
-        const { data: newUser, error: createUserError } = await supabase
-          .from("user")
-          .insert([{
+        .insert([
+          {
             email: email,
-            first_name : "Invitation",
-            last_name : "Pending"
-          }])
-          .select();
-  
-        if (createUserError) {
-          console.error("Error creating user:", createUserError);
-          return res.status(500).json({ error: "Failed to create user." });
-        }
-  
-        if (!newUser || newUser.length === 0) {
-          return res.status(500).json({ error: "User creation failed - no user returned." });
-        }
-  
-        userId = newUser[0].user_id; // Get the auto-generated user_id from the first (and only) created user
-      } else {
-        userId = existingUser.user_id;
+            first_name: "Invitation",
+            last_name: "Pending",
+          },
+        ])
+        .select();
+
+      if (createUserError) {
+        console.error("Error creating user:", createUserError);
+        return res.status(500).json({ error: "Failed to create user." });
       }
-  
-      // Get project IDs from project addresses
-      const { data: projectData, error: projectError } = await supabase
+
+      if (!newUser || newUser.length === 0) {
+        return res
+          .status(500)
+          .json({ error: "User creation failed - no user returned." });
+      }
+
+      userId = newUser[0].user_id; // Get the auto-generated user_id from the first (and only) created user
+    } else {
+      userId = existingUser.user_id;
+    }
+
+    // Get project IDs from project addresses
+    const { data: projectData, error: projectError } = await supabase
+      .from("project")
+      .select("proj_id, org_id")
+      .in("address", projects);
+
+    if (projectError) {
+      console.error("Error fetching projects:", projectError);
+      return res.status(500).json({ error: "Failed to fetch project data." });
+    }
+
+    if (!projectData || projectData.length === 0) {
+      return res.status(404).json({ error: "No matching projects found." });
+    }
+
+    // Create entries in org_user table for each project
+    const orgUserEntries = projectData.map((project) => ({
+      user_id: userId,
+      org_id: project.org_id,
+      proj_id: project.proj_id,
+      org_user_type: role,
+    }));
+
+    // Insert all org_user entries
+    const { error: orgUserError } = await supabase
+      .from("org_user")
+      .insert(orgUserEntries);
+
+    if (orgUserError) {
+      console.error("Error creating org_user entries:", orgUserError);
+
+      // If org_user creation fails, cleanup the user if we just created them
+      if (!existingUser) {
+        await supabase.from("user").delete().eq("user_id", userId);
+      }
+
+      return res
+        .status(500)
+        .json({ error: "Failed to associate user with projects." });
+    }
+
+    // Increment admin_users_count for each project
+    const updatePromises = projectData.map(async (project) => {
+      const { data: currentProject } = await supabase
         .from("project")
-        .select("proj_id, org_id")
-        .in("address", projects);
-  
-      if (projectError) {
-        console.error("Error fetching projects:", projectError);
-        return res.status(500).json({ error: "Failed to fetch project data." });
-      }
-  
-      if (!projectData || projectData.length === 0) {
-        return res.status(404).json({ error: "No matching projects found." });
-      }
-  
-      // Create entries in org_user table for each project
-      const orgUserEntries = projectData.map(project => ({
-        user_id: userId,
-        org_id: project.org_id,
-        proj_id: project.proj_id,
-        org_user_type: role
-      }));
-  
-      // Insert all org_user entries
-      const { error: orgUserError } = await supabase
-        .from("org_user")
-        .insert(orgUserEntries);
-  
-      if (orgUserError) {
-        console.error("Error creating org_user entries:", orgUserError);
-        
-        // If org_user creation fails, cleanup the user if we just created them
-        if (!existingUser) {
-          await supabase
-            .from("user")
-            .delete()
-            .eq("user_id", userId);
-        }
-        
-        return res.status(500).json({ error: "Failed to associate user with projects." });
-      }
-  
-      // Increment admin_users_count for each project
-      const updatePromises = projectData.map(async (project) => {
-        const { data: currentProject } = await supabase
-          .from("project")
-          .select("admin_users_count")
-          .eq("proj_id", project.proj_id)
-          .single();
+        .select("admin_users_count")
+        .eq("proj_id", project.proj_id)
+        .single();
 
-        const newCount = (currentProject?.admin_users_count || 0) + 1;
+      const newCount = (currentProject?.admin_users_count || 0) + 1;
 
-        return supabase
-          .from("project")
-          .update({ admin_users_count: newCount })
-          .eq("proj_id", project.proj_id);
-      });
+      return supabase
+        .from("project")
+        .update({ admin_users_count: newCount })
+        .eq("proj_id", project.proj_id);
+    });
 
-      await Promise.all(updatePromises);
-  
-            // Generate a secure token using UUID v4
-        const { v4: uuidv4 } = require('uuid');
-        const token = uuidv4();
-  
-        // First delete any existing rows for this email and task
-        const { error: deleteError } = await supabase
-          .from('temp_acc_access')
-          .delete()
-          .match({ task: 'registration', email: email });
-  
-        if (deleteError) {
-          console.error("Error deleting existing token:", deleteError);
-          return res.status(500).json({ error: "Failed to update access token." });
-        }
-  
-        // Insert new token
-        const { error: insertError } = await supabase
-          .from('temp_acc_access')
-          .insert([{
-            token_id: token,
-            task: 'registration',
-            email: email
-          }]);
-  
-        if (insertError) {
-          console.error("Error storing token:", insertError);
-          
-          // If token creation fails, cleanup the user if we just created them
-          if (!existingUser) {
-            await supabase
-              .from("user")
-              .delete()
-              .eq("user_id", userId);
-          }
-          
-          return res.status(500).json({ error: "Failed to create access token." });
-        }
-  
-        const subject = `Smartess Organization Invite`;
-        const webURL = process.env.WEBSITE_URL;
-  
-      // HTML template for the email
-      const htmlContent = `
+    await Promise.all(updatePromises);
+
+    // Generate a secure token using UUID v4
+    const { v4: uuidv4 } = require("uuid");
+    const token = uuidv4();
+
+    // First delete any existing rows for this email and task
+    const { error: deleteError } = await supabase
+      .from("temp_acc_access")
+      .delete()
+      .match({ task: "registration", email: email });
+
+    if (deleteError) {
+      console.error("Error deleting existing token:", deleteError);
+      return res.status(500).json({ error: "Failed to update access token." });
+    }
+
+    // Insert new token
+    const { error: insertError } = await supabase
+      .from("temp_acc_access")
+      .insert([
+        {
+          token_id: token,
+          task: "registration",
+          email: email,
+        },
+      ]);
+
+    if (insertError) {
+      console.error("Error storing token:", insertError);
+
+      // If token creation fails, cleanup the user if we just created them
+      if (!existingUser) {
+        await supabase.from("user").delete().eq("user_id", userId);
+      }
+
+      return res.status(500).json({ error: "Failed to create access token." });
+    }
+
+    const subject = `Smartess Organization Invite`;
+    const webURL = process.env.WEBSITE_URL;
+
+    // HTML template for the email
+    const htmlContent = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -1137,24 +1249,23 @@ exports.changeOrgUserRole = async (req, res) => {
         </body>
         </html>
       `;
-  
-      // Send the email
-      await resend.emails.send({
-        from: `Smartess <support@${process.env.RESEND_DOMAIN}>`,
-        to: email,
-        subject,
-        html: htmlContent,
-      });
-  
-      return res.status(200).json({
-        message: "User created and email sent successfully to " + email
-      });
-    } catch (error) {
-      console.error("Failed to process invitation:", error);
-      return res.status(500).json({
-        message: "Failed to process invitation.",
-        error: error.message
-      });
-    }
-  };
 
+    // Send the email
+    await resend.emails.send({
+      from: `Smartess <support@${process.env.RESEND_DOMAIN}>`,
+      to: email,
+      subject,
+      html: htmlContent,
+    });
+
+    return res.status(200).json({
+      message: "User created and email sent successfully to " + email,
+    });
+  } catch (error) {
+    console.error("Failed to process invitation:", error);
+    return res.status(500).json({
+      message: "Failed to process invitation.",
+      error: error.message,
+    });
+  }
+};

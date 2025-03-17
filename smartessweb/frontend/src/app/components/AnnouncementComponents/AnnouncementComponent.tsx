@@ -18,6 +18,7 @@ interface AnnouncementComponentProps {
   description: string;
   likes: number;
   files: { name: string; url: string }[];
+  userProfilePicture: string | null;
 }
 
 // Helper function to determine if a file is an image
@@ -35,6 +36,7 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
   description,
   likes,
   files = [],
+  userProfilePicture,
 }) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [isTextShort, setIsTextShort] = useState(false);
@@ -103,7 +105,13 @@ const AnnouncementComponent: React.FC<AnnouncementComponentProps> = ({
       {/* Profile picture, author section and tag section*/}
       <div className=" w-full flex items-center justify-between">
         <div className="flex items-center">
-          <Image className="h-8 w-8 rounded-full bg-gray-50" src={pfp} alt="" />
+          <Image
+            className="h-8 w-8 rounded-full bg-gray-50"
+            src={userProfilePicture || pfp}
+            alt=""
+            width={100}
+            height={40}
+          />
           <span
             className="ml-4 text-sm font-semibold leading-6 text-gray-600"
             aria-hidden="true"
