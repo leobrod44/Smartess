@@ -21,7 +21,9 @@ exports.getCurrentUser = async (req, res) => {
 
     const { data: userData, error: userError } = await supabase
       .from("user")
-      .select("user_id")
+      .select(
+        "user_id, email, first_name, last_name, phone_number, profile_picture_url"
+      )
       .eq("email", user.email)
       .single();
 
@@ -70,6 +72,11 @@ exports.getCurrentUser = async (req, res) => {
           ? role
           : "basic",
       address: addresses,
+      firstName: userData.first_name,
+      lastName: userData.last_name,
+      email: userData.email,
+      phoneNumber: userData.phone_number,
+      profilePictureUrl: userData.profile_picture_url,
     };
 
     res.json({ currentUser: formattedCurrentUser });

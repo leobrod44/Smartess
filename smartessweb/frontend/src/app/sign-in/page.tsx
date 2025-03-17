@@ -8,7 +8,7 @@ import { signInApi } from "@/api/sign-in/sign-in";
 import Logo from "../../public/images/logo.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { useUserContext } from "@/context/UserProvider";
-import { userApi } from "@/api/components/DashboardNavbar";
+import { manageAccountsApi } from "@/api/page";
 import ForgotPasswordModal from "../components/ForgotPassword/ForgotPasswordModal";
 import LandingNavbar from "@/app/components/LandingNavbar";
 
@@ -31,6 +31,8 @@ const SignInPage = () => {
     setUserFirstName,
     setUserLastName,
     setUserType,
+    setUserProfilePicture,
+    setUserPhoneNumber,
   } = useUserContext();
 
   const validateEmail = (email: string) => {
@@ -71,12 +73,14 @@ const SignInPage = () => {
     try {
       const data = await signInApi.signIn({ email, password });
       localStorage.setItem("token", data.token);
-      const user = await userApi.getUserInfo(data.token);
-      setUserId(user.user_id);
-      setUserEmail(user.email);
-      setUserFirstName(user.first_name);
-      setUserLastName(user.last_name);
-      setUserType(user.type);
+      const user = await manageAccountsApi.getCurrentUserApi(data.token);
+      setUserId(user.currentUser.userId);
+      setUserEmail(user.currentUser.email);
+      setUserFirstName(user.currentUser.firstName);
+      setUserLastName(user.currentUser.lastName);
+      setUserType(user.currentUser.role);
+      setUserProfilePicture(user.currentUser.profilePictureUrl);
+      setUserPhoneNumber(user.currentUser.phoneNumber);
       setTimeout(() => {
         router.push("/dashboard");
       });

@@ -29,6 +29,12 @@ export interface CurrentUser {
   firstName: string;
 
   lastName: string;
+
+  email: string;
+
+  phoneNumber: string;
+
+  profilePictureUrl: string;
 }
 
 export interface TicketsType {
