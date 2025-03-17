@@ -65,7 +65,7 @@ const AlertList = ({ alerts, projects }: AlertListProps) => {
       {alerts.map((alert, index) => (
         <div
           key={`${alert.id}-${alert.unitNumber}-${index}`}
-          className={`grid grid-cols-8 items-center p-4 transition-all duration-200 ${
+          className={`grid grid-cols-8 items-center p-2 transition-all duration-200 ${
             index % 2 === 0 ? "bg-white" : "bg-gray-100"
           }`}
         >
