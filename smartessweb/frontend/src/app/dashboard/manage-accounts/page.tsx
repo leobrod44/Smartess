@@ -134,6 +134,9 @@ const ManageUsersPage = () => {
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email,
+          phoneNumber: tempCurrentUser.phoneNumber,
+          profilePictureUrl: tempCurrentUser.profilePictureUrl || null,
         });
 
         const responseOrgUsers = await manageAccountsApi.getOrgUsersApi(token);
@@ -252,8 +255,11 @@ const ManageUsersPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">View and manage the employees across your organization.  Access their information and manage their assignment to projects and their privileges. </h2>
-    
+      <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">
+        View and manage the employees across your organization. Access their
+        information and manage their assignment to projects and their
+        privileges.{" "}
+      </h2>
 
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
@@ -273,7 +279,10 @@ const ManageUsersPage = () => {
               className="cursor-pointer flex items-center"
               style={{ fontSize: "2rem" }}
             >
-              <AddIcon className="text-[#30525E]" fontSize="inherit" />
+              <AddIcon
+                className="text-[#30525E]"
+                fontSize="inherit"
+              />
             </div>
             <AddUserModal
               isOpen={isAddUserModalOpen}
@@ -314,6 +323,7 @@ const ManageUsersPage = () => {
                 currentUserRole={currentUser?.role || "basic"}
                 addresses={addresses || []}
                 currentOrg={currentOrg}
+                profilePictureUrl={user.profilePictureUrl || null}
                 onUserDeleted={handleRemoveUser}
               />
             );

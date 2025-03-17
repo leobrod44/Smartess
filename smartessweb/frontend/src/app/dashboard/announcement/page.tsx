@@ -15,6 +15,7 @@ interface AnnouncementApiData {
   announcement_id: number;
   announcement_type: "organization" | "project";
   user_id: number;
+  user_profile_picture: string | null;
   name: string | null;
   org_id: number | null;
   org_name: string | null;
@@ -32,6 +33,7 @@ interface AnnouncementItem {
   title: string;
   tag: "Organization" | "Project";
   user_id: number;
+  user_profile_picture: string | null;
   author: string;
   description: string;
   date: Date;
@@ -78,6 +80,7 @@ const AnnouncementPage = () => {
           author: ann.name ?? "",
           description: ann.content,
           user_id: ann.user_id,
+          user_profile_picture: ann.user_profile_picture || null,
           date: new Date(ann.created_at),
           keyword: ann.keywords?.join(", ") || "",
           likes: ann.like_count || 0,
@@ -125,6 +128,7 @@ const AnnouncementPage = () => {
             description: ann.content,
             date: new Date(ann.created_at),
             user_id: ann.user_id,
+            user_profile_picture: ann.user_profile_picture || null,
             keyword: ann.keywords?.join(", ") || "",
             likes: ann.like_count || 0,
             files:
@@ -257,8 +261,11 @@ const AnnouncementPage = () => {
           </div>
         </div>
 
-        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">View the history of announcements that have been sent to tenants across your organization. Send your own announcement by clicking the plus button. </h2>
-    
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">
+          View the history of announcements that have been sent to tenants
+          across your organization. Send your own announcement by clicking the
+          plus button.{" "}
+        </h2>
 
         <div className="flex flex-col gap-4">
           {isLoading ? (
@@ -300,6 +307,7 @@ const AnnouncementPage = () => {
                 description={announcement.description}
                 likes={announcement.likes}
                 files={announcement.files}
+                userProfilePicture={announcement.user_profile_picture}
               />
             ))
           )}
