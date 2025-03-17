@@ -4,24 +4,35 @@ import Image from "next/image";
 import Logo from "../../../public/images/building_straight.png";
 import { manageAccountsApi } from "@/api/page";
 import { showToastError, showToastSuccess } from "../Toast";
+import { useUserContext } from "@/context/UserProvider";
 
-const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
+interface CurrentUserProps {
+  role: string;
+  profilePicture?: string;
+}
+
+const ProfileCard = ({ currentUser }: { currentUser: CurrentUserProps }) => {
+  const { setUserProfilePicture } = useUserContext();
+
   const handleImageUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("Selected file:", file);
       const token = localStorage.getItem("token");
       if (!token) {
         console.error("Token not found in local storage");
         return;
       }
+
       const formData = new FormData();
       formData.append("file", file);
+
       try {
-        await manageAccountsApi.storeProfilePictureApi(token, formData);
+        const { profilePictureUrl } =
+          await manageAccountsApi.storeProfilePictureApi(token, formData);
         showToastSuccess("Profile picture uploaded successfully.");
+        setUserProfilePicture(profilePictureUrl);
       } catch (error) {
         console.log(error);
         showToastError("Error uploading profile picture:");
@@ -37,8 +48,8 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
           <div className="bg-white w-full h-full rounded ">
             <div className="flex flex-col justify-center items-center w-full h-full">
               <Image
-                src={Logo}
-                alt="Smartess Logo"
+                src={currentUser.profilePicture || Logo}
+                alt="Profile Picture"
                 width={300}
                 height={600}
                 className="w-64 h-64 rounded-full"

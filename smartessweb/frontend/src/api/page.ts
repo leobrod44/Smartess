@@ -53,10 +53,7 @@ export const manageAccountsApi = {
     return data;
   },
 
-  storeProfilePictureApi: async (
-    token: string,
-    formData: FormData
-  ): Promise<void> => {
+  storeProfilePictureApi: async (token: string, formData: FormData) => {
     const response = await fetch(
       `${API_URL}/manage-accounts/change-profile-picture`,
       {

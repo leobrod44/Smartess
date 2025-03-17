@@ -169,7 +169,7 @@ exports.storeProfilePicture = async (req, res) => {
         .json({ message: "Failed to update user", error: updateError });
     }
 
-    return res.status(200).json({ user: updatedUser });
+    return res.status(200).json({ profilePictureUrl: publicUrl });
   } catch (error) {
     console.error("Server Error:", error);
     return res.status(500).json({
