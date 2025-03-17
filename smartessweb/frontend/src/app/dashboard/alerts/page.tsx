@@ -28,6 +28,8 @@ const AlertPage = () => {
   const filterOptionsAlerts = [
     "Most Recent",
     "Least Recent",
+    "Project A-Z",
+    "Project Z-A",
     "Clear All Filters",
   ];
   const handleFilterChange = (filterValue: string) => {
@@ -50,13 +52,28 @@ const AlertPage = () => {
   const sortedFilteredAlerts = filteredAlerts
     .filter((alert) => {
       const lowerCaseQuery = searchQuery.toLowerCase();
+      const projectAddress =
+        mockProjects.find((p) => p.projectId === alert.projectId)?.address ||
+        "";
+
       return (
         alert.message.toLowerCase().includes(lowerCaseQuery) ||
         alert.unitNumber.toString().includes(lowerCaseQuery) ||
-        alert.type.toLowerCase().includes(lowerCaseQuery)
+        alert.type.toLowerCase().includes(lowerCaseQuery) ||
+        projectAddress.toLowerCase().includes(lowerCaseQuery)
       );
     })
     .sort((a, b) => {
+      const projectA =
+        mockProjects.find((p) => p.projectId === a.projectId)?.address || "";
+      const projectB =
+        mockProjects.find((p) => p.projectId === b.projectId)?.address || "";
+      if (filter === " Project A-Z") {
+        return projectA.localeCompare(projectB);
+      } else if (filter === "Project Z-A") {
+        return projectB.localeCompare(projectA);
+      }
+
       if (filter === "Most Recent") {
         return (
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
