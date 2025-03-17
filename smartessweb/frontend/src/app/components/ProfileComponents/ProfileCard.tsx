@@ -48,7 +48,7 @@ const ProfileCard = ({ currentUser }: { currentUser: { role: string } }) => {
           <div className="flex flex-col items-center bg-white rounded-b-lg w-full h-4/5 p-2">
             <div className="flex justify-center pb-10">
               <label className="cursor-pointer bg-[#266472] hover:bg-[#1f505e] w-28 h-8 text-white text-xs text-center transition duration-300 rounded-md pt-2 pb-6">
-                Upload Image
+                Change Avatar
                 <input
                   type="file"
                   accept="image/*"

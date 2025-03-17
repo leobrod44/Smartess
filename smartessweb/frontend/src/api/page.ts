@@ -57,13 +57,16 @@ export const manageAccountsApi = {
     token: string,
     formData: FormData
   ): Promise<void> => {
-    const response = await fetch(`${API_URL}/users/post_profile_picture`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+    const response = await fetch(
+      `${API_URL}/manage-accounts/change-profile-picture`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      }
+    );
 
     const data = await response.json();
 
