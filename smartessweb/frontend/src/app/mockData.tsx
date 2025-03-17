@@ -34,7 +34,7 @@ export interface CurrentUser {
 
   phoneNumber: string;
 
-  profilePictureUrl: string;
+  profilePictureUrl: string | null;
 }
 
 export interface TicketsType {
@@ -84,6 +84,8 @@ export interface Individual {
   lastName: string;
 
   role: "admin" | "basic" | "master";
+
+  profilePictureUrl: string | null;
 }
 
 export interface Unit {

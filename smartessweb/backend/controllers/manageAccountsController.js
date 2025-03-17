@@ -280,7 +280,7 @@ exports.getOrgIndividualsData = async (req, res) => {
 
     const { data: individualData, error: fetchError } = await supabase
       .from("user")
-      .select("user_id, first_name, last_name")
+      .select("user_id, first_name, last_name, profile_picture_url")
       .in("user_id", userIds);
 
     if (fetchError) {
@@ -305,6 +305,7 @@ exports.getOrgIndividualsData = async (req, res) => {
         firstName: user.first_name,
         lastName: user.last_name,
         role: orgUser?.org_user_type || "basic", // default to basic if no role is found
+        profilePictureUrl: user.profile_picture_url,
       };
     });
 

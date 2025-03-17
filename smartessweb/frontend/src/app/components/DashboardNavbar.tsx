@@ -133,6 +133,7 @@ const DashboardNavbar = () => {
   const {
     userFirstName,
     userLastName,
+    userProfilePicture,
     setUserId,
     setUserEmail,
     setUserFirstName,
@@ -280,7 +281,7 @@ const DashboardNavbar = () => {
                     <div className="flex h-16 shrink-0 items-center">
                       <Link href="/">
                         <Image
-                          className="h-8 w-auto"
+                          className="h-8 w-auto rounded-full"
                           src={dashboardLogo}
                           alt="Logo"
                           width={100}
@@ -658,8 +659,10 @@ const DashboardNavbar = () => {
                     <span className="sr-only">Open user menu</span>
                     <Image
                       className="h-8 w-8 rounded-full bg-gray-50"
-                      src={dashboardLogo}
+                      src={userProfilePicture || dashboardLogo}
                       alt=""
+                      width={100}
+                      height={40}
                     />
                     <span className="hidden lg:flex lg:items-center">
                       <span

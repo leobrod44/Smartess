@@ -22,6 +22,7 @@ interface UserInfoModalProps {
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
   currentOrg: number | undefined;
+  profilePictureUrl: string | null;
   onDeleteUser: (uid: number) => void;
   onSave: (addresses: string[]) => void;
 }
@@ -35,6 +36,7 @@ function UserInfoModal({
   addresses: initialAddresses,
   currentUserRole,
   currentOrg,
+  profilePictureUrl,
   onDeleteUser,
   onSave,
 }: UserInfoModalProps) {
@@ -258,7 +260,11 @@ function UserInfoModal({
     }));
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="user-details-modal"
+    >
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
         <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
           <button
@@ -271,22 +277,22 @@ function UserInfoModal({
           </button>
 
           <div className="flex flex-col items-center justify-center">
-              <Image
-                width={150}
-                height={300}
-                className="rounded-full bg-gray-50 pb-3"
-                src={pfp}
-                alt="User Profile Pic"
-              />
+            <Image
+              width={100}
+              height={40}
+              className="rounded-full bg-gray-50 pb-3"
+              src={profilePictureUrl || pfp}
+              alt="User Profile Pic"
+            />
 
-              <Typography
-                variant="h6"
-                id="user-details-modal"
-                className="text-[#254752] text-s font-sequel-sans-black mb-4"
-              >
-                {capitalizeWords(userName)}
-              </Typography>
-           
+            <Typography
+              variant="h6"
+              id="user-details-modal"
+              className="text-[#254752] text-s font-sequel-sans-black mb-4"
+            >
+              {capitalizeWords(userName)}
+            </Typography>
+
             <div className="border p-2 rounded shadow-md w-full mb-4 flex items-center relative">
               <p className="mb-1 text-[#30525E] text-lg font-sequel-sans-medium">
                 Role
@@ -336,7 +342,10 @@ function UserInfoModal({
                 <strong>Projects</strong>
               </Typography>
               {currentUserRole === "master" && (
-                <IconButton className="text-[#30525E]" onClick={handleAddClick}>
+                <IconButton
+                  className="text-[#30525E]"
+                  onClick={handleAddClick}
+                >
                   <AddIcon />
                 </IconButton>
               )}
