@@ -24,11 +24,7 @@ body {
     text-wrap: balance;
   }
 }
-@layer base {
-  .custom-pagination {
-    @apply fixed bottom-4 ;
-  }
-}
+
 .custom-transition-length-1s{
   transition:  1s; 
 }
@@ -66,7 +62,21 @@ body {
   background-color: #f0f0f0; 
   color:#171717
 }
+/* Global pagination container styling */
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensures the page takes up the full screen height */
+}
 
+.pagination-content {
+  flex-grow: 1; /* Pushes pagination to the bottom when needed */
+}
+
+/* Ensure pagination is at the bottom */
+.pagination-bottom {
+  margin-top: auto;
+}
 .text-truncate {
   display: -webkit-box;
   -webkit-line-clamp: 2;  
