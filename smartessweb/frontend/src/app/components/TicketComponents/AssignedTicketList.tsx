@@ -3,18 +3,22 @@ import { useState } from "react";
 import { Pagination } from "@mui/material";
 import ResolveTicketModal from "./ResolveTicketModal";
 import { showToastSuccess, showToastError } from "@/app/components/Toast";
-import { ticketResolutionApi, APIAssignedTicket } from "@/api/components/TicketsComponents/AssignedTicketsList";
+import {
+  ticketResolutionApi,
+  APIAssignedTicket,
+} from "@/api/components/TicketsComponents/AssignedTicketsList";
 
-const AssignedTicketList = ({ 
+const AssignedTicketList = ({
   tickets,
-  onRefresh 
-}: { 
+  onRefresh,
+}: {
   tickets: APIAssignedTicket[];
   onRefresh: () => void;
 }) => {
   const [page, setPage] = useState(1);
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedTicket, setSelectedTicket] = useState<APIAssignedTicket | null>(null);
+  const [selectedTicket, setSelectedTicket] =
+    useState<APIAssignedTicket | null>(null);
   const ticketsPerPage = 20;
 
   const handleChangePage = (
@@ -32,14 +36,14 @@ const AssignedTicketList = ({
   const handleResolveConfirm = async () => {
     if (selectedTicket) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('No token found');
+          throw new Error("No token found");
         }
 
         await ticketResolutionApi.updateTicketResolution(token, {
           ticket_id: selectedTicket.ticketId,
-          status: selectedTicket.isResolved ? 'unresolved' : 'resolved'
+          status: selectedTicket.isResolved ? "unresolved" : "resolved",
         });
 
         if (selectedTicket.isResolved) {
@@ -51,14 +55,17 @@ const AssignedTicketList = ({
             `Ticket ${selectedTicket.ticketId} has been marked as resolved.`
           );
         }
-        
+
         onRefresh();
-        
       } catch (error) {
-        console.error('Error updating ticket status:', error);
-        showToastError(error instanceof Error ? error.message : 'Failed to update ticket status');
+        console.error("Error updating ticket status:", error);
+        showToastError(
+          error instanceof Error
+            ? error.message
+            : "Failed to update ticket status"
+        );
       }
-      
+
       setModalOpen(false);
     }
   };
@@ -84,7 +91,7 @@ const AssignedTicketList = ({
   // };
 
   return (
-    <div className="mt-8 flow-root">
+    <div className="relative pb-20 mt-8 flow-root">
       <ResolveTicketModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
@@ -143,10 +150,7 @@ const AssignedTicketList = ({
             </thead>
             <tbody className="bg-white">
               {ticketsToDisplay.map((ticket) => (
-                <tr
-                  key={ticket.ticketId}
-                  className="even:bg-gray-50"
-                >
+                <tr key={ticket.ticketId} className="even:bg-gray-50">
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-[#14323B] sm:pl-3">
                     {ticket.ticketId}
                   </td>
@@ -200,7 +204,7 @@ const AssignedTicketList = ({
           </table>
         </div>
       </div>
-      <div className="flex justify-center mt-4">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={Math.ceil(tickets.length / ticketsPerPage)}
