@@ -8,6 +8,7 @@ import (
 	"Smartess/go/hub/rtsp"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 )
 
@@ -19,6 +20,11 @@ type SmartessHub struct {
 }
 
 func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
+	if selectedHub == structures.LOCAL_MOCK_HUB {
+		if err := os.Setenv("HUB_IP", "mockhub:8765"); err != nil {
+			return SmartessHub{}, errors.New("Failed to set HUB_IP environment variable")
+		}
+	}
 	logger, err := logs.NewRabbitMQLogger()
 	if err != nil {
 		return SmartessHub{}, errors.New("Failed to initialize RabbitMQ logger: " + err.Error())
