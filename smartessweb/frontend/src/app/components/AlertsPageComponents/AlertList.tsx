@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Alert } from "../../mockData"; // Adjust path as needed
+import { Alert, Project } from "../../mockData"; // Adjust path as needed
 import { format } from "date-fns";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import WaterDamageIcon from "@mui/icons-material/WaterDamage";
@@ -19,7 +19,13 @@ import { TrashIcon } from "@heroicons/react/24/outline";
 
 export interface AlertListProps {
   alerts: Alert[];
+  projects: Project[];
 }
+
+const getProjectAddress = (projectId: string, projects: Project[]): string => {
+  const project = projects.find((p) => p.projectId === projectId);
+  return project ? project.address : "Unknown Address"; // Fallback if project not found
+};
 
 // Map alert messages to corresponding icons
 const getAlertIcon = (type: string) => {
@@ -53,18 +59,22 @@ const getAlertIcon = (type: string) => {
       return <DangerousIcon className="text-gray-400" fontSize="large" />;
   }
 };
-const AlertList = ({ alerts }: AlertListProps) => {
+const AlertList = ({ alerts, projects }: AlertListProps) => {
   return (
     <div className="space-y-4">
       {alerts.map((alert, index) => (
         <div
           key={`${alert.id}-${alert.unitNumber}-${index}`}
-          className={`grid grid-cols-7 items-center p-4 transition-all duration-200 ${
+          className={`grid grid-cols-8 items-center p-2 transition-all duration-200 ${
             index % 2 === 0 ? "bg-white" : "bg-gray-100"
           }`}
         >
           {/* Id */}
           <div className=" pl-2 text-[#30525E]">{alert.id}</div>
+          <div className=" pl-2 text-[#30525E]">
+            {" "}
+            {getProjectAddress(alert.projectId, projects)}
+          </div>
 
           <div className=" pl-2 text-[#30525E]"> {alert.unitNumber} </div>
 
