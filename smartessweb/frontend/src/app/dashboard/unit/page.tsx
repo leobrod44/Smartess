@@ -153,9 +153,9 @@ const UnitPage = () => {
         </h2>
         <div className="p-[10px] rounded-[7px] w-full mx-auto mt-4">
           {isLoading ? (
-            <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-              Loading units...
-            </p>
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
           ) : allUnits.length === 0 ? (
             <p> No data available</p>
           ) : currentUnits.length === 0 ? (
