@@ -298,7 +298,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
 export const generateMockProjects = (): Project[] => {
   return [
     {
-      projectId: "a10294",
+      projectId: "1",
 
       address: "1000 De La Gauchetiere",
 
@@ -314,7 +314,7 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "a12294",
+      projectId: "2",
 
       address: "750 Peel Street",
 
@@ -330,9 +330,9 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "b10294",
+      projectId: "5",
 
-      address: "50 Rue Guy",
+      address: "1654 Rue Kemmel",
 
       adminUsersCount: 1,
 
@@ -346,7 +346,7 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "cd10294",
+      projectId: "4",
 
       address: "131 Chemin des Coniferes",
 
@@ -576,7 +576,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "1",
 
-    projectId: "a10294",
+    projectId: "1",
 
     unitNumber: "101",
 
@@ -590,7 +590,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "2",
 
-    projectId: "a10294",
+    projectId: "1",
 
     unitNumber: "102",
 
@@ -604,7 +604,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "3",
 
-    projectId: "b10294",
+    projectId: "5",
 
     unitNumber: "103",
 
@@ -620,7 +620,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Low Battery In Device",
 
@@ -633,7 +633,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Sensor Activated",
 
@@ -647,7 +647,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Door Opened",
 
@@ -660,7 +660,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Motion Detected",
 
@@ -674,7 +674,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Climate Alert",
 
@@ -688,7 +688,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Unknown Alert",
 
@@ -702,7 +702,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Light On",
 
