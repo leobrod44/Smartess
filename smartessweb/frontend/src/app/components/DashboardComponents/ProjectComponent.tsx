@@ -40,7 +40,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
   };
 
   return (
-    <div className="w-full">
+    <div className="relative pb-20 w-full">
       {projectsToDisplay.map((project, index) => (
         <div
           key={index}
@@ -146,7 +146,7 @@ export default function ProjectInfo({ projects }: ProjectInfoProps) {
       ))}
 
       {/* Pagination  */}
-      <div className="flex justify-center mt-8">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={Math.ceil(projects.length / projectsPerPage)}

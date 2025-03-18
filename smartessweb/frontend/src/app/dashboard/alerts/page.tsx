@@ -108,7 +108,7 @@ const AlertPage = () => {
   };
 
   return (
-    <div className="mx-4 lg:mx-8 min-h-screen flex-col">
+    <div className="relative mx-4 lg:mx-8 min-h-screen flex-col pb-20">
       <div className="flex items-center justify-between">
         <h1 className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Alerts
@@ -158,12 +158,9 @@ const AlertPage = () => {
       ) : sortedFilteredAlerts.length === 0 ? (
         <NoResultsFound searchItem={searchQuery} />
       ) : (
-        <AlertList
-          alerts={paginatedAlerts}
-          projects={mockProjects}
-        />
+        <AlertList alerts={paginatedAlerts} projects={mockProjects} />
       )}
-      <div className="mt-4 flex justify-center">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}

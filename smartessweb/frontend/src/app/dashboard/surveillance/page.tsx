@@ -141,7 +141,7 @@ const SurveillancePage = () => {
   const handleClickDisconnected = () => setWidgetFilter("disconnected");
 
   return (
-    <div>
+    <div className="relative pb-20">
       <div className="mx-4 lg:mx-8 min-h-screen">
         <div className="flex flex-row justify-between">
           <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
@@ -152,10 +152,17 @@ const SurveillancePage = () => {
           </div>
         </div>
 
-        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-4">Access the security cameras across your organization. Use the Project Filter on the left, or the search bar above to narrow results. </h2>
-    
-        <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4"> <span className="text-[#325a67] font-bold"> TIP:</span> Click on the security footage to access detailed information about it.</h2>
-     
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-4">
+          Access the security cameras across your organization. Use the Project
+          Filter on the left, or the search bar above to narrow results.{" "}
+        </h2>
+
+        <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4">
+          {" "}
+          <span className="text-[#325a67] font-bold"> TIP:</span> Click on the
+          security footage to access detailed information about it.
+        </h2>
+
         {!isLoading && (
           <div className="flex justify-center">
             <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-4 w-full max-w-[100%] mt-2">
@@ -245,7 +252,7 @@ const SurveillancePage = () => {
             ))}
           </div>
         )}
-        <div className="mt-4 flex justify-center">
+        <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
           <Pagination
             className="custom-pagination"
             count={totalPages}

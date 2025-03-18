@@ -93,7 +93,7 @@ const TicketList = ({
   // };
 
   return (
-    <div className="mt-8 flow-root">
+    <div className=" relative pb-20 mt-8 flow-root">
       <DeleteTicketModal
         isOpen={isModalOpen}
         onClose={() => setModalOpen(false)}
@@ -152,10 +152,7 @@ const TicketList = ({
             </thead>
             <tbody className="bg-white">
               {ticketsToDisplay.map((ticket) => (
-                <tr
-                  key={ticket.ticketId}
-                  className="even:bg-gray-50"
-                >
+                <tr key={ticket.ticketId} className="even:bg-gray-50">
                   <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-[#14323B] sm:pl-3">
                     {ticket.ticketId}
                   </td>
@@ -204,7 +201,7 @@ const TicketList = ({
           </table>
         </div>
       </div>
-      <div className="flex justify-center mt-4">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={Math.ceil(tickets.length / ticketsPerPage)}
