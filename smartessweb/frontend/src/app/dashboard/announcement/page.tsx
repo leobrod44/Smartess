@@ -246,7 +246,7 @@ const AnnouncementPage = () => {
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div>
+    <div className="relative pb-20">
       <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
         <div className="flex items-center justify-between">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
@@ -324,7 +324,7 @@ const AnnouncementPage = () => {
         onClose={closeModal}
         onAnnouncementAdded={handleAnnouncementAdded}
       />
-      <div className="mt-4 flex justify-center">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}
