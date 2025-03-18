@@ -269,9 +269,9 @@ const AnnouncementPage = () => {
 
         <div className="flex flex-col gap-4">
           {isLoading ? (
-            <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
-              Loading ...
-            </p>
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
           ) : announcements.length === 0 ? (
             // No announcements at all
             <div className="unit-container max-w-fit sm:max-w-full mx-auto text-center">
