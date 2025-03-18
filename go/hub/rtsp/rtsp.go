@@ -27,6 +27,7 @@ type CameraConfig struct {
 	Name        string `yaml:"name"`
 	StreamURL   string `yaml:"streamURL"`
 	SegmentTime int    `yaml:"segment_time"`
+	Allowed     bool   `yaml:"allowed"`
 }
 
 type Cameras struct {
@@ -124,15 +125,7 @@ func (rtsp *RtspProcessor) Start() {
 							continue
 						}
 						rtsp.Logger.Info((fmt.Sprintf("Publishing segment to queue: %v", segmentFilePath)))
-						err = rtsp.instance.Channel.Publish(
-							"videostream", // Default exchange
-							fmt.Sprintf("videostream.hubid.%s", camera.Name), // Routing key (queue name)
-							false, // Mandatory
-							false, // Immediate
-							amqp.Publishing{
-								ContentType: "application/octet-stream", // Type of the content
-								Body:        segmentFileContent,         // Content (segment file data)
-							})
+						err = rtsp.CheckedPublish(camera, segmentFileContent)
 						if err != nil {
 							rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err))
 						}
@@ -149,6 +142,22 @@ func (rtsp *RtspProcessor) Start() {
 			}
 		}(tmpDir)
 	}
+}
+
+func (rtsp *RtspProcessor) CheckedPublish(camera CameraConfig, segmentFileContent []byte) error {
+	if camera.Allowed == false {
+		rtsp.Logger.Info(fmt.Sprintf("Camera %s is not allowed to publish", camera.Name))
+		return nil
+	}
+	return rtsp.instance.Channel.Publish(
+		"videostream", // Default exchange
+		fmt.Sprintf("videostream.hubid.%s", camera.Name), // Routing key (queue name)
+		false, // Mandatory
+		false, // Immediate
+		amqp.Publishing{
+			ContentType: "application/octet-stream", // Type of the content
+			Body:        segmentFileContent,         // Content (segment file data)
+		})
 }
 
 func (rtsp *RtspProcessor) Close() {
