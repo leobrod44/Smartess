@@ -89,7 +89,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   }
 
   return (
-    <div className="flex flex-col min-h-screen justify-between p-4">
+    <div className="relative flex flex-col min-h-screen justify-between p-4 pb-20 ">
       <div className="mx-auto w-full">
         {itemsToDisplay.map((item) => {
           const consumptionInfo = getConsumptionInfo(
@@ -407,7 +407,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
         })}
       </div>
 
-      <div className="flex justify-center mt-8">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}
