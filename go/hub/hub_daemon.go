@@ -21,7 +21,9 @@ type SmartessHub struct {
 
 func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 	if selectedHub == structures.LOCAL_MOCK_HUB {
-		os.Setenv("HUB_IP", "mockhub:8765")
+		if err := os.Setenv("HUB_IP", "mockhub:8765"); err != nil {
+			return SmartessHub{}, errors.New("Failed to set HUB_IP environment variable")
+		}
 	}
 	logger, err := logs.NewRabbitMQLogger()
 	if err != nil {
