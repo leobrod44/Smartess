@@ -24,7 +24,11 @@ body {
     text-wrap: balance;
   }
 }
-
+@layer base {
+  .custom-pagination {
+    @apply fixed bottom-4 ;
+  }
+}
 .custom-transition-length-1s{
   transition:  1s; 
 }
