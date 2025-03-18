@@ -242,7 +242,7 @@ const ManageUsersPage = () => {
   };
 
   return (
-    <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
+    <div className="relative pb-20 mx-4 lg:mx-8 min-h-screen flex flex-col">
       <div className="flex items-center pt-4 justify-between">
         <div className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Manage Your Organization Users
@@ -279,10 +279,7 @@ const ManageUsersPage = () => {
               className="cursor-pointer flex items-center"
               style={{ fontSize: "2rem" }}
             >
-              <AddIcon
-                className="text-[#30525E]"
-                fontSize="inherit"
-              />
+              <AddIcon className="text-[#30525E]" fontSize="inherit" />
             </div>
             <AddUserModal
               isOpen={isAddUserModalOpen}
@@ -330,7 +327,7 @@ const ManageUsersPage = () => {
           })
         )}
       </div>
-      <div className="mt-4 flex justify-center">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}
