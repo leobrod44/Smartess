@@ -114,8 +114,8 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-[#14323B] text-lg">Loading projects...</div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
   }
@@ -133,7 +133,10 @@ const DashboardPage = () => {
       <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
         Welcome to Your Dashboard
       </div>
-      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-4">View and manage information about your organization&apos;s overall health, and the projects within it.</h2>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-4">
+        View and manage information about your organization&apos;s overall
+        health, and the projects within it.
+      </h2>
       <DashboardWidget />
 
       <div className="flex items-center pt-4 justify-between">
@@ -148,7 +151,12 @@ const DashboardPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4"> <span className="text-[#325a67] font-bold"> TIP:</span> Use the Project Filter on the left, or the search bar and filter above to narrow results.</h2>
+      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4">
+        {" "}
+        <span className="text-[#325a67] font-bold"> TIP:</span> Use the Project
+        Filter on the left, or the search bar and filter above to narrow
+        results.
+      </h2>
       {projects.length === 0 ? (
         <p>No data available</p>
       ) : filteredProjects.length === 0 ? (
