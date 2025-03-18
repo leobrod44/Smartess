@@ -6,8 +6,10 @@ import { useState, useMemo } from "react";
 import Searchbar from "../../components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import NoResultsFound from "@/app/components/NoResultsFound";
+import { useProjectContext } from "@/context/ProjectProvider";
 
 const AlertPage = () => {
+  const { selectedProjectId } = useProjectContext();
   const itemsPerPage = 6;
   const mockProjects = useMemo(() => generateMockProjects(), []);
 
@@ -51,6 +53,12 @@ const AlertPage = () => {
 
   const sortedFilteredAlerts = filteredAlerts
     .filter((alert) => {
+      if (
+        selectedProjectId.toString() &&
+        alert.projectId !== selectedProjectId.toString()
+      ) {
+        return false;
+      }
       const lowerCaseQuery = searchQuery.toLowerCase();
       const projectAddress =
         mockProjects.find((p) => p.projectId === alert.projectId)?.address ||
@@ -100,7 +108,7 @@ const AlertPage = () => {
   };
 
   return (
-    <div className=" mx-4 lg:mx-8 min-h-screen flex-col">
+    <div className="mx-4 lg:mx-8 min-h-screen flex-col">
       <div className="flex items-center justify-between">
         <h1 className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Alerts
@@ -150,7 +158,10 @@ const AlertPage = () => {
       ) : sortedFilteredAlerts.length === 0 ? (
         <NoResultsFound searchItem={searchQuery} />
       ) : (
-        <AlertList alerts={paginatedAlerts} projects={mockProjects} />
+        <AlertList
+          alerts={paginatedAlerts}
+          projects={mockProjects}
+        />
       )}
       <div className="mt-4 flex justify-center">
         <Pagination
