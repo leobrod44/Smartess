@@ -105,6 +105,8 @@ export interface Unit {
 
   alerts: Alert[];
 
+  status?: "live" | "disconnected";
+
   cameraStatus?: "live" | "disconnected";
 }
 

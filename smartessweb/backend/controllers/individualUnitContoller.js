@@ -89,7 +89,7 @@ exports.getIndividualUnit = async (req, res) => {
         // Fetch hub data based on unit_id
         const { data: hubData, error: hubError } = await supabase
             .from('hub')
-            .select('hub_id, unit_number')
+            .select('hub_id, unit_number, status')
             .eq('unit_number', unit_id)
             .eq('proj_id', project.proj_id)
             .single();
@@ -217,7 +217,8 @@ exports.getIndividualUnit = async (req, res) => {
             hubUsers: hubUsers.filter(user => user !== null),
             ticket: formattedTickets,
             owner,
-            alerts: formattedAlerts
+            alerts: formattedAlerts,
+            status: hubData.status
         };
 
         res.json({ unit });
