@@ -64,45 +64,26 @@ const AlertList = ({ alerts, projects }: AlertListProps) => {
     <div className="space-y-4">
       {alerts.map((alert, index) => (
         <div
-          key={`${alert.id}-${alert.unitNumber}-${index}`}
-          className={`grid grid-cols-8 items-center p-2 transition-all duration-200 ${
-            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-          }`}
-        >
-          {/* Id */}
-          <div className=" pl-2 text-[#30525E]">{alert.id}</div>
-          <div className=" pl-2 text-[#30525E]">
-            {" "}
-            {getProjectAddress(alert.projectId, projects)}
+            key={`${alert.id}-${alert.unitNumber}-${index}`}
+            className={`grid grid-cols-6 gap-x-20 items-center p-2 transition-all duration-200 ${
+              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+            }`}
+          >
+            <div className="pl-2 text-[#30525E]">
+              {getProjectAddress(alert.projectId, projects)}
+            </div>
+            <div className="pl-2 text-[#30525E]">{alert.unitNumber}</div>
+            <div className="pr-6 text-[#30525E]">{alert.message}</div>
+            <div className="pl-2">{getAlertIcon(alert.type)}</div>
+            <div className="text-[#30525E]">
+              {format(new Date(alert.timestamp), "yyyy-MM-dd")}
+            </div>
+            <div className="text-[#30525E]">
+              {format(new Date(alert.timestamp), "HH:mm:ss")}
+            </div>
           </div>
-
-          <div className=" pl-2 text-[#30525E]"> {alert.unitNumber} </div>
-
-          {/* Alert message */}
-          <div className=" pr-6 text-[#30525E]">{alert.message}</div>
-
-          {/* Type */}
-          <div className=" pl-2">{getAlertIcon(alert.type)}</div>
-
-          {/* Date */}
-          <div className="text-[#30525E]">
-            {format(new Date(alert.timestamp), "yyyy-MM-dd")}
-          </div>
-
-          {/* Time */}
-          <div className=" text-[#30525E]">
-            {format(new Date(alert.timestamp), "HH:mm:ss")}
-          </div>
-
-          {/* Action */}
-          <div className="pl-8">
-            <button>
-              <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
-            </button>
-          </div>
+          ))}
         </div>
-      ))}
-    </div>
   );
 };
 
