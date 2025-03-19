@@ -1,25 +1,39 @@
 "use client";
+
 import AlertList from "../../components/AlertsPageComponents/AlertList";
-import { generateMockProjects } from "../../mockData";
+import { Project } from "../../mockData";
 import Pagination from "@mui/material/Pagination";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Searchbar from "../../components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import NoResultsFound from "@/app/components/NoResultsFound";
 import { useProjectContext } from "@/context/ProjectProvider";
+import { alertsApi } from "@/api/dashboard/alerts/page";
+import { useRouter } from "next/navigation";
 
 const AlertPage = () => {
   const { selectedProjectId } = useProjectContext();
   const itemsPerPage = 6;
-  const mockProjects = useMemo(() => generateMockProjects(), []);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>([]);
 
-  const allAlerts = useMemo(
-    () =>
-      generateMockProjects().flatMap((project) =>
-        project.units.flatMap((unit) => unit.alerts)
-      ),
-    [mockProjects]
-  );
+  // Update this useMemo to depend on projects state instead of mockProjects
+  const allAlerts = useMemo(() => {
+    const uniqueAlerts = new Map();
+  
+    projects.forEach((project) => {
+      project.units.forEach((unit) => {
+        unit.alerts.forEach((alert) => {
+          if (!uniqueAlerts.has(alert.id)) {
+            uniqueAlerts.set(alert.id, alert);
+          }
+        });
+      });
+    });
+  
+    return Array.from(uniqueAlerts.values());
+  }, [projects]);
 
   //onnce backend is being added, please add the loading state in the try/catch/finally when you are getting the data from db..
   //all alerts frorm db should be saved to all alerts
@@ -34,6 +48,37 @@ const AlertPage = () => {
     "Project Z-A",
     "Clear All Filters",
   ];
+
+  useEffect(() => {
+    setFilteredAlerts([...allAlerts]);
+  }, [allAlerts]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/sign-in");
+      return;
+    }
+
+    const fetchProjectsForAlerts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await alertsApi.getProjectsForAlerts(token);
+
+        if (response && response.projects) {
+          setProjects(response.projects);
+        }
+
+      } catch (err) {
+        console.error("Error fetching organization alerts::", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProjectsForAlerts();
+  }, [router]);
+
   const handleFilterChange = (filterValue: string) => {
     if (filterValue === "Clear Filters") {
       setFilter("");
@@ -61,11 +106,11 @@ const AlertPage = () => {
       }
       const lowerCaseQuery = searchQuery.toLowerCase();
       const projectAddress =
-        mockProjects.find((p) => p.projectId === alert.projectId)?.address ||
+        projects.find((p) => p.projectId === alert.projectId)?.address ||
         "";
 
       return (
-        alert.message.toLowerCase().includes(lowerCaseQuery) ||
+        (alert.message?.toLowerCase() || "").includes(lowerCaseQuery) ||
         alert.unitNumber.toString().includes(lowerCaseQuery) ||
         alert.type.toLowerCase().includes(lowerCaseQuery) ||
         projectAddress.toLowerCase().includes(lowerCaseQuery)
@@ -73,9 +118,9 @@ const AlertPage = () => {
     })
     .sort((a, b) => {
       const projectA =
-        mockProjects.find((p) => p.projectId === a.projectId)?.address || "";
+        projects.find((p) => p.projectId === a.projectId)?.address || "";
       const projectB =
-        mockProjects.find((p) => p.projectId === b.projectId)?.address || "";
+        projects.find((p) => p.projectId === b.projectId)?.address || "";
       if (filter === " Project A-Z") {
         return projectA.localeCompare(projectB);
       } else if (filter === "Project Z-A") {
@@ -127,10 +172,7 @@ const AlertPage = () => {
         filter above to narrow results.{" "}
       </h2>
 
-      <div className="grid grid-cols-8 font-semibold border-b-2 border-black pb-2 mb-4">
-        <p className="pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
-          Id
-        </p>
+      <div className="grid grid-cols-6 gap-x-20 font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Project
         </p>
@@ -149,26 +191,37 @@ const AlertPage = () => {
         <p className="pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
           Time
         </p>
-        <p className="pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
-          Action
+      </div>
+      
+      {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+        </div>
+      ) : allAlerts.length === 0 ? (
+        <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+          No Data Available
         </p>
-      </div>
-      {allAlerts.length === 0 ? (
-        <p> No data available</p>
-      ) : sortedFilteredAlerts.length === 0 ? (
-        <NoResultsFound searchItem={searchQuery} />
+      ) : sortedFilteredAlerts.length === 0 && searchQuery !== "" ? (
+        <div className="unit-container max-w-fit sm:max-w-full mx-auto">
+          <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
+            <NoResultsFound searchItem={searchQuery} />
+          </div>
+        </div>
       ) : (
-        <AlertList alerts={paginatedAlerts} projects={mockProjects} />
+        <AlertList alerts={paginatedAlerts} projects={projects} />
       )}
-      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
-        <Pagination
-          className="custom-pagination"
-          count={totalPages}
-          page={currentPage}
-          onChange={handlePageChange}
-          color="primary"
-        />
-      </div>
+      
+      {!isLoading && allAlerts.length > 0 && sortedFilteredAlerts.length > 0 && (
+        <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
+          <Pagination
+            className="custom-pagination"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </div>
+      )}
     </div>
   );
 };
