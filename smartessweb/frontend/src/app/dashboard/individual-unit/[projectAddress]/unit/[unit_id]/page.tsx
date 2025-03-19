@@ -9,6 +9,7 @@ import BackArrowButton from "@/app/components/BackArrowBtn";
 import { individualUnitApi } from "@/api/page";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { set } from "date-fns";
 
 export default function UnitPage({
   params,
@@ -22,6 +23,7 @@ export default function UnitPage({
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
   const [address, setAddress] = useState<string>("");
   const [unit, setUnit] = useState<Unit | undefined>(undefined);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -66,6 +68,7 @@ export default function UnitPage({
         );
         const fetchedUnit = response.unit;
         setUnit(fetchedUnit);
+        setIsConnected(fetchedUnit.status === 'live');
       } catch (err) {
         console.error("Error fetching unit:", err);
       } finally {
@@ -89,8 +92,6 @@ export default function UnitPage({
     return <div>Unit not found</div>;
   }
 
-  const isConnected = unit.cameraStatus === "live";
-
   return (
     <div>
       <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
@@ -110,7 +111,7 @@ export default function UnitPage({
 
           <div className="right-2 bg-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg shadow flex items-center gap-2 border max-w-fit">
             <span className="text-xs sm:text-sm font-bold text-black">
-              {isConnected ? "Live" : "Disconnected"}
+              {isConnected ? "Connected" : "Disconnected"}
             </span>
             <div
               className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full ${
