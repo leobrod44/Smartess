@@ -87,6 +87,8 @@ export default function UnitPage({
     return <div>Unit not found</div>;
   }
 
+  const isConnected = unit.cameraStatus === "live";
+
   return (
     <div>
       <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
@@ -97,9 +99,24 @@ export default function UnitPage({
           </h1>
           <BackArrowButton />
         </div>
-        <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
-          Unit {unit.unitNumber}
-        </h1>
+        <div className="relative flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
+              Unit {unit.unitNumber}
+            </h1>
+          </div>
+
+          <div className="right-2 bg-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg shadow flex items-center gap-2 border max-w-fit">
+            <span className="text-xs sm:text-sm font-bold text-black">
+              {isConnected ? "Live" : "Disconnected"}
+            </span>
+            <div
+              className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full ${
+                isConnected ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+          </div>
+        </div>
 
         {/* Render HubOwner Component with surrounding background */}
         <div className="my-4 rounded-lg bg-[#4b7d8d] p-2">
