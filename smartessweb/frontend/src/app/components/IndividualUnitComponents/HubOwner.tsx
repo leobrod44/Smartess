@@ -48,12 +48,12 @@ const HubOwner = ({
               : "Not Provided"}
             <div className="text-[#14323B] font-semibold">Email:</div>{" "}
             {owner.email}
-            <p>
+            <div className="flex justify-center mt-2">
               <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
                 Contact
                 <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
               </button>
-            </p>
+            </div>
           </div>
 
           {/* Table View for Medium and Larger Screens */}
