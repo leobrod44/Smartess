@@ -1,6 +1,6 @@
 import { API_URL } from "../../api";
 
-import { Alert, Project } from "@/app/mockData";
+import { Project } from "@/app/mockData";
 
 export const alertsApi = {
     getProjectsForAlerts: async (token: string): Promise<{ projects: Project[] }> => {
