@@ -183,6 +183,36 @@ exports.getUserProjects = async (req, res) => {
               })
             );
 
+            // Fetch alerts for the hub
+            const { data: alerts, error: alertsError } = await supabase
+              .from("alerts")
+              .select("*")
+              .eq('active', true)
+              .eq("hub_id", hub.hub_id)
+              .order("created_at", { ascending: false });
+
+            if (alertsError) {
+              console.error(
+                `Error fetching alerts for hub ${hub.hub_id}:`,
+                alertsError
+              );
+              return null;
+            }
+
+            // Format alerts
+            const formattedAlerts = alerts.map((alert) => ({
+              id: alert.alert_id,
+              hubId: alert.hub_id,
+              unitNumber: hub.unit_number,
+              description: alert.description,
+              message: alert.message,
+              active: alert.active,
+              type: alert.type,
+              timestamp: alert.created_at,
+              deviceId: alert.device_id,
+              hubIp: alert.hub_ip,
+            }));
+
             // Return the transformed unit data with the owner populated
             return {
               projectId: project.proj_id,
@@ -190,7 +220,7 @@ exports.getUserProjects = async (req, res) => {
               hubUsers: users.filter((user) => user !== null),
               tickets: ticketStats,
               owner,
-              alerts: [], // Empty alerts array
+              alerts: formattedAlerts
             };
           })
         );
