@@ -86,11 +86,16 @@ exports.getProjectsForAlerts = async (req, res) => {
             const hub = hubs.find(h => h.hub_id === alert.hub_id);
             return {
                 id: alert.alert_id,
-                projectId: hub ? hub.proj_id : null,
+                hubId: alert.hub_id,
                 unitNumber: hub ? hub.unit_number : null,
+                projectId: hub ? hub.proj_id : null,
+                description: alert.description,
                 message: alert.message,
+                active: alert.active,
                 type: alert.type,
                 timestamp: alert.created_at,
+                deviceId: alert.device_id,
+                hubIp: alert.hub_ip,
             };
         });
 
