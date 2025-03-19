@@ -105,15 +105,15 @@ const HubUsers = ({ hubUsers, currentUserRole }: HubUsersProps) => {
                 : "Not Provided"}
               <div className="text-[#14323B] font-semibold">Email:</div>{" "}
               {user.email}
-              <p>
+              <div className="flex justify-center my-2">
                 <button className="w-[80px] h-[22px] flex items-center justify-center gap-2 bg-[#4b7d8d] rounded-md hover:bg-[#1f505e] transition duration-300 text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight">
                   Contact
                   <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
                 </button>
-              </p>
+              </div>
               {currentUserRole === "master" || currentUserRole === "admin" ? (
                 <div>
-                  <div className="text-[#14323B] font-semibold">Actions:</div>
+                  <div className="text-[#14323B] font-semibold mt-5">Actions:</div>
                   <button>
                     <TrashIcon
                       onClick={() => handleDeleteClick(user)}
