@@ -15,8 +15,6 @@ import SensorsIcon from "@mui/icons-material/Sensors";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import WbIncandescentIcon from "@mui/icons-material/WbIncandescent";
 
-import { TrashIcon } from "@heroicons/react/24/outline";
-
 export interface AlertListProps {
   alerts: Alert[];
   projects: Project[];
