@@ -184,6 +184,31 @@ exports.getIndividualUnit = async (req, res) => {
             };
         }));
 
+        // Fetch alerts for the hub
+        const { data: alerts, error: alertsError } = await supabase
+            .from("alerts")
+            .select("*")
+            .eq('hub_id', hubData.hub_id)
+            .order("created_at", { ascending: false });
+
+        if (alertsError) {
+            return res.status(500).json({ error: "Failed to fetch alerts." });
+        }
+
+        // Format alerts
+        const formattedAlerts = alerts.map(alert => ({
+            id: alert.alert_id,
+            hubId: alert.hub_id,
+            unitNumber: hubData.unit_number,
+            description: alert.description,
+            message: alert.message,
+            active: alert.active,
+            type: alert.type,
+            timestamp: alert.created_at,
+            deviceId: alert.device_id,
+            hubIp: alert.hub_ip,
+        }));
+
         // Construct the final unit object
         const unit = {
             projectId: hubData.proj_id,
@@ -192,7 +217,7 @@ exports.getIndividualUnit = async (req, res) => {
             hubUsers: hubUsers.filter(user => user !== null),
             ticket: formattedTickets,
             owner,
-            alerts: [] // Placeholder for alerts
+            alerts: formattedAlerts
         };
 
         res.json({ unit });
