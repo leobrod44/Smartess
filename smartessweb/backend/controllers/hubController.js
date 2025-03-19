@@ -100,7 +100,7 @@ exports.getHubDetails = async (req, res) => {
             id: alert.id,
             projectId: proj_id,
             unitNumber: unit_number,
-            message: alert.description,
+            message: alert.message,
             timestamp: alert.created_at,
             resolved: !alert.active,
             icon: alert.icon || 'default-icon'

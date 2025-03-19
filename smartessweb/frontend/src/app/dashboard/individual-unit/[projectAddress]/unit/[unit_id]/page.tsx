@@ -42,6 +42,8 @@ export default function UnitPage({
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email,
+          phoneNumber: tempCurrentUser.phoneNumber,
         });
       } catch (err) {
         console.error("Error fetching current user:", err);

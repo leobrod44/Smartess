@@ -93,7 +93,7 @@ exports.getDashboardWidgets = async (req, res) => {
         // Get active alerts and map with hub and project data
         const { data: activeAlerts, error: alertsError } = await supabase
             .from('alerts')
-            .select('description, hub_id, created_at')
+            .select('message, hub_id, created_at')
             .eq('active', true)
             .in('hub_id', hubs.map(hub => hub.hub_id))
             .order('created_at', { ascending: false })
@@ -110,7 +110,7 @@ exports.getDashboardWidgets = async (req, res) => {
             const project = projects.find(p => p.proj_id === hub.proj_id);
             
             return {
-                alertType: alert.description,
+                alertType: alert.message,
                 unitAddress: project.address,
                 unitNumber: `Unit ${hub.unit_number}`,
             };

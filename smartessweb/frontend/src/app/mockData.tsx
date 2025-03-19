@@ -34,7 +34,7 @@ export interface CurrentUser {
 
   phoneNumber: string;
 
-  profilePictureUrl: string | null;
+  profilePictureUrl?: string | null;
 }
 
 export interface TicketsType {
