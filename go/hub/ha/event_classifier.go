@@ -75,7 +75,7 @@ var alertMappings = map[string]string{
 // TODO WILL CHANGE AND WORK ON THESE MORE, NEED TO DETERMINE THE TYPE OF ALERT
 func DetermineAlertType(entityID string) string {
 	for prefix, alertType := range alertMappings {
-		if strings.HasPrefix(entityID, prefix) {
+		if strings.HasPrefix(strings.ToLower(entityID), prefix) {
 			return alertType
 		}
 	}
