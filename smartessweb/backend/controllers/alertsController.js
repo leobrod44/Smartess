@@ -59,7 +59,7 @@ exports.getProjectsForAlerts = async (req, res) => {
         // Fetch all hubs across projects
         const { data: hubs, error: hubError } = await supabase
             .from('hub')
-            .select('hub_id, proj_id, unit_number')
+            .select('hub_id, proj_id, unit_number, hub_ip')
             .in('proj_id', projects.map(p => p.proj_id))
             .order('unit_number', { ascending: true });
 
@@ -180,7 +180,8 @@ exports.getProjectsForAlerts = async (req, res) => {
                         closed: 0
                     },
                     owner,
-                    alerts: unitAlerts // Attach alerts here
+                    alerts: unitAlerts,
+                    hubIp: hub.hub_ip
                 };
             }));
 

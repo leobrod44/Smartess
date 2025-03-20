@@ -5,7 +5,6 @@ import (
 	"Smartess/go/hub/ha"
 	"encoding/json"
 	"log"
-	"math/rand"
 	"net/http"
 	"time"
 
@@ -36,7 +35,7 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed to send message:", err)
 			return
 		}
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 }
 
@@ -47,8 +46,9 @@ func main() {
 }
 
 func GenerateEventMessage() ha.WebhookMessage {
-	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-	eventID := rng.Intn(11) + 1
+	//rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	//eventID := rng.Intn(11) + 1
+	eventID := 2
 	var event ha.WebhookMessage
 
 	switch eventID {
@@ -104,13 +104,13 @@ func GenerateEventMessage() ha.WebhookMessage {
 	case 2:
 		event = ha.WebhookMessage{
 			ID:   2,
-			Type: "Light Information",
+			Type: "state_changed",
 			Event: structures.EventDetails{
 				EventType: "state_changed",
 				Data: structures.EventData{
-					EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+					EntityID: "light.hue_go_2",
 					OldState: structures.State{
-						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						EntityID: "light.hue_go_2",
 						State:    "off",
 						Attributes: map[string]interface{}{
 							"friendly_name":         "Kitchen Light",
@@ -128,7 +128,7 @@ func GenerateEventMessage() ha.WebhookMessage {
 						},
 					},
 					NewState: structures.State{
-						EntityID: "light.lumi_lumi_switch_b1laus01_light_3",
+						EntityID: "light.hue_go_2",
 						State:    "on",
 						Attributes: map[string]interface{}{
 							"friendly_name":         "Kitchen Light",
@@ -136,6 +136,7 @@ func GenerateEventMessage() ha.WebhookMessage {
 							"off_with_transition":   false,
 							"supported_color_modes": []string{"onoff"},
 							"supported_features":    8,
+							"rgb_color":             []int{238, 254, 255},
 						},
 						LastChanged: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),
 						LastUpdated: time.Date(2024, 11, 26, 22, 33, 57, 907198000, time.UTC),

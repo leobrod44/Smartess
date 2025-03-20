@@ -108,6 +108,8 @@ export interface Unit {
   status?: "live" | "disconnected";
 
   cameraStatus?: "live" | "disconnected";
+
+  hubIp?: string;
 }
 
 export interface Alert {
@@ -143,6 +145,16 @@ export interface Alert {
     | "Unknown";
 
   timestamp: Date;
+
+  hubIp?: string;
+
+  active?: boolean;
+
+  description?: string;
+
+  deviceId?: string;
+
+  hubId?: number;
 }
 
 export interface Ticket {
