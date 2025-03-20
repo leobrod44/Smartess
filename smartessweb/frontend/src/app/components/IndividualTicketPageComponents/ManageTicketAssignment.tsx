@@ -63,6 +63,8 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email || "",
+          phoneNumber: tempCurrentUser.phoneNumber || ""
         });
       } catch (err) {
         console.error("Error fetching user role:", err);
@@ -157,13 +159,39 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
-  const assignYourself = () => {
+  const assignYourself = async () => {
     try {
       if (!currentUser) {
         showToastError("Unable to assign yourself. User data is unavailable.");
         return;
       }
-
+  
+      // Check if user is already assigned
+      const isAlreadyAssigned = assignedUsers.some(
+        user => user.userId === parseInt(currentUser.userId)
+      );
+      
+      if (isAlreadyAssigned) {
+        showToastError("You are already assigned to this ticket.");
+        return;
+      }
+  
+      // Check if max users limit would be exceeded
+      if (assignedUsers.length >= MAX_USERS) {
+        showToastError(
+          `Cannot assign more than ${MAX_USERS} users to this ticket.`
+        );
+        return;
+      }
+  
+      // Make the API call to assign yourself
+      await ticketAssignApis.assignUsersToTicket(
+        ticket.ticket_id,
+        [parseInt(currentUser.userId)],
+        currentUser.userId
+      );
+  
+      // After successful API call, update local state
       const newAssignedUser: AssignedUser = {
         userId: parseInt(currentUser.userId),
         firstName: currentUser.firstName,
@@ -171,19 +199,24 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         email: "",
         resolved: false,
       };
-
-      setAssignedUsers((prev) => [...prev, newAssignedUser]);
-
-      setAvailableUsers((prevAvailableUsers) =>
+  
+      setAssignedUsers(prev => [...prev, newAssignedUser]);
+  
+      // Remove yourself from available users
+      setAvailableUsers(prevAvailableUsers =>
         prevAvailableUsers.filter(
-          (user) => user.individualId !== parseInt(currentUser.userId)
+          user => user.individualId !== parseInt(currentUser.userId)
         )
       );
-
+  
       onStatusUpdate("pending");
       showToastSuccess("Assigned yourself successfully!");
     } catch (error) {
-      showToastError("There was an error assigning yourself to this ticket.");
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "There was an error assigning yourself to this ticket."
+      );
       console.error(error);
     }
   };
@@ -209,7 +242,8 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             firstName: unassignedUser.firstName,
             lastName: unassignedUser.lastName,
             role: "basic",
-          },
+            profilePictureUrl: "",
+          } as Individual,
         ]);
       }
     } catch (error) {
@@ -246,6 +280,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     role: "basic",
+                    profilePictureUrl: "",
                   }}
                 />
               ))}
@@ -303,6 +338,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                   firstName: user.firstName,
                   lastName: user.lastName,
                   role: "basic",
+                  profilePictureUrl: "",
                 }}
                 onUnassignClick={handleUnassignUser}
               />
