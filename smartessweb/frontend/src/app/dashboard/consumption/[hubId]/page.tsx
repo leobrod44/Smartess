@@ -53,7 +53,11 @@ const IndividualConsumptionPage = ({
   }, [hubId]);
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
   if (error) {
     return <div className="p-4 text-red-500">Error: {error}</div>;
