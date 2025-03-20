@@ -35,7 +35,7 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed to send message:", err)
 			return
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(5 * time.Hour)
 	}
 }
 
