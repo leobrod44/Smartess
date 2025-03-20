@@ -1,15 +1,16 @@
 "use client";
 
 import AlertList from "../../components/AlertsPageComponents/AlertList";
-import { Project } from "../../mockData";
+import {Alert, Project} from "../../mockData";
 import Pagination from "@mui/material/Pagination";
-import { useState, useMemo, useEffect } from "react";
+import {useEffect, useMemo, useState} from "react";
 import Searchbar from "../../components/Searchbar";
 import FilterComponent from "@/app/components/FilterList";
 import NoResultsFound from "@/app/components/NoResultsFound";
-import { useProjectContext } from "@/context/ProjectProvider";
-import { alertsApi } from "@/api/dashboard/alerts/page";
-import { useRouter } from "next/navigation";
+import {useProjectContext} from "@/context/ProjectProvider";
+import {alertsApi} from "@/api/dashboard/alerts/page";
+import {useRouter} from "next/navigation";
+import {Client} from "@stomp/stompjs";
 
 const AlertPage = () => {
   const { selectedProjectId } = useProjectContext();
@@ -31,7 +32,6 @@ const AlertPage = () => {
         });
       });
     });
-  
     return Array.from(uniqueAlerts.values());
   }, [projects]);
 
@@ -78,6 +78,100 @@ const AlertPage = () => {
 
     fetchProjectsForAlerts();
   }, [router]);
+
+  const processNewAlert = (messageBody: string) => {
+    try {
+      const incomingAlert = JSON.parse(messageBody);
+
+      // Create a deep copy of projects and update it
+      setProjects(prevProjects => {
+        const updatedProjects = [...prevProjects];
+
+        // Find matching unit by hubIp
+        for (const project of updatedProjects) {
+          const unitIndex = project.units.findIndex(unit => unit.hubIp === incomingAlert.hub_ip);
+          if (unitIndex == -1) {
+            console.log('No matching hub found for:', incomingAlert.hub_ip);
+            return updatedProjects; // Return unchanged state
+          }
+
+          const unit = project.units[unitIndex]
+
+          const newAlert : Alert = {
+            id: "9999999",
+            projectId: project.projectId,
+            unitNumber: unit.unitNumber,
+            description: incomingAlert.state,
+            message: incomingAlert.message,
+            active: true, // Assuming new alerts start as active
+            type: incomingAlert.type,
+            timestamp: incomingAlert.time_fired,
+            deviceId: incomingAlert.device,
+            hubIp: incomingAlert.hub_ip
+          };
+          // Add the new alert to this unit's alerts array
+          unit.alerts = [...unit.alerts, newAlert];
+
+          return updatedProjects; // Return updated state
+        }
+
+        // If no matching hubIp found, log it
+        console.log('No matching hub found for:', incomingAlert.hub_ip);
+        return updatedProjects; // Return unchanged state
+      });
+
+    } catch (error) {
+      console.error('Error processing alert:', error);
+    }
+  };
+
+    // WebSocket implementation with @stomp/stompjs
+  useEffect(() => {
+    // Create a new STOMP client
+    const client = new Client({
+      brokerURL: "ws://localhost:15674/ws", // Use wss:// for secure connection
+      connectHeaders: {
+        login: "admin",
+        passcode: "admin",
+      },
+      debug: function (str) {
+        console.log(str);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    // Define what happens on successful connection
+    client.onConnect = function (frame) {
+      console.log("Connected to RabbitMQ Web STOMP:", frame);
+
+      // Subscribe to the queue
+      client.subscribe("/queue/website.alert", function (message) {
+        if (message.body) {
+          console.log("Message received:", message.body);
+          processNewAlert(message.body);
+        }
+      });
+    };
+
+
+    client.onStompError = function (frame) {
+      console.error("STOMP error:", frame.headers.message);
+      console.error("Additional details:", frame.body);
+    };
+
+    // Start the connection
+    client.activate();
+
+    // Cleanup on component unmount
+    return () => {
+      if (client.active) {
+        console.log("Disconnecting from RabbitMQ...");
+        client.deactivate();
+      }
+    };
+  }, []);
 
   const handleFilterChange = (filterValue: string) => {
     if (filterValue === "Clear Filters") {
