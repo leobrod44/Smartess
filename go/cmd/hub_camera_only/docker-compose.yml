@@ -44,19 +44,30 @@ services:
       - smartess_network  # Use the existing network
 
   # Frontend (Web UI for displaying the live video stream)
+  # frontend:
+  #   build:
+  #     context: ./ # Path to the frontend code
+  #     dockerfile: ./frontend/Dockerfile
+  #   container_name: frontend_ui
+  #   ports:
+  #     - "8083:80"  # Expose port 80 to access the frontend via HTTP
+  #   depends_on:
+  #     - consumer
+  #   networks:
+  #     - smartess_network  # Use the existing network
+  #   volumes:
+  #     - ./frontend/static:/usr/share/nginx/html #./frontend:/usr/share/nginx/html  # Mount frontend directory
   frontend:
     build:
-      context: ./ # Path to the frontend code
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: frontend_ui
     ports:
-      - "8083:80"  # Expose port 80 to access the frontend via HTTP
+      - "8083:3000"  # Expose port 80 to access the frontend via HTTP
     depends_on:
       - consumer
     networks:
       - smartess_network  # Use the existing network
-    volumes:
-      - ./frontend/static:/usr/share/nginx/html #./frontend:/usr/share/nginx/html  # Mount frontend directory
   # Mock camera rtsp stream for testing purposes
   mock_camera:
     container_name: mock_camera

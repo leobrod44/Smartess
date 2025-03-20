@@ -5,6 +5,7 @@ import { energyConsumptionApi } from "@/api/dashboard/energyConsumption/page";
 import EnergyConsumptionStats from "@/app/components/EnergyConsumptionComponents/EnergyConsumptionStats";
 import DailyConsumptionChart from "@/app/components/EnergyConsumptionComponents/DailyConsumptionChart";
 import MonthlyConsumptionChart from "@/app/components/EnergyConsumptionComponents/MonthlyConsumptionChart";
+import BackArrowButton from "@/app/components/BackArrowBtn";
 
 interface EnergyConsumption {
   id: string;
@@ -52,7 +53,11 @@ const IndividualConsumptionPage = ({
   }, [hubId]);
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
   }
   if (error) {
     return <div className="p-4 text-red-500">Error: {error}</div>;
@@ -88,10 +93,13 @@ const IndividualConsumptionPage = ({
   }));
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
-      <h1 className="text-[#325a67] text-[30px] leading-10 tracking-tight">
-        Energy Consumption Overview
-      </h1>
+    <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="flex items-center justify-between pb-4">
+        <h1 className="text-[#325a67] text-[30px] leading-10 tracking-tight">
+          Energy Consumption Overview
+        </h1>
+        <BackArrowButton />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 min-h-screen">
         <EnergyConsumptionStats consumption={consumption} />
         <DailyConsumptionChart dailyData={dailyChartData} />

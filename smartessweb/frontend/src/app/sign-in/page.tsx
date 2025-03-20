@@ -8,7 +8,7 @@ import { signInApi } from "@/api/sign-in/sign-in";
 import Logo from "../../public/images/logo.png";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import { useUserContext } from "@/context/UserProvider";
-import { userApi } from "@/api/components/DashboardNavbar";
+import { manageAccountsApi } from "@/api/page";
 import ForgotPasswordModal from "../components/ForgotPassword/ForgotPasswordModal";
 import LandingNavbar from "@/app/components/LandingNavbar";
 
@@ -25,20 +25,14 @@ const SignInPage = () => {
     setForgotPasswordOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setForgotPasswordOpen(false);
-  };
-
-  const handlePassworReset = () => {
-    setForgotPasswordOpen(false);
-  };
-
   const {
     setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,
     setUserType,
+    setUserProfilePicture,
+    setUserPhoneNumber,
   } = useUserContext();
 
   const validateEmail = (email: string) => {
@@ -79,12 +73,14 @@ const SignInPage = () => {
     try {
       const data = await signInApi.signIn({ email, password });
       localStorage.setItem("token", data.token);
-      const user = await userApi.getUserInfo(data.token);
-      setUserId(user.user_id);
-      setUserEmail(user.email);
-      setUserFirstName(user.first_name);
-      setUserLastName(user.last_name);
-      setUserType(user.type);
+      const user = await manageAccountsApi.getCurrentUserApi(data.token);
+      setUserId(user.currentUser.userId);
+      setUserEmail(user.currentUser.email);
+      setUserFirstName(user.currentUser.firstName);
+      setUserLastName(user.currentUser.lastName);
+      setUserType(user.currentUser.role);
+      setUserProfilePicture(user.currentUser.profilePictureUrl);
+      setUserPhoneNumber(user.currentUser.phoneNumber);
       setTimeout(() => {
         router.push("/dashboard");
       });
@@ -197,19 +193,21 @@ const SignInPage = () => {
 
             {/* Forgot password link */}
             <div className="max-w-lg pl-[266px] md:pl-0 justify-end items-center inline-flex pt-5 w-full">
-              <a
-                className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer"
+              <button
+                type="button"
+                className="text-center text-[#266472]/40 text-xl font-light font-sequel-sans-light underline hover:text-[#30525e] custom-transition-length-1s whitespace-nowrap cursor-pointer bg-transparent border-none"
                 onClick={handleOpenModal}
                 aria-label="Forgot your password?"
               >
                 Forgot your password?
-              </a>
+              </button>
               {/* Forgot Password Modal Component */}
-              <ForgotPasswordModal
-                isOpen={isForgotPasswordOpen}
-                onClose={handleCloseModal}
-                onReset={handlePassworReset}
-              />
+              {isForgotPasswordOpen && (
+                <ForgotPasswordModal
+                  isOpen={isForgotPasswordOpen}
+                  onClose={() => setForgotPasswordOpen(false)}
+                />
+              )}
             </div>
 
             <div className=" w-full max-w-lg py-5 flex flex-col justify-center items-center  gap-1.5">

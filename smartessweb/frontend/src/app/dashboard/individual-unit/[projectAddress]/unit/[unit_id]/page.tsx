@@ -22,6 +22,7 @@ export default function UnitPage({
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
   const [address, setAddress] = useState<string>("");
   const [unit, setUnit] = useState<Unit | undefined>(undefined);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -42,6 +43,8 @@ export default function UnitPage({
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email,
+          phoneNumber: tempCurrentUser.phoneNumber,
         });
       } catch (err) {
         console.error("Error fetching current user:", err);
@@ -64,6 +67,7 @@ export default function UnitPage({
         );
         const fetchedUnit = response.unit;
         setUnit(fetchedUnit);
+        setIsConnected(fetchedUnit.status === 'live');
       } catch (err) {
         console.error("Error fetching unit:", err);
       } finally {
@@ -77,8 +81,8 @@ export default function UnitPage({
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-[#14323B] text-lg">Loading projects...</div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
   }
@@ -89,17 +93,32 @@ export default function UnitPage({
 
   return (
     <div>
-      <div className="flex-1 border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
+      <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
         {/* Back Arrow Button */}
-        <div className="flex items center justify-between mb-4">
+        <div className="flex items center justify-between mb-2">
           <h1 className="text-[#325a67] text-[35px] leading-10 tracking-tight">
             {address}
           </h1>
           <BackArrowButton />
         </div>
-        <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
-          Unit {unit.unitNumber}
-        </h1>
+        <div className="relative flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-[#729987] text-[25px] leading-10 tracking-tight">
+              Unit {unit.unitNumber}
+            </h1>
+          </div>
+
+          <div className="right-2 bg-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg shadow flex items-center gap-2 border max-w-fit">
+            <span className="text-xs sm:text-sm font-bold text-black">
+              {isConnected ? "Connected" : "Disconnected"}
+            </span>
+            <div
+              className={`w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 rounded-full ${
+                isConnected ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+          </div>
+        </div>
 
         {/* Render HubOwner Component with surrounding background */}
         <div className="my-4 rounded-lg bg-[#4b7d8d] p-2">

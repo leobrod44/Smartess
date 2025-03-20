@@ -6,7 +6,11 @@ import AssignedTicketList from "@/app/components/TicketComponents/AssignedTicket
 import TicketWidget from "@/app/components/TicketComponents/TicketWidget";
 import FilterComponent from "@/app/components/FilterList";
 import Searchbar from "@/app/components/Searchbar";
-import { assignedTicketsApi, APITicket } from "@/api/dashboard/ticket/my-tickets/page";
+import {
+  assignedTicketsApi,
+  APITicket,
+} from "@/api/dashboard/ticket/my-tickets/page";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 type WidgetFilter = "all" | "resolved" | "unresolved";
 
@@ -15,6 +19,7 @@ const AssignedTicketPage = () => {
   const [tickets, setTickets] = useState<APITicket[]>([]);
   const [query, setQuery] = useState("");
   const [widgetFilter, setWidgetFilter] = useState<WidgetFilter>("all");
+  const [isLoading, setLoading] = useState(false);
 
   const fetchAssignedTickets = async () => {
     const token = localStorage.getItem("token");
@@ -23,8 +28,10 @@ const AssignedTicketPage = () => {
       return;
     }
     try {
+      setLoading(true);
       const data = await assignedTicketsApi.getAssignedTickets(token);
       setTickets(data.tickets);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }
@@ -43,7 +50,9 @@ const AssignedTicketPage = () => {
 
   const widgetStats = useMemo(() => {
     const total = projectTickets.length;
-    const resolved = projectTickets.filter((ticket) => ticket.isResolved).length;
+    const resolved = projectTickets.filter(
+      (ticket) => ticket.isResolved
+    ).length;
     const unresolved = total - resolved;
     return { total, resolved, unresolved };
   }, [projectTickets]);
@@ -70,7 +79,9 @@ const AssignedTicketPage = () => {
           ticket.unit,
           ticket.status,
           ticket.date,
-        ].some((field) => field.toLowerCase().includes(query.toLowerCase()))
+        ].some((field) =>
+          field?.toString().toLowerCase().includes(query.toLowerCase())
+        )
       );
     }
 
@@ -88,7 +99,8 @@ const AssignedTicketPage = () => {
         newDisplayedTickets.sort((a, b) => {
           const statusOrder: Record<string, number> = { false: 0, true: 1 };
           return (
-            statusOrder[String(a.isResolved)] - statusOrder[String(b.isResolved)]
+            statusOrder[String(a.isResolved)] -
+            statusOrder[String(b.isResolved)]
           );
         });
         break;
@@ -129,6 +141,15 @@ const AssignedTicketPage = () => {
   const handleClickResolved = () => setWidgetFilter("resolved");
   const handleClickUnresolved = () => setWidgetFilter("unresolved");
 
+  // Spinner while loading
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="flex justify-center">
@@ -154,7 +175,7 @@ const AssignedTicketPage = () => {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-10 tracking-tight">
+        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-2 tracking-tight">
           Your Tickets
         </div>
         <div className="flex items-center space-x-4">
@@ -172,10 +193,19 @@ const AssignedTicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <AssignedTicketList 
-        tickets={displayedTickets} 
-        onRefresh={fetchAssignedTickets}
-      />
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-2">View and manage the tickets that have been assigned to you. Mark them as resolved or unresolved to update their status. Click on a ticket name below to access its detailed information.</h2>
+    
+
+      {tickets.length === 0 ? (
+        <p> No data available</p>
+      ) : displayedTickets.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <AssignedTicketList
+          tickets={displayedTickets}
+          onRefresh={fetchAssignedTickets}
+        />
+      )}
     </div>
   );
 };

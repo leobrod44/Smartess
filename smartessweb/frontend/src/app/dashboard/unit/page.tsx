@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { Project } from "../../mockData";
 import { unitsApi } from "@/api/page";
 import { useRouter } from "next/navigation";
-
+import NoResultsFound from "@/app/components/NoResultsFound";
 const unitsPerPage = 3;
 
 const UnitPage = () => {
@@ -126,12 +126,12 @@ const UnitPage = () => {
         );
 
   return (
-    <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6">
+    <>
+      <div className=" relative pb-20 mx-4 lg:mx-8  min-h-screen flex flex-col min-h-screen">
         <div className="flex flex-row justify-between">
           <div className="flex flex-row">
             <h2 className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
-              <h4>Units</h4>
+              Units Page
             </h2>
           </div>
           {/* Filtering and searching div */}
@@ -145,18 +145,22 @@ const UnitPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight">
+          {" "}
+          View and manage all of the units in your organization. Use the Project
+          Filter on the left or the search bar and filter above to narrow down
+          results.
+        </h2>
         <div className="p-[10px] rounded-[7px] w-full mx-auto mt-4">
           {isLoading ? (
-            <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-              Loading units...
-            </p>
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
+          ) : allUnits.length === 0 ? (
+            <p> No data available</p>
           ) : currentUnits.length === 0 ? (
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
-              <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-                No results found.
-                <br />
-                Please adjust your filters or search criteria.
-              </p>
+              <NoResultsFound searchItem={searchQuery} />
             </div>
           ) : (
             /* Mapping of Filtered units by project selected in navar */
@@ -169,7 +173,7 @@ const UnitPage = () => {
             ))
           )}
         </div>
-        <div className="mt-4 flex justify-center">
+        <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
           <Pagination
             className="custom-pagination"
             count={totalPages}
@@ -179,7 +183,7 @@ const UnitPage = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

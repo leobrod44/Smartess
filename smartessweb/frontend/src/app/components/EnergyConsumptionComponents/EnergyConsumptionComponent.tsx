@@ -1,6 +1,7 @@
 import React, { useState, FC } from "react";
 import { Pagination } from "@mui/material";
 import Link from "next/link";
+import NoResultsFound from "../NoResultsFound";
 
 interface EnergyConsumption {
   id: string;
@@ -19,6 +20,7 @@ interface EnergyConsumption {
 
 interface EnergyConsumptionProps {
   energyConsumptions: EnergyConsumption[];
+  query: string;
 }
 
 function getConsumptionInfo(consumption: number) {
@@ -62,6 +64,7 @@ const ITEMS_PER_PAGE = 6;
 
 const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   energyConsumptions,
+  query,
 }) => {
   const [page, setPage] = useState(1);
 
@@ -79,16 +82,14 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
   );
   const totalPages = Math.ceil(energyConsumptions.length / ITEMS_PER_PAGE);
 
-  if (energyConsumptions.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        No data available
-      </div>
-    );
+  if (energyConsumptions.length === 0 && query.trim() === "") {
+    return <p>No data available</p>;
+  } else if (itemsToDisplay.length === 0 && query.trim() !== "") {
+    return <NoResultsFound searchItem={query} />;
   }
 
   return (
-    <div className="flex flex-col min-h-screen justify-between p-4">
+    <div className="relative flex flex-col min-h-screen justify-between p-4 pb-20 ">
       <div className="mx-auto w-full">
         {itemsToDisplay.map((item) => {
           const consumptionInfo = getConsumptionInfo(
@@ -100,10 +101,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
           const variationInfo = getVariationInfo(item.variation);
 
           return (
-            <Link
-              key={item.id}
-              href={`/dashboard/consumption/${item.hub_id}`}
-            >
+            <Link key={item.id} href={`/dashboard/consumption/${item.hub_id}`}>
               <div
                 className="
                 bg-white
@@ -409,7 +407,7 @@ const EnergyConsumptionInfo: FC<EnergyConsumptionProps> = ({
         })}
       </div>
 
-      <div className="flex justify-center mt-8">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}

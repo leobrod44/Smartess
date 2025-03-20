@@ -8,6 +8,7 @@ import Searchbar from "@/app/components/Searchbar";
 import { useUserContext } from "@/context/UserProvider";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { ticketsListApi, APITicketList } from "@/api/dashboard/ticket/page";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 interface Ticket {
   ticketId: string;
@@ -268,8 +269,8 @@ const TicketPage = () => {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-10 tracking-tight">
-          Your Tickets
+        <div className="pt-4 w-[306px] h-[66px] text-[#325a67] text-[30px] leading-2 tracking-tight">
+          Tickets Page
         </div>
         <div className="flex items-center space-x-4">
           <FilterComponent
@@ -279,11 +280,19 @@ const TicketPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <TicketList
-        tickets={filteredTickets}
-        userType={userType}
-        onTicketDelete={handleTicketDelete}
-      />
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-2">View and manage the tickets across your organization. Click on a ticket name below to access its detailed information.</h2>
+    
+      {tickets.length === 0 ? (
+        <p>No data available</p>
+      ) : filteredTickets.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <TicketList
+          tickets={filteredTickets}
+          userType={userType}
+          onTicketDelete={handleTicketDelete}
+        />
+      )}
     </div>
   );
 };

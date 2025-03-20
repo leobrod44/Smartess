@@ -9,6 +9,7 @@ export interface AnnouncementsData {
     announcement_id: number;
     announcement_type: "organization" | "project";
     user_id: number;
+    user_profile_picture: string | null;
     name: string | null;
     org_id: number | null;
     org_name: string | null;

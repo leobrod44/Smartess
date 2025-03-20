@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Alert } from "../../mockData"; // Adjust path as needed
+import { Alert, Project } from "../../mockData"; // Adjust path as needed
 import { format } from "date-fns";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import WaterDamageIcon from "@mui/icons-material/WaterDamage";
@@ -15,11 +15,15 @@ import SensorsIcon from "@mui/icons-material/Sensors";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import WbIncandescentIcon from "@mui/icons-material/WbIncandescent";
 
-import { TrashIcon } from "@heroicons/react/24/outline";
-
 export interface AlertListProps {
   alerts: Alert[];
+  projects: Project[];
 }
+
+const getProjectAddress = (projectId: string, projects: Project[]): string => {
+  const project = projects.find((p) => p.projectId === projectId);
+  return project ? project.address : "Unknown Address"; // Fallback if project not found
+};
 
 // Map alert messages to corresponding icons
 const getAlertIcon = (type: string) => {
@@ -53,46 +57,31 @@ const getAlertIcon = (type: string) => {
       return <DangerousIcon className="text-gray-400" fontSize="large" />;
   }
 };
-const AlertList = ({ alerts }: AlertListProps) => {
+const AlertList = ({ alerts, projects }: AlertListProps) => {
   return (
     <div className="space-y-4">
       {alerts.map((alert, index) => (
         <div
-          key={`${alert.id}-${alert.unitNumber}-${index}`}
-          className={`grid grid-cols-7 items-center p-4 transition-all duration-200 ${
-            index % 2 === 0 ? "bg-white" : "bg-gray-100"
-          }`}
-        >
-          {/* Id */}
-          <div className=" pl-2 text-[#30525E]">{alert.id}</div>
-
-          <div className=" pl-2 text-[#30525E]"> {alert.unitNumber} </div>
-
-          {/* Alert message */}
-          <div className=" pr-6 text-[#30525E]">{alert.message}</div>
-
-          {/* Type */}
-          <div className=" pl-2">{getAlertIcon(alert.type)}</div>
-
-          {/* Date */}
-          <div className="text-[#30525E]">
-            {format(new Date(alert.timestamp), "yyyy-MM-dd")}
+            key={`${alert.id}-${alert.unitNumber}-${index}`}
+            className={`grid grid-cols-6 gap-x-20 items-center p-2 transition-all duration-200 ${
+              index % 2 === 0 ? "bg-white" : "bg-gray-100"
+            }`}
+          >
+            <div className="pl-2 text-[#30525E]">
+              {getProjectAddress(alert.projectId, projects)}
+            </div>
+            <div className="pl-2 text-[#30525E]">{alert.unitNumber}</div>
+            <div className="pr-6 text-[#30525E]">{alert.message}</div>
+            <div className="pl-2">{getAlertIcon(alert.type)}</div>
+            <div className="text-[#30525E]">
+              {format(new Date(alert.timestamp), "yyyy-MM-dd")}
+            </div>
+            <div className="text-[#30525E]">
+              {format(new Date(alert.timestamp), "HH:mm:ss")}
+            </div>
           </div>
-
-          {/* Time */}
-          <div className=" text-[#30525E]">
-            {format(new Date(alert.timestamp), "HH:mm:ss")}
-          </div>
-
-          {/* Action */}
-          <div className="pl-8">
-            <button>
-              <TrashIcon className="h-5 w-5 mx-auto text-red-500 hover:text-red-900  " />
-            </button>
-          </div>
+          ))}
         </div>
-      ))}
-    </div>
   );
 };
 

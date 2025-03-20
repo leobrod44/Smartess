@@ -133,12 +133,17 @@ const DashboardNavbar = () => {
   const {
     userFirstName,
     userLastName,
+    userProfilePicture,
     setUserId,
     setUserEmail,
     setUserFirstName,
     setUserLastName,
     setUserType,
+    setUserProfilePicture,
+    setUserPhoneNumber,
   } = useUserContext();
+
+  const [token, setToken] = useState<string | null>(null);
 
   const sidebarItems = [...home, ...general, ...security, ...community];
 
@@ -169,12 +174,14 @@ const DashboardNavbar = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) {
           router.push("/sign-in");
           return;
         }
-        const response = await projectApi.getUserProjects(token);
+        // Update the token state so that it can be passed to Notification
+        setToken(storedToken);
+        const response = await projectApi.getUserProjects(storedToken);
         setProjects(response.projects);
       } catch (err) {
         console.error("Error fetching projects:", err);
@@ -193,6 +200,9 @@ const DashboardNavbar = () => {
       setUserFirstName("");
       setUserLastName("");
       setUserType("");
+      setUserProfilePicture("");
+      setUserPhoneNumber("");
+      setToken("");
       showToastSuccess("Logged out successfully");
       setTimeout(() => {
         router.push("/");
@@ -219,7 +229,10 @@ const DashboardNavbar = () => {
       */}
       <div>
         <Transition show={sidebarOpen}>
-          <Dialog className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
+          <Dialog
+            className="relative z-50 lg:hidden"
+            onClose={setSidebarOpen}
+          >
             <TransitionChild
               enter="transition-opacity ease-linear duration-300"
               enterFrom="opacity-0"
@@ -268,7 +281,7 @@ const DashboardNavbar = () => {
                     <div className="flex h-16 shrink-0 items-center">
                       <Link href="/">
                         <Image
-                          className="h-8 w-auto"
+                          className="h-8 w-auto rounded-full"
                           src={dashboardLogo}
                           alt="Logo"
                           width={100}
@@ -277,19 +290,30 @@ const DashboardNavbar = () => {
                       </Link>
                     </div>
 
-                    {/* Address Dropdown */}
-                    <AddressDropdown
-                      projects={projects}
-                      onProjectChange={handleProjectChange}
-                    />
+                    <div>
+                      <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                        PROJECT FILTER
+                      </div>
+                      {/* Address Dropdown */}
+                      <AddressDropdown
+                        projects={projects}
+                        onProjectChange={handleProjectChange}
+                      />
+                    </div>
 
                     <nav className="flex flex-1 flex-col">
-                      <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                      <ul
+                        role="list"
+                        className="flex flex-1 flex-col gap-y-7"
+                      >
                         <li>
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             HOME
                           </div>
-                          <ul role="list" className="-mx-2 mt-2 space-y-1">
+                          <ul
+                            role="list"
+                            className="-mx-2 mt-2 space-y-1"
+                          >
                             {home.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -315,7 +339,10 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             GENERAL
                           </div>
-                          <ul role="list" className="-mx-2 mt-2 space-y-1">
+                          <ul
+                            role="list"
+                            className="-mx-2 mt-2 space-y-1"
+                          >
                             {general.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -341,7 +368,10 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             SECURITY
                           </div>
-                          <ul role="list" className="-mx-2 mt-2 space-y-1">
+                          <ul
+                            role="list"
+                            className="-mx-2 mt-2 space-y-1"
+                          >
                             {security.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -367,7 +397,10 @@ const DashboardNavbar = () => {
                           <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
                             COMMUNITY
                           </div>
-                          <ul role="list" className="-mx-2 mt-2 space-y-1">
+                          <ul
+                            role="list"
+                            className="-mx-2 mt-2 space-y-1"
+                          >
                             {community.map((item) => (
                               <li key={item.name}>
                                 <Link
@@ -413,19 +446,30 @@ const DashboardNavbar = () => {
                 />
               </Link>
             </div>
-
-            <AddressDropdown
-              projects={projects}
-              onProjectChange={handleProjectChange}
-            />
+            <div>
+              <div className="text-xs font-semibold leading-6 text-[#7A8C92]">
+                PROJECT FILTER
+              </div>
+              {/* Address Dropdown */}
+              <AddressDropdown
+                projects={projects}
+                onProjectChange={handleProjectChange}
+              />
+            </div>
 
             <nav className="flex flex-1 flex-col">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
+              <ul
+                role="list"
+                className="flex flex-1 flex-col gap-y-7"
+              >
                 <li>
                   <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-5">
                     HOME
                   </div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
+                  <ul
+                    role="list"
+                    className="-mx-2 mt-2 space-y-1"
+                  >
                     {home.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -451,7 +495,10 @@ const DashboardNavbar = () => {
                   <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     GENERAL
                   </div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
+                  <ul
+                    role="list"
+                    className="-mx-2 mt-2 space-y-1"
+                  >
                     {general.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -477,7 +524,10 @@ const DashboardNavbar = () => {
                   <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     SECURITY
                   </div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
+                  <ul
+                    role="list"
+                    className="-mx-2 mt-2 space-y-1"
+                  >
                     {security.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -503,7 +553,10 @@ const DashboardNavbar = () => {
                   <div className="text-xs font-semibold leading-6 text-[#7A8C92] mt-2">
                     COMMUNITY
                   </div>
-                  <ul role="list" className="-mx-2 mt-2 space-y-1">
+                  <ul
+                    role="list"
+                    className="-mx-2 mt-2 space-y-1"
+                  >
                     {community.map((item) => (
                       <li key={item.name}>
                         <Link
@@ -538,7 +591,10 @@ const DashboardNavbar = () => {
               onClick={() => setSidebarOpen(true)}
             >
               <span className="sr-only">Open sidebar</span>
-              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+              <Bars3Icon
+                className="h-6 w-6"
+                aria-hidden="true"
+              />
             </button>
 
             {/* Separator */}
@@ -552,7 +608,10 @@ const DashboardNavbar = () => {
                 className="relative flex flex-1"
                 onSubmit={(e) => e.preventDefault()}
               >
-                <label htmlFor="search-field" className="sr-only">
+                <label
+                  htmlFor="search-field"
+                  className="sr-only"
+                >
                   Search
                 </label>
                 <MagnifyingGlassIcon
@@ -590,15 +649,20 @@ const DashboardNavbar = () => {
                   aria-hidden="true"
                 />
 
-                <Notification />
+                {token && <Notification token={token} />}
                 {/* Profile dropdown */}
-                <Menu as="div" className="relative">
+                <Menu
+                  as="div"
+                  className="relative"
+                >
                   <MenuButton className="-m-1.5 flex items-center p-1.5">
                     <span className="sr-only">Open user menu</span>
                     <Image
                       className="h-8 w-8 rounded-full bg-gray-50"
-                      src={dashboardLogo}
+                      src={userProfilePicture || dashboardLogo}
                       alt=""
+                      width={100}
+                      height={40}
                     />
                     <span className="hidden lg:flex lg:items-center">
                       <span

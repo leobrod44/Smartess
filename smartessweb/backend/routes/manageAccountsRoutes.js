@@ -1,4 +1,6 @@
 const express = require("express");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 const {
   getCurrentUser,
   getOrgUsers,
@@ -10,9 +12,9 @@ const {
   changeOrgUserRole,
   deleteOrgUser,
   sendInvite,
+  storeProfilePicture,
+  sendPasswordReset,
 } = require("../controllers/manageAccountsController");
-const multer = require("multer");
-const upload = multer();
 const { verifyToken } = require("../middleware/middleware");
 const router = express.Router();
 
@@ -30,5 +32,11 @@ router.post(
 router.post("/change-org-user-role", verifyToken, changeOrgUserRole);
 router.post("/delete-org-user", verifyToken, deleteOrgUser);
 router.post("/invite-user-email", verifyToken, upload.none(), sendInvite);
+router.post(
+  "/change-profile-picture",
+  verifyToken,
+  upload.single("file"),
+  storeProfilePicture
+);
 
 module.exports = router;

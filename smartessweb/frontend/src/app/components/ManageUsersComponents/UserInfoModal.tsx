@@ -10,6 +10,8 @@ import { Project } from "../../mockData";
 import { manageAccountsApi } from "@/api/page";
 import router from "next/router";
 import { showToastError, showToastSuccess } from "../Toast";
+import Image from "next/image";
+import pfp from "@/public/images/Default_pfp.jpg";
 
 interface UserInfoModalProps {
   uid: number;
@@ -20,6 +22,7 @@ interface UserInfoModalProps {
   addresses: string[];
   currentUserRole: "admin" | "basic" | "master";
   currentOrg: number | undefined;
+  profilePictureUrl: string | null;
   onDeleteUser: (uid: number) => void;
   onSave: (addresses: string[]) => void;
 }
@@ -33,6 +36,7 @@ function UserInfoModal({
   addresses: initialAddresses,
   currentUserRole,
   currentOrg,
+  profilePictureUrl,
   onDeleteUser,
   onSave,
 }: UserInfoModalProps) {
@@ -149,7 +153,7 @@ function UserInfoModal({
 
     setProjectMenuOpen(false);
   };
-  
+
   const handleSave = async () => {
     try {
       // remove matching IDs from both arrays in case a user adds a project then removes it
@@ -256,7 +260,11 @@ function UserInfoModal({
     }));
 
   return (
-    <Modal open={open} onClose={onClose} aria-labelledby="user-details-modal">
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="user-details-modal"
+    >
       <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50">
         <div className="relative top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-lg p-10 overflow-y-auto max-h-[90vh] ">
           <button
@@ -269,6 +277,13 @@ function UserInfoModal({
           </button>
 
           <div className="flex flex-col items-center justify-center">
+            <Image
+              src={profilePictureUrl || pfp}
+              alt="User Profile Pic"
+              width={100}
+              height={100}
+              className="rounded-full object-cover w-[100px] h-[100px]"
+            />
             <Typography
               variant="h6"
               id="user-details-modal"
@@ -292,7 +307,15 @@ function UserInfoModal({
                   </div>
                 ) : (
                   <div className="flex justify-center items-center">
-                    <span className="inline-block px-6 py-1 border border-[#30525E] rounded-full">
+                    <span
+                      className={`inline-block px-4 py-1 text-white rounded-full ${
+                        role === "master"
+                          ? "bg-yellow-500"
+                          : role === "admin"
+                          ? "bg-[#CCCCCC]"
+                          : "bg-[#A6634F]"
+                      }`}
+                    >
                       {capitalizeWords(role)}
                     </span>
                   </div>
@@ -318,7 +341,10 @@ function UserInfoModal({
                 <strong>Projects</strong>
               </Typography>
               {currentUserRole === "master" && (
-                <IconButton className="text-[#30525E]" onClick={handleAddClick}>
+                <IconButton
+                  className="text-[#30525E]"
+                  onClick={handleAddClick}
+                >
                   <AddIcon />
                 </IconButton>
               )}

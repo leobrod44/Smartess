@@ -12,7 +12,6 @@ logger.info("Server is initializing...");
 //Add routes here
 const authRoutes = require("./routes/authRoutes");
 const startProjectRoutes = require("./routes/startProjectRoutes");
-const userRoutes = require("./routes/userRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const hubRoutes = require("./routes/hubRoutes");
 const widgetRoutes = require("./routes/widgetRoutes");
@@ -23,12 +22,13 @@ const ticketsRoutes = require("./routes/ticketsRoutes");
 const announcementsRoutes = require("./routes/announcementRoutes");
 const consumptionRoutes = require("./routes/consumptionRoutes");
 const surveillanceRoutes = require("./routes/surveillanceRoutes");
-const registrationRoutes = require("./routes/registrationRoutes"); 
+const registrationRoutes = require("./routes/registrationRoutes");
+const resetPasswordRoutes = require("./routes/resetPasswordRoutes");
+const alertRoutes = require("./routes/alertRoutes");
 
 //Add path here
 app.use("/api/auth", authRoutes);
 app.use("/api/start-project", startProjectRoutes);
-app.use("/api/users", userRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/hubs", hubRoutes);
 app.use("/api/widgets", widgetRoutes);
@@ -40,6 +40,7 @@ app.use("/api/announcements", announcementsRoutes);
 app.use("/api/consumptions", consumptionRoutes);
 app.use("/api/surveillance", surveillanceRoutes);
 app.use("/api/registration", registrationRoutes);
+app.use("/api/reset-password", resetPasswordRoutes);
+app.use("/api/alerts", alertRoutes);
 
 module.exports = app;
-

@@ -29,6 +29,12 @@ export interface CurrentUser {
   firstName: string;
 
   lastName: string;
+
+  email: string;
+
+  phoneNumber: string;
+
+  profilePictureUrl?: string | null;
 }
 
 export interface TicketsType {
@@ -78,6 +84,8 @@ export interface Individual {
   lastName: string;
 
   role: "admin" | "basic" | "master";
+
+  profilePictureUrl: string | null;
 }
 
 export interface Unit {
@@ -96,6 +104,12 @@ export interface Unit {
   owner: Owner;
 
   alerts: Alert[];
+
+  status?: "live" | "disconnected";
+
+  cameraStatus?: "live" | "disconnected";
+
+  hubIp?: string;
 }
 
 export interface Alert {
@@ -131,6 +145,16 @@ export interface Alert {
     | "Unknown";
 
   timestamp: Date;
+
+  hubIp?: string;
+
+  active?: boolean;
+
+  description?: string;
+
+  deviceId?: string;
+
+  hubId?: number;
 }
 
 export interface Ticket {
@@ -288,7 +312,7 @@ export const generateMockAnnouncements = (): Announcement[] => {
 export const generateMockProjects = (): Project[] => {
   return [
     {
-      projectId: "a10294",
+      projectId: "1",
 
       address: "1000 De La Gauchetiere",
 
@@ -304,7 +328,7 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "a12294",
+      projectId: "2",
 
       address: "750 Peel Street",
 
@@ -320,9 +344,9 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "b10294",
+      projectId: "5",
 
-      address: "50 Rue Guy",
+      address: "1654 Rue Kemmel",
 
       adminUsersCount: 1,
 
@@ -336,7 +360,7 @@ export const generateMockProjects = (): Project[] => {
     },
 
     {
-      projectId: "cd10294",
+      projectId: "4",
 
       address: "131 Chemin des Coniferes",
 
@@ -566,7 +590,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "1",
 
-    projectId: "a10294",
+    projectId: "1",
 
     unitNumber: "101",
 
@@ -580,7 +604,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "2",
 
-    projectId: "a10294",
+    projectId: "1",
 
     unitNumber: "102",
 
@@ -594,7 +618,7 @@ const generateMockAlerts = (): Alert[] => [
   {
     id: "3",
 
-    projectId: "b10294",
+    projectId: "5",
 
     unitNumber: "103",
 
@@ -610,7 +634,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Low Battery In Device",
 
@@ -623,7 +647,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Sensor Activated",
 
@@ -637,7 +661,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Door Opened",
 
@@ -650,7 +674,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Motion Detected",
 
@@ -664,7 +688,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Climate Alert",
 
@@ -678,7 +702,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Unknown Alert",
 
@@ -692,7 +716,7 @@ const generateMockAlerts = (): Alert[] => [
 
     unitNumber: "101",
 
-    projectId: "b10294",
+    projectId: "5",
 
     message: "Light On",
 
@@ -821,18 +845,21 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 2,
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
+    profilePictureUrl: null,
   },
   {
     individualId: 2,
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
+    profilePictureUrl: null,
   },
 ];
 
@@ -843,12 +870,14 @@ const generateMockProjectUsers2 = (): Individual[] => [
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
+    profilePictureUrl: null,
   },
   {
     individualId: 4,
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 
@@ -858,12 +887,14 @@ const generateMockProjectUsers3 = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 
@@ -873,48 +904,56 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    profilePictureUrl: null,
   },
   {
     individualId: 6,
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 12,
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 7,
     firstName: "Kellie",
     lastName: "Bells",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 8,
     firstName: "Kaitlyn",
     lastName: "Jingle",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 9,
     firstName: "Timothy",
     lastName: "Brown",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 10,
     firstName: "Bob",
     lastName: "Blinker",
     role: "admin",
+    profilePictureUrl: null,
   },
   {
     individualId: 11,
     firstName: "Sarah",
     lastName: "Michaels",
     role: "admin",
+    profilePictureUrl: null,
   },
 ];
 

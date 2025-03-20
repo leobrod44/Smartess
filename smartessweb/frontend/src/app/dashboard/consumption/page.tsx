@@ -140,10 +140,8 @@ const ConsumptionPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-[#14323B] text-lg">
-          Loading energy consumption data...
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
   }
@@ -157,8 +155,8 @@ const ConsumptionPage = () => {
   }
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="flex items-center justify-between pb-4">
+    <div className=" mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="flex items-center justify-between">
         <h1 className="text-[#325a67] text-[30px] leading-10 tracking-tight">
           Energy Consumption
         </h1>
@@ -170,8 +168,21 @@ const ConsumptionPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
+      <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight">
+        {" "}
+        View and manage the energy consumption data across all units in your
+        organization. Use the Project Filter on the left or the search bar and
+        filter above to narrow down results.
+      </h2>
+      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight py-2">
+        {" "}
+        <span className="text-[#325a67] font-bold"> TIP:</span> Click on a unit
+        to view its detailed information.
+      </h2>
+
       <EnergyConsumptionComponent
         energyConsumptions={filteredEnergyConsumptions}
+        query={query}
       />
     </div>
   );

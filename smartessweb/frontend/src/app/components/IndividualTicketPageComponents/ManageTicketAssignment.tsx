@@ -28,6 +28,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   const MAX_USERS = 3;
   const [availableUsers, setAvailableUsers] = useState<Individual[]>([]);
   const [currentUser, setCurrentUser] = useState<CurrentUser>();
+  const currentUserId = currentUser?.userId as string;
 
   useEffect(() => {
     const fetchAssignedUsers = async () => {
@@ -113,7 +114,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
       const userIds = selectedUsers.map((user) => user.individualId);
 
       // Make the API call
-      await ticketAssignApis.assignUsersToTicket(ticket.ticket_id, userIds);
+      await ticketAssignApis.assignUsersToTicket(
+        ticket.ticket_id,
+        userIds,
+        currentUserId
+      );
 
       // After successful API call, update local state
       const newAssignedUsers: AssignedUser[] = selectedUsers.map((user) => ({
@@ -185,7 +190,11 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
   const handleUnassignUser = async (userId: number) => {
     try {
-      await ticketAssignApis.unassignUserFromTicket(ticket.ticket_id, userId);
+      await ticketAssignApis.unassignUserFromTicket(
+        ticket.ticket_id,
+        userId,
+        currentUserId
+      );
 
       setAssignedUsers((prev) => prev.filter((user) => user.userId !== userId));
       const unassignedUser = assignedUsers.find(
@@ -216,10 +225,10 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
   return (
     <>
       {ticket.status === "closed" ? (
-        <div className="w-full px-2 bg-white rounded-[38px] pb-6">
+        <div className="w-full bg-white rounded-[38px] pb-6">
           {assignedUsers.length !== 0 ? (
             <>
-              <div className="text-[#254752] px-3 text-[20px] font-sequel-sans w-full flex items-center justify-between">
+              <div className="text-[#254752] text-[20px] font-sequel-sans w-full flex items-center justify-between">
                 Users Previously Assigned To This Ticket
               </div>
               <div className="w-full px-3 mt-6 flex justify-between text-[#266472] text-s font-sequel-sans">
@@ -243,7 +252,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             </>
           ) : (
             <>
-              <div className="text-[#266472] px-3 text-[18px] font-sequel-sans w-full">
+              <div className="text-[#266472] text-[18px] font-sequel-sans w-full">
                 No Users Were Assigned To This Ticket When Closed
               </div>
             </>
@@ -251,8 +260,8 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         </div>
       ) : assignedUsers.length === 0 ? (
         <>
-          <div className="w-full px-2.5 bg-white rounded-[38px] pb-6">
-            <div className="px-3 text-[#254752] text-s font-['Sequel Sans']">
+          <div className="w-full  bg-white rounded-[38px] pb-6">
+            <div className="text-[#254752] text-s font-['Sequel Sans']">
               There are currently no users assigned to this ticket.{" "}
               <span
                 className="text-[#266472] underline hover:text-[#254752] cursor-pointer transition duration-300"
@@ -273,7 +282,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         </>
       ) : (
         <>
-          <div className="w-full px-2.5 bg-white rounded-[38px] shadow border-2 border-[#254752]/30 shadow-xl pb-6 mb-10">
+          <div className="w-full px-2.5 bg-white rounded-md  shadow-2xl shadow-[#325a67] pb-6 mb-10">
             <div className="text-[#254752] text-[20px] font-sequel-sans w-full px-[13px] pt-6 flex items-center justify-between">
               Users Assigned To This Ticket
             </div>
@@ -301,7 +310,6 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
 
             {assignedUsers.length < MAX_USERS && (
               <div className="flex justify-center mt-3">
-                
                 <button
                   className="px-3 py-1 items-center bg-[#266472] rounded-md hover:bg-[#254752] transition duration-300 text-center text-white text-s font-['Sequel Sans']"
                   onClick={handleOpenModal}

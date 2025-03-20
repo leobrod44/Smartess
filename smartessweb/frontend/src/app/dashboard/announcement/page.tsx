@@ -9,11 +9,13 @@ import FilterComponent from "@/app/components/FilterList";
 import { Pagination } from "@mui/material";
 import { useUserContext } from "@/context/UserProvider";
 import { useProjectContext } from "@/context/ProjectProvider";
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 interface AnnouncementApiData {
   announcement_id: number;
   announcement_type: "organization" | "project";
   user_id: number;
+  user_profile_picture: string | null;
   name: string | null;
   org_id: number | null;
   org_name: string | null;
@@ -31,6 +33,7 @@ interface AnnouncementItem {
   title: string;
   tag: "Organization" | "Project";
   user_id: number;
+  user_profile_picture: string | null;
   author: string;
   description: string;
   date: Date;
@@ -44,6 +47,8 @@ const AnnouncementPage = () => {
   const { selectedProjectId } = useProjectContext();
   const { userId } = useUserContext();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [filteredAnnouncements, setFilteredAnnouncements] = useState<
     AnnouncementItem[]
@@ -52,7 +57,7 @@ const AnnouncementPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const announcementsPerPage = 5;
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const [query, setQuery] = useState("");
 
   const filterOptions = [
     "Most Likes",
@@ -75,6 +80,7 @@ const AnnouncementPage = () => {
           author: ann.name ?? "",
           description: ann.content,
           user_id: ann.user_id,
+          user_profile_picture: ann.user_profile_picture || null,
           date: new Date(ann.created_at),
           keyword: ann.keywords?.join(", ") || "",
           likes: ann.like_count || 0,
@@ -108,6 +114,7 @@ const AnnouncementPage = () => {
 
     const fetchAnnouncements = async () => {
       try {
+        setIsLoading(true);
         const response = await announcementApi.getAnnouncements(userId);
         const fetchedAnnouncements: AnnouncementItem[] =
           response.announcements.map((ann: AnnouncementApiData) => ({
@@ -121,6 +128,7 @@ const AnnouncementPage = () => {
             description: ann.content,
             date: new Date(ann.created_at),
             user_id: ann.user_id,
+            user_profile_picture: ann.user_profile_picture || null,
             keyword: ann.keywords?.join(", ") || "",
             likes: ann.like_count || 0,
             files:
@@ -144,18 +152,14 @@ const AnnouncementPage = () => {
 
         setAnnouncements(projectFiltered);
         setFilteredAnnouncements(projectFiltered);
+        setIsLoading(false);
       } catch (error) {
         console.error("Error fetching announcements:", error);
       }
     };
 
     fetchAnnouncements();
-    setIsMounted(true);
   }, [router, userId, selectedProjectId]);
-
-  if (!isMounted) {
-    return <p>Loading...</p>;
-  }
 
   const handleSearch = (query: string) => {
     const filtered = announcements.filter((announcement) => {
@@ -183,6 +187,7 @@ const AnnouncementPage = () => {
         tagMatch
       );
     });
+    setQuery(query);
     setFilteredAnnouncements(filtered);
     setCurrentPage(1);
   };
@@ -241,8 +246,8 @@ const AnnouncementPage = () => {
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div>
-      <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 min-h-screen flex flex-col">
+    <div className="relative pb-20">
+      <div className="mx-4 lg:mx-8 min-h-screen flex flex-col">
         <div className="flex items-center justify-between">
           <div className="text-[#325a67] text-[30px] leading-10 tracking-tight">
             Announcements
@@ -255,15 +260,39 @@ const AnnouncementPage = () => {
             <Searchbar onSearch={handleSearch} />
           </div>
         </div>
+
+        <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">
+          View the history of announcements that have been sent to tenants
+          across your organization. Send your own announcement by clicking the
+          plus button.{" "}
+        </h2>
+
         <div className="flex flex-col gap-4">
-          {currentAnnouncements.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+            </div>
+          ) : announcements.length === 0 ? (
+            // No announcements at all
+            <div className="unit-container max-w-fit sm:max-w-full mx-auto text-center">
+              <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4 p-6">
+                <p className="text-[#325a67] text-lg">
+                  No announcements available.
+                </p>
+                <p className="text-gray-500">Be the first to post one!</p>
+                <button
+                  onClick={openModal}
+                  className="mt-4 px-4 py-2 bg-[#254752] text-white rounded-lg hover:bg-[#14323B] transition duration-300"
+                >
+                  Create Announcement
+                </button>
+              </div>
+            </div>
+          ) : currentAnnouncements.length === 0 ? (
+            //no filtered announcements
             <div className="unit-container max-w-fit sm:max-w-full mx-auto">
               <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
-                <p className="text-[#729987] text-xl font-sequel-sans-black text-center p-2">
-                  No results found.
-                  <br />
-                  Please adjust your filters or search criteria.
-                </p>
+                <NoResultsFound searchItem={query} />
               </div>
             </div>
           ) : (
@@ -278,6 +307,7 @@ const AnnouncementPage = () => {
                 description={announcement.description}
                 likes={announcement.likes}
                 files={announcement.files}
+                userProfilePicture={announcement.user_profile_picture}
               />
             ))
           )}
@@ -294,7 +324,7 @@ const AnnouncementPage = () => {
         onClose={closeModal}
         onAnnouncementAdded={handleAnnouncementAdded}
       />
-      <div className="mt-4 flex justify-center">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}

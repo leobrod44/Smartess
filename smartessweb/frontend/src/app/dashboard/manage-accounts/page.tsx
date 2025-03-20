@@ -11,15 +11,7 @@ import { useRouter } from "next/navigation";
 import { useProjectContext } from "@/context/ProjectProvider";
 import { manageAccountsApi } from "@/api/page";
 import AddUserModal from "@/app/components/ManageUsersComponents/AddUserForm";
-
-/*  Mock current organization user data, this is different from the data 
-    displayed on the page (all organization users) which you can find in the mockData.tsx
-    This data is only used for the logic of displaying different UI
-    based on the current user role (master,admn, or basic) and addresses -
-     only organization users that share the same addresses as currentUser
-    are displayed in the page as they should belong to the same organizations 
-    ie: currentUser is an organization user currently logged into the system 
-*/
+import NoResultsFound from "@/app/components/NoResultsFound";
 
 const ManageUsersPage = () => {
   const router = useRouter();
@@ -33,7 +25,7 @@ const ManageUsersPage = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentOrg, setCurrentOrg] = useState<number | undefined>(undefined);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 8;
 
   // Add roles to filter options
@@ -131,6 +123,7 @@ const ManageUsersPage = () => {
 
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const responseCurrentUser = await manageAccountsApi.getCurrentUserApi(
           token
         );
@@ -141,6 +134,9 @@ const ManageUsersPage = () => {
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email,
+          phoneNumber: tempCurrentUser.phoneNumber,
+          profilePictureUrl: tempCurrentUser.profilePictureUrl || null,
         });
 
         const responseOrgUsers = await manageAccountsApi.getOrgUsersApi(token);
@@ -164,7 +160,7 @@ const ManageUsersPage = () => {
       } catch (err) {
         console.error("Error fetching organization users:", err);
       } finally {
-        //setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -246,8 +242,8 @@ const ManageUsersPage = () => {
   };
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="flex items-center pt-4 justify-between mb-8">
+    <div className="relative pb-20 mx-4 lg:mx-8 min-h-screen flex flex-col">
+      <div className="flex items-center pt-4 justify-between">
         <div className="w-full text-[#325a67] text-[30px] leading-10 tracking-tight whitespace-nowrap">
           Manage Your Organization Users
         </div>
@@ -259,6 +255,11 @@ const ManageUsersPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
+      <h2 className="text-left text-[#325a67] text-[16px] leading-2 tracking-tight pb-10">
+        View and manage the employees across your organization. Access their
+        information and manage their assignment to projects and their
+        privileges.{" "}
+      </h2>
 
       <div className="flex font-semibold border-b-2 border-black pb-2 mb-4">
         <p className="flex-1 pl-2 text-[#30525E] text-lg font-sequel-sans-medium leading-tight tracking-tight">
@@ -287,30 +288,46 @@ const ManageUsersPage = () => {
           </>
         )}
       </div>
-
       <div className="flex-grow">
-        {currentItems.map(({ user, addresses }) => {
-          const addressString =
-            addresses.length > 1
-              ? `${addresses[0]} (+${addresses.length - 1} more)`
-              : addresses[0];
+        {isLoading ? (
+          <div className="flex items-center justify-center h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+          </div>
+        ) : currentItems.length === 0 && searchQuery === "" ? (
+          <p className="text-[#729987] text-xl font-sequel-sans-black text-left p-2">
+            No Data Available
+          </p>
+        ) : filteredUsers.length === 0 && searchQuery !== "" ? (
+          <div className="unit-container max-w-fit sm:max-w-full mx-auto">
+            <div className="bg-[#fff] rounded-[7px] w-full mt-4 mb-4">
+              <NoResultsFound searchItem={searchQuery} />
+            </div>
+          </div>
+        ) : (
+          currentItems.map(({ user, addresses }) => {
+            const addressString =
+              addresses.length > 1
+                ? `${addresses[0]} (+${addresses.length - 1} more)`
+                : addresses[0];
 
-          return (
-            <ManageAccountsList
-              key={user.individualId}
-              uid={user.individualId}
-              address={addressString}
-              userName={`${user.firstName} ${user.lastName}`}
-              permission={user.role}
-              currentUserRole={currentUser?.role || "basic"}
-              addresses={addresses || []}
-              currentOrg={currentOrg}
-              onUserDeleted={handleRemoveUser}
-            />
-          );
-        })}
+            return (
+              <ManageAccountsList
+                key={user.individualId}
+                uid={user.individualId}
+                address={addressString}
+                userName={`${user.firstName} ${user.lastName}`}
+                permission={user.role}
+                currentUserRole={currentUser?.role || "basic"}
+                addresses={addresses || []}
+                currentOrg={currentOrg}
+                profilePictureUrl={user.profilePictureUrl || null}
+                onUserDeleted={handleRemoveUser}
+              />
+            );
+          })
+        )}
       </div>
-      <div className="mt-4 flex justify-center">
+      <div className="absolute bottom-0 left-0 w-full bg-white pb-0 flex justify-center">
         <Pagination
           className="custom-pagination"
           count={totalPages}

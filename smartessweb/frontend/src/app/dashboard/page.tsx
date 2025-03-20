@@ -9,6 +9,7 @@ import FilterComponent from "../components/FilterList";
 import { Project } from "../mockData";
 import { projectApi } from "@/api/page";
 import { useProjectContext } from "@/context/ProjectProvider";
+import NoResultsFound from "../components/NoResultsFound";
 
 const DashboardPage = () => {
   const router = useRouter();
@@ -17,6 +18,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { selectedProjectId } = useProjectContext();
+  const [query, setQuery] = useState("");
 
   const filterOptionsDashboard = [
     "Address A-Z",
@@ -83,6 +85,7 @@ const DashboardPage = () => {
     });
 
     setFilteredProjects(filtered);
+    setQuery(query);
   };
 
   const handleFilterChange = (filterValue: string) => {
@@ -111,8 +114,8 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-[#14323B] text-lg">Loading projects...</div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
       </div>
     );
   }
@@ -126,10 +129,14 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="border border-black rounded-lg p-6 mx-4 lg:mx-8 mt-6 min-h-screen flex flex-col">
-      <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight pb-4">
+    <div className="mx-4 lg:mx-8  min-h-screen flex flex-col">
+      <div className="text-left text-[#325a67] text-[30px] leading-10 tracking-tight">
         Welcome to Your Dashboard
       </div>
+      <h2 className=" text-left text-[#325a67] text-[16px] leading-10 tracking-tight pb-4">
+        View and manage information about your organization&apos;s overall
+        health, and the projects within it.
+      </h2>
       <DashboardWidget />
 
       <div className="flex items-center pt-4 justify-between">
@@ -144,7 +151,19 @@ const DashboardPage = () => {
           <Searchbar onSearch={handleSearch} />
         </div>
       </div>
-      <ProjectComponent projects={filteredProjects} />
+      <h2 className="text-left text-[#14323B] text-[16px] leading-2 tracking-tight pb-4">
+        {" "}
+        <span className="text-[#325a67] font-bold"> TIP:</span> Use the Project
+        Filter on the left, or the search bar and filter above to narrow
+        results.
+      </h2>
+      {projects.length === 0 ? (
+        <p>No data available</p>
+      ) : filteredProjects.length === 0 ? (
+        <NoResultsFound searchItem={query} />
+      ) : (
+        <ProjectComponent projects={filteredProjects} />
+      )}
     </div>
   );
 };

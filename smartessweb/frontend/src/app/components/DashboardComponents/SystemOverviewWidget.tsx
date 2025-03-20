@@ -28,7 +28,7 @@ const DashboardOverviewWidget = ({
         </div>
         <div className="bg-[#325A67] w-full h-full place-content-around rounded-[7px] m-0.5">
           <h3 className="text-3xl">{systemOverview?.totalAdminUsers}</h3>
-          <h3 className="text-xs pb-1">Total Admin Users</h3>
+          <h3 className="text-xs pb-1">Total Employees</h3>
         </div>
       </div>
     </div>
