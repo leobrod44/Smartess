@@ -4,53 +4,51 @@ import { showToastError, showToastSuccess } from "../Toast";
 import { useUserContext } from "@/context/UserProvider";
 import { manageAccountsApi } from "@/api/page";
 
-const ManagePhoneNumberModal = ({
+const ManageEmailModal = ({
   isOpen,
   onClose,
-  onResetPhoneNumber,
+  onResetEmail,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onResetPhoneNumber: (phoneNumber: string) => void;
+  onResetEmail: (email: string) => void;
 }) => {
-  const [newPhoneNumber, setNewPhoneNumber] = useState("");
-  const [confirmPhoneNumber, setConfirmPhoneNumber] = useState("");
-  const { setUserPhoneNumber } = useUserContext();
+  const [newEmail, setNewEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
+  const { setUserEmail } = useUserContext();
 
-  const handleNewPhoneNumberInput = (
+  const handleNewEmailInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewEmail(value);
+  };
+
+  const handleConfirmNewEmailInput = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    setNewPhoneNumber(value);
+    setConfirmEmail(value);
   };
 
-  const handleConfirmNewPhoneNumberInput = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setConfirmPhoneNumber(value);
-  };
-
-  // Submit Form for Phone number change
+  // Submit Form for Email change
   const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await handleReset();
   };
 
   const handleReset = async () => {
-    const phoneRegex = /^(\d{3}-\d{3}-\d{4}|\d{10})$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!newPhoneNumber || !confirmPhoneNumber) {
+    if (!newEmail || !confirmEmail) {
       showToastError("Please fill in all required fields");
       return;
     }
-    if (!phoneRegex.test(confirmPhoneNumber)) {
-      showToastError("Please enter a valid 10-digit phone number");
+    if (!emailRegex.test(confirmEmail)) {
+      showToastError("Please enter a valid email");
       return;
     }
 
-    if (newPhoneNumber !== confirmPhoneNumber) {
-      showToastError("Phone numbers do not match.");
+    if (newEmail !== confirmEmail) {
+      showToastError("Email do not match.");
       return;
     }
 
@@ -62,22 +60,22 @@ const ManagePhoneNumberModal = ({
       }
 
       const response = await manageAccountsApi.updateUserInfoApi(token, {
-        phoneNumber: confirmPhoneNumber,
+        email: confirmEmail,
       });
 
       const updatedUser = response.user;
-      if (updatedUser && updatedUser.phoneNumber) {
-        setUserPhoneNumber(updatedUser.phoneNumber);
+      if (updatedUser && updatedUser.email) {
+        setUserEmail(updatedUser.email);
       }
 
-      showToastSuccess("Phone number has been changed");
-      onResetPhoneNumber(confirmPhoneNumber);
-      setNewPhoneNumber("");
-      setConfirmPhoneNumber("");
+      showToastSuccess("Email has been changed");
+      onResetEmail(confirmEmail);
+      setNewEmail("");
+      setConfirmEmail("");
       onClose();
     } catch (error) {
       console.log(error);
-      showToastError("Failed to update phone number");
+      showToastError("Failed to update email");
     }
   };
 
@@ -95,12 +93,12 @@ const ManagePhoneNumberModal = ({
           </button>
           <div className="flex justify-center">
             <h2 className="text-4xl text-[#30525E] pt-10 font-sequel-sans font-extrabold">
-              Modify Phone Number
+              Modify Email
             </h2>
           </div>
           <div className="flex justify-center text-[#254752] text-xs mb-5">
             <h3 className="text-sm text-[red] pt-5 font-sequel-sans-regular">
-              Please enter a valid new phone number.
+              Please enter a valid new email.
             </h3>
           </div>
 
@@ -108,28 +106,28 @@ const ManagePhoneNumberModal = ({
             <div className="flex items-center gap-4">
               <div className="w-1/3">
                 <label className="text-sm font-sequel-sans-regular text-right block">
-                  New Phone number
+                  New Email
                 </label>
               </div>
               <input
                 type="text"
-                name="phonenumber"
-                value={newPhoneNumber}
-                onChange={handleNewPhoneNumberInput}
+                name="email"
+                value={newEmail}
+                onChange={handleNewEmailInput}
                 className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-[290px]"
               />
             </div>
             <div className="flex items-center gap-4">
               <div className="w-1/3">
                 <label className="text-sm font-sequel-sans-regular text-right block">
-                  Confirm New Phone number
+                  Confirm New Email
                 </label>
               </div>
               <input
                 type="text"
-                name="phonenumber"
-                value={confirmPhoneNumber}
-                onChange={handleConfirmNewPhoneNumberInput}
+                name="email"
+                value={confirmEmail}
+                onChange={handleConfirmNewEmailInput}
                 className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-[290px]"
               />
             </div>
@@ -157,4 +155,4 @@ const ManagePhoneNumberModal = ({
   );
 };
 
-export default ManagePhoneNumberModal;
+export default ManageEmailModal;

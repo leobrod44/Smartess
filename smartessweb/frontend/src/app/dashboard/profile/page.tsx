@@ -1,11 +1,22 @@
 "use client";
 
+import React, { useState } from "react";
 import ProfileCard from "@/app/components/ProfileComponents/ProfileCard";
 import ProfileInfo from "@/app/components/ProfileComponents/ProfileInfo";
 import ManagePasswordModal from "@/app/components/ProfileComponents/ManagePasswordModal";
 import ManagePhoneNumberModal from "@/app/components/ProfileComponents/ManagePhoneNumberModal";
-import { useState } from "react";
+import ManageEmailModal from "@/app/components/ProfileComponents/ManageEmailModal";
+import ManageFirstNameModal from "@/app/components/ProfileComponents/ManageFirstNameModal";
+import ManageLastNameModal from "@/app/components/ProfileComponents/ManageLastNameModal";
 import { useUserContext } from "@/context/UserProvider";
+
+type ModalType =
+  | "password"
+  | "phone"
+  | "email"
+  | "firstName"
+  | "lastName"
+  | null;
 
 const ProfilePage = () => {
   const {
@@ -18,34 +29,10 @@ const ProfilePage = () => {
     userPhoneNumber,
   } = useUserContext();
 
-  const [isManagePasswordOpen, setManagePasswordOpen] = useState(false);
-  const [isManagePhoneNumberOpen, setManagePhoneNumberOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
 
-  // Modal handler for password
-  const handlePasswordOpenModal = () => {
-    setManagePasswordOpen(true);
-  };
-
-  const handlePasswordCloseModal = () => {
-    setManagePasswordOpen(false);
-  };
-
-  const handlePasswordReset = () => {
-    setManagePasswordOpen(false);
-  };
-
-  // Modal handler for phone number
-  const handlePhoneNumberOpenModal = () => {
-    setManagePhoneNumberOpen(true);
-  };
-
-  const handlePhoneNumberCloseModal = () => {
-    setManagePhoneNumberOpen(false);
-  };
-
-  const handlePhoneNumberReset = () => {
-    setManagePhoneNumberOpen(false);
-  };
+  const openModal = (modalType: ModalType) => setActiveModal(modalType);
+  const closeModal = () => setActiveModal(null);
 
   const currentUser = {
     userId: userId,
@@ -74,25 +61,50 @@ const ProfilePage = () => {
           {/* Right panel */}
           <ProfileInfo
             currentUser={currentUser}
-            onOpenPassword={handlePasswordOpenModal}
-            onOpenPhoneNumber={handlePhoneNumberOpenModal}
+            onOpenPassword={() => openModal("password")}
+            onOpenPhoneNumber={() => openModal("phone")}
+            onOpenEmail={() => openModal("email")}
+            onOpenFirstName={() => openModal("firstName")}
+            onOpenLastName={() => openModal("lastName")}
           />
         </div>
       </div>
-      {/* ModifyPassword Modal */}{" "}
-      {isManagePasswordOpen && (
+
+      {activeModal === "password" && (
         <ManagePasswordModal
-          isOpen={isManagePasswordOpen}
-          onClose={handlePasswordCloseModal}
-          onResetPassword={handlePasswordReset}
+          isOpen={true}
+          onClose={closeModal}
+          onResetPassword={closeModal}
         />
       )}
-      {/* PhoneNumber Modal */}
-      {isManagePhoneNumberOpen && (
+
+      {activeModal === "phone" && (
         <ManagePhoneNumberModal
-          isOpen={isManagePhoneNumberOpen}
-          onClose={handlePhoneNumberCloseModal}
-          onResetPhoneNumber={handlePhoneNumberReset}
+          isOpen={true}
+          onClose={closeModal}
+          onResetPhoneNumber={closeModal}
+        />
+      )}
+
+      {activeModal === "email" && (
+        <ManageEmailModal
+          isOpen={true}
+          onClose={closeModal}
+          onResetEmail={closeModal}
+        />
+      )}
+      {activeModal === "firstName" && (
+        <ManageFirstNameModal
+          isOpen={true}
+          onClose={closeModal}
+          onResetFirstName={closeModal}
+        />
+      )}
+      {activeModal === "lastName" && (
+        <ManageLastNameModal
+          isOpen={true}
+          onClose={closeModal}
+          onResetLastName={closeModal}
         />
       )}
     </div>

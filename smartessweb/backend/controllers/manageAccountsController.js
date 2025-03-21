@@ -136,7 +136,14 @@ exports.updateUserInfo = async (req, res) => {
       return res.status(500).json({ error: "Failed to update user info" });
     }
 
-    return res.status(200).json({ user: updatedUser });
+    const formattedUser = {
+      ...updatedUser,
+      firstName: updatedUser.first_name,
+      lastName: updatedUser.last_name,
+      phoneNumber: updatedUser.phone_number,
+    };
+
+    return res.status(200).json({ user: formattedUser });
   } catch (error) {
     console.error("Server Error:", error);
     return res.status(500).json({ error: "Internal server error" });
