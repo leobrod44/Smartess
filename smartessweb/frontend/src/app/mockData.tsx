@@ -89,7 +89,7 @@ export interface Individual {
 
   phoneNumber: string;
 
-  profilePictureUrl: string | null;
+  profilePictureUrl?: string | null;
 }
 
 export interface Unit {
