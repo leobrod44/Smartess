@@ -3,7 +3,6 @@ import React from "react";
 import { useState } from "react";
 import { showToastError, showToastSuccess } from "../Toast";
 import { manageAccountsApi } from "@/api/page";
-import { authApi } from "@/api/components/DashboardNavbar";
 import { useRouter } from "next/navigation";
 import { useUserContext } from "@/context/UserProvider";
 
