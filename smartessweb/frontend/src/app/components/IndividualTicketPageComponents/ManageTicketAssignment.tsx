@@ -18,7 +18,9 @@ interface AssignedUser {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber: string;
   resolved: boolean;
+  profilePictureUrl?: string | null;
 }
 
 function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
@@ -63,6 +65,8 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
           address: tempCurrentUser.address,
           firstName: tempCurrentUser.firstName,
           lastName: tempCurrentUser.lastName,
+          email: tempCurrentUser.email,
+          phoneNumber: tempCurrentUser.phoneNumber,
         });
       } catch (err) {
         console.error("Error fetching user role:", err);
@@ -125,7 +129,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         userId: user.individualId,
         firstName: user.firstName,
         lastName: user.lastName,
-        email: "", // You might want to include email in the API response
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        profilePictureUrl: user.profilePictureUrl,
         resolved: false,
       }));
 
@@ -168,7 +174,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         userId: parseInt(currentUser.userId),
         firstName: currentUser.firstName,
         lastName: currentUser.lastName,
-        email: "",
+        email: currentUser.email,
+        phoneNumber: currentUser.phoneNumber,
+        profilePictureUrl: currentUser.profilePictureUrl,
         resolved: false,
       };
 
@@ -209,6 +217,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
             firstName: unassignedUser.firstName,
             lastName: unassignedUser.lastName,
             role: "basic",
+            email: unassignedUser.email,
+            phoneNumber: unassignedUser.phoneNumber,
+            profilePictureUrl: unassignedUser.profilePictureUrl,
           },
         ]);
       }
@@ -246,6 +257,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     role: "basic",
+                    email: user.email,
+                    phoneNumber: user.phoneNumber,
+                    profilePictureUrl: null,
                   }}
                 />
               ))}
@@ -303,6 +317,9 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                   firstName: user.firstName,
                   lastName: user.lastName,
                   role: "basic",
+                  email: user.email,
+                  phoneNumber: user.phoneNumber,
+                  profilePictureUrl: null,
                 }}
                 onUnassignClick={handleUnassignUser}
               />

@@ -68,6 +68,8 @@ const IndividualTicketPage = ({ params }: { params: { ticketId: string } }) => {
           address: responseCurrentUser.currentUser.address,
           firstName: responseCurrentUser.currentUser.firstName,
           lastName: responseCurrentUser.currentUser.lastName,
+          email: responseCurrentUser.currentUser.email,
+          phoneNumber: responseCurrentUser.currentUser.phoneNumber,
         });
 
         const { ticket } = await ticketsApi.getIndividualTicket(
