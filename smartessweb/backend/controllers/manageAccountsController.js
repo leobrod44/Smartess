@@ -86,6 +86,88 @@ exports.getCurrentUser = async (req, res) => {
   }
 };
 
+exports.updateUserInfo = async (req, res) => {
+  try {
+    const token = req.token;
+
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: "Invalid token or user not found" });
+    }
+
+    const { email, firstName, lastName, phoneNumber, password } = req.body;
+
+    if (email) {
+      const { data: updatedAuthUser, error: authUpdateError } =
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          email: email,
+        });
+
+      if (authUpdateError) {
+        console.error(
+          "Error updating Supabase Auth user email:",
+          authUpdateError
+        );
+        return res
+          .status(500)
+          .json({ error: "Failed to update Auth user email" });
+      }
+    }
+
+    if (password) {
+      const { data: updatedAuthUser, error: authUpdateError } =
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          password: password,
+        });
+
+      if (authUpdateError) {
+        console.error(
+          "Error updating Supabase Auth user password:",
+          authUpdateError
+        );
+        return res
+          .status(500)
+          .json({ error: "Failed to update Auth user password" });
+      }
+    }
+
+    const updateFields = {};
+    if (email) updateFields.email = email;
+    if (firstName) updateFields.first_name = firstName;
+    if (lastName) updateFields.last_name = lastName;
+    if (phoneNumber) updateFields.phone_number = phoneNumber;
+    if (password) updateFields.password = password;
+
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from("user")
+      .update(updateFields)
+      .eq("email", user.email)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error("Error updating user info in DB:", updateError);
+      return res.status(500).json({ error: "Failed to update user info" });
+    }
+
+    const formattedUser = {
+      ...updatedUser,
+      firstName: updatedUser.first_name,
+      lastName: updatedUser.last_name,
+      phoneNumber: updatedUser.phone_number,
+    };
+
+    return res.status(200).json({ user: formattedUser });
+  } catch (error) {
+    console.error("Server Error:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.storeProfilePicture = async (req, res) => {
   try {
     const token = req.token;

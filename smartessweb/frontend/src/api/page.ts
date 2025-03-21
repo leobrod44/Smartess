@@ -53,6 +53,36 @@ export const manageAccountsApi = {
     return data;
   },
 
+  updateUserInfoApi: async (
+    token: string,
+    userUpdates: {
+      email?: string;
+      firstName?: string;
+      lastName?: string;
+      phoneNumber?: string;
+      password?: string;
+    }
+  ) => {
+    const response = await fetch(
+      `${API_URL}/manage-accounts/update-user-info`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userUpdates),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to update user info");
+    }
+    return data;
+  },
+
   storeProfilePictureApi: async (token: string, formData: FormData) => {
     const response = await fetch(
       `${API_URL}/manage-accounts/change-profile-picture`,
