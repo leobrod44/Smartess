@@ -1,6 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import { showToastError, showToastSuccess } from "../Toast";
+import { useUserContext } from "@/context/UserProvider";
+import { manageAccountsApi } from "@/api/page";
 
 const ManagePhoneNumberModal = ({
   isOpen,
@@ -11,33 +13,31 @@ const ManagePhoneNumberModal = ({
   onClose: () => void;
   onResetPhoneNumber: (phoneNumber: string) => void;
 }) => {
-  const [newPhoneNumber, setnewPhoneNumber] = useState("");
+  const [newPhoneNumber, setNewPhoneNumber] = useState("");
   const [confirmPhoneNumber, setConfirmPhoneNumber] = useState("");
+  const { setUserPhoneNumber } = useUserContext();
 
   const handleNewPhoneNumberInput = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    setnewPhoneNumber(value);
-    // For backend and debugging
-    console.log(value);
+    setNewPhoneNumber(value);
   };
 
   const handleConfirmNewPhoneNumberInput = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    // For backend and debugging
     setConfirmPhoneNumber(value);
   };
 
   // Submit Form for Phone number change
-  const handleFormSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleReset();
+    await handleReset();
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const phoneRegex = /^(\d{3}-\d{3}-\d{4}|\d{10})$/;
 
     if (!newPhoneNumber || !confirmPhoneNumber) {
@@ -54,10 +54,31 @@ const ManagePhoneNumberModal = ({
       return;
     }
 
-    showToastSuccess("Phone number has been changed");
-    onResetPhoneNumber(confirmPhoneNumber);
-    setnewPhoneNumber("");
-    setConfirmPhoneNumber("");
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToastError("No authentication token found");
+        return;
+      }
+
+      const response = await manageAccountsApi.updateUserInfoApi(token, {
+        phoneNumber: confirmPhoneNumber,
+      });
+
+      const updatedUser = response.user;
+      if (updatedUser && updatedUser.phone_number) {
+        setUserPhoneNumber(updatedUser.phone_number);
+      }
+
+      showToastSuccess("Phone number has been changed");
+      onResetPhoneNumber(confirmPhoneNumber);
+      setNewPhoneNumber("");
+      setConfirmPhoneNumber("");
+      onClose();
+    } catch (error) {
+      console.log(error);
+      showToastError("Failed to update phone number");
+    }
   };
 
   if (!isOpen) return null;
