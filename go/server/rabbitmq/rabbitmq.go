@@ -39,7 +39,7 @@ func Init() (RabbitMQServer, error) {
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
-
+	// Need to create a stream environment for the video stream handler the way it was done on producer side but now for consumer
 	env, err := stream.NewEnvironment(
 		stream.NewEnvironmentOptions().
 			SetUri(os.Getenv("RABBITMQ_STREAM_URI")).
@@ -98,6 +98,7 @@ func Init() (RabbitMQServer, error) {
 				return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
 					exchangeConfig.Name, queueConfig.RoutingKey, err)
 			}
+			// Ignore the website-ready queue (Need not handling, only for users to directly consume from this queue from the website)
 			if queue.Name == "website.alert" {
 				continue
 			}
@@ -159,7 +160,6 @@ func setHandler(exchange string, queue string, mongoClient *mongo.Client, instan
 	case "alerts":
 		return handlers.NewAlertHandler(mongoClient, instance), nil
 	case "videostream":
-		//return handlers.NewVideoHandler(), nil
 		return handlers.NewControllerHandler(instance, env), nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue)
