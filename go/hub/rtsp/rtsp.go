@@ -41,6 +41,8 @@ func (d *CameraEnum) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		*d = ANT
 	case "MOCK":
 		*d = MOCK
+	case "ANTMOCK":
+		*d = ANTMOCK
 	default:
 		return fmt.Errorf("invalid CameraEnum value: %s", s)
 	}
@@ -52,10 +54,11 @@ const (
 	REAL CameraEnum = iota
 	ANT
 	MOCK
+	ANTMOCK
 )
 
 func (d CameraEnum) String() string {
-	return [...]string{"REAL", "ANT", "MOCK"}[d]
+	return [...]string{"REAL", "ANT", "MOCK", "ANTMOCK"}[d]
 }
 
 type CameraConfig struct {
@@ -183,6 +186,8 @@ func (rtsp *RtspProcessor) Start() {
 			rtsp.streamRTSP(&cam, ctx)
 		}(camera, &ctx)
 
+		// Special reserved queue for sending the name of camera (i.e. the name of its assigned RabbitMQ Stream)
+		// This is done in parallel to other RTSP processor task once when starting everything initially
 		go func(ctx *StreamContext, producer *stream.Producer) {
 			defer wg.Done()
 
@@ -244,40 +249,40 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		// Log and return error if directory creation fails
 		return nil, fmt.Errorf("error creating directory %v: %v", tmpDir, err)
 	}
+	STANDARD_OPTIONS := []string{
+		// RTSP Transport settings
+		"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+		"-i", camera.StreamURL, // Input RTSP stream
+		"-buffer_size", "1024000", // Set buffer size
+		"-probesize", "50M", // Increase probe size
+		"-analyzeduration", "20000000", // Increase analyze duration
+		"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
 
+		// Video encoding settings
+		"-c:v", "libx264", // Compress using H.264 codec
+		"-preset", "fast", // Use fast preset for encoding
+		"-crf", "23", // Control quality (lower = better)
+		"-r", "15", // Force frame rate
+		"-g", "30", // Set keyframe interval
+
+		// Audio settings
+		"-b:a", "64k", // Set audio bitrate
+
+		// Output format settings
+		"-f", "segment", // Enable segmentation
+		"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
+		"-segment_format", "mp4", // Output format
+		"-reset_timestamps", "1", // Reset timestamps for each segment
+		"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
+		"-segment_list_type", "m3u8", // HLS format
+		"-segment_list_size", "0", // Unlimited segments
+		"-segment_list_flags", "+live", // Make it a live playlist
+		fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
+	}
 	switch camera.Type {
 	case ANT, REAL:
 		return &FFmpegConfig{
-			options: []string{
-				// RTSP Transport settings
-				"-rtsp_transport", "tcp", // Use TCP for RTSP transport
-				"-i", camera.StreamURL, // Input RTSP stream
-				"-buffer_size", "1024000", // Set buffer size
-				"-probesize", "50M", // Increase probe size
-				"-analyzeduration", "20000000", // Increase analyze duration
-				"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
-
-				// Video encoding settings
-				"-c:v", "libx264", // Compress using H.264 codec
-				"-preset", "fast", // Use fast preset for encoding
-				"-crf", "23", // Control quality (lower = better)
-				"-r", "15", // Force frame rate
-				"-g", "30", // Set keyframe interval
-
-				// Audio settings
-				"-b:a", "64k", // Set audio bitrate
-
-				// Output format settings
-				"-f", "segment", // Enable segmentation
-				"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
-				"-segment_format", "mp4", // Output format
-				"-reset_timestamps", "1", // Reset timestamps for each segment
-				"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
-				"-segment_list_type", "m3u8", // HLS format
-				"-segment_list_size", "0", // Unlimited segments
-				"-segment_list_flags", "+live", // Make it a live playlist
-				fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
-			},
+			options:                STANDARD_OPTIONS,
 			maxRetries:             1,
 			retryDelay:             5 * time.Second,
 			bufferPostSendInterval: 100 * time.Millisecond, // Increased interval
@@ -285,61 +290,39 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		}, nil
 	case MOCK:
 		return &FFmpegConfig{
-			//options: []string{
-			//	"-rtsp_transport", "tcp", // Ensure stable RTSP stream transport
-			//	"-i", camera.StreamURL,
-			//	"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
-			//	"-preset", "ultrafast", // Adjust tradeoff between encoding speed and compression efficiency
-			//	"-tune", "zerolatency", // Reduce latency
-			//	"-profile:v", "baseline", // Set baseline profile
-			//	"-level", "3.0", // Set level to 3.0
-			//
-			//	"-pix_fmt", "yuv420p", // Pixel format
-			//	"-maxrate", "2000k", // Maximum bitrate
-			//	"-bufsize", "2000k", // Buffer size
-			//
-			//	// GOP settings
-			//	"-g", "30",
-			//	"-keyint_min", "30", // Set minimum keyframe interval
-			//
-			//	// Forcing keyframe interval
-			//	"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
-			//	"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
-			//	"-sc_threshold", "0",
-			//	"-an",       // Disable audio codec
-			//	"-f", "mp4", // Output format
-			//	"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", // Enable faststart for streaming
-			//	"-frag_duration", "1000000", // Fragment duration (1 second)
-			//},
+			options:                STANDARD_OPTIONS,
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 30 * time.Millisecond,
+			bufferReaderSize:       1024000, // Match buffer_size from ffmpeg
+		}, nil
+	case ANTMOCK:
+		return &FFmpegConfig{
 			options: []string{
-				// RTSP Transport settings
-				"-rtsp_transport", "tcp", // Use TCP for RTSP transport
-				"-i", camera.StreamURL, // Input RTSP stream
-				"-buffer_size", "1024000", // Set buffer size
-				"-probesize", "50M", // Increase probe size
-				"-analyzeduration", "20000000", // Increase analyze duration
-				"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
+				"-rtsp_transport", "tcp", // Ensure stable RTSP stream transport
+				"-i", camera.StreamURL,
+				"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
+				"-preset", "ultrafast", // Adjust tradeoff between encoding speed and compression efficiency
+				"-tune", "zerolatency", // Reduce latency
+				"-profile:v", "baseline", // Set baseline profile
+				"-level", "3.0", // Set level to 3.0
 
-				// Video encoding settings
-				"-c:v", "libx264", // Compress using H.264 codec
-				"-preset", "fast", // Use fast preset for encoding
-				"-crf", "23", // Control quality (lower = better)
-				"-r", "15", // Force frame rate
-				"-g", "30", // Set keyframe interval
+				"-pix_fmt", "yuv420p", // Pixel format
+				"-maxrate", "2000k", // Maximum bitrate
+				"-bufsize", "2000k", // Buffer size
 
-				// Audio settings
-				"-b:a", "64k", // Set audio bitrate
+				// GOP settings
+				"-g", "30",
+				"-keyint_min", "30", // Set minimum keyframe interval
 
-				// Output format settings
-				"-f", "segment", // Enable segmentation
-				"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
-				"-segment_format", "mp4", // Output format
-				"-reset_timestamps", "1", // Reset timestamps for each segment
-				"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
-				"-segment_list_type", "m3u8", // HLS format
-				"-segment_list_size", "0", // Unlimited segments
-				"-segment_list_flags", "+live", // Make it a live playlist
-				fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
+				// Forcing keyframe interval
+				"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every second
+				"-x264-params", "keyint=30:min-keyint=30", // Set both max and min keyframe interval
+				"-sc_threshold", "0",
+				"-an",       // Disable audio codec
+				"-f", "mp4", // Output format
+				"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", // Enable faststart for streaming
+				"-frag_duration", "1000000", // Fragment duration (1 second)
 			},
 			maxRetries:             5,
 			retryDelay:             5 * time.Second,
