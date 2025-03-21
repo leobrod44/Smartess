@@ -35,7 +35,7 @@ func mockHub(w http.ResponseWriter, r *http.Request) {
 			log.Println("Failed to send message:", err)
 			return
 		}
-		time.Sleep(5 * time.Hour)
+		time.Sleep(10 * time.Minute) //TODO: Usually 5 second, Temporary to test video stream and other hub features without generating alerts too much
 	}
 }
 

@@ -21,7 +21,7 @@ services:
     ports:
       - "8554:8554"
     healthcheck:
-      test: [ "CMD", "ffmpeg", "-i", "rtsp://mock_camera:8554/live", "-t", "1", "-f", "null", "/dev/null" ]
+      test: [ "CMD", "ffmpeg", "-i", "rtsp://mock_camera:8554/live", "-t", "1", "-f", "null", "/dev/null" ] #TODO: Use also/only ffprobe ?
       interval: 30s
       retries: 5
       start_period: 10s
