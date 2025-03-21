@@ -2,6 +2,10 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import React from "react";
 import { useState } from "react";
 import { showToastError, showToastSuccess } from "../Toast";
+import { manageAccountsApi } from "@/api/page";
+import { authApi } from "@/api/components/DashboardNavbar";
+import { useRouter } from "next/navigation";
+import { useUserContext } from "@/context/UserProvider";
 
 const ManagePasswordModal = ({
   isOpen,
@@ -15,6 +19,16 @@ const ManagePasswordModal = ({
   const [showNewPassword, setshowNewPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const router = useRouter();
+  const {
+    setUserId,
+    setUserEmail,
+    setUserFirstName,
+    setUserLastName,
+    setUserType,
+    setUserProfilePicture,
+    setUserPhoneNumber,
+  } = useUserContext();
 
   const handleNewPasswordInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -32,12 +46,12 @@ const ManagePasswordModal = ({
   };
 
   // Submit form with password
-  const handleFormSubmission = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    handleReset();
+    await handleReset();
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
 
     if (!newPassword || !confirmNewPassword) {
@@ -57,10 +71,49 @@ const ManagePasswordModal = ({
       return;
     }
 
-    showToastSuccess("Password has been changed");
-    onResetPassword(confirmNewPassword);
-    setNewPassword("");
-    setConfirmNewPassword("");
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        showToastError("No authentication token found");
+        return;
+      }
+
+      await manageAccountsApi.updateUserInfoApi(token, {
+        password: confirmNewPassword,
+      });
+
+      showToastSuccess("Password has been changed");
+      onResetPassword(confirmNewPassword);
+      setNewPassword("");
+      setConfirmNewPassword("");
+      onClose();
+      handleLogout();
+    } catch (error) {
+      console.log(error);
+      showToastError("Failed to update Password");
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("token");
+      setUserId("");
+      setUserEmail("");
+      setUserFirstName("");
+      setUserLastName("");
+      setUserType("");
+      setUserProfilePicture("");
+      setUserPhoneNumber("");
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+    } catch (error) {
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "An error occurred during logout"
+      );
+    }
   };
 
   if (!isOpen) return null;

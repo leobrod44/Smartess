@@ -99,7 +99,7 @@ exports.updateUserInfo = async (req, res) => {
       return res.status(401).json({ error: "Invalid token or user not found" });
     }
 
-    const { email, firstName, lastName, phoneNumber } = req.body;
+    const { email, firstName, lastName, phoneNumber, password } = req.body;
 
     if (email) {
       const { data: updatedAuthUser, error: authUpdateError } =
@@ -118,11 +118,29 @@ exports.updateUserInfo = async (req, res) => {
       }
     }
 
+    if (password) {
+      const { data: updatedAuthUser, error: authUpdateError } =
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          password: password,
+        });
+
+      if (authUpdateError) {
+        console.error(
+          "Error updating Supabase Auth user password:",
+          authUpdateError
+        );
+        return res
+          .status(500)
+          .json({ error: "Failed to update Auth user password" });
+      }
+    }
+
     const updateFields = {};
     if (email) updateFields.email = email;
     if (firstName) updateFields.first_name = firstName;
     if (lastName) updateFields.last_name = lastName;
     if (phoneNumber) updateFields.phone_number = phoneNumber;
+    if (password) updateFields.password = password;
 
     const { data: updatedUser, error: updateError } = await supabaseAdmin
       .from("user")

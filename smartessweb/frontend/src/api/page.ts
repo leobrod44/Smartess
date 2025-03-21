@@ -60,6 +60,7 @@ export const manageAccountsApi = {
       firstName?: string;
       lastName?: string;
       phoneNumber?: string;
+      password?: string;
     }
   ) => {
     const response = await fetch(
