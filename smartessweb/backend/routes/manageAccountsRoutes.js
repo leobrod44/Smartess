@@ -13,6 +13,7 @@ const {
   deleteOrgUser,
   sendInvite,
   storeProfilePicture,
+  updateUserInfo,
   sendPasswordReset,
 } = require("../controllers/manageAccountsController");
 const { verifyToken } = require("../middleware/middleware");
@@ -38,5 +39,6 @@ router.post(
   upload.single("file"),
   storeProfilePicture
 );
+router.post("/update-user-info", verifyToken, updateUserInfo);
 
 module.exports = router;
