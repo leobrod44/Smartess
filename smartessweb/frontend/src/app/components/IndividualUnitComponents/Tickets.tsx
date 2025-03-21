@@ -53,66 +53,78 @@ const Tickets = ({ tickets }: TicketsProps) => {
         Unit Tickets
       </div>
 
-      {/* Table Headers */}
-      <div className="hidden md:grid md:grid-cols-5 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
-        <div>Id</div>
-        <div>Ticket</div>
-        <div>Type</div>
-        <div>Status</div>
-        <div>Date</div>
-      </div>
-      {/* Separator Line */}
-      <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
-
-      {/* Table Rows */}
-      <div className="flex flex-col gap-6 max-h-[300px] overflow-y-auto custom-scrollbar px-2">
-        {sortedTickets.map((ticket, index) => (
-          <div
-            key={index}
-            className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-2"
-          >
-            {/* Stacked view for small screens */}
-            <div className="md:hidden text-center rounded-lg border p-2">
-              <div className="text-[#14323B] font-semibold">Id:</div>
-              {ticket.ticket_id}
-              <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
-              {ticket.description}
-              <div className="text-[#14323B] font-semibold">Type:</div>{" "}
-              {capitalizeWords(ticket.type)}
-              <div className="text-[#14323B] font-semibold">Status:</div>
-              <div className="inline-block">
-                <span
-                  className={`inline-block px-2 py-1 rounded-[20px] ${getStatusColorClasses(
-                    ticket.status
-                  )}`}
-                >
-                  {capitalizeWords(ticket.status)}
-                </span>
-              </div>
-              <div className="text-[#14323B] font-semibold">Date:</div>{" "}
-              {formatDate(ticket.created_at)}
-            </div>
-
-            {/* Table view for medium and larger screens */}
-            <div className="hidden md:block">{ticket.ticket_id}</div>
-            <div className="hidden md:block">{ticket.description}</div>
-            <div className="hidden md:block">
-              {" "}
-              {capitalizeWords(ticket.type)}
-            </div>
-            <div
-              className={`hidden md:block w-[78px] h-6 rounded-[20px] mx-auto text-center ${getStatusColorClasses(
-                ticket.status
-              )}`}
-            >
-              {capitalizeWords(ticket.status)}
-            </div>
-            <div className="hidden md:block">
-              {formatDate(ticket.created_at)}
-            </div>
+      {/* Table Headers - Only show if there are tickets */}
+      {tickets.length > 0 && (
+        <>
+          <div className="hidden md:grid md:grid-cols-5 w-full text-center text-[#14323B] font-semibold text-sm mb-2">
+            <div>Id</div>
+            <div>Ticket</div>
+            <div>Type</div>
+            <div>Status</div>
+            <div>Date</div>
           </div>
-        ))}
-      </div>
+          {/* Separator Line */}
+          <div className="w-full h-px bg-[#4b7d8d] mb-4"></div>
+        </>
+      )}
+
+      {/* No Tickets Message */}
+      {tickets.length === 0 ? (
+        <div className="text-center py-10 text-gray-500">
+          <p className="text-lg mb-2">There are currently no tickets associated with this unit.</p>
+        </div>
+      ) : (
+        /* Table Rows */
+        <div className="flex flex-col gap-6 max-h-[300px] overflow-y-auto custom-scrollbar px-2">
+          {sortedTickets.map((ticket, index) => (
+            <div
+              key={index}
+              className="md:grid md:grid-cols-5 w-full text-center text-black text-sm gap-2"
+            >
+              {/* Stacked view for small screens */}
+              <div className="md:hidden text-center rounded-lg border p-2">
+                <div className="text-[#14323B] font-semibold">Id:</div>
+                {ticket.ticket_id}
+                <div className="text-[#14323B] font-semibold">Ticket:</div>{" "}
+                {ticket.description}
+                <div className="text-[#14323B] font-semibold">Type:</div>{" "}
+                {capitalizeWords(ticket.type)}
+                <div className="text-[#14323B] font-semibold">Status:</div>
+                <div className="inline-block">
+                  <span
+                    className={`inline-block px-2 py-1 rounded-[20px] ${getStatusColorClasses(
+                      ticket.status
+                    )}`}
+                  >
+                    {capitalizeWords(ticket.status)}
+                  </span>
+                </div>
+                <div className="text-[#14323B] font-semibold">Date:</div>{" "}
+                {formatDate(ticket.created_at)}
+              </div>
+
+              {/* Table view for medium and larger screens */}
+              <div className="hidden md:block">{ticket.ticket_id}</div>
+              <div className="hidden md:block">{ticket.description}</div>
+              <div className="hidden md:block">
+                {" "}
+                {capitalizeWords(ticket.type)}
+              </div>
+              <div
+                className={`hidden md:block w-[78px] h-6 rounded-[20px] mx-auto text-center ${getStatusColorClasses(
+                  ticket.status
+                )}`}
+              >
+                {capitalizeWords(ticket.status)}
+              </div>
+              <div className="hidden md:block">
+                {formatDate(ticket.created_at)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="flex justify-center">
         <button
           onClick={handleNavigation}
