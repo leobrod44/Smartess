@@ -7,6 +7,8 @@ interface AssignedUser {
   lastName: string;
   email: string;
   resolved: boolean;
+  phoneNumber: string;
+  profilePictureUrl?: string | null;
 }
 
 const getAssignedUsers = async (ticketId: string): Promise<AssignedUser[]> => {

@@ -4,53 +4,51 @@ import { showToastError, showToastSuccess } from "../Toast";
 import { useUserContext } from "@/context/UserProvider";
 import { manageAccountsApi } from "@/api/page";
 
-const ManagePhoneNumberModal = ({
+const ManageLastNameModal = ({
   isOpen,
   onClose,
-  onResetPhoneNumber,
+  onResetLastName,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onResetPhoneNumber: (phoneNumber: string) => void;
+  onResetLastName: (lastName: string) => void;
 }) => {
-  const [newPhoneNumber, setNewPhoneNumber] = useState("");
-  const [confirmPhoneNumber, setConfirmPhoneNumber] = useState("");
-  const { setUserPhoneNumber } = useUserContext();
+  const [newLastName, setNewLastName] = useState("");
+  const [confirmLastName, setConfirmLastName] = useState("");
+  const { setUserLastName } = useUserContext();
 
-  const handleNewPhoneNumberInput = (
+  const handleNewLastNameInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewLastName(value);
+  };
+
+  const handleConfirmNewLastNameInput = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    setNewPhoneNumber(value);
+    setConfirmLastName(value);
   };
 
-  const handleConfirmNewPhoneNumberInput = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const value = e.target.value;
-    setConfirmPhoneNumber(value);
-  };
-
-  // Submit Form for Phone number change
+  // Submit Form for LastName change
   const handleFormSubmission = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     await handleReset();
   };
 
   const handleReset = async () => {
-    const phoneRegex = /^(\d{3}-\d{3}-\d{4}|\d{10})$/;
+    const lastNameRegex = /^[A-Za-z]+(?:[ '-][A-Za-z]+)*$/;
 
-    if (!newPhoneNumber || !confirmPhoneNumber) {
+    if (!newLastName || !confirmLastName) {
       showToastError("Please fill in all required fields");
       return;
     }
-    if (!phoneRegex.test(confirmPhoneNumber)) {
-      showToastError("Please enter a valid 10-digit phone number");
+    if (!lastNameRegex.test(confirmLastName)) {
+      showToastError("Please enter a valid Last Name");
       return;
     }
 
-    if (newPhoneNumber !== confirmPhoneNumber) {
-      showToastError("Phone numbers do not match.");
+    if (newLastName !== confirmLastName) {
+      showToastError("Last Name do not match.");
       return;
     }
 
@@ -62,22 +60,22 @@ const ManagePhoneNumberModal = ({
       }
 
       const response = await manageAccountsApi.updateUserInfoApi(token, {
-        phoneNumber: confirmPhoneNumber,
+        lastName: confirmLastName,
       });
 
       const updatedUser = response.user;
-      if (updatedUser && updatedUser.phoneNumber) {
-        setUserPhoneNumber(updatedUser.phoneNumber);
+      if (updatedUser && updatedUser.last_name) {
+        setUserLastName(updatedUser.last_name);
       }
 
-      showToastSuccess("Phone number has been changed");
-      onResetPhoneNumber(confirmPhoneNumber);
-      setNewPhoneNumber("");
-      setConfirmPhoneNumber("");
+      showToastSuccess("Last Name has been changed");
+      onResetLastName(confirmLastName);
+      setNewLastName("");
+      setConfirmLastName("");
       onClose();
     } catch (error) {
       console.log(error);
-      showToastError("Failed to update phone number");
+      showToastError("Failed to update Last Name");
     }
   };
 
@@ -95,12 +93,12 @@ const ManagePhoneNumberModal = ({
           </button>
           <div className="flex justify-center">
             <h2 className="text-4xl text-[#30525E] pt-10 font-sequel-sans font-extrabold">
-              Modify Phone Number
+              Modify Last Name
             </h2>
           </div>
           <div className="flex justify-center text-[#254752] text-xs mb-5">
             <h3 className="text-sm text-[red] pt-5 font-sequel-sans-regular">
-              Please enter a valid new phone number.
+              Please enter a valid new Last Name.
             </h3>
           </div>
 
@@ -108,28 +106,28 @@ const ManagePhoneNumberModal = ({
             <div className="flex items-center gap-4">
               <div className="w-1/3">
                 <label className="text-sm font-sequel-sans-regular text-right block">
-                  New Phone number
+                  New Last Name
                 </label>
               </div>
               <input
                 type="text"
-                name="phonenumber"
-                value={newPhoneNumber}
-                onChange={handleNewPhoneNumberInput}
+                name="lastName"
+                value={newLastName}
+                onChange={handleNewLastNameInput}
                 className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-[290px]"
               />
             </div>
             <div className="flex items-center gap-4">
               <div className="w-1/3">
                 <label className="text-sm font-sequel-sans-regular text-right block">
-                  Confirm New Phone number
+                  Confirm New Last Name
                 </label>
               </div>
               <input
                 type="text"
-                name="phonenumber"
-                value={confirmPhoneNumber}
-                onChange={handleConfirmNewPhoneNumberInput}
+                name="lastName"
+                value={confirmLastName}
+                onChange={handleConfirmNewLastNameInput}
                 className="text-sm font-sequel-sans-regular border border-gray-400 rounded-lg px-3 py-1 w-[290px]"
               />
             </div>
@@ -157,4 +155,4 @@ const ManagePhoneNumberModal = ({
   );
 };
 
-export default ManagePhoneNumberModal;
+export default ManageLastNameModal;

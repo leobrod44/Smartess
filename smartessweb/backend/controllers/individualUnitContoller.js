@@ -150,14 +150,7 @@ exports.getIndividualUnit = async (req, res) => {
             type: ticket.type,
             status: ticket.status,
             created_at: ticket.created_at,
-            unit_number: "",
-            project_address: "",
-            submitted_by_email: "",
-            submitted_by_firstName: "",
-            submitted_by_lastName: "",
-            title: "",
             description: ticket.description,
-            assigned_employees: [],
           }));
 
         // Remove the owner from hubUsersData

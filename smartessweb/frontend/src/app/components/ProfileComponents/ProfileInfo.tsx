@@ -2,6 +2,9 @@ const ProfileInfo = ({
   currentUser,
   onOpenPassword,
   onOpenPhoneNumber,
+  onOpenEmail,
+  onOpenFirstName,
+  onOpenLastName,
 }: {
   currentUser: {
     firstName: string;
@@ -11,6 +14,9 @@ const ProfileInfo = ({
   };
   onOpenPassword: () => void;
   onOpenPhoneNumber: () => void;
+  onOpenEmail: () => void;
+  onOpenFirstName: () => void;
+  onOpenLastName: () => void;
 }) => {
   return (
     <div className="flex flex-col  w-full h-[680px] gap-2 drop-shadow-2xl">
@@ -33,6 +39,14 @@ const ProfileInfo = ({
                   </h1>
                 </div>
               </div>
+              <div className="flex flex-row justify-end items-center pt-5">
+                <button
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs transition duration-300 rounded-md"
+                  onClick={onOpenFirstName}
+                >
+                  Manage
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-2 border-b">
@@ -49,6 +63,14 @@ const ProfileInfo = ({
                   </h1>
                 </div>
               </div>
+              <div className="flex flex-row justify-end items-center pt-5">
+                <button
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs transition duration-300 rounded-md"
+                  onClick={onOpenLastName}
+                >
+                  Manage
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-2 border-b">
@@ -64,6 +86,14 @@ const ProfileInfo = ({
                     {currentUser.email}
                   </h1>
                 </div>
+              </div>
+              <div className="flex flex-row justify-end items-center pt-5">
+                <button
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs transition duration-300 rounded-md"
+                  onClick={onOpenEmail}
+                >
+                  Manage
+                </button>
               </div>
             </div>
           </div>
@@ -84,7 +114,7 @@ const ProfileInfo = ({
 
               <div className="flex flex-row justify-end items-center pt-5">
                 <button
-                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs hover:bg-[#1f505e] transition duration-300 rounded-md"
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs transition duration-300 rounded-md"
                   onClick={onOpenPhoneNumber}
                 >
                   Manage
@@ -109,7 +139,7 @@ const ProfileInfo = ({
 
               <div className="flex flex-row justify-end items-center pt-5">
                 <button
-                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs hover:bg-[#1f505e] transition duration-300 rounded-md"
+                  className="bg-[#266472] hover:bg-[#1f505e] w-20 h-6 text-white text-xs transition duration-300 rounded-md"
                   onClick={onOpenPassword}
                 >
                   Manage

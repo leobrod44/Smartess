@@ -15,6 +15,7 @@ import (
 	"github.com/bluenviron/gortsplib/v4"
 	stream_amqp "github.com/rabbitmq/rabbitmq-stream-go-client/pkg/amqp"
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
+	"github.com/streadway/amqp"
 	"gopkg.in/yaml.v3"
 )
 
@@ -40,6 +41,8 @@ func (d *CameraEnum) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		*d = ANT
 	case "MOCK":
 		*d = MOCK
+	case "ANTMOCK":
+		*d = ANTMOCK
 	default:
 		return fmt.Errorf("invalid CameraEnum value: %s", s)
 	}
@@ -51,10 +54,11 @@ const (
 	REAL CameraEnum = iota
 	ANT
 	MOCK
+	ANTMOCK
 )
 
 func (d CameraEnum) String() string {
-	return [...]string{"REAL", "ANT", "MOCK"}[d]
+	return [...]string{"REAL", "ANT", "MOCK", "ANTMOCK"}[d]
 }
 
 type CameraConfig struct {
@@ -103,18 +107,30 @@ func (rtsp *RtspProcessor) Start() {
 
 	var wg sync.WaitGroup
 
+	env, err := stream.NewEnvironment(
+		stream.NewEnvironmentOptions().
+			SetUri(os.Getenv("RABBITMQ_STREAM_URI")).
+			SetMaxConsumersPerClient(10).
+			SetMaxProducersPerClient(10),
+	)
+	if err != nil {
+		rtsp.Logger.Error(fmt.Sprintf("failed to create stream environment: %v", err))
+		panic(err)
+	}
+
+	defer func() {
+		if err := env.Close(); err != nil {
+			rtsp.Logger.Error(fmt.Sprintf("Failed to close stream environment: %v", err))
+		}
+	}()
+
 	for _, camera := range rtsp.cameras.CameraConfigs {
-		env, producer, err := setupStreamEnvironment(camera.Name, os.Getenv("RABBITMQ_STREAM_URI"))
+		producer, err := setupStreams(camera.Name, env)
 		if err != nil {
 			rtsp.Logger.Error(fmt.Sprintf("Failed to setup stream environment: %v", err))
 			panic(err)
 		}
 
-		defer func() {
-			if err := env.Close(); err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Failed to close stream environment: %v", err))
-			}
-		}()
 		defer func() {
 			if err := producer.Close(); err != nil {
 				rtsp.Logger.Error(fmt.Sprintf("Failed to close producer: %v", err))
@@ -170,8 +186,29 @@ func (rtsp *RtspProcessor) Start() {
 			rtsp.streamRTSP(&cam, ctx)
 		}(camera, &ctx)
 
+		// Special reserved queue for sending the name of camera (i.e. the name of its assigned RabbitMQ Stream)
+		// This is done in parallel to other RTSP processor task once when starting everything initially
 		go func(ctx *StreamContext, producer *stream.Producer) {
 			defer wg.Done()
+
+			streamName := producer.GetStreamName()
+			routingKey := streamName
+			if strings.HasPrefix(streamName, "video_stream.hub_id") {
+				routingKey = "videostream.hubid" + streamName[len("video_stream.hub_id"):]
+			}
+			err = rtsp.instance.Channel.Publish(
+				"videostream", // exchange
+				routingKey,    //key
+				true,          // mandatory
+				false,         // immediate
+				amqp.Publishing{
+					ContentType: "text/plain",
+					Body:        []byte(streamName),
+				})
+			if err != nil {
+				rtsp.Logger.Error(fmt.Sprintf("Error publishing streamName: %v", err))
+			}
+
 			rtsp.sendData(ctx, producer)
 		}(&ctx, producer)
 
@@ -212,40 +249,40 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		// Log and return error if directory creation fails
 		return nil, fmt.Errorf("error creating directory %v: %v", tmpDir, err)
 	}
+	STANDARD_OPTIONS := []string{
+		// RTSP Transport settings
+		"-rtsp_transport", "tcp", // Use TCP for RTSP transport
+		"-i", camera.StreamURL, // Input RTSP stream
+		"-buffer_size", "1024000", // Set buffer size
+		"-probesize", "50M", // Increase probe size
+		"-analyzeduration", "20000000", // Increase analyze duration
+		"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
 
+		// Video encoding settings
+		"-c:v", "libx264", // Compress using H.264 codec
+		"-preset", "fast", // Use fast preset for encoding
+		"-crf", "23", // Control quality (lower = better)
+		"-r", "15", // Force frame rate
+		"-g", "30", // Set keyframe interval
+
+		// Audio settings
+		"-b:a", "64k", // Set audio bitrate
+
+		// Output format settings
+		"-f", "segment", // Enable segmentation
+		"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
+		"-segment_format", "mp4", // Output format
+		"-reset_timestamps", "1", // Reset timestamps for each segment
+		"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
+		"-segment_list_type", "m3u8", // HLS format
+		"-segment_list_size", "0", // Unlimited segments
+		"-segment_list_flags", "+live", // Make it a live playlist
+		fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
+	}
 	switch camera.Type {
 	case ANT, REAL:
 		return &FFmpegConfig{
-			options: []string{
-				// RTSP Transport settings
-				"-rtsp_transport", "tcp", // Use TCP for RTSP transport
-				"-i", camera.StreamURL, // Input RTSP stream
-				"-buffer_size", "1024000", // Set buffer size
-				"-probesize", "50M", // Increase probe size
-				"-analyzeduration", "20000000", // Increase analyze duration
-				"-avoid_negative_ts", "make_zero", // Avoid negative timestamps
-
-				// Video encoding settings
-				"-c:v", "libx264", // Compress using H.264 codec
-				"-preset", "fast", // Use fast preset for encoding
-				"-crf", "23", // Control quality (lower = better)
-				"-r", "15", // Force frame rate
-				"-g", "30", // Set keyframe interval
-
-				// Audio settings
-				"-b:a", "64k", // Set audio bitrate
-
-				// Output format settings
-				"-f", "segment", // Enable segmentation
-				"-segment_time", fmt.Sprintf("%v", camera.SegmentTime), // Segment duration
-				"-segment_format", "mp4", // Output format
-				"-reset_timestamps", "1", // Reset timestamps for each segment
-				"-segment_list", fmt.Sprintf("%s/segments.m3u8", tmpDir), // HLS playlist
-				"-segment_list_type", "m3u8", // HLS format
-				"-segment_list_size", "0", // Unlimited segments
-				"-segment_list_flags", "+live", // Make it a live playlist
-				fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
-			},
+			options:                STANDARD_OPTIONS,
 			maxRetries:             1,
 			retryDelay:             5 * time.Second,
 			bufferPostSendInterval: 100 * time.Millisecond, // Increased interval
@@ -253,7 +290,17 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		}, nil
 	case MOCK:
 		return &FFmpegConfig{
+			options:                STANDARD_OPTIONS,
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 30 * time.Millisecond,
+			bufferReaderSize:       1024000, // Match buffer_size from ffmpeg
+		}, nil
+	case ANTMOCK:
+		return &FFmpegConfig{
 			options: []string{
+				"-rtsp_transport", "tcp", // Ensure stable RTSP stream transport
+				"-i", camera.StreamURL,
 				"-c:v", "libx264", // Video codec, libx264 corresponds to H.264
 				"-preset", "ultrafast", // Adjust tradeoff between encoding speed and compression efficiency
 				"-tune", "zerolatency", // Reduce latency
@@ -277,10 +324,10 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 				"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart", // Enable faststart for streaming
 				"-frag_duration", "1000000", // Fragment duration (1 second)
 			},
-			// maxRetries:             5,
-			// retryDelay:             5 * time.Second,
-			// bufferPostSendInterval: 30 * time.Millisecond,
-			// bufferReaderSize:       1024 * 1024,
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 30 * time.Millisecond,
+			bufferReaderSize:       1024 * 1024,
 		}, nil
 	default:
 		return nil, fmt.Errorf("invalid camera selection: %d", camera.Type)
@@ -291,42 +338,32 @@ func (c *FFmpegConfig) buildCommand() *exec.Cmd {
 	return exec.Command("ffmpeg", c.options...)
 }
 
-func setupStreamEnvironment(camera string, rabbitMQURI string) (*stream.Environment, *stream.Producer, error) {
-	env, err := stream.NewEnvironment(
-		stream.NewEnvironmentOptions().
-			SetUri(rabbitMQURI).
-			SetMaxConsumersPerClient(10).
-			SetMaxProducersPerClient(10),
-	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create stream environment: %v", err)
-	}
-
+func setupStreams(camera string, env *stream.Environment) (*stream.Producer, error) {
 	hubID := os.Getenv("HUB_IP")
 	streamName := fmt.Sprintf("video_stream.hub_id.%s.%s", hubID, camera)
 
-	err = env.DeclareStream(streamName, &stream.StreamOptions{
+	err := env.DeclareStream(streamName, &stream.StreamOptions{
 		MaxLengthBytes:      stream.ByteCapacity{}.GB(2),
 		MaxSegmentSizeBytes: stream.ByteCapacity{}.MB(50),
 	})
 	if err != nil {
 		err := env.Close()
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to close stream environment: %v", err)
+			return nil, fmt.Errorf("failed to close stream environment: %v", err)
 		}
-		return nil, nil, fmt.Errorf("failed to declare stream: %v", err)
+		return nil, fmt.Errorf("failed to declare stream: %v", err)
 	}
 
 	producer, err := env.NewProducer(streamName, nil)
 	if err != nil {
 		err := env.Close()
 		if err != nil {
-			return nil, nil, fmt.Errorf("failed to close stream environment: %v", err)
+			return nil, fmt.Errorf("failed to close stream environment: %v", err)
 		}
-		return nil, nil, fmt.Errorf("failed to create producer: %v", err)
+		return nil, fmt.Errorf("failed to create producer: %v", err)
 	}
 
-	return env, producer, nil
+	return producer, nil
 }
 
 // TODO HLS 1: If the stream abruptly stops and so segments.m3u8 playlist is not getting updated anymore, append at its EOF a "#EXT-X-ENDLIST" tag
@@ -382,7 +419,7 @@ func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Produce
 		case segmentFileContent := <-ctx.dataChan:
 			err := producer.Send(stream_amqp.NewMessage(segmentFileContent))
 			if err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to queue: %v", err)) // corrected format string
+				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to stream: %v", err)) // corrected format string
 			}
 			rtsp.Logger.Info(fmt.Sprintf("Published %v bytes to stream %v", len(segmentFileContent), producer.GetStreamName()))
 

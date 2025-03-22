@@ -85,7 +85,11 @@ export interface Individual {
 
   role: "admin" | "basic" | "master";
 
-  profilePictureUrl: string | null;
+  email: string;
+
+  phoneNumber: string;
+
+  profilePictureUrl?: string | null;
 }
 
 export interface Unit {
@@ -845,6 +849,8 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Alice",
     lastName: "Smith",
     role: "master",
+    email: "alicesmith@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -852,6 +858,8 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Bob",
     lastName: "Johnson",
     role: "basic",
+    email: "bobjohnson@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -859,6 +867,8 @@ const generateMockProjectUsers = (): Individual[] => [
     firstName: "Karen",
     lastName: "Philipeli",
     role: "basic",
+    email: "karenphilipe@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
 ];
@@ -870,6 +880,8 @@ const generateMockProjectUsers2 = (): Individual[] => [
     firstName: "Zach",
     lastName: "Brown",
     role: "basic",
+    email: "zachbrown@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -877,6 +889,8 @@ const generateMockProjectUsers2 = (): Individual[] => [
     firstName: "Aliana",
     lastName: "Prince",
     role: "admin",
+    email: "alinaprice@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
 ];
@@ -887,6 +901,8 @@ const generateMockProjectUsers3 = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    email: "sarajohnson@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -894,6 +910,8 @@ const generateMockProjectUsers3 = (): Individual[] => [
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    email: "billieeilish@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
 ];
@@ -904,6 +922,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Sara",
     lastName: "Johnson",
     role: "master",
+    email: "sarajohnson@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -911,6 +931,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Billie",
     lastName: "Eilish",
     role: "admin",
+    email: "billieeilish@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -918,6 +940,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Mark",
     lastName: "Johns",
     role: "admin",
+    email: "markjohns@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -925,6 +949,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Kellie",
     lastName: "Bells",
     role: "admin",
+    email: "kelliebells@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -932,6 +958,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Kaitlyn",
     lastName: "Jingle",
     role: "admin",
+    email: "kaitlynjingle@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -939,6 +967,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Timothy",
     lastName: "Brown",
     role: "admin",
+    email: "timothybrown@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -946,6 +976,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Bob",
     lastName: "Blinker",
     role: "admin",
+    email: "bobblinker@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
   {
@@ -953,6 +985,8 @@ export const mockUsersNotAssignedToTicker = (): Individual[] => [
     firstName: "Sarah",
     lastName: "Michaels",
     role: "admin",
+    email: "sarahmichaels@gmail.com",
+    phoneNumber: "5140000000",
     profilePictureUrl: null,
   },
 ];
