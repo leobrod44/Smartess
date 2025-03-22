@@ -6,10 +6,11 @@ import { ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 interface AssignedUserProps {
   Individual: Individual;
+  resolved: string;
   onUnassignClick: (userId: number) => void;
 }
 
-function AssignedUser({ Individual, onUnassignClick }: AssignedUserProps) {
+function AssignedUser({ Individual, resolved, onUnassignClick }: AssignedUserProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleUnassignClick = () => {
@@ -64,8 +65,8 @@ function AssignedUser({ Individual, onUnassignClick }: AssignedUserProps) {
         </button>
       </div>
 
-      <div className=" flex-1 text-[#a6634f] text-xs font-sequel-sans-black text-right mr-3">
-        UNRESOLVED
+      <div className={`flex-1 text-xs font-sequel-sans-black text-right mr-3 ${resolved === "resolved" ? 'text-[rgb(114,153,135)]' : 'text-[#a6634f]'}`}>
+        {resolved === "resolved" ? 'RESOLVED' : 'UNRESOLVED'}
       </div>
       {isModalOpen && (
         <UnassignConfirmModal
