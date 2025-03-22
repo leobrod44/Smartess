@@ -45,7 +45,7 @@ exchanges:
     description: "Exchange for video streaming"
     bindings:
       - queue: videostream.hubid
-        routing_key: "videostream.hubid.*"
+        routing_key: "videostream.hubid.#"
         type: queue
         max_size: 0
         passive: false

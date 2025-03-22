@@ -55,6 +55,7 @@ services:
     environment:
       RABBITMQ_URI: amqp://admin:admin@rabbitmq:5672/ # amqp://admin:admin@rabbitmq:5672/
       MONGO_STRING: mongodb+srv://cluster0admin:cluster0admin@cluster0.yko5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      RABBITMQ_STREAM_URI: rabbitmq-stream://admin:admin@rabbitmq:5552/
     env_file: .env
     networks:
       - smartess_network

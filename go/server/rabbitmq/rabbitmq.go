@@ -11,6 +11,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 
@@ -38,6 +39,23 @@ func Init() (RabbitMQServer, error) {
 	if err != nil {
 		return RabbitMQServer{}, errors.New("Failed to initialize RabbitMQ instance: " + err.Error())
 	}
+	// Need to create a stream environment for the video stream handler the way it was done on producer side but now for consumer
+	env, err := stream.NewEnvironment(
+		stream.NewEnvironmentOptions().
+			SetUri(os.Getenv("RABBITMQ_STREAM_URI")).
+			SetMaxConsumersPerClient(10).
+			SetMaxProducersPerClient(10),
+	)
+	if err != nil {
+		logger.Error(fmt.Sprintf("failed to create stream environment: %v", err))
+		panic(err)
+	}
+
+	defer func() {
+		if err := env.Close(); err != nil {
+			logger.Error(fmt.Sprintf("Failed to close stream environment: %v", err))
+		}
+	}()
 
 	var consumers []handlers.QueueConsumer
 	for _, exchangeConfig := range instance.Config.Exchanges {
@@ -80,10 +98,11 @@ func Init() (RabbitMQServer, error) {
 				return RabbitMQServer{}, fmt.Errorf("failed to bind queue %s to exchange %s with routing key %s: %v", queue.Name,
 					exchangeConfig.Name, queueConfig.RoutingKey, err)
 			}
-			if queue.Name == "website.alert" || queue.Name == "videostream.hubid" {
+			// Ignore the website-ready queue (Need not handling, only for users to directly consume from this queue from the website)
+			if queue.Name == "website.alert" {
 				continue
 			}
-			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient, instance)
+			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient, instance, env)
 			if err != nil {
 				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 			}
@@ -134,14 +153,14 @@ func (r *RabbitMQServer) Start() {
 	select {}
 }
 
-func setHandler(exchange string, queue string, mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance) (handlers.MessageHandler, error) {
+func setHandler(exchange string, queue string, mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance, env *stream.Environment) (handlers.MessageHandler, error) {
 	switch exchange {
 	case "logs":
 		return handlers.NewHubLogHandler(queue), nil
 	case "alerts":
 		return handlers.NewAlertHandler(mongoClient, instance), nil
 	case "videostream":
-		return handlers.NewVideoHandler(), nil
+		return handlers.NewControllerHandler(instance, env), nil
 	default:
 		return nil, fmt.Errorf("no handler found for queue: %s", queue)
 	}
