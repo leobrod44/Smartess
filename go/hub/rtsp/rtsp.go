@@ -280,7 +280,36 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
 	}
 	switch camera.Type {
-	case ANT, REAL:
+	case ANT:
+		options := []string{
+			"-rtsp_transport", "tcp",
+			"-i", camera.StreamURL,
+			"-c:v", "libx264",
+			"-buffer_size", "1024000", // Set buffer size
+			"-probesize", "50M", // Increase probe size
+			"-analyzeduration", "20000000", // Increase analyze duration
+			"-preset", "fast",
+			"-tune", "zerolatency",
+			//"-g", "30",
+			"-r", "15",
+			"-crf", "23", // Control quality (lower = better)
+			//"-keyint_min", "30",
+			"-vf", "fps=15,showinfo,vfrdet",
+			"-force_key_frames", "expr:gte(t,n_forced*1)",
+			"-f", "mp4",
+			"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
+			"-frag_duration", fmt.Sprintf("%d", (camera.SegmentTime*1000000)/5), // Segment time in microseconds
+			"-an", // Disable audio for simplicity
+			"-",   // Output to stdout
+		}
+		return &FFmpegConfig{
+			options:                options,
+			maxRetries:             5,
+			retryDelay:             5 * time.Second,
+			bufferPostSendInterval: 30 * time.Millisecond,
+			bufferReaderSize:       1024 * 1024,
+		}, nil
+	case REAL:
 		return &FFmpegConfig{
 			options:                STANDARD_OPTIONS,
 			maxRetries:             1,
@@ -371,60 +400,107 @@ func setupStreams(camera string, env *stream.Environment) (*stream.Producer, err
 // TODO HLS 2: segments.m3u8 should be utf8-standard encoded... to ensure this, use the following command:
 // TODO	"iconv -f ISO-8859-1 -t utf-8 -c segments.m3u8 > segments.m3u8.tmp && mv segments.m3u8.tmp segments.m3u8"
 // TODO	OR "iconv -f US-ASCII -t UTF-8 segments.m3u8 > utf8_segments.m3u8" OR "sed -i '1s/^/\xEF\xBB\xBF/' segments.m3u8" "sed 's/\r$//' segments.m3u8 > segments2.m3u8"
+// func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) {
+//
+//	for {
+//		files, err := os.ReadDir(ctx.directory)
+//		if err != nil {
+//			ctx.errChan <- fmt.Errorf("error reading directory %v: %v", ctx.directory, err)
+//			return
+//		}
+//
+//		for _, file := range files {
+//			if file.IsDir() {
+//				continue
+//			}
+//			if !strings.Contains(file.Name(), "segments.m3u8") {
+//				rtsp.Logger.Info(fmt.Sprintf("Segment file: %v", file.Name()))
+//				segmentFilePath := fmt.Sprintf("%s/%s", ctx.directory, file.Name())
+//
+//				segmentFileContent, err := os.ReadFile(segmentFilePath)
+//				if err != nil {
+//					rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
+//					continue
+//				}
+//				filePath := fmt.Sprintf("%s/%s", ctx.directory, file.Name())
+//				fileInfo, err := os.Stat(filePath)
+//				if err != nil {
+//					rtsp.Logger.Error(fmt.Sprintf("Error retrieving file stats for %v: %v", filePath, err))
+//					continue
+//				}
+//				rtsp.Logger.Info(fmt.Sprintf("File size: %d bytes !!", fileInfo.Size()))
+//				ctx.dataChan <- segmentFileContent
+//				//err = os.Remove(segmentFilePath)
+//				//if err != nil {
+//				//	rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
+//				//	continue
+//				//}
+//			}
+//		}
+//
+//		time.Sleep(time.Duration(camera.SegmentTime))
+//	}
+//
+// }
+//
+//	func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
+//		for {
+//			select {
+//			case segmentFileContent := <-ctx.dataChan:
+//				err := producer.Send(stream_amqp.NewMessage(segmentFileContent))
+//				if err != nil {
+//					rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to stream: %v", err)) // corrected format string
+//				}
+//				rtsp.Logger.Info(fmt.Sprintf("Published %v bytes to stream %v", len(segmentFileContent), producer.GetStreamName()))
+//
+//			case err := <-ctx.errChan:
+//				rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
+//			}
+//		}
+//	}
 func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) {
+	config, err := rtsp.newFFmpegConfig(*camera)
+	if err != nil {
+		rtsp.Logger.Error(fmt.Sprintf("Failed to create FFmpeg config: %v", err))
+		return
+	}
+	cmd := config.buildCommand()
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		rtsp.Logger.Error(fmt.Sprintf("Failed to get stdout pipe: %v", err))
+		return
+	}
+	cmd.Stderr = os.Stderr // Log FFmpeg errors to stderr
+	if err := cmd.Start(); err != nil {
+		rtsp.Logger.Error(fmt.Sprintf("Failed to start FFmpeg: %v", err))
+		return
+	}
+	defer cmd.Wait()
 
+	buffer := make([]byte, config.bufferReaderSize)
 	for {
-		files, err := os.ReadDir(ctx.directory)
+		n, err := stdout.Read(buffer)
 		if err != nil {
-			ctx.errChan <- fmt.Errorf("error reading directory %v: %v", ctx.directory, err)
+			ctx.errChan <- fmt.Errorf("error reading FFmpeg output: %v", err)
 			return
 		}
-
-		for _, file := range files {
-			if file.IsDir() {
-				continue
-			}
-			if !strings.Contains(file.Name(), "segments.m3u8") {
-				rtsp.Logger.Info(fmt.Sprintf("Segment file: %v", file.Name()))
-				segmentFilePath := fmt.Sprintf("%s/%s", ctx.directory, file.Name())
-
-				segmentFileContent, err := os.ReadFile(segmentFilePath)
-				if err != nil {
-					rtsp.Logger.Error(fmt.Sprintf("Error reading segment file %v: %v", segmentFilePath, err))
-					continue
-				}
-				filePath := fmt.Sprintf("%s/%s", ctx.directory, file.Name())
-				fileInfo, err := os.Stat(filePath)
-				if err != nil {
-					rtsp.Logger.Error(fmt.Sprintf("Error retrieving file stats for %v: %v", filePath, err))
-					continue
-				}
-				rtsp.Logger.Info(fmt.Sprintf("File size: %d bytes !!", fileInfo.Size()))
-				ctx.dataChan <- segmentFileContent
-				//err = os.Remove(segmentFilePath)
-				//if err != nil {
-				//	rtsp.Logger.Error(fmt.Sprintf("Failed to remove segment file %v: %v", segmentFilePath, err))
-				//	continue
-				//}
-			}
-		}
-
-		time.Sleep(time.Duration(camera.SegmentTime))
+		ctx.dataChan <- buffer[:n]
 	}
-
 }
+
 func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
 	for {
 		select {
-		case segmentFileContent := <-ctx.dataChan:
-			err := producer.Send(stream_amqp.NewMessage(segmentFileContent))
-			if err != nil {
-				rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to stream: %v", err)) // corrected format string
+		case segment := <-ctx.dataChan:
+			msg := stream_amqp.NewMessage(segment)
+			if err := producer.Send(msg); err != nil {
+				rtsp.Logger.Error(fmt.Sprintf("Failed to send segment: %v", err))
+			} else {
+				rtsp.Logger.Info(fmt.Sprintf("Sent %d bytes to stream %s", len(segment), producer.GetStreamName()))
 			}
-			rtsp.Logger.Info(fmt.Sprintf("Published %v bytes to stream %v", len(segmentFileContent), producer.GetStreamName()))
-
 		case err := <-ctx.errChan:
-			rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
+			rtsp.Logger.Error(fmt.Sprintf("Stream error: %v", err))
+			return
 		}
 	}
 }
