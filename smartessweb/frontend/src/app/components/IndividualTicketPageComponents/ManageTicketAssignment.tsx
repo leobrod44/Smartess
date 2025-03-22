@@ -352,6 +352,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
                   phoneNumber: user.phoneNumber,
                   profilePictureUrl: null,
                 }}
+                resolved={user.resolved}
                 onUnassignClick={handleUnassignUser}
               />
             ))}
