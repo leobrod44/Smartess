@@ -163,13 +163,39 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
     }
   };
 
-  const assignYourself = () => {
+  const assignYourself = async () => {
     try {
       if (!currentUser) {
         showToastError("Unable to assign yourself. User data is unavailable.");
         return;
       }
-
+  
+      // Check if user is already assigned
+      const isAlreadyAssigned = assignedUsers.some(
+        user => user.userId === parseInt(currentUser.userId)
+      );
+      
+      if (isAlreadyAssigned) {
+        showToastError("You are already assigned to this ticket.");
+        return;
+      }
+  
+      // Check if max users limit would be exceeded
+      if (assignedUsers.length >= MAX_USERS) {
+        showToastError(
+          `Cannot assign more than ${MAX_USERS} users to this ticket.`
+        );
+        return;
+      }
+  
+      // Make the API call to assign yourself
+      await ticketAssignApis.assignUsersToTicket(
+        ticket.ticket_id,
+        [parseInt(currentUser.userId)],
+        currentUser.userId
+      );
+  
+      // After successful API call, update local state
       const newAssignedUser: AssignedUser = {
         userId: parseInt(currentUser.userId),
         firstName: currentUser.firstName,
@@ -179,19 +205,24 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         profilePictureUrl: currentUser.profilePictureUrl,
         resolved: false,
       };
-
-      setAssignedUsers((prev) => [...prev, newAssignedUser]);
-
-      setAvailableUsers((prevAvailableUsers) =>
+  
+      setAssignedUsers(prev => [...prev, newAssignedUser]);
+  
+      // Remove yourself from available users
+      setAvailableUsers(prevAvailableUsers =>
         prevAvailableUsers.filter(
-          (user) => user.individualId !== parseInt(currentUser.userId)
+          user => user.individualId !== parseInt(currentUser.userId)
         )
       );
-
+  
       onStatusUpdate("pending");
       showToastSuccess("Assigned yourself successfully!");
     } catch (error) {
-      showToastError("There was an error assigning yourself to this ticket.");
+      showToastError(
+        error instanceof Error
+          ? error.message
+          : "There was an error assigning yourself to this ticket."
+      );
       console.error(error);
     }
   };
