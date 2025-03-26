@@ -35,8 +35,19 @@ const SystemHealthWidget = ({
           innerRadius={35}
           outerRadius={80}
           dataKey="value"
-          label={({ value }) => (value > 0 ? value : "")}
-          labelLine={false} 
+          label={({ cx, cy, midAngle, outerRadius, value }) => {
+            const RADIAN = Math.PI / 180;
+            const radius = outerRadius + 15;
+            const x = cx + radius * Math.cos(-midAngle * RADIAN);
+            const y = cy + radius * Math.sin(-midAngle * RADIAN);
+      
+            return value > 0 ? (
+              <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central">
+                {value}
+              </text>
+            ) : null;
+          }}
+          labelLine={false}
         >
           {data.map((entry, index) => (
             <Cell key={`Cell-${index}`} fill={entry.color} />

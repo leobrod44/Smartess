@@ -64,7 +64,7 @@ exports.getDashboardWidgets = async (req, res) => {
         // Calculate system health statistics
         const systemHealth = {
             systemsLive: hubs.filter(hub => hub.status === 'live').length,
-            systemsDown: hubs.filter(hub => hub.status === 'down').length,
+            systemsDown: hubs.filter(hub => hub.status === 'disconnected').length,
         };
 
         // Get admin users count
