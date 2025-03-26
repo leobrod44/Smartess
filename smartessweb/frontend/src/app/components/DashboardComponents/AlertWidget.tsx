@@ -57,7 +57,7 @@ const AlertWidget = ({
             </div>
           </>
         ) : (
-          <div className="text-center text-black text-xs font-['Sequel Sans'] leading-tight tracking-tight pt-2">
+          <div className="text-center text-white text-xs font-['Sequel Sans'] leading-tight tracking-tight pt-2">
             No alerts found
           </div>
         )}
