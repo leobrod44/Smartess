@@ -41,36 +41,34 @@ exports.getCurrentUser = async (req, res) => {
       .eq("user_id", userData.user_id);
 
     if (currentUserError) {
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch current user data." });
+      return res.status(500).json({ error: "Failed to fetch current user data." });
     }
 
-    if (!currentUser) {
+    if (!currentUser || currentUser.length === 0) {
       return res.status(404).json({ error: "Current user not found." });
     }
 
-    const projectIds = currentUser.map((cUser) => cUser.proj_id);
-    const { data: projects, error: projectError } = await supabase
-      .from("project")
-      .select("address")
-      .in("proj_id", projectIds);
+    let addresses = "";
+    const projectIds = currentUser.map((cUser) => cUser.proj_id).filter(Boolean); // Remove null values
 
-    if (projectError) {
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch project addresses." });
+    if (projectIds.length > 0) {
+      const { data: projects, error: projectError } = await supabase
+        .from("project")
+        .select("address")
+        .in("proj_id", projectIds);
+
+      if (projectError) {
+        return res.status(500).json({ error: "Failed to fetch project addresses." });
+      }
+
+      addresses = projects.map((project) => project.address);
     }
 
-    const addresses = projects.map((project) => project.address);
     const role = currentUser[0].org_user_type;
 
     const formattedCurrentUser = {
       userId: userData.user_id,
-      role:
-        role === "master" || role === "admin" || role === "basic"
-          ? role
-          : "basic",
+      role: ["master", "admin", "basic"].includes(role) ? role : "basic",
       address: addresses,
       firstName: userData.first_name,
       lastName: userData.last_name,
@@ -290,7 +288,7 @@ exports.getOrgUsers = async (req, res) => {
 
     const { data: orgUserData, error: orgUserError } = await supabase
       .from("org_user")
-      .select("org_id, proj_id")
+      .select("org_id, proj_id, org_user_type")
       .eq("user_id", userData.user_id);
 
     if (orgUserError) {
@@ -299,14 +297,14 @@ exports.getOrgUsers = async (req, res) => {
         .json({ error: "Failed to fetch organization data." });
     }
 
-    // get all organizations and projects for the current user
-    const orgIds = [...new Set(orgUserData.map((org) => org.org_id))]; // Unique org_ids
-    const projIds = [...new Set(orgUserData.map((proj) => proj.proj_id))];
+    const orgIds = [...new Set(orgUserData.map((org) => org.org_id))];
+    const projIds = [...new Set(orgUserData.map((proj) => proj.proj_id).filter(Boolean))];
+
     if (orgIds.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No organizations found for this user." });
+      return res.status(404).json({ error: "No organizations found for this user." });
     }
+
+    const isBasicUser = orgUserData.some((org) => org.org_user_type === "basic");
 
     const { data: nonNullProjData, error: nonNullProjError } = await supabase
       .from("org_user")
@@ -315,21 +313,25 @@ exports.getOrgUsers = async (req, res) => {
       .in("proj_id", projIds)
       .neq("user_id", userData.user_id);
 
-    // Query for when proj_id is null
-    const { data: nullProjData, error: nullProjError } = await supabase
-      .from("org_user")
-      .select("user_id, org_id, proj_id, org_user_type")
-      .in("org_id", orgIds)
-      .is("proj_id", null) // Check specifically for null
-      .neq("user_id", userData.user_id);
+    if (nonNullProjError) {
+      return res.status(500).json({ error: "Failed to fetch organization users." });
+    }
 
-    // Combine the results
-    const allOrgUsers = [...nonNullProjData, ...nullProjData];
+    let allOrgUsers = [...nonNullProjData];
 
-    if (nonNullProjError || nullProjError) {
-      return res
-        .status(500)
-        .json({ error: "Failed to fetch organization users." });
+    if (!isBasicUser) {
+      const { data: nullProjData, error: nullProjError } = await supabase
+        .from("org_user")
+        .select("user_id, org_id, proj_id, org_user_type")
+        .in("org_id", orgIds)
+        .is("proj_id", null)
+        .neq("user_id", userData.user_id);
+
+      if (nullProjError) {
+        return res.status(500).json({ error: "Failed to fetch organization users." });
+      }
+
+      allOrgUsers = [...allOrgUsers, ...nullProjData];
     }
 
     res.json({ orgUsers: allOrgUsers });
@@ -338,6 +340,7 @@ exports.getOrgUsers = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
 
 exports.getOrgIndividualsData = async (req, res) => {
   try {
@@ -418,36 +421,34 @@ exports.getOrgUsersProjects = async (req, res) => {
     }
 
     const uniqueProjIds = [
-      ...new Set(fetchedOrgUsers.map((user) => user.proj_id)),
-    ].filter((id) => id !== null);
+      ...new Set(fetchedOrgUsers.map((user) => user.proj_id).filter(Boolean)), // Remove null values
+    ];
 
-    const { data: projectData, error: queryError } = await supabase
-      .from("project")
-      .select(
-        "proj_id, address, admin_users_count, hub_users_count, pending_tickets_count"
-      )
-      .in("proj_id", uniqueProjIds);
+    let projects = [];
 
-    if (queryError) {
-      console.error("Query Error:", queryError);
-      return res.status(500).json({ error: "Failed to fetch projects." });
+    if (uniqueProjIds.length > 0) {
+      const { data: projectData, error: queryError } = await supabase
+        .from("project")
+        .select(
+          "proj_id, address, admin_users_count, hub_users_count, pending_tickets_count"
+        )
+        .in("proj_id", uniqueProjIds);
+
+      if (queryError) {
+        console.error("Query Error:", queryError);
+        return res.status(500).json({ error: "Failed to fetch projects." });
+      }
+
+      projects = projectData.map((project) => ({
+        projectId: project.proj_id.toString(),
+        address: project.address,
+        adminUsersCount: project.admin_users_count,
+        hubUsersCount: project.hub_users_count,
+        pendingTicketsCount: project.pending_tickets_count,
+      }));
     }
 
-    if (!projectData || projectData.length === 0) {
-      return res
-        .status(404)
-        .json({ error: "No projects found for the provided IDs." });
-    }
-
-    const projects = projectData.map((project) => ({
-      projectId: project.proj_id.toString(),
-      address: project.address,
-      adminUsersCount: project.admin_users_count,
-      hubUsersCount: project.hub_users_count,
-      pendingTicketsCount: project.pending_tickets_count,
-    }));
-
-    res.json({ projects: projects });
+    res.json({ projects });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal server error." });
@@ -462,43 +463,69 @@ exports.getOrgProjects = async (req, res) => {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser(token);
+
     if (authError) {
       return res.status(401).json({ error: "Invalid token" });
     }
 
-    const { currentOrg } = req.body;
-
-    if (!currentOrg) {
-      return res
-        .status(400)
-        .json({ error: "Organization ID (org_id) is required." });
-    }
-
-    const { data: projectData, error: queryError } = await supabase
-      .from("project")
+    const { data: userData, error: userError } = await supabase
+      .from("user")
       .select(
-        "proj_id, address, admin_users_count, hub_users_count, pending_tickets_count"
+        "user_id, email, first_name, last_name, phone_number, profile_picture_url"
       )
-      .eq("org_id", currentOrg);
+      .eq("email", user.email)
+      .single();
 
-    if (queryError) {
-      console.error("Query Error:", queryError);
-      return res.status(500).json({ error: "Failed to fetch projects." });
+    if (userError) {
+      return res.status(500).json({ error: "Failed to fetch user data." });
     }
 
-    if (!projectData || projectData.length === 0) {
+    if (!userData) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const { data: currentUser, error: currentUserError } = await supabase
+      .from("org_user")
+      .select("user_id, proj_id, org_id, org_user_type")
+      .eq("user_id", userData.user_id);
+
+    if (currentUserError) {
       return res
-        .status(404)
-        .json({ error: "No projects found for the provided organization ID." });
+        .status(500)
+        .json({ error: "Failed to fetch current user data." });
     }
 
-    const projects = projectData.map((project) => ({
-      projectId: project.proj_id.toString(),
-      address: project.address,
-      adminUsersCount: project.admin_users_count,
-      hubUsersCount: project.hub_users_count,
-      pendingTicketsCount: project.pending_tickets_count,
-    }));
+    if (!currentUser || currentUser.length === 0) {
+      return res.status(404).json({ error: "Current user not found." });
+    }
+
+    const projectIds = currentUser
+      .map((cUser) => cUser.proj_id)
+      .filter((id) => id !== null); // Remove null values
+
+    let projects = [];
+
+    if (projectIds.length > 0) {
+      const { data: projectData, error: queryError } = await supabase
+        .from("project")
+        .select(
+          "proj_id, address, admin_users_count, hub_users_count, pending_tickets_count"
+        )
+        .in("proj_id", projectIds);
+
+      if (queryError) {
+        console.error("Query Error:", queryError);
+        return res.status(500).json({ error: "Failed to fetch projects." });
+      }
+
+      projects = projectData.map((project) => ({
+        projectId: project.proj_id.toString(),
+        address: project.address,
+        adminUsersCount: project.admin_users_count,
+        hubUsersCount: project.hub_users_count,
+        pendingTicketsCount: project.pending_tickets_count,
+      }));
+    }
 
     res.json({ orgProjects: projects });
   } catch (error) {
@@ -506,6 +533,7 @@ exports.getOrgProjects = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
 
 exports.assignOrgUserToProject = async (req, res) => {
   try {
