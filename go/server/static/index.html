@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Video Stream</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+<video id="video" controls autoplay></video>
+<script>
+  const video = document.getElementById('video');
+  const hls = new Hls();
+
+  // Replace with your camera's HLS playlist URL
+  const playlistUrl = "http://localhost:8080/hls/tapo_C200_ant/playlist.m3u8";
+
+  if (Hls.isSupported()) {
+    hls.loadSource(playlistUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
+      video.play();
+    });
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // Native HLS support (e.g., Safari)
+    video.src = playlistUrl;
+    video.addEventListener('loadedmetadata', function () {
+      video.play();
+    });
+  }
+</script>
+</body>
+</html>
