@@ -249,6 +249,7 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		// Log and return error if directory creation fails
 		return nil, fmt.Errorf("error creating directory %v: %v", tmpDir, err)
 	}
+
 	STANDARD_OPTIONS := []string{
 		// RTSP Transport settings
 		"-rtsp_transport", "tcp", // Use TCP for RTSP transport
@@ -279,40 +280,121 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		"-segment_list_flags", "+live", // Make it a live playlist
 		fmt.Sprintf("%s/segment-%%03d.mp4", tmpDir), // Segment output
 	}
+	HLS_OPTIONS := []string{
+		// RTSP Transport settings
+		"-rtsp_transport", "tcp", // Use TCP for RTSP transport (more reliable than UDP)
+		"-i", camera.StreamURL, // Input RTSP stream
+		"-buffer_size", "1024000", // Set buffer size
+		"-probesize", "50M", // Increase probe size for better format detection
+		"-analyzeduration", "20000000", // Increase analyze duration
+
+		// Video encoding settings
+		"-c:v", "libx264", // Use H.264 codec (widely supported)
+		"-preset", "ultrafast", // Prioritize speed over quality
+		"-tune", "zerolatency", // Optimize for low latency
+		"-profile:v", "baseline", // Use baseline profile for broader compatibility
+		"-level", "3.0", // Compatibility level
+		"-crf", "23", // Balance between quality and size
+		"-r", "15", // 15 fps is good for surveillance
+		"-g", "30", // GOP size of 30 frames
+		"-keyint_min", "30", // Minimum keyframe interval
+
+		// Force consistent keyframes for better streaming
+		"-force_key_frames", "expr:gte(t,n_forced*2)",
+
+		// HLS specific settings
+		"-f", "hls", // Output format as HLS
+		"-hls_time", fmt.Sprintf("%d", camera.SegmentTime), // Segment duration
+		"-hls_list_size", "10", // Number of segments to keep in playlist
+		"-hls_flags", "delete_segments+append_list", // Delete old segments, append to list
+		"-hls_segment_type", "mpegts", // Segment format (MPEG-TS)
+		"-hls_segment_filename", fmt.Sprintf("%s/segment-%%03d.ts", tmpDir), // Segment naming
+		fmt.Sprintf("%s/segments.m3u8", tmpDir), // Output playlist
+	}
+	//LL_HLS_OPTIONS := []string{
+	//	// RTSP Transport settings
+	//	"-rtsp_transport", "tcp", // Use TCP for RTSP transport (more reliable than UDP)
+	//	"-i", camera.StreamURL, // Input RTSP stream
+	//	"-buffer_size", "1024000", // Set buffer size
+	//	"-probesize", "32768", // Reduced probe size for faster startup
+	//	"-analyzeduration", "1000000", // Reduced analyze duration for faster startup
+	//	"-fflags", "+genpts+discardcorrupt", // Generate PTS and discard corrupt data
+	//
+	//	"-sws_flags", "bilinear", // Fast scaling
+	//	"-avioflags", "direct", // Direct I/O for better performance
+	//
+	//	// Video encoding settings
+	//	"-c:v", "libx264", // Use H.264 codec (widely supported)
+	//	"-preset", "ultrafast", // Prioritize speed over efficiency
+	//	"-tune", "zerolatency", // Optimize for low latency
+	//	"-profile:v", "baseline", // Use baseline profile (lowest latency)
+	//	"-level", "3.0", // Compatibility level
+	//	"-crf", "28", // Balance quality/size (higher = lower quality but less data)
+	//	"-maxrate", "2000k", // Limit maximum bitrate
+	//	"-bufsize", "1000k", // Small buffer for lower latency
+	//	"-g", "15", // Lower GOP size (keyframe every 15 frames)
+	//	"-keyint_min", "15", // Minimum keyframe interval
+	//	"-sc_threshold", "0", // Disable scene change detection (more predictable keyframes)
+	//
+	//	// Force consistent keyframes for better streaming
+	//	"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every 1 second
+	//
+	//	// HLS specific settings
+	//	"-f", "hls", // Output format as HLS
+	//	"-hls_time", "1", // Very short segments (1 second)
+	//	"-hls_list_size", "4", // Keep only 4 segments in playlist (reduces delay)
+	//	"-hls_flags", "delete_segments+append_list+program_date_time+independent_segments", // Enable LL-HLS features
+	//	"-hls_segment_type", "mpegts", // Segment format (MPEG-TS)
+	//	"-hls_segment_filename", fmt.Sprintf("%s/segment-%%03d.ts", tmpDir), // Segment naming
+	//	"-hls_init_time", "0", // Start segments at 0 seconds
+	//	"-hls_playlist_type", "event", // Event playlist for live streaming
+	//	fmt.Sprintf("%s/segments.m3u8", tmpDir), // Output playlist
+	//}
 	switch camera.Type {
 	case ANT:
-		options := []string{
-			"-rtsp_transport", "tcp",
-			"-i", camera.StreamURL,
-			"-c:v", "libx264",
-			"-buffer_size", "1024000", // Set buffer size
-			"-probesize", "50M", // Increase probe size
-			"-analyzeduration", "20000000", // Increase analyze duration
-			"-preset", "fast",
-			"-tune", "zerolatency",
-			//"-g", "30",
-			"-r", "15",
-			"-crf", "23", // Control quality (lower = better)
-			//"-keyint_min", "30",
-			"-vf", "fps=15,showinfo,vfrdet",
-			"-force_key_frames", "expr:gte(t,n_forced*1)",
-			"-f", "mp4",
-			"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
-			"-frag_duration", fmt.Sprintf("%d", (camera.SegmentTime*1000000)/5), // Segment time in microseconds
-			"-an", // Disable audio for simplicity
-			"-",   // Output to stdout
+		if strings.Contains(camera.Name, "duplicate") {
+			options := []string{
+				"-rtsp_transport", "tcp",
+				"-i", camera.StreamURL,
+				"-c:v", "libx264",
+				"-buffer_size", "1024000", // Set buffer size
+				"-probesize", "50M", // Increase probe size
+				"-analyzeduration", "20000000", // Increase analyze duration
+				"-preset", "fast",
+				"-tune", "zerolatency",
+				//"-g", "30",
+				"-r", "15",
+				"-crf", "23", // Control quality (lower = better)
+				//"-keyint_min", "30",
+				"-vf", "fps=15,showinfo,vfrdet",
+				"-force_key_frames", "expr:gte(t,n_forced*1)",
+				"-f", "mp4",
+				"-movflags", "frag_keyframe+empty_moov+default_base_moof+faststart",
+				"-frag_duration", fmt.Sprintf("%d", camera.SegmentTime*1000000), // Segment time in microseconds
+				"-an", // Disable audio for simplicity
+				"-",   // Output to stdout
+			}
+			return &FFmpegConfig{
+				options:                options,
+				maxRetries:             5,
+				retryDelay:             5 * time.Second,
+				bufferPostSendInterval: 30 * time.Millisecond,
+				bufferReaderSize:       1024 * 1024,
+			}, nil
+		} else {
+
+			return &FFmpegConfig{
+				options:                HLS_OPTIONS,
+				maxRetries:             5,
+				retryDelay:             5 * time.Second,
+				bufferPostSendInterval: 100 * time.Millisecond,
+				bufferReaderSize:       1024000,
+			}, nil
 		}
-		return &FFmpegConfig{
-			options:                options,
-			maxRetries:             5,
-			retryDelay:             5 * time.Second,
-			bufferPostSendInterval: 30 * time.Millisecond,
-			bufferReaderSize:       1024 * 1024,
-		}, nil
 	case REAL:
 		return &FFmpegConfig{
-			options:                STANDARD_OPTIONS,
-			maxRetries:             1,
+			options:                HLS_OPTIONS,
+			maxRetries:             6,
 			retryDelay:             5 * time.Second,
 			bufferPostSendInterval: 100 * time.Millisecond, // Increased interval
 			bufferReaderSize:       1024000,                // Match buffer_size from ffmpeg
@@ -443,21 +525,7 @@ func setupStreams(camera string, env *stream.Environment) (*stream.Producer, err
 //
 // }
 //
-//	func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
-//		for {
-//			select {
-//			case segmentFileContent := <-ctx.dataChan:
-//				err := producer.Send(stream_amqp.NewMessage(segmentFileContent))
-//				if err != nil {
-//					rtsp.Logger.Error(fmt.Sprintf("Failed to publish segment to stream: %v", err)) // corrected format string
-//				}
-//				rtsp.Logger.Info(fmt.Sprintf("Published %v bytes to stream %v", len(segmentFileContent), producer.GetStreamName()))
-//
-//			case err := <-ctx.errChan:
-//				rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
-//			}
-//		}
-//	}
+
 func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) {
 	config, err := rtsp.newFFmpegConfig(*camera)
 	if err != nil {
@@ -487,7 +555,6 @@ func (rtsp *RtspProcessor) streamRTSP(camera *CameraConfig, ctx *StreamContext) 
 		ctx.dataChan <- buffer[:n]
 	}
 }
-
 func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Producer) {
 	for {
 		select {
@@ -499,7 +566,9 @@ func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Produce
 				rtsp.Logger.Info(fmt.Sprintf("Sent %d bytes to stream %s", len(segment), producer.GetStreamName()))
 			}
 		case err := <-ctx.errChan:
-			rtsp.Logger.Error(fmt.Sprintf("Stream error: %v", err))
+			rtsp.Logger.Error(fmt.Sprintf("MQ Stream RTSP error: %v", err))
+
+			//TODO Leave return statement here or not?
 			return
 		}
 	}
