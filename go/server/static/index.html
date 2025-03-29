@@ -421,7 +421,7 @@
   function startHlsStream(camera) {
     stopHlsStream();
 
-    const hlsUrl = `/tmp/data/${camera}/segments.m3u8`//`/hls/${camera}/segments.m3u8`;
+    const hlsUrl = `/hls/${camera}/segments.m3u8`;//`/tmp/data/${camera}/segments.m3u8`
     streamUrl.value = hlsUrl;
 
     log(`Starting HLS stream for camera: ${camera}`, 'info');
@@ -434,6 +434,24 @@
         maxBufferLength: 30,
         maxMaxBufferLength: 60,
       });
+      // hlsPlayer = new Hls({
+      //   debug: false,
+      //   enableWorker: true,
+      //   lowLatencyMode: true,          // Enable low latency mode
+      //   liveSyncDuration: 1,           // Target 1 second behind live edge
+      //   liveMaxLatencyDuration: 2,     // Maximum accepted latency
+      //   //liveDurationInfinity: true,    // Treat as infinite live stream
+      //   highBufferWatchdogPeriod: 1,   // Aggressive buffer monitoring
+      //   nudgeMaxRetry: 5,              // More retries before giving up
+      //   maxBufferLength: 4,            // Reduced buffer length (seconds)
+      //   maxMaxBufferLength: 6,         // Maximum buffer length (seconds)
+      //   maxBufferSize: 2 * 1000 * 1000, // 2MB max buffer size
+      //   maxBufferHole: 0.1,            // Smaller holes to recover from
+      //   manifestLoadingTimeOut: 3000,  // Faster timeout for manifest
+      //   manifestLoadingMaxRetry: 4,    // More retries for manifest
+      //   startLevel: 0,                 // Start with lowest quality
+      //   // backBufferLength: 0            // No backward buffer (reduces memory)
+      // });
 
       hlsPlayer.loadSource(hlsUrl);
       hlsPlayer.attachMedia(videoElement);
