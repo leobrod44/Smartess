@@ -1,0 +1,364 @@
+events:
+  - id: 1
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "climate.sinope_technologies_th1124zb_g2_thermostat"
+        old_state: {}
+        new_state:
+          entity_id: "climate.sinope_technologies_th1124zb_g2_thermostat"
+          state: "heat"
+          attributes:
+            current_temperature: 20.5
+            friendly_name: "Master Bedroom Thermostat"
+            hvac_action: "idle"
+            hvac_modes:
+              - "off"
+              - "heat"
+            max_temp: 30
+            min_temp: 5
+            occupancy: 1
+            occupied_cooling_setpoint: 2600
+            occupied_heating_setpoint: 1950
+            pi_heating_demand: 0
+            preset_mode: "none"
+            preset_modes:
+              - "away"
+              - "none"
+            supported_features: 17
+            system_mode: "[<SystemMode.Heat: 4>]/heat"
+            temperature: 19.5
+            unoccupied_heating_setpoint: 1500
+          last_changed: "2024-11-14T14:26:12.795069Z"
+          last_updated: "2024-11-26T22:34:20.807774Z"
+          context:
+            id: "01JDN9RZ6HMT9PEZAMT3DHY2MB"
+            parent_id: ""
+            user_id: "2cfced4b8a794ab59da3543e6feebdd7"
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9RZ6HMT9PEZAMT3DHY2MB"
+        parent_id: ""
+        user_id: "2cfced4b8a794ab59da3543e6feebdd7"
+
+  - id: 2
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "light.hue_go_2"
+        old_state:
+          entity_id: "light.hue_go_2"
+          state: "off"
+          attributes:
+            friendly_name: "Kitchen Light"
+            off_brightness: null
+            off_with_transition: false
+            supported_color_modes:
+              - "onoff"
+            supported_features: 8
+          last_changed: "2024-11-26T22:33:57.907198Z"
+          last_updated: "2024-11-26T22:33:57.907198Z"
+          context:
+            id: "01JDN9R843GN161T321VYY0FJ7"
+            parent_id: ""
+            user_id: "288a21978a6d496b90aefec65844c6ec"
+        new_state:
+          entity_id: "light.hue_go_2"
+          state: "on"
+          attributes:
+            friendly_name: "Kitchen Light"
+            off_brightness: null
+            off_with_transition: false
+            supported_color_modes:
+              - "onoff"
+            supported_features: 8
+            rgb_color:
+              - 238
+              - 254
+              - 255
+          last_changed: "2024-11-26T22:33:57.907198Z"
+          last_updated: "2024-11-26T22:33:57.907198Z"
+          context:
+            id: "01JDN9R843GN161T321VYY0FJ7"
+            parent_id: ""
+            user_id: "288a21978a6d496b90aefec65844c6ec"
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9R843GN161T321VYY0FJ7"
+        parent_id: ""
+        user_id: "288a21978a6d496b90aefec65844c6ec"
+
+  - id: 3
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "sensor.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "sensor.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 4
+    type: "Light Warning"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "light.lumi_lumi_switch_b1laus01_light_3"
+        old_state:
+          entity_id: "light.lumi_lumi_switch_b1laus01_light_3"
+          state: "on"
+          attributes:
+            friendly_name: "Kitchen Light"
+            off_brightness: null
+            off_with_transition: false
+            supported_color_modes:
+              - "onoff"
+            supported_features: 8
+          last_changed: "2024-11-26T22:33:57.907198Z"
+          last_updated: "2024-11-26T22:33:57.907198Z"
+          context:
+            id: "01JDN9R843GN161T321VYY0FJ7"
+            parent_id: ""
+            user_id: "288a21978a6d496b90aefec65844c6ec"
+        new_state:
+          entity_id: "light.lumi_lumi_switch_b1laus01_light_3"
+          state: "on"
+          attributes:
+            friendly_name: "Kitchen Light"
+            off_brightness: null
+            off_with_transition: false
+            supported_color_modes:
+              - "onoff"
+            supported_features: 12
+          last_changed: "2024-11-26T22:33:57.907198Z"
+          last_updated: "2024-11-26T22:33:57.907198Z"
+          context:
+            id: "01JDN9R843GN161T321VYY0FJ7"
+            parent_id: ""
+            user_id: "288a21978a6d496b90aefec65844c6ec"
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9R843GN161T321VYY0FJ7"
+        parent_id: ""
+        user_id: "288a21978a6d496b90aefec65844c6ec"
+
+  - id: 5
+    type: "Light Information"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "light.lumi_lumi_switch_b1laus01_light_3"
+        old_state: {}
+        new_state:
+          entity_id: "light.lumi_lumi_switch_b1laus01_light_3"
+          state: "on"
+          attributes:
+            friendly_name: "Kitchen Light"
+            off_brightness: null
+            off_with_transition: false
+            supported_color_modes:
+              - "onoff"
+            supported_features: 12
+          last_changed: "2024-11-26T22:33:57.907198Z"
+          last_updated: "2024-11-26T22:33:57.907198Z"
+          context:
+            id: "01JDN9R843GN161T321VYY0FJ7"
+            parent_id: ""
+            user_id: "288a21978a6d496b90aefec65844c6ec"
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9R843GN161T321VYY0FJ7"
+        parent_id: ""
+        user_id: "288a21978a6d496b90aefec65844c6ec"
+
+  - id: 6
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "battery.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "battery.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 7
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "motion.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "motion.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 8
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "door.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "door.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 9
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "smoke.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "smoke.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 10
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "water.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "water.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
+
+  - id: 11
+    type: "state_changed"
+    event:
+      event_type: "state_changed"
+      data:
+        entity_id: "temperature.sinope_technologies_th1123zb_g2_temperature"
+        old_state: {}
+        new_state:
+          entity_id: "temperature.sinope_technologies_th1123zb_g2_temperature"
+          state: "21.3"
+          attributes:
+            device_class: "temperature"
+            friendly_name: "Sinope Technologies TH1123ZB-G2 Temperature"
+            state_class: "measurement"
+            unit_of_measurement: "°C"
+          last_changed: "2024-11-26T22:34:43.172305Z"
+          last_updated: "2024-11-26T22:34:43.172305Z"
+          context:
+            id: "01JDN9SN345HZCFMAJJG769V8K"
+            parent_id: ""
+            user_id: ""
+      origin: "LOCAL"
+      time_fired: "CURRENT_TIME"
+      context:
+        id: "01JDN9SN345HZCFMAJJG769V8K"
+        parent_id: ""
+        user_id: ""
