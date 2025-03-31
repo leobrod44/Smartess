@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	logs "Smartess/go/hub/logger"
 
@@ -80,6 +81,11 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 	message.Event.Data.EntityID = demoType
 	conciseEvent := ha.ConvertWebhookMessageToConciseEvent(message)
 
+	parsedTime, err := time.Parse(time.RFC3339, message.Event.TimeFired)
+	if err != nil {
+		log.Fatalf("failed to parse time: %v", err)
+	}
+
 	//  TODO 1 NEED A BETTER AND MORE IN DEPTH WAY TO DETERMINE THE ALERT SEVERITY INFORMATION/WARNING/CRITICAL
 	routeKey := classification.GenerateAlertRoutingKey(conciseEvent, message)
 	//  TODO ADD MORE TYPE | sensors have many different types
@@ -90,7 +96,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 		// TODO WHAT IS THE MESSAGE?
 		Message:   *conciseEvent.Attributes.FriendlyName,
 		State:     message.Event.Data.NewState.State,
-		TimeStamp: message.Event.Data.NewState.LastChanged,
+		TimeStamp: parsedTime,
 		Type:      alertType,
 	}
 	r.Logger.Info(fmt.Sprintf("%v", alert))
