@@ -65,9 +65,9 @@ func GenerateEventMessage() ha.WebhookMessage {
 		panic(err)
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	randomEvent := eventsWrapper.Events[rand.Intn(len(eventsWrapper.Events))]
+	randomEvent := eventsWrapper.Events[r.Intn(len(eventsWrapper.Events))]
 
 	//override TimeFired with the current time
 	randomEvent.Event.TimeFired = time.Now().Format(time.RFC3339)
