@@ -19,7 +19,7 @@ interface AssignedUser {
   lastName: string;
   email: string;
   phoneNumber: string;
-  resolved: boolean;
+  resolved: string;
   profilePictureUrl?: string | null;
 }
 
@@ -132,7 +132,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         email: user.email,
         phoneNumber: user.phoneNumber,
         profilePictureUrl: user.profilePictureUrl,
-        resolved: false,
+        resolved: "unresolved",
       }));
 
       setAssignedUsers((prev) => [...prev, ...newAssignedUsers]);
@@ -203,7 +203,7 @@ function ManageTicketAssignment({ ticket, onStatusUpdate }: ManageTicketProps) {
         email: currentUser.email,
         phoneNumber: currentUser.phoneNumber,
         profilePictureUrl: currentUser.profilePictureUrl,
-        resolved: false,
+        resolved: "unresolved",
       };
   
       setAssignedUsers(prev => [...prev, newAssignedUser]);

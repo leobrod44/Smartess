@@ -6,7 +6,7 @@ interface AssignedUser {
   firstName: string;
   lastName: string;
   email: string;
-  resolved: boolean;
+  resolved: string;
   phoneNumber: string;
   profilePictureUrl?: string | null;
 }
