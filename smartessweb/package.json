@@ -19,6 +19,7 @@
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@mui/icons-material": "^6.1.6",
+    "@stomp/stompjs": "^7.1.0",
     "@supabase/supabase-js": "^2.45.4",
     "amqplib": "^0.10.5",
     "concurrently": "^9.0.1",
