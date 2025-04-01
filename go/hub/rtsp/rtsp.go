@@ -311,45 +311,45 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		"-hls_segment_filename", fmt.Sprintf("%s/segment-%%03d.ts", tmpDir), // Segment naming
 		fmt.Sprintf("%s/segments.m3u8", tmpDir), // Output playlist
 	}
-	//LL_HLS_OPTIONS := []string{
-	//	// RTSP Transport settings
-	//	"-rtsp_transport", "tcp", // Use TCP for RTSP transport (more reliable than UDP)
-	//	"-i", camera.StreamURL, // Input RTSP stream
-	//	"-buffer_size", "1024000", // Set buffer size
-	//	"-probesize", "32768", // Reduced probe size for faster startup
-	//	"-analyzeduration", "1000000", // Reduced analyze duration for faster startup
-	//	"-fflags", "+genpts+discardcorrupt", // Generate PTS and discard corrupt data
-	//
-	//	"-sws_flags", "bilinear", // Fast scaling
-	//	"-avioflags", "direct", // Direct I/O for better performance
-	//
-	//	// Video encoding settings
-	//	"-c:v", "libx264", // Use H.264 codec (widely supported)
-	//	"-preset", "ultrafast", // Prioritize speed over efficiency
-	//	"-tune", "zerolatency", // Optimize for low latency
-	//	"-profile:v", "baseline", // Use baseline profile (lowest latency)
-	//	"-level", "3.0", // Compatibility level
-	//	"-crf", "28", // Balance quality/size (higher = lower quality but less data)
-	//	"-maxrate", "2000k", // Limit maximum bitrate
-	//	"-bufsize", "1000k", // Small buffer for lower latency
-	//	"-g", "15", // Lower GOP size (keyframe every 15 frames)
-	//	"-keyint_min", "15", // Minimum keyframe interval
-	//	"-sc_threshold", "0", // Disable scene change detection (more predictable keyframes)
-	//
-	//	// Force consistent keyframes for better streaming
-	//	"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every 1 second
-	//
-	//	// HLS specific settings
-	//	"-f", "hls", // Output format as HLS
-	//	"-hls_time", "1", // Very short segments (1 second)
-	//	"-hls_list_size", "4", // Keep only 4 segments in playlist (reduces delay)
-	//	"-hls_flags", "delete_segments+append_list+program_date_time+independent_segments", // Enable LL-HLS features
-	//	"-hls_segment_type", "mpegts", // Segment format (MPEG-TS)
-	//	"-hls_segment_filename", fmt.Sprintf("%s/segment-%%03d.ts", tmpDir), // Segment naming
-	//	"-hls_init_time", "0", // Start segments at 0 seconds
-	//	"-hls_playlist_type", "event", // Event playlist for live streaming
-	//	fmt.Sprintf("%s/segments.m3u8", tmpDir), // Output playlist
-	//}
+	LL_HLS_OPTIONS := []string{
+		// RTSP Transport settings
+		"-rtsp_transport", "tcp", // Use TCP for RTSP transport (more reliable than UDP)
+		"-i", camera.StreamURL, // Input RTSP stream
+		"-buffer_size", "1024000", // Set buffer size
+		"-probesize", "32768", // Reduced probe size for faster startup
+		"-analyzeduration", "1000000", // Reduced analyze duration for faster startup
+		"-fflags", "+genpts+discardcorrupt", // Generate PTS and discard corrupt data
+
+		"-sws_flags", "bilinear", // Fast scaling
+		"-avioflags", "direct", // Direct I/O for better performance
+
+		// Video encoding settings
+		"-c:v", "libx264", // Use H.264 codec (widely supported)
+		"-preset", "ultrafast", // Prioritize speed over efficiency
+		"-tune", "zerolatency", // Optimize for low latency
+		"-profile:v", "baseline", // Use baseline profile (lowest latency)
+		"-level", "3.0", // Compatibility level
+		"-crf", "28", // Balance quality/size (higher = lower quality but less data)
+		"-maxrate", "2000k", // Limit maximum bitrate
+		"-bufsize", "1000k", // Small buffer for lower latency
+		"-g", "15", // Lower GOP size (keyframe every 15 frames)
+		"-keyint_min", "15", // Minimum keyframe interval
+		"-sc_threshold", "0", // Disable scene change detection (more predictable keyframes)
+
+		// Force consistent keyframes for better streaming
+		"-force_key_frames", "expr:gte(t,n_forced*1)", // Force keyframe every 1 second
+
+		// HLS specific settings
+		"-f", "hls", // Output format as HLS
+		"-hls_time", "1", // Very short segments (1 second)
+		"-hls_list_size", "4", // Keep only 4 segments in playlist (reduces delay)
+		"-hls_flags", "delete_segments+append_list+program_date_time+independent_segments", // Enable LL-HLS features
+		"-hls_segment_type", "mpegts", // Segment format (MPEG-TS)
+		"-hls_segment_filename", fmt.Sprintf("%s/segment-%%03d.ts", tmpDir), // Segment naming
+		"-hls_init_time", "0", // Start segments at 0 seconds
+		"-hls_playlist_type", "event", // Event playlist for live streaming
+		fmt.Sprintf("%s/segments.m3u8", tmpDir), // Output playlist
+	}
 	switch camera.Type {
 	case ANT:
 		if strings.Contains(camera.Name, "duplicate") {
@@ -384,7 +384,7 @@ func (rtsp *RtspProcessor) newFFmpegConfig(camera CameraConfig) (*FFmpegConfig, 
 		} else {
 
 			return &FFmpegConfig{
-				options:                HLS_OPTIONS,
+				options:                LL_HLS_OPTIONS,
 				maxRetries:             5,
 				retryDelay:             5 * time.Second,
 				bufferPostSendInterval: 100 * time.Millisecond,
