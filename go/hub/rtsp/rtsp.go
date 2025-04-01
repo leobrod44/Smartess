@@ -499,5 +499,10 @@ func (rtsp *RtspProcessor) StartMotionDetection(event_handler *events.EventHandl
 func handleMotionDetectedEvent(event_handler *events.EventHandler, cameraName string) {
 	fmt.Println("Motion event handled")
 	currentTime := time.Now()
-	event_handler.PublishMotionAlert(cameraName, "Motion detected", "ON", currentTime)
+	err := event_handler.PublishMotionAlert(cameraName, "Motion detected", "ON", currentTime)
+
+	if err != nil {
+		// Handle the error, e.g., log it or return it
+		log.Printf("Failed to publish motion alert for camera %s: %v", cameraName, err)
+	}
 }
