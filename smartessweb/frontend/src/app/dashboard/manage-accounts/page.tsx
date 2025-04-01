@@ -52,20 +52,23 @@ const ManageUsersPage = () => {
       (orgUser) => orgUser.proj_id === null
     );
 
-    nullProjOrgUsers.forEach((orgUser) => {
-      const matchingIndividual = individuals.find(
-        (individual) => individual.individualId === orgUser.user_id
-      );
-
-      if (matchingIndividual) {
-        if (!userMap[matchingIndividual.individualId]) {
-          userMap[matchingIndividual.individualId] = {
-            user: matchingIndividual,
-            addresses: [], // Empty addresses for null projects
-          };
+    if (selectedProjectAddress === "ALL PROJECTS") {
+      nullProjOrgUsers.forEach((orgUser) => {
+        const matchingIndividual = individuals.find(
+          (individual) => individual.individualId === orgUser.user_id
+        );
+    
+        if (matchingIndividual) {
+          if (!userMap[matchingIndividual.individualId]) {
+            userMap[matchingIndividual.individualId] = {
+              user: matchingIndividual,
+              addresses: [], // Empty addresses for null projects
+            };
+          }
         }
-      }
-    });
+      });
+    }
+    
 
     projects.forEach((project) => {
       const shouldIncludeProject =
@@ -181,34 +184,36 @@ const ManageUsersPage = () => {
       )
     : [];
 
-  const filteredUsers = consolidatedUsers
-    .filter(({ user, addresses }) => {
-      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-      const addressString = addresses.join(" ").toLowerCase();
-      const role = user.role.toLowerCase();
-      const query = searchQuery.toLowerCase();
+    const filteredUsers = consolidatedUsers
+      .filter(({ user, addresses }) => {
+        const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+        const addressString = addresses ? addresses.join(" ").toLowerCase() : "";
+        const role = user.role.toLowerCase();
+        const query = searchQuery.toLowerCase();
 
-      const matchesSearch =
-        fullName.includes(query) ||
-        addressString.includes(query) ||
-        role.includes(query);
+        const matchesSearch =
+          fullName.includes(query) ||
+          addressString.includes(query) ||
+          role.includes(query);
 
-      const matchesFilter =
-        filter === "" ||
-        filter === "Address A-Z" ||
-        filter === "User A-Z" ||
-        user.role.toLowerCase() === filter.toLowerCase();
+        const matchesFilter =
+          filter === "" ||
+          filter === "Address A-Z" ||
+          filter === "User A-Z" ||
+          user.role.toLowerCase() === filter.toLowerCase();
 
-      return matchesSearch && matchesFilter;
-    })
-    .sort((a, b) => {
-      if (filter === "Address A-Z") {
-        return a.addresses[0].localeCompare(b.addresses[0]);
-      } else if (filter === "User A-Z") {
-        const nameA = `${a.user.firstName} ${a.user.lastName}`;
-        const nameB = `${b.user.firstName} ${b.user.lastName}`;
-        return nameA.localeCompare(nameB);
-      }
+        return matchesSearch && matchesFilter;
+      })
+      .sort((a, b) => {
+        if (filter === "Address A-Z") {
+          const addressA = a.addresses?.[0] || "";
+          const addressB = b.addresses?.[0] || "";
+          return addressA.localeCompare(addressB);
+        } else if (filter === "User A-Z") {
+          const nameA = `${a.user.firstName} ${a.user.lastName}`;
+          const nameB = `${b.user.firstName} ${b.user.lastName}`;
+          return nameA.localeCompare(nameB);
+        }
       return 0;
     });
 
