@@ -32,6 +32,7 @@ const AlertPage = () => {
         });
       });
     });
+    console.log(projects)
     return Array.from(uniqueAlerts.values());
   }, [projects]);
 
@@ -136,10 +137,10 @@ const AlertPage = () => {
   useEffect(() => {
     // Create a new STOMP client
     const client = new Client({
-      brokerURL: 'ws://localhost:15674/ws',
+      brokerURL: 'ws://151.145.39.229:15674/ws',
       connectHeaders: {
-        login: 'admin',
-        passcode: 'admin',
+        login: 'qready',
+        passcode: 'qready'
       },
       debug: function (str) {
         console.log(str);
