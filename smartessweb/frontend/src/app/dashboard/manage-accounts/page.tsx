@@ -52,20 +52,23 @@ const ManageUsersPage = () => {
       (orgUser) => orgUser.proj_id === null
     );
 
-    nullProjOrgUsers.forEach((orgUser) => {
-      const matchingIndividual = individuals.find(
-        (individual) => individual.individualId === orgUser.user_id
-      );
-
-      if (matchingIndividual) {
-        if (!userMap[matchingIndividual.individualId]) {
-          userMap[matchingIndividual.individualId] = {
-            user: matchingIndividual,
-            addresses: [], // Empty addresses for null projects
-          };
+    if (selectedProjectAddress === "ALL PROJECTS") {
+      nullProjOrgUsers.forEach((orgUser) => {
+        const matchingIndividual = individuals.find(
+          (individual) => individual.individualId === orgUser.user_id
+        );
+    
+        if (matchingIndividual) {
+          if (!userMap[matchingIndividual.individualId]) {
+            userMap[matchingIndividual.individualId] = {
+              user: matchingIndividual,
+              addresses: [], // Empty addresses for null projects
+            };
+          }
         }
-      }
-    });
+      });
+    }
+    
 
     projects.forEach((project) => {
       const shouldIncludeProject =
