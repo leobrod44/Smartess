@@ -1,4 +1,11 @@
-# Hub Developer Getting Started Guide
+# Hub and Core System
+Go codebase
+## Hub Team Features Demo Video link
+
+[Video for Presentation Day Hub Team Demo](https://drive.google.com/file/d/1KnHlDSw1Z77iP68RljKhooetPIYsfUyf/view?usp=sharing) 
+<br/>
+
+## Hub Developer Getting Started Guide
 
 1. If you do not already have the smartess_network set up on docker, in the main directory "Smartess" run:
 
