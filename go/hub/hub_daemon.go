@@ -89,6 +89,7 @@ func (hub *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
 	go func() {
 		defer wg.Done()
 		hub.rtsp_processor.Start()
+		hub.rtsp_processor.StartMotionDetection(hub.event_handler)
 	}()
 	wg.Wait()
 	hub.rtsp_processor.Close()

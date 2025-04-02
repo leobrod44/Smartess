@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	logs "Smartess/go/hub/logger"
 
@@ -210,4 +211,45 @@ func connectMockHubWebhook(logger *logs.Logger) (*websocket.Conn, error) {
 	}
 	logger.Info("Subscribed to Home Assistant events")
 	return conn, nil
+}
+
+func (r *EventHandler) PublishMotionAlert(deviceID string, message string, state string, timestamp time.Time) error {
+	// Construct the alert
+	alert := structures.Alert{
+		HubIP:     os.Getenv("HUB_IP"),
+		DeviceID:  deviceID,
+		Message:   message,
+		State:     state,
+		TimeStamp: timestamp,
+		Type:      "Motion",
+	}
+
+	// Marshal the alert into JSON
+	alertJson, err := json.Marshal(alert)
+	if err != nil {
+		r.Logger.Error(fmt.Sprintf("Failed to marshal alert: %v", err))
+		return fmt.Errorf("failed to marshal alert: %v", err)
+	}
+
+	exchangeName := "alerts"
+	routeKey := "alerts.motion." + deviceID
+
+	// Publish the alert
+	err = r.instance.Channel.Publish(
+		exchangeName, // exchange
+		routeKey,     // routing key
+		true,         // mandatory
+		false,        // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        alertJson,
+		},
+	)
+	if err != nil {
+		r.Logger.Error(fmt.Sprintf("Failed to publish alert: %v", err))
+		return fmt.Errorf("failed to publish alert: %v", err)
+	}
+
+	r.Logger.Info(fmt.Sprintf("Alert published successfully: %v", alert))
+	return nil
 }

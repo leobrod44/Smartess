@@ -4,16 +4,11 @@ import (
 	"Smartess/go/common/logging"
 	common_rabbitmq "Smartess/go/common/rabbitmq"
 	"Smartess/go/server/rabbitmq/handlers"
-	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
-	"time"
 
 	"github.com/rabbitmq/rabbitmq-stream-go-client/pkg/stream"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"go.uber.org/zap"
 )
@@ -33,7 +28,7 @@ func Init() (RabbitMQServer, error) {
 
 	//TODO remove mongo and change to supabase, also set as param rather than var passing
 
-	mongoClient := initMongoDB()
+	//mongoClient := initMongoDB()
 
 	instance, err := common_rabbitmq.Init("/app/config/config.yaml")
 	if err != nil {
@@ -102,7 +97,7 @@ func Init() (RabbitMQServer, error) {
 			if queue.Name == "website.alert" {
 				continue
 			}
-			handler, err := setHandler(exchangeConfig.Name, queue.Name, mongoClient, instance, env)
+			handler, err := setHandler(exchangeConfig.Name, queue.Name, instance, env)
 			if err != nil {
 				return RabbitMQServer{}, errors.New("Failed to set handler: " + err.Error())
 			}
@@ -153,12 +148,12 @@ func (r *RabbitMQServer) Start() {
 	select {}
 }
 
-func setHandler(exchange string, queue string, mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance, env *stream.Environment) (handlers.MessageHandler, error) {
+func setHandler(exchange string, queue string, instance *common_rabbitmq.RabbitMQInstance, env *stream.Environment) (handlers.MessageHandler, error) {
 	switch exchange {
 	case "logs":
 		return handlers.NewHubLogHandler(queue), nil
 	case "alerts":
-		return handlers.NewAlertHandler(mongoClient, instance), nil
+		return handlers.NewAlertHandler(instance), nil
 	case "videostream":
 		return handlers.NewControllerHandler(instance, env), nil
 	default:
@@ -171,22 +166,22 @@ func (r *RabbitMQServer) Close() {
 	r.instance.Conn.Close()
 }
 
-func initMongoDB() *mongo.Client {
-	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
+// func initMongoDB() *mongo.Client {
+// 	clientOptions := options.Client().ApplyURI(os.Getenv("MONGO_STRING"))
 
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
+// 	client, err := mongo.Connect(context.TODO(), clientOptions)
+// 	if err != nil {
+// 		log.Fatalf("Failed to connect to MongoDB: %v", err)
+// 	}
 
-	// Ping the database to verify connection
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+// 	// Ping the database to verify connection
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
 
-	if err := client.Ping(ctx, nil); err != nil {
-		log.Fatalf("Failed to ping MongoDB: %v", err)
-	}
+// 	if err := client.Ping(ctx, nil); err != nil {
+// 		log.Fatalf("Failed to ping MongoDB: %v", err)
+// 	}
 
-	log.Println("Connected to MongoDB")
-	return client
-}
+// 	log.Println("Connected to MongoDB")
+// 	return client
+// }
