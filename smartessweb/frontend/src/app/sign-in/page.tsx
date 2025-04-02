@@ -79,7 +79,7 @@ const SignInPage = () => {
       setUserFirstName(user.currentUser.firstName);
       setUserLastName(user.currentUser.lastName);
       setUserType(user.currentUser.role);
-      setUserProfilePicture(user.currentUser.profilePictureUrl);
+      setUserProfilePicture(user.currentUser.profilePictureUrl ?? "");
       setUserPhoneNumber(user.currentUser.phoneNumber);
       setTimeout(() => {
         router.push("/dashboard");
