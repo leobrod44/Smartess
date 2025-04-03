@@ -66,6 +66,7 @@ type CameraConfig struct {
 	Type        CameraEnum `yaml:"type"`
 	StreamURL   string     `yaml:"streamURL"`
 	SegmentTime int        `yaml:"segment_time"`
+	Allowed     bool       `yaml:"allowed"`
 }
 
 type Cameras struct {
