@@ -24,7 +24,7 @@ const consumptionRoutes = require("./routes/consumptionRoutes");
 const surveillanceRoutes = require("./routes/surveillanceRoutes");
 const registrationRoutes = require("./routes/registrationRoutes");
 const resetPasswordRoutes = require("./routes/resetPasswordRoutes");
-const alertRoutes = require("./routes/alertRoutes");
+const alertRoutes = require("./routes/alertsRoutes");
 
 //Add path here
 app.use("/api/auth", authRoutes);
