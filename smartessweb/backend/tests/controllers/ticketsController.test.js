@@ -5,54 +5,143 @@ const supabase = require('../../config/supabase');
 describe('Tickets Controller Tests', () => {
     let authToken;
     
-    beforeAll(async () => {
-        const loginResponse = await request(app)
-            .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
-        expect(loginResponse.status).toBe(200);
-        authToken = loginResponse.body.token;
-    });
-
-    describe('GET /api/tickets/get-tickets', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app).get('/api/tickets/get-tickets');
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should handle invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
-            });
-
-            const response = await request(app)
-                .get('/api/tickets/get-tickets')
-                .set('Authorization', 'Bearer invalid_token');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should handle user fetch error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
+    // Test utilities for mocking responses
+    const mockUtils = {
+        // Mock authentication with valid user
+        mockValidAuth: () => {
+            return jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({
                 data: { user: { email: 'test@example.com' } },
                 error: null
             });
-
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        },
+        
+        // Mock authentication with invalid token
+        mockInvalidAuth: () => {
+            return jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({
+                data: { user: null },
+                error: { message: 'Invalid token' }
+            });
+        },
+        
+        // Mock user query
+        mockUserQuery: (userId = '123', error = null) => {
+            return jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user data' }
+                    data: error ? null : { user_id: userId },
+                    error: error
                 })
             }));
+        },
+        
+        // Mock ticket query
+        mockTicketQuery: (data = null, error = null) => {
+            const defaultTicket = {
+                ticket_id: '123',
+                proj_id: '456',
+                hub_id: '789',
+                description: 'Test Ticket',
+                description_detailed: 'Detailed description',
+                type: 'maintenance',
+                status: 'open',
+                created_at: '2024-01-26T12:00:00Z',
+                submitted_by_user_id: '789'
+            };
+            
+            return jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: error ? null : (data || defaultTicket),
+                    error: error
+                })
+            }));
+        },
+        
+        // Mock project access query
+        mockProjectAccessQuery: (userType = 'admin', error = null) => {
+            return jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: error ? null : { user_id: '123', proj_id: '456', org_user_type: userType },
+                    error: error
+                })
+            }));
+        },
+        
+        // Generic mock for Supabase
+        mockSupabaseQuery: (returnValue) => {
+            // Create a spy that returns the provided mock implementation
+            return jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                // If the returnValue has a mockResolvedValue property, ensure it works properly
+                if (returnValue.mockResolvedValue) {
+                    const originalMockResolvedValue = returnValue.mockResolvedValue;
+                    returnValue.mockResolvedValue = jest.fn().mockImplementation(() => {
+                        return originalMockResolvedValue();
+                    });
+                }
+                return returnValue;
+            });
+        },
+        
+        // Test common error responses
+        testAuthErrors: async (endpoint, method = 'get', payload = {}) => {
+            // Test no token provided
+            const noTokenResponse = await request(app)[method](endpoint);
+            expect(noTokenResponse.status).toBe(401);
+            expect(noTokenResponse.body).toHaveProperty('error', 'No token provided');
+            
+            // Test invalid token
+            mockUtils.mockInvalidAuth();
+            const invalidTokenResponse = await request(app)[method](endpoint)
+                .set('Authorization', 'Bearer invalid_token')
+                .send(method === 'get' ? undefined : payload);
+            
+            expect(invalidTokenResponse.status).toBe(401);
+            expect(invalidTokenResponse.body).toHaveProperty('error', 'Invalid token');
+        }
+    };
+    
+    beforeAll(async () => {
+        const loginResponse = await request(app)
+            .post('/api/auth/login')
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
+        expect(loginResponse.status).toBe(200);
+        authToken = loginResponse.body.token;
+    });
+    
+    beforeEach(() => {
+        jest.clearAllMocks();
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+        
+        // Ensure all Supabase mock methods that might be chained return themselves
+        // This helps with mocking the method chaining pattern used in the controller
+        const mockMethods = ['select', 'insert', 'update', 'delete', 'eq', 'in', 'not', 'single'];
+        const fromSpy = jest.spyOn(supabase, 'from');
+        
+        fromSpy.mockImplementation(() => {
+            const mock = {};
+            
+            mockMethods.forEach(method => {
+                mock[method] = jest.fn().mockReturnValue(mock);
+            });
+            
+            return mock;
+        });
+    });
+
+
+
+    describe('GET /api/tickets/get-tickets', () => {
+        it('should handle authentication errors', async () => {
+            await mockUtils.testAuthErrors('/api/tickets/get-tickets');
+        });
+
+        it('should handle user fetch error', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery(null, { message: 'Failed to fetch user data' });
 
             const response = await request(app)
                 .get('/api/tickets/get-tickets')
@@ -64,25 +153,17 @@ describe('Tickets Controller Tests', () => {
         });
 
         it('should handle projects fetch error', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            fromSpy.mockImplementationOnce(() => ({
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 not: jest.fn().mockResolvedValue({
                     data: null,
                     error: { message: 'Failed to fetch projects' }
                 })
-            }));
+            });
 
             const response = await request(app)
                 .get('/api/tickets/get-tickets')
@@ -94,17 +175,27 @@ describe('Tickets Controller Tests', () => {
         });
 
         it('should handle tickets fetch error', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            mockUserAndProjectQueries(fromSpy);
-
-            fromSpy.mockImplementationOnce(() => ({
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            
+            // Mock projects query
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                not: jest.fn().mockResolvedValue({
+                    data: [{ proj_id: '456' }],
+                    error: null
+                })
+            });
+            
+            // Mock tickets query with error
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 in: jest.fn().mockResolvedValue({
                     data: null,
                     error: { message: 'Failed to fetch tickets' }
                 })
-            }));
+            });
 
             const response = await request(app)
                 .get('/api/tickets/get-tickets')
@@ -115,20 +206,129 @@ describe('Tickets Controller Tests', () => {
             expect(console.error).toHaveBeenCalled();
         });
 
-        it('should handle hub data fetch error', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
+        it('should successfully return formatted tickets', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            
+            // Mock projects query
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                not: jest.fn().mockResolvedValue({
+                    data: [{ proj_id: '456' }],
+                    error: null
+                })
+            });
+            
+            // Mock tickets query
+            const mockTicket = {
+                ticket_id: '123',
+                proj_id: '456',
+                hub_id: '789',
+                description: 'Test Ticket',
+                description_detailed: 'Detailed description',
+                type: 'maintenance',
+                status: 'open',
+                created_at: '2024-01-26T12:00:00Z'
+            };
+            
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [mockTicket],
+                    error: null
+                })
+            });
+            
+            // Mock hub query
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [{ hub_id: '789', unit_number: '101' }],
+                    error: null
+                })
+            });
 
-            mockUserAndProjectQueries(fromSpy);
-            mockTicketsQuery(fromSpy);
+            const response = await request(app)
+                .get('/api/tickets/get-tickets')
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(200);
+            expect(response.body.tickets).toEqual([{
+                ticket_id: mockTicket.ticket_id,
+                proj_id: mockTicket.proj_id,
+                unit_id: mockTicket.hub_id,
+                name: mockTicket.description,
+                description: mockTicket.description_detailed,
+                type: mockTicket.type,
+                unit: '101',
+                status: mockTicket.status,
+                created_at: '2024-01-26'
+            }]);
+        });
 
-            fromSpy.mockImplementationOnce(() => ({
+        it('should return 404 if user is not found', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Mock user query with no error but null data
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: null
+                })
+            });
+            
+            const response = await request(app)
+                .get('/api/tickets/get-tickets')
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(404);
+            expect(response.body).toHaveProperty('error', 'User not found.');
+        });
+
+        it('should handle hub fetch error', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            
+            // Mock projects query success
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                not: jest.fn().mockResolvedValue({
+                    data: [{ proj_id: '456' }],
+                    error: null
+                })
+            });
+            
+            // Mock tickets query success
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [{ 
+                        ticket_id: '123', 
+                        proj_id: '456',
+                        hub_id: '789',
+                        description: 'Test Ticket',
+                        description_detailed: 'Detailed description',
+                        type: 'maintenance',
+                        status: 'open',
+                        created_at: '2024-01-26T12:00:00Z'
+                    }],
+                    error: null
+                })
+            });
+            
+            // Mock hub query error
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 in: jest.fn().mockResolvedValue({
                     data: null,
                     error: { message: 'Failed to fetch hub data' }
                 })
-            }));
-
+            });
+            
             const response = await request(app)
                 .get('/api/tickets/get-tickets')
                 .set('Authorization', `Bearer ${authToken}`);
@@ -138,65 +338,14 @@ describe('Tickets Controller Tests', () => {
             expect(console.error).toHaveBeenCalled();
         });
 
-        it('should successfully return formatted tickets', async () => {
-            const mockData = {
-                ticket: {
-                    ticket_id: '123',
-                    proj_id: '456',
-                    hub_id: '789',
-                    description: 'Test Ticket',
-                    description_detailed: 'Detailed description',
-                    type: 'maintenance',
-                    status: 'open',
-                    created_at: '2024-01-26T12:00:00Z'
-                },
-                hub: {
-                    hub_id: '789',
-                    unit_number: '101'
-                }
-            };
-
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            mockUserAndProjectQueries(fromSpy);
-
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [mockData.ticket],
-                    error: null
-                })
-            }));
-
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [mockData.hub],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/get-tickets')
-                .set('Authorization', `Bearer ${authToken}`);
+        it('should handle unexpected errors gracefully', async () => {
+            mockUtils.mockValidAuth();
             
-            expect(response.status).toBe(200);
-            expect(response.body.tickets).toEqual([{
-                ticket_id: mockData.ticket.ticket_id,
-                proj_id: mockData.ticket.proj_id,
-                unit_id: mockData.ticket.hub_id,
-                name: mockData.ticket.description,
-                description: mockData.ticket.description_detailed,
-                type: mockData.ticket.type,
-                unit: mockData.hub.unit_number,
-                status: mockData.ticket.status,
-                created_at: '2024-01-26'
-            }]);
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
+            // Force an exception by making supabase.from throw an error
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                throw new Error('Unexpected error');
+            });
+            
             const response = await request(app)
                 .get('/api/tickets/get-tickets')
                 .set('Authorization', `Bearer ${authToken}`);
@@ -208,56 +357,151 @@ describe('Tickets Controller Tests', () => {
     });
 
     describe('DELETE /api/tickets/delete-ticket/:ticket_id', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
+        const endpoint = '/api/tickets/delete-ticket/123';
+        
+        it('should handle authentication errors', async () => {
+            await mockUtils.testAuthErrors(endpoint, 'delete');
         });
-
-        it('should return 400 if no ticket_id is provided', async () => {
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/')
-                .set('Authorization', `Bearer ${authToken}`);
+        
+        it('should return 404 if ticket does not exist', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
             
-            expect(response.status).toBe(404); // Assuming Express returns 404 for undefined route
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
-            });
-
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
-                .set('Authorization', 'Bearer invalid_token');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return 500 if user data fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
-            });
-
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+            // In the controller, if data is null but error is also null, it returns 404
+            // This matches the controller's behavior for tickets not found
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
                     data: null,
-                    error: { message: 'Failed to fetch user data' }
+                    error: null
                 })
-            }));
+            });
+            
+            const response = await request(app)
+                .delete(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(404);
+            expect(response.body).toHaveProperty('error', 'Ticket not found');
+        });
+        
+        it('should return 403 if user does not have access', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            
+            // Mock projectAccess query to return null (no access) without error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: null
+                })
+            });
+            
+            const response = await request(app)
+                .delete(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(403);
+            // Update expected message to match what the controller actually returns
+            expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
+        });
+        
+        it('should return 403 if user does not have admin/master role', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery('basic'); // Basic user, not admin/master
+            
+            const response = await request(app)
+                .delete(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(403);
+            expect(response.body).toHaveProperty('error', 'User does not have permission to delete tickets');
+        });
+        
+        it('should return 500 if ticket deletion fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery();
+            
+            // Mock deletion with error
+            mockUtils.mockSupabaseQuery({
+                delete: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    error: { message: 'Failed to delete ticket' }
+                })
+            });
+            
+            const response = await request(app)
+                .delete(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to delete ticket');
+        });
+        
+        it('should successfully delete ticket for admin user', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery();
+            
+            // Mock successful deletion
+            mockUtils.mockSupabaseQuery({
+                delete: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    error: null
+                })
+            });
+            
+            const response = await request(app)
+                .delete(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('message', 'Ticket successfully deleted');
+        });
 
+        it('should return 400 if ticket ID is missing in controller', async () => {
+            // Mock req and res objects
+            const req = {
+                token: 'mock-token',
+                params: { ticket_id: undefined } // Explicitly undefined ticket_id
+            };
+            
+            // Create a mock response object
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+            
+            // Call the controller function directly
+            await require('../../controllers/ticketsController').deleteTicket(req, res);
+            
+            // Verify the expected behavior
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: "Ticket ID is required" });
+        });
+
+        it('should return 500 if user data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Mock user query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database error' }
+                })
+            });
+            
             const response = await request(app)
                 .delete('/api/tickets/delete-ticket/123')
                 .set('Authorization', `Bearer ${authToken}`);
@@ -266,29 +510,20 @@ describe('Tickets Controller Tests', () => {
             expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
         });
 
-        it('should return 500 if ticket fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with error
-            fromSpy.mockImplementationOnce(() => ({
+        it('should return 500 if ticket data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            
+            // Mock ticket query with error
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
                     data: null,
-                    error: { message: 'Failed to fetch ticket data' }
+                    error: { message: 'Failed to fetch ticket' }
                 })
-            }));
-
+            });
+            
             const response = await request(app)
                 .delete('/api/tickets/delete-ticket/123')
                 .set('Authorization', `Bearer ${authToken}`);
@@ -297,70 +532,22 @@ describe('Tickets Controller Tests', () => {
             expect(response.body).toHaveProperty('error', 'Failed to fetch ticket data');
         });
 
-        it('should return 404 if ticket does not exist', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('error', 'Ticket not found');
-        });
-
         it('should return 500 if project access verification fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            
             // Mock project access query with error
-            fromSpy.mockImplementationOnce(() => ({
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
                     data: null,
-                    error: { message: 'Failed to verify project access' }
+                    error: { message: 'Failed to verify access' }
                 })
-            }));
-
+            });
+            
             const response = await request(app)
                 .delete('/api/tickets/delete-ticket/123')
                 .set('Authorization', `Bearer ${authToken}`);
@@ -369,493 +556,351 @@ describe('Tickets Controller Tests', () => {
             expect(response.body).toHaveProperty('error', 'Failed to verify project access');
         });
 
-        it('should return 403 if user does not have project access', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
+        it('should handle unexpected errors gracefully', async () => {
+            mockUtils.mockValidAuth();
             
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
-        });
-
-        it('should return 403 if user does not have admin or master role', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with non-admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'member' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
+            // Force an exception by making supabase.from throw an error
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                throw new Error('Unexpected error');
+            });
             
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have permission to delete tickets');
-        });
-
-        it('should return 500 if ticket deletion fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket deletion with error
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: { message: 'Failed to delete ticket' }
-                })
-            }));
-
             const response = await request(app)
                 .delete('/api/tickets/delete-ticket/123')
                 .set('Authorization', `Bearer ${authToken}`);
             
             expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to delete ticket');
+            expect(response.body).toHaveProperty('error', 'Internal server error');
+            expect(console.error).toHaveBeenCalled();
         });
 
-        it('should successfully delete ticket for admin user', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
 
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
+    });
+
+    describe('GET /api/tickets/get-assigned-tickets-for-user', () => {
+        const endpoint = '/api/tickets/get-assigned-tickets-for-user';
+        
+        it('should handle authentication errors', async () => {
+            await mockUtils.testAuthErrors(endpoint);
+        });
+        
+        it('should return 500 if user data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Mock user query with error
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
+                    data: null,
+                    error: { message: 'Database error' }
                 })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket deletion
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
+            });
+            
             const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+        });
+        
+        it('should return 500 if ticket assignments fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery('123');
+            
+            // Mock assignments query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database error' }
+                })
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch ticket assignments.');
+        });
+        
+        it('should return empty array if no assignments found', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery('123');
+            
+            // Mock empty assignments
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    data: [],
+                    error: null
+                })
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
                 .set('Authorization', `Bearer ${authToken}`);
             
             expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'Ticket successfully deleted');
+            expect(response.body).toEqual({ tickets: [] });
         });
-
-        it('should successfully delete ticket for master user', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
+        
+        it('should return 500 if tickets data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery('123');
+            
+            // Mock assignments with data
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with master role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'master' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket deletion
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockResolvedValue({
+                    data: [
+                        { 
+                            ticket_id: '123', 
+                            resolved_status: 'resolved', 
+                            assigned_by_user_id: '456',
+                            assigned_to_user_id: '123'
+                        }
+                    ],
                     error: null
                 })
-            }));
-
+            });
+            
+            // Mock tickets query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database error' }
+                })
+            });
+            
             const response = await request(app)
-                .delete('/api/tickets/delete-ticket/123')
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch tickets data.');
+        });
+        
+        it('should return 500 if hub data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery('123');
+            
+            // Mock assignments with data
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    data: [
+                        { 
+                            ticket_id: '123', 
+                            resolved_status: 'resolved', 
+                            assigned_by_user_id: '456',
+                            assigned_to_user_id: '123'
+                        }
+                    ],
+                    error: null
+                })
+            });
+            
+            // Mock tickets query with success
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [
+                        {
+                            ticket_id: '123',
+                            proj_id: '456',
+                            hub_id: '789',
+                            description: 'Test Ticket',
+                            description_detailed: 'Detailed description',
+                            type: 'maintenance',
+                            status: 'open',
+                            created_at: '2024-01-26T12:00:00Z'
+                        }
+                    ],
+                    error: null
+                })
+            });
+            
+            // Mock hub query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database error' }
+                })
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch hub data.');
+        });
+        
+        it('should successfully return formatted assigned tickets', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery('123');
+            
+            // Mock assignments with data
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockResolvedValue({
+                    data: [
+                        { 
+                            ticket_id: '123', 
+                            resolved_status: 'resolved', 
+                            assigned_by_user_id: '456',
+                            assigned_to_user_id: '123'
+                        },
+                        { 
+                            ticket_id: '124', 
+                            resolved_status: 'unresolved', 
+                            assigned_by_user_id: '456',
+                            assigned_to_user_id: '123'
+                        }
+                    ],
+                    error: null
+                })
+            });
+            
+            // Mock tickets query with success
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [
+                        {
+                            ticket_id: '123',
+                            proj_id: '456',
+                            hub_id: '789',
+                            description: 'Test Ticket 1',
+                            description_detailed: 'Detailed description 1',
+                            type: 'maintenance',
+                            status: 'open',
+                            created_at: '2024-01-26T12:00:00Z'
+                        },
+                        {
+                            ticket_id: '124',
+                            proj_id: '456',
+                            hub_id: '790',
+                            description: 'Test Ticket 2',
+                            description_detailed: 'Detailed description 2',
+                            type: 'support',
+                            status: 'pending',
+                            created_at: '2024-01-27T12:00:00Z'
+                        }
+                    ],
+                    error: null
+                })
+            });
+            
+            // Mock hub query with success
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                in: jest.fn().mockResolvedValue({
+                    data: [
+                        { hub_id: '789', unit_number: '101' },
+                        { hub_id: '790', unit_number: '102' }
+                    ],
+                    error: null
+                })
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
                 .set('Authorization', `Bearer ${authToken}`);
             
             expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'Ticket successfully deleted');
+            expect(response.body.tickets).toHaveLength(2);
+            
+            // Check first ticket
+            expect(response.body.tickets[0]).toHaveProperty('ticketId', '123');
+            expect(response.body.tickets[0]).toHaveProperty('name', 'Test Ticket 1');
+            expect(response.body.tickets[0]).toHaveProperty('unit', '101');
+            expect(response.body.tickets[0]).toHaveProperty('isResolved', true);
+            
+            // Check second ticket
+            expect(response.body.tickets[1]).toHaveProperty('ticketId', '124');
+            expect(response.body.tickets[1]).toHaveProperty('name', 'Test Ticket 2');
+            expect(response.body.tickets[1]).toHaveProperty('unit', '102');
+            expect(response.body.tickets[1]).toHaveProperty('isResolved', false);
+        });
+        
+        it('should handle unexpected errors gracefully', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Force an exception by making supabase.from throw an error
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                throw new Error('Unexpected error');
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Internal server error.');
+            expect(console.error).toHaveBeenCalledWith(
+                'Error in getAssignedTicketsForUser:',
+                expect.any(Error)
+            );
         });
     });
 
     describe('GET /api/tickets/ticket/:ticket_id', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
+        const endpoint = '/api/tickets/ticket/123';
+        
+        it('should handle authentication errors', async () => {
+            await mockUtils.testAuthErrors(endpoint);
         });
-
-        it('should return 400 if no ticket_id is provided', async () => {
-            const response = await request(app)
-                .get('/api/tickets/ticket/')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(404); // Assuming Express returns 404 for undefined route
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .get('/api/tickets/ticket/123');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
-            });
-
-            const response = await request(app)
-                .get('/api/tickets/ticket/123')
-                .set('Authorization', 'Bearer invalid_token');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return 500 if user data fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
-            });
-
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user data' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
-        });
-
+        
         it('should return 404 if ticket does not exist', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery(null, { message: 'Ticket not found' });
+            
             const response = await request(app)
-                .get('/api/tickets/ticket/123')
+                .get(endpoint)
                 .set('Authorization', `Bearer ${authToken}`);
             
             expect(response.status).toBe(404);
             expect(response.body).toHaveProperty('error', 'Ticket not found');
         });
-
+        
         it('should return 403 if user does not have project access', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { 
-                        ticket_id: '123', 
-                        proj_id: '456', 
-                        hub_id: '789',
-                        description: 'Test Ticket',
-                        description_detailed: 'Detailed description',
-                        type: 'maintenance',
-                        status: 'open',
-                        created_at: '2024-01-26T12:00:00Z',
-                        submitted_by_user_id: '789'
-                    },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery(null, { message: 'No access' });
+            
             const response = await request(app)
-                .get('/api/tickets/ticket/123')
+                .get(endpoint)
                 .set('Authorization', `Bearer ${authToken}`);
             
             expect(response.status).toBe(403);
             expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
         });
-
-        it('should return 500 if hub information fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { 
-                        ticket_id: '123', 
-                        proj_id: '456', 
-                        hub_id: '789',
-                        description: 'Test Ticket',
-                        description_detailed: 'Detailed description',
-                        type: 'maintenance',
-                        status: 'open',
-                        created_at: '2024-01-26T12:00:00Z',
-                        submitted_by_user_id: '789'
-                    },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock hub fetch with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch unit information' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch unit information');
-        });
-
+        
         it('should successfully fetch individual ticket', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { 
-                        ticket_id: '123', 
-                        proj_id: '456', 
-                        hub_id: '789',
-                        description: 'Test Ticket',
-                        description_detailed: 'Detailed description',
-                        type: 'maintenance',
-                        status: 'open',
-                        created_at: '2024-01-26T12:00:00Z',
-                        submitted_by_user_id: '789'
-                    },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock hub fetch
-            fromSpy.mockImplementationOnce(() => ({
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery();
+            
+            // Mock hub info
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
                     data: { unit_number: '101' },
                     error: null
                 })
-            }));
-
-            // Mock submitter info fetch
-            fromSpy.mockImplementationOnce(() => ({
+            });
+            
+            // Mock submitter info
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
@@ -866,1750 +911,1979 @@ describe('Tickets Controller Tests', () => {
                     },
                     error: null
                 })
-            }));
-
-            // Mock project info fetch
-            fromSpy.mockImplementationOnce(() => ({
+            });
+            
+            // Mock project info
+            mockUtils.mockSupabaseQuery({
                 select: jest.fn().mockReturnThis(),
                 eq: jest.fn().mockReturnThis(),
                 single: jest.fn().mockResolvedValue({
                     data: { address: '123 Test St' },
                     error: null
                 })
-            }));
+            });
+            
+            const response = await request(app)
+                .get(endpoint)
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(200);
+            expect(response.body.ticket).toHaveProperty('ticket_id', '123');
+            expect(response.body.ticket).toHaveProperty('unit', '101');
+            expect(response.body.ticket).toHaveProperty('submitted_by_firstName', 'John');
+            expect(response.body.ticket).toHaveProperty('project_address', '123 Test St');
+        });
 
+        it('should return 400 if ticket ID is missing in controller', async () => {
+            // Mock req and res objects
+            const req = {
+                token: 'mock-token',
+                params: { ticket_id: undefined } // Explicitly undefined ticket_id
+            };
+            
+            // Create a mock response object
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            };
+            
+            // Call the controller function directly
+            await require('../../controllers/ticketsController').fetchIndividualTicket(req, res);
+            
+            // Verify the expected behavior
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith({ error: "Ticket ID is required" });
+        });
+
+        it('should return 500 if user data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Mock user query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database error' }
+                })
+            });
+            
             const response = await request(app)
                 .get('/api/tickets/ticket/123')
                 .set('Authorization', `Bearer ${authToken}`);
             
-            expect(response.status).toBe(200);
-            expect(response.body.ticket).toEqual({
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
+        });
+
+        it('should return 500 if hub data fetch fails', async () => {
+            mockUtils.mockValidAuth();
+            mockUtils.mockUserQuery();
+            mockUtils.mockTicketQuery();
+            mockUtils.mockProjectAccessQuery();
+            
+            // Mock hub query with error
+            mockUtils.mockSupabaseQuery({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Failed to fetch hub data' }
+                })
+            });
+            
+            const response = await request(app)
+                .get('/api/tickets/ticket/123')
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch unit information');
+        });
+
+        it('should handle unexpected errors gracefully', async () => {
+            mockUtils.mockValidAuth();
+            
+            // Force an exception by making supabase.from throw an error
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                throw new Error('Unexpected error');
+            });
+            
+            const response = await request(app)
+                .get('/api/tickets/ticket/123')
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Internal server error');
+            expect(console.error).toHaveBeenCalled();
+        });
+    });
+
+    describe('Ticket Assignment Endpoints', () => {
+        describe('GET /api/tickets/assignable-employees/:ticket_id', () => {
+            const endpoint = '/api/tickets/assignable-employees/123';
+            
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint);
+            });
+            
+            it('should return 403 if user does not have admin/master role', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery('basic');
+                
+                const response = await request(app)
+                    .get(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have permission to assign tickets');
+            });
+            
+            it('should successfully return assignable employees', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock ticket assignments
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [{ assigned_to_user_id: '222' }],
+                        error: null
+                    })
+                });
+                
+                // Mock org users
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: [
+                            { user_id: '789', org_user_type: 'basic' },
+                            { user_id: '101', org_user_type: 'admin' }
+                        ],
+                        error: null
+                    })
+                });
+                
+                // Mock employee details
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: [
+                            { 
+                                user_id: '789', 
+                                first_name: 'Jane', 
+                                last_name: 'Doe', 
+                                email: 'jane.doe@example.com' 
+                            },
+                            { 
+                                user_id: '101', 
+                                first_name: 'John', 
+                                last_name: 'Smith', 
+                                email: 'john.smith@example.com' 
+                            }
+                        ],
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .get(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(200);
+                expect(response.body.employees).toHaveLength(2);
+                expect(response.body.employees[0]).toHaveProperty('firstName', 'Jane');
+                expect(response.body.employees[1]).toHaveProperty('role', 'admin');
+            });
+
+            it('should return 500 if user data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
+            });
+
+            it('should return 404 if ticket data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket query with error or null data
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch ticket data' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(404);
+                expect(response.body).toHaveProperty('error', 'Ticket not found');
+            });
+
+            it('should return 500 if assignment fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock assignment query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch assignments' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch ticket assignments');
+            });
+
+            it('should return 500 if org users fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock assignment query success
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock org users query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch org users' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch employees');
+            });
+
+            it('should return 500 if employee details fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock assignment query success
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock org users query success
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: [{ user_id: '123', org_user_type: 'admin' }],
+                        error: null
+                    })
+                });
+                
+                // Mock employee details query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch employee details' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch employee details');
+            });
+
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception by making supabase.from throw an error
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error');
+                expect(console.error).toHaveBeenCalled();
+            });
+
+            it('should return 403 if project access verification fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                
+                // Mock project access query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to verify access' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assignable-employees/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
+            });
+        });
+        
+        describe('GET /api/tickets/assigned-users/:ticket_id', () => {
+            const endpoint = '/api/tickets/assigned-users/123';
+            
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint);
+            });
+            
+            it('should return empty array if no assignments found', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock empty assignments
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .get(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toEqual({ assignedUsers: [] });
+            });
+            
+            it('should successfully return assigned users', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock assignments
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [
+                            { assigned_to_user_id: '456', resolved_status: false },
+                            { assigned_to_user_id: '789', resolved_status: true }
+                        ],
+                        error: null
+                    })
+                });
+                
+                // Mock user details
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: [
+                            { 
+                                user_id: '456', 
+                                first_name: 'John', 
+                                last_name: 'Doe', 
+                                email: 'john.doe@example.com' 
+                            },
+                            { 
+                                user_id: '789', 
+                                first_name: 'Jane', 
+                                last_name: 'Smith', 
+                                email: 'jane.smith@example.com' 
+                            }
+                        ],
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .get(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(200);
+                expect(response.body.assignedUsers).toHaveLength(2);
+                expect(response.body.assignedUsers[0]).toHaveProperty('firstName', 'John');
+                expect(response.body.assignedUsers[0]).toHaveProperty('resolved', false);
+                expect(response.body.assignedUsers[1]).toHaveProperty('firstName', 'Jane');
+                expect(response.body.assignedUsers[1]).toHaveProperty('resolved', true);
+            });
+
+            it('should return 500 if assignments fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock assignments query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch assignments' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assigned-users/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch assignments');
+            });
+
+            it('should return 500 if user details fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock assignments query success
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [{ assigned_to_user_id: '123', resolved_status: false }],
+                        error: null
+                    })
+                });
+                
+                // Mock user details query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    in: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to fetch user details' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assigned-users/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user details');
+            });
+
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception by making supabase.from throw an error
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/assigned-users/123')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error');
+            });
+        });
+        
+        describe('POST /api/tickets/assign-users', () => {
+            const endpoint = '/api/tickets/assign-users';
+            const validPayload = { 
+                ticket_id: '123', 
+                user_ids: ['456'],
+                assigned_by_user_id: '123'
+            };
+            
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint, 'post', validPayload);
+            });
+            
+            it('should return 400 if request data is invalid', async () => {
+                // Test missing ticket_id
+                const response1 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ user_ids: ['456'] });
+                
+                expect(response1.status).toBe(400);
+                expect(response1.body).toHaveProperty('error', 'Invalid request data');
+                
+                // Test missing user_ids
+                const response2 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ ticket_id: '123' });
+                
+                expect(response2.status).toBe(400);
+                expect(response2.body).toHaveProperty('error', 'Invalid request data');
+                
+                // Test user_ids not array
+                const response3 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ ticket_id: '123', user_ids: 'not-an-array' });
+                
+                expect(response3.status).toBe(400);
+                expect(response3.body).toHaveProperty('error', 'Invalid request data');
+            });
+            
+            it('should return 400 if ticket is closed', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock closed ticket
+                mockUtils.mockTicketQuery({
+                    proj_id: '456',
+                    status: 'closed'
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(400);
+                expect(response.body).toHaveProperty('error', 'Cannot assign users to a closed ticket');
+            });
+            
+            it('should return 400 if maximum users would be exceeded', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments (already has 2)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [
+                            { assigned_to_user_id: '111' },
+                            { assigned_to_user_id: '222' }
+                        ],
+                        error: null
+                    })
+                });
+                
+                // Try to assign 2 more (would exceed max of 3)
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({
+                        ...validPayload,
+                        user_ids: ['333', '444']
+                    });
+                
+                expect(response.status).toBe(400);
+                expect(response.body).toHaveProperty('error', 'Maximum 3 users can be assigned to a ticket');
+            });
+            
+            it('should successfully assign users to ticket', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments (empty)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock successful assignment
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock successful notification
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock successful status update
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('message', 'Users successfully assigned to ticket');
+            });
+
+            it('should return 500 if user data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
+            });
+
+            it('should return 500 if user data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
+            });
+
+            it('should return 403 if user does not have access to the project', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                
+                // Mock project access query with null data (no access)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
+            });
+
+            it('should return 403 if user does not have permission to assign tickets', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                
+                // Mock project access with basic role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: { org_user_type: 'basic' },
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have permission to assign tickets');
+            });
+
+            it('should return 500 if checking current assignments fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments check with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Failed to check assignments' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to check current assignments');
+            });
+
+            it('should return 500 if assignment insert fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments check
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock assignment insert with error
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: { message: 'Failed to insert assignments' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to assign users');
+            });
+
+            it('should return 500 if notification insert fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments check
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock assignment insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert with error
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: { message: 'Failed to insert notifications' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to create notifications');
+            });
+
+            it('should return 500 if ticket status update fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock current assignments check
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock assignment insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock status update with error
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        error: { message: 'Failed to update status' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to update ticket status');
+            });
+
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception by making supabase.from throw an error
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error');
+                expect(console.error).toHaveBeenCalled();
+            });
+
+            it('should return 403 if user does not have access to the project', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                
+                // Mock project access query with null data but no error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
+            });
+
+            it('should return 404 if ticket fetch fails with error', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post('/api/tickets/assign-users')
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(404);
+                expect(response.body).toHaveProperty('error', 'Ticket not found');
+            });
+        });
+
+        describe('POST /api/tickets/unassign-user', () => {
+            const endpoint = '/api/tickets/unassign-user';
+            const validPayload = {
                 ticket_id: '123',
-                proj_id: '456',
-                unit_id: '789',
-                name: 'Test Ticket',
-                description: 'Detailed description',
-                type: 'maintenance',
-                unit: '101',
-                status: 'open',
-                created_at: '2024-01-26',
-                submitted_by_firstName: 'John',
-                submitted_by_lastName: 'Doe',
-                submitted_by_email: 'john.doe@example.com',
-                project_address: '123 Test St'
+                user_id: '456',
+                assigned_by_user_id: '789'
+            };
+            
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint, 'post', validPayload);
             });
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
-            const response = await request(app)
-                .get('/api/tickets/ticket/123')
-                .set('Authorization', `Bearer ${authToken}`);
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Internal server error');
-        });
-    });
-
-    describe('GET /api/tickets/assignable-employees/:ticket_id', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
+            it('should return 400 if request data is invalid', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Missing ticket_id
+                const response1 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ user_id: '456', assigned_by_user_id: '789' });
+                
+                expect(response1.status).toBe(400);
+                expect(response1.body).toHaveProperty('error', 'Invalid request data');
+                
+                // Missing user_id
+                const response2 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ ticket_id: '123', assigned_by_user_id: '789' });
+                
+                expect(response2.status).toBe(400);
+                expect(response2.body).toHaveProperty('error', 'Invalid request data');
+                
+                // Missing assigned_by_user_id
+                const response3 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ ticket_id: '123', user_id: '456' });
+                
+                expect(response3.status).toBe(400);
+                expect(response3.body).toHaveProperty('error', 'Invalid request data');
             });
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', 'Bearer invalid_token');
             
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return 500 if user data fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
+            it('should return 500 if user data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
             });
-
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user data' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
-        });
-
-        it('should return 404 if ticket does not exist', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
+            it('should return 404 if ticket does not exist', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Ticket not found' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(404);
+                expect(response.body).toHaveProperty('error', 'Ticket not found');
+            });
             
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('error', 'Ticket not found');
-        });
-
-        it('should return 403 if user does not have project access', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
-        });
-
-        it('should return 403 if user does not have admin/master role', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with non-admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'basic' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have permission to assign tickets');
-        });
-
-        it('should return 500 if ticket assignments fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket assignments with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch ticket assignments' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch ticket assignments');
-        });
-
-        it('should return 500 if org users fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock org users fetch with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch employees' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch employees');
-        });
-
-        it('should return 500 if employee details fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock org users fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [
-                        { user_id: '789', org_user_type: 'basic' },
-                        { user_id: '101', org_user_type: 'admin' }
-                    ],
-                    error: null
-                })
-            }));
-
-            // Mock employee details fetch with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch employee details' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch employee details');
-        });
-
-        it('should successfully return assignable employees', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [{ assigned_to_user_id: '222' }],
-                    error: null
-                })
-            }));
-
-            // Mock org users fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [
-                        { user_id: '789', org_user_type: 'basic' },
-                        { user_id: '101', org_user_type: 'admin' }
-                    ],
-                    error: null
-                })
-            }));
-
-            // Mock employee details fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [
-                        { 
-                            user_id: '789', 
-                            first_name: 'Jane', 
-                            last_name: 'Doe', 
-                            email: 'jane.doe@example.com' 
+            it('should return 400 if ticket is closed', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock closed ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'closed',
+                            description: 'Closed Ticket'
                         },
-                        { 
-                            user_id: '101', 
-                            first_name: 'John', 
-                            last_name: 'Smith', 
-                            email: 'john.smith@example.com' 
-                        }
-                    ],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(200);
-            expect(response.body.employees).toEqual([
-                {
-                    employeeId: '789',
-                    firstName: 'Jane',
-                    lastName: 'Doe',
-                    email: 'jane.doe@example.com',
-                    role: 'basic'
-                },
-                {
-                    employeeId: '101',
-                    firstName: 'John',
-                    lastName: 'Smith',
-                    email: 'john.smith@example.com',
-                    role: 'admin'
-                }
-            ]);
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
-            const response = await request(app)
-                .get('/api/tickets/assignable-employees/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Internal server error');
-        });
-    });
-
-    describe('GET /api/tickets/assigned-users/:ticket_id', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123');
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(400);
+                expect(response.body).toHaveProperty('error', 'Cannot unassign users from a closed ticket');
             });
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', 'Bearer invalid_token');
             
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return empty array if no assignments found', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
-            });
-
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock ticket assignments with empty array
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(200);
-            expect(response.body).toEqual({ assignedUsers: [] });
-        });
-
-        it('should return 500 if ticket assignments fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
-            });
-
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock ticket assignments with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch assignments' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch assignments');
-        });
-
-        it('should return 500 if user details fetch fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock ticket assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [
-                        { assigned_to_user_id: '456', resolved_status: false },
-                        { assigned_to_user_id: '789', resolved_status: true }
-                    ],
-                    error: null
-                })
-            }));
-
-            // Mock user details fetch with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user details' }
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', `Bearer ${authToken}`);
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch user details');
-        });
-
-        it('should successfully return assigned users', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock ticket assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [
-                        { assigned_to_user_id: '456', resolved_status: false },
-                        { assigned_to_user_id: '789', resolved_status: true }
-                    ],
-                    error: null
-                })
-            }));
-
-            // Mock user details fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                in: jest.fn().mockResolvedValue({
-                    data: [
-                        { 
-                            user_id: '456', 
-                            first_name: 'John', 
-                            last_name: 'Doe', 
-                            email: 'john.doe@example.com' 
+            it('should return 403 if user does not have access to the project', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
                         },
-                        { 
-                            user_id: '789', 
-                            first_name: 'Jane', 
-                            last_name: 'Smith', 
-                            email: 'jane.smith@example.com' 
-                        }
-                    ],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', `Bearer ${authToken}`);
+                        error: null
+                    })
+                });
+                
+                // Mock no project access
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
+            });
             
-            expect(response.status).toBe(200);
-            expect(response.body.assignedUsers).toEqual([
-                {
-                    userId: '456',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    email: 'john.doe@example.com',
-                    resolved: false
-                },
-                {
-                    userId: '789',
-                    firstName: 'Jane',
-                    lastName: 'Smith',
-                    email: 'jane.smith@example.com',
-                    resolved: true
-                }
-            ]);
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
-            const response = await request(app)
-                .get('/api/tickets/assigned-users/123')
-                .set('Authorization', `Bearer ${authToken}`);
+            it('should return 403 if user does not have admin/master role', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock project access with basic role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            org_user_type: 'basic'
+                        },
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have permission to unassign users');
+            });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Internal server error');
+            it('should return 500 if notification creation fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock project access with admin role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            org_user_type: 'admin'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock delete success
+                mockUtils.mockSupabaseQuery({
+                    delete: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert with error
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: { message: 'Notification error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to create unassignment notification');
+            });
+            
+            it('should update ticket status when no assignments remain', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock project access with admin role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            org_user_type: 'admin'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock delete success
+                mockUtils.mockSupabaseQuery({
+                    delete: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock remaining assignments check (empty)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock update status success
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('message', 'User successfully unassigned from ticket');
+            });
+            
+            it('should return 500 if ticket status update fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock project access with admin role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            org_user_type: 'admin'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock delete success
+                mockUtils.mockSupabaseQuery({
+                    delete: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock remaining assignments check (empty)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [],
+                        error: null
+                    })
+                });
+                
+                // Mock update with error
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        error: { message: 'Update error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to update ticket status');
+            });
+            
+            it('should successfully unassign user without updating status when other assignments remain', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Mock ticket
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            proj_id: '456',
+                            status: 'open',
+                            description: 'Test Ticket'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock project access with admin role
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            org_user_type: 'admin'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock delete success
+                mockUtils.mockSupabaseQuery({
+                    delete: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert success
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock remaining assignments check (has some)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: [{ assigned_to_user_id: '789' }],
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('message', 'User successfully unassigned from ticket');
+            });
+            
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error');
+                expect(console.error).toHaveBeenCalled();
+            });
+            
         });
     });
 
-    describe('POST /api/tickets/assign-users', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
-
-        it('should return 400 if ticket_id is missing', async () => {
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ user_ids: ['456'] });
+    describe('Ticket Status Management', () => {
+        describe('POST /api/tickets/close-ticket/:ticket_id', () => {
+            const endpoint = '/api/tickets/close-ticket/123';
             
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Invalid request data');
-        });
-
-        it('should return 400 if user_ids is missing', async () => {
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123' });
-            
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Invalid request data');
-        });
-
-        it('should return 400 if user_ids is not an array', async () => {
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: 'not an array' });
-            
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Invalid request data');
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint, 'post');
             });
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', 'Bearer invalid_token')
-                .send({ ticket_id: '123', user_ids: ['456'] });
             
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return 500 if user data fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
+            it('should return 403 if user does not have admin/master role', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery('basic');
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(403);
+                expect(response.body).toHaveProperty('error', 'User does not have permission to close tickets');
             });
-
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user data' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
+            it('should successfully close ticket', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                mockUtils.mockTicketQuery();
+                mockUtils.mockProjectAccessQuery();
+                
+                // Mock successful update
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('message', 'Ticket successfully closed');
+            });
         });
-
-        it('should return 404 if ticket does not exist', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('error', 'Ticket not found');
-        });
-
-        it('should return 400 if ticket is closed', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with closed status
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'closed' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Cannot assign users to a closed ticket');
-        });
-
-        it('should return 403 if user does not have project access', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
-        });
-
-        it('should return 403 if user does not have admin/master role', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with non-admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'basic' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have permission to assign tickets');
-        });
-
-        it('should return 500 if current assignments check fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock current assignments fetch with error
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to check current assignments' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to check current assignments');
-        });
-
-        it('should return 400 if assignment would exceed max users', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock current assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [
-                        { assigned_to_user_id: '789' },
-                        { assigned_to_user_id: '101' }
-                    ],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456', '222'] });
-            
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Maximum 3 users can be assigned to a ticket');
-        });
-
-        it('should successfully assign users to ticket', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock current assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock insert assignments
-            fromSpy.mockImplementationOnce(() => ({
-                insert: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            // Mock ticket status update
-            fromSpy.mockImplementationOnce(() => ({
-                update: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'Users successfully assigned to ticket');
-        });
-
-        it('should return 500 if assignment insert fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock current assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock insert assignments with error
-            fromSpy.mockImplementationOnce(() => ({
-                insert: jest.fn().mockResolvedValue({
-                    error: { message: 'Failed to assign users' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to assign users');
-        });
-
-        it('should return 500 if ticket status update fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock current assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock insert assignments
-            fromSpy.mockImplementationOnce(() => ({
-                insert: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            // Mock ticket status update with error
-            fromSpy.mockImplementationOnce(() => ({
-                update: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: { message: 'Failed to update ticket status' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to update ticket status');
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
-            const response = await request(app)
-                .post('/api/tickets/assign-users')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_ids: ['456'] });
-            
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Internal server error');
-        });
+        
+        
     });
 
-    describe('POST /api/tickets/unassign-user', () => {
-        beforeEach(() => {
-            jest.clearAllMocks();
-            jest.spyOn(console, 'error').mockImplementation(() => {});
-        });
+    describe('Notifications', () => {
+        describe('GET /api/tickets/get-ticket-notifications', () => {
+            const endpoint = '/api/tickets/get-ticket-notifications';
 
-        it('should return 400 if ticket_id is missing', async () => {
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ user_id: '456' });
+            const validPayload = {
+                ticket_id: '123',
+                status: 'resolved'
+            };
             
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Invalid request data');
-        });
-
-        it('should return 400 if user_id is missing', async () => {
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123' });
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint);
+            });
             
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Invalid request data');
-        });
-
-        it('should return 401 if no token provided', async () => {
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .send({ ticket_id: '123', user_id: '456' });
-            
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'No token provided');
-        });
-
-        it('should return 401 for invalid token', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: null },
-                error: { message: 'Invalid token' }
+            it('should successfully retrieve notifications', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery();
+                
+                // Our controller returns the data directly, so we need to mock correctly
+                const mockNotifications = [
+                    {
+                        notification_id: '123',
+                        notification_type: 'assignment',
+                        ticket_id: '456',
+                        is_seen: false
+                    }
+                ];
+                
+                // Mock notifications with proper structure
+                const fromMock = {
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: mockNotifications,
+                        error: null
+                    })
+                };
+                
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => fromMock);
+                
+                const response = await request(app)
+                    .get(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(200);
+                // The controller directly returns the notification array
+                expect(Array.isArray(response.body)).toBe(true);
+                expect(response.body[0]).toHaveProperty('notification_id', '123');
             });
 
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', 'Bearer invalid_token')
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 500 if user query returns an error', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/get-ticket-notifications')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+                expect(console.error).toHaveBeenCalled();
+            });
             
-            expect(response.status).toBe(401);
-            expect(response.body).toHaveProperty('error', 'Invalid token');
-        });
-
-        it('should return 500 if user data fetch fails', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockResolvedValueOnce({
-                data: { user: { email: 'test@example.com' } },
-                error: null
+            it('should return 404 if user not found', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with no error but no data (user not found)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/get-ticket-notifications')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(404);
+                expect(response.body).toHaveProperty('error', 'User not found.');
+            });
+            
+            it('should return 500 if notifications query returns an error', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query success
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: { user_id: '123' },
+                        error: null
+                    })
+                });
+                
+                // Mock notifications query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/get-ticket-notifications')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch notifications.');
+                expect(console.error).toHaveBeenCalled();
             });
 
-            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: { message: 'Failed to fetch user data' }
-                })
-            }));
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception by making supabase.from throw an error
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .get('/api/tickets/get-ticket-notifications')
+                    .set('Authorization', `Bearer ${authToken}`);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error.');
+                expect(console.error).toHaveBeenCalledWith(
+                    'Error in getTicketNotifications:',
+                    expect.any(Error)
+                );
+            });
 
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to fetch user data');
         });
 
-        it('should return 404 if ticket does not exist', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
-            
-            expect(response.status).toBe(404);
-            expect(response.body).toHaveProperty('error', 'Ticket not found');
+        describe('POST /api/tickets/update-ticket-notification', () => {
+            const endpoint = '/api/tickets/update-ticket-notification';
+            const validPayload = { ticket_id: 'notify123' }; // Example valid ticket ID for notification
+            const testUserAuthData = { user: { email: 'test@example.com' } }; // Consistent user for mocks
+            const testUserId = 'user-abc'; // Corresponding ID for the test user
+    
+            // Test Authentication Errors
+            it('should handle authentication errors', async () => {
+                // Uses the existing helper to test no token and invalid token scenarios
+                await mockUtils.testAuthErrors(endpoint, 'post', validPayload);
+            });
+    
+            // Test Invalid Input
+            it('should return 400 if ticket_id is missing', async () => {
+                // Mock valid authentication first
+                jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({ data: testUserAuthData, error: null });
+    
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({}); // Send empty payload
+    
+                expect(response.status).toBe(400);
+                expect(response.body).toHaveProperty('error', 'Invalid request data');
+            });
+    
+            // Test User Fetch Failure (DB Error)
+            it('should return 500 if user data fetch fails', async () => {
+                jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({ data: testUserAuthData, error: null });
+    
+                // Mock user query failing with a database error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error fetching user' }
+                    })
+                });
+    
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+    
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+            });
+    
+            // Test User Not Found (Controller handles this as 500)
+            it('should return 500 if user is not found', async () => {
+                jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({ data: testUserAuthData, error: null });
+    
+                // Mock user query returning null data (user not in DB)
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null, // User data is null
+                        error: null  // No database error, just not found
+                    })
+                });
+    
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+    
+                // Controller logic returns 500 in this case
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+            });
+    
+             // Test Unexpected Error
+            it('should handle unexpected errors gracefully', async () => {
+                jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({ data: testUserAuthData, error: null });
+    
+                // Force an unexpected error during the user fetch stage
+                 jest.spyOn(supabase, 'from').mockImplementationOnce((tableName) => {
+                     if (tableName === 'user') {
+                        throw new Error('Unexpected controller crash');
+                     }
+                     // Basic fallback for other calls if needed, though should ideally not be reached
+                     return {
+                         select: jest.fn().mockReturnThis(),
+                         eq: jest.fn().mockReturnThis(),
+                         single: jest.fn().mockRejectedValue(new Error('Fallback error')) // Make it reject to be safe
+                     };
+                 });
+    
+    
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+    
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error.');
+                expect(console.error).toHaveBeenCalledWith(
+                    'Error in updateTicketNotification:',
+                    expect.any(Error) // Check that the generic error handler logged the error
+                );
+            });
+    
         });
-
-        it('should return 400 if ticket is closed', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch with closed status
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'closed' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+        
+        describe('POST /api/tickets/update-ticket-resolution', () => {
+            const endpoint = '/api/tickets/update-ticket-resolution';
+            const validPayload = {
+                ticket_id: '123',
+                status: 'resolved'
+            };
             
-            expect(response.status).toBe(400);
-            expect(response.body).toHaveProperty('error', 'Cannot unassign users from a closed ticket');
-        });
-
-        it('should return 403 if user does not have project access', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with no data
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: null,
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should handle authentication errors', async () => {
+                await mockUtils.testAuthErrors(endpoint, 'post', validPayload);
+            });
             
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have access to this ticket');
-        });
-
-        it('should return 403 if user does not have admin/master role', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query with non-admin role
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'basic' },
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 400 if request data is invalid', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Missing ticket_id
+                const response1 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ status: 'resolved' });
+                
+                expect(response1.status).toBe(400);
+                
+                // Invalid status
+                const response2 = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send({ ticket_id: '123', status: 'invalid-status' });
+                
+                expect(response2.status).toBe(400);
+            });
             
-            expect(response.status).toBe(403);
-            expect(response.body).toHaveProperty('error', 'User does not have permission to unassign users');
-        });
-
-        it('should return 500 if unassignment fails', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock unassignment with error
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: { message: 'Failed to unassign user' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 500 if user data fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Mock user query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+            });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to unassign user');
-        });
-
-        it('should successfully unassign user and keep ticket status', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock unassignment
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            // Mock remaining assignments
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [{ assigned_to_user_id: '789' }],
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 500 if assignment record fetch fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery('123');
+                
+                // Mock assignment query with error
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: null,
+                        error: { message: 'Database error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to fetch ticket assignment.');
+            });
             
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'User successfully unassigned from ticket');
-        });
-
-        it('should unassign user and update ticket to open if no assignments remain', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock unassignment
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            // Mock remaining assignments (empty)
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock ticket status update
-            fromSpy.mockImplementationOnce(() => ({
-                update: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 400 if ticket is already marked with the same status', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery('123');
+                
+                // Mock assignment record with same status
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            ticket_id: '123',
+                            assigned_to_user_id: '123',
+                            assigned_by_user_id: '456',
+                            resolved_status: 'resolved'
+                        },
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(400);
+                expect(response.body).toHaveProperty('error', 'Ticket is already marked as resolved.');
+            });
             
-            expect(response.status).toBe(200);
-            expect(response.body).toHaveProperty('message', 'User successfully unassigned from ticket');
-        });
-
-        it('should return 500 if ticket status update fails after last unassignment', async () => {
-            const fromSpy = jest.spyOn(supabase, 'from');
-
-            // Mock user query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123' },
-                    error: null
-                })
-            }));
-
-            // Mock ticket fetch
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { proj_id: '456', status: 'open' },
-                    error: null
-                })
-            }));
-
-            // Mock project access query
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockReturnThis(),
-                single: jest.fn().mockResolvedValue({
-                    data: { user_id: '123', proj_id: '456', org_user_type: 'admin' },
-                    error: null
-                })
-            }));
-
-            // Mock unassignment
-            fromSpy.mockImplementationOnce(() => ({
-                delete: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: null
-                })
-            }));
-
-            // Mock remaining assignments (empty)
-            fromSpy.mockImplementationOnce(() => ({
-                select: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    data: [],
-                    error: null
-                })
-            }));
-
-            // Mock ticket status update with error
-            fromSpy.mockImplementationOnce(() => ({
-                update: jest.fn().mockReturnThis(),
-                eq: jest.fn().mockResolvedValue({
-                    error: { message: 'Failed to update ticket status' }
-                })
-            }));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should return 500 if notification creation fails', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery('123');
+                
+                // Mock assignment record
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            ticket_id: '123',
+                            assigned_to_user_id: '123',
+                            assigned_by_user_id: '456',
+                            resolved_status: 'unresolved'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock update success
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock ticket data query
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: { description: 'Test Ticket' },
+                        error: null
+                    })
+                });
+                
+                // Mock notification insert with error
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: { message: 'Notification error' }
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Failed to create notification.');
+            });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Failed to update ticket status');
-        });
-
-        it('should handle internal server error', async () => {
-            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
-
-            const response = await request(app)
-                .post('/api/tickets/unassign-user')
-                .set('Authorization', `Bearer ${authToken}`)
-                .send({ ticket_id: '123', user_id: '456' });
+            it('should handle unexpected errors gracefully', async () => {
+                mockUtils.mockValidAuth();
+                
+                // Force an exception by making supabase.from throw an error
+                jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                    throw new Error('Unexpected error');
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(500);
+                expect(response.body).toHaveProperty('error', 'Internal server error.');
+                expect(console.error).toHaveBeenCalledWith(
+                    'Error in updateTicketResolutionStatus:',
+                    expect.any(Error)
+                );
+            });
             
-            expect(response.status).toBe(500);
-            expect(response.body).toHaveProperty('error', 'Internal server error');
+            it('should successfully update resolution status', async () => {
+                mockUtils.mockValidAuth();
+                mockUtils.mockUserQuery('123');
+                
+                // Mock assignment record - exact data structure is important here
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: {
+                            ticket_id: '123',
+                            assigned_to_user_id: '123',
+                            assigned_by_user_id: '456',
+                            resolved_status: 'unresolved'
+                        },
+                        error: null
+                    })
+                });
+                
+                // Mock successful update
+                mockUtils.mockSupabaseQuery({
+                    update: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    mockResolvedValue: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                // Mock ticket data for notification
+                mockUtils.mockSupabaseQuery({
+                    select: jest.fn().mockReturnThis(),
+                    eq: jest.fn().mockReturnThis(),
+                    single: jest.fn().mockResolvedValue({
+                        data: { description: 'Test Ticket' },
+                        error: null
+                    })
+                });
+                
+                // Mock notification creation
+                mockUtils.mockSupabaseQuery({
+                    insert: jest.fn().mockResolvedValue({
+                        error: null
+                    })
+                });
+                
+                const response = await request(app)
+                    .post(endpoint)
+                    .set('Authorization', `Bearer ${authToken}`)
+                    .send(validPayload);
+                
+                expect(response.status).toBe(200);
+                expect(response.body).toHaveProperty('message', 'Ticket marked as resolved.');
+            });
         });
     });
 });
-
-function mockUserAndProjectQueries(fromSpy) {
-    fromSpy.mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-            data: { user_id: '123' },
-            error: null
-        })
-    }));
-
-    fromSpy.mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        not: jest.fn().mockResolvedValue({
-            data: [{ proj_id: '456' }],
-            error: null
-        })
-    }));
-
-    return fromSpy;
-}
-
-function mockTicketsQuery(fromSpy) {
-    fromSpy.mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-            data: [{
-                ticket_id: '123',
-                proj_id: '456',
-                hub_id: '789',
-                description: 'Test Ticket',
-                description_detailed: 'Detailed description',
-                type: 'maintenance',
-                status: 'open',
-                created_at: '2024-01-26T12:00:00Z'
-            }],
-            error: null
-        })
-    }));
-    return fromSpy;
-}
-

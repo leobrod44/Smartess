@@ -8,7 +8,7 @@ describe('Units Controller Tests', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });

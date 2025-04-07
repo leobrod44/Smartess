@@ -8,7 +8,7 @@ describe('Manage Accounts Controller Tests - Get Current User', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });
@@ -328,7 +328,7 @@ describe('Manage Accounts Controller Tests - Get Org Users', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });
@@ -796,7 +796,7 @@ describe('Manage Accounts Controller Tests - Get Org Individuals Data', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });
@@ -956,7 +956,7 @@ describe('Manage Accounts Controller Tests - Get Org Users Projects', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });
@@ -1099,7 +1099,7 @@ describe('Manage Accounts Controller Tests - Get Org Projects', () => {
     beforeAll(async () => {
         const loginResponse = await request(app)
             .post('/api/auth/login')
-            .send({ email: 'admin@gmail.com', password: 'admin123' });
+            .send({ email: 'dwight@gmail.com', password: 'dwight123' });
         expect(loginResponse.status).toBe(200);
         authToken = loginResponse.body.token;
     });

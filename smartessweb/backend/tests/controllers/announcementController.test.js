@@ -42,8 +42,8 @@ describe('Announcement Controller Tests', () => {
     const loginResponse = await request(app)
       .post('/api/auth/login')
       .send({
-        email: 'admin@gmail.com',
-        password: 'admin123'
+        email: 'dwight@gmail.com',
+        password: 'dwight123'
       });
 
     expect(loginResponse.status).toBe(200);
