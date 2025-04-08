@@ -12,6 +12,7 @@ services:
       - "8765:8765"
     volumes:
       - ./data:/tmp/data
+      - ./config:/app/config/mockhub
     networks:
       - smartess_network
   mock_camera:
