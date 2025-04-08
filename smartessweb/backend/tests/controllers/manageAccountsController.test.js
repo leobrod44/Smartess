@@ -347,6 +347,7 @@ describe('Manage Accounts Controller Tests', () => {
             expect(response.body).toHaveProperty('error', 'Failed to fetch current user data.');
           });
     });
+    
 
     describe('Update User Info', () => {
         // Common auth tests
@@ -503,6 +504,199 @@ describe('Manage Accounts Controller Tests', () => {
             adminAuthUpdateSpy.mockRestore();
             adminFromSpy.mockRestore();
             consoleErrorSpy.mockRestore();
+        });
+
+        it('should return 500 if updating user info in DB fails', async () => {
+            mockAuthUser();
+            
+            // Mock auth update success
+            const adminAuthUpdateSpy = jest.spyOn(supabase.auth.admin, 'updateUserById')
+                .mockImplementation(() => {
+                    return Promise.resolve({
+                        data: { user: { id: '123' } },
+                        error: null
+                    });
+                });
+            
+            // Mock DB update failure
+            const adminFromSpy = jest.spyOn(supabase.admin, 'from')
+                .mockImplementation(() => {
+                    return {
+                        update: jest.fn().mockReturnThis(),
+                        eq: jest.fn().mockReturnThis(),
+                        select: jest.fn().mockReturnThis(),
+                        single: jest.fn().mockResolvedValue({
+                            data: null,
+                            error: { message: 'Database update error' }
+                        })
+                    };
+                });
+            
+            const response = await request(app)
+                .post('/api/manage-accounts/update-user-info')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ 
+                    firstName: 'Updated', 
+                    lastName: 'User',
+                    phoneNumber: '555-9876'
+                });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to update user info');
+            
+            // Clean up spies
+            adminAuthUpdateSpy.mockRestore();
+            adminFromSpy.mockRestore();
+        });
+    });
+
+    describe('Store Profile Picture', () => {
+        // Mock fs and path modules
+        jest.mock('fs', () => ({
+            readFileSync: jest.fn().mockReturnValue(Buffer.from('test-image-data')),
+            unlinkSync: jest.fn()
+        }));
+        
+        jest.mock('path', () => ({
+            resolve: jest.fn().mockReturnValue('/resolved/path'),
+            extname: jest.fn().mockReturnValue('.jpg')
+        }));
+        
+        jest.mock('uuid', () => ({
+            v4: jest.fn().mockReturnValue('mock-uuid')
+        }));
+        
+        commonAuthTests('/api/manage-accounts/change-profile-picture', 'post');
+    
+        it('should return 500 if user database query fails', async () => {
+            mockAuthUser();
+    
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Database query failed' }
+                })
+            }));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/change-profile-picture')
+                .set('Authorization', `Bearer ${authToken}`)
+                .attach('file', Buffer.from('test image'), 'test.jpg');
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Database query failed');
+        });
+    
+        it('should return 404 if user not found', async () => {
+            mockAuthUser();
+    
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: null
+                })
+            }));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/change-profile-picture')
+                .set('Authorization', `Bearer ${authToken}`)
+                .attach('file', Buffer.from('test image'), 'test.jpg');
+            
+            expect(response.status).toBe(404);
+            expect(response.body).toHaveProperty('error', 'User not found');
+        });
+    
+        it('should return 400 if no file uploaded', async () => {
+            mockAuthUser();
+    
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: { user_id: '123' },
+                    error: null
+                })
+            }));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/change-profile-picture')
+                .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('message', 'No file uploaded.');
+        });
+    
+        it('should return 500 if updating user with new profile picture URL fails', async () => {
+            mockAuthUser();
+    
+            // Mock user query
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: { user_id: '123' },
+                    error: null
+                })
+            }));
+    
+            // Setup storage mocks
+            const uploadSpy = jest.fn().mockResolvedValue({
+                data: { path: 'users/mock-uuid.jpg' },
+                error: null
+            });
+            
+            const getPublicUrlSpy = jest.fn().mockReturnValue({
+                data: { publicUrl: 'https://example.com/avatars/users/mock-uuid.jpg' }
+            });
+            
+            const fromStorageSpy = jest.fn().mockReturnValue({
+                upload: uploadSpy,
+                getPublicUrl: getPublicUrlSpy
+            });
+            
+            // Mock the storage property on supabaseAdmin
+            jest.spyOn(supabase.admin.storage, 'from').mockImplementation(fromStorageSpy);
+            
+            // Mock the user update call
+            jest.spyOn(supabase.admin, 'from').mockImplementationOnce(() => ({
+                update: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                select: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Update error' }
+                })
+            }));
+            
+            const response = await request(app)
+                .post('/api/manage-accounts/change-profile-picture')
+                .set('Authorization', `Bearer ${authToken}`)
+                .attach('file', Buffer.from('test image'), 'test.jpg');
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('message', 'Failed to update user');
+        });
+    
+        it('should handle unexpected errors', async () => {
+            mockAuthUser();
+            
+            // Force an unexpected error
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+                throw new Error('Unexpected error');
+            });
+            
+            const response = await request(app)
+                .post('/api/manage-accounts/change-profile-picture')
+                .set('Authorization', `Bearer ${authToken}`)
+                .attach('file', Buffer.from('test image'), 'test.jpg');
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('message', 'Server error storing profile picture');
+            expect(response.body).toHaveProperty('error', 'Unexpected error');
         });
     });
     
@@ -663,6 +857,167 @@ describe('Manage Accounts Controller Tests', () => {
             
             expect(response.status).toBe(500);
             expect(response.body).toHaveProperty('error', 'Internal server error.');
+        });
+
+        it('should return 500 if fetching organization data fails', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Failed to fetch organization data' }
+              })
+            }));
+          
+            const response = await request(app)
+              .get('/api/manage-accounts/get-org-users')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch organization data.');
+          });
+          
+          it('should return 404 if no organizations found for user', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with empty data
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [],
+                error: null
+              })
+            }));
+          
+            const response = await request(app)
+              .get('/api/manage-accounts/get-org-users')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(404);
+            expect(response.body).toHaveProperty('error', 'No organizations found for this user.');
+          });
+          
+          it('should return 500 if fetching non-null project organization users fails', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with data
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [{ org_id: '456', proj_id: '789', org_user_type: 'admin' }],
+                error: null
+              })
+            }));
+          
+            // Mock non-null project org users query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              neq: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Failed to fetch organization users' }
+              })
+            }));
+          
+            const response = await request(app)
+              .get('/api/manage-accounts/get-org-users')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch organization users.');
+          });
+          
+          it('should return 500 if fetching null project organization users fails', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with admin role (not basic)
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [{ org_id: '456', proj_id: '789', org_user_type: 'admin' }],
+                error: null
+              })
+            }));
+          
+            // Mock non-null project org users query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              neq: jest.fn().mockResolvedValue({
+                data: [],
+                error: null
+              })
+            }));
+          
+            // Mock null project org users query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockReturnThis(),
+              is: jest.fn().mockReturnThis(),
+              neq: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Failed to fetch organization users' }
+              })
+            }));
+          
+            const response = await request(app)
+              .get('/api/manage-accounts/get-org-users')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch organization users.');
         });
     });
 
@@ -993,6 +1348,387 @@ describe('Manage Accounts Controller Tests', () => {
                 .post('/api/manage-accounts/get-org-projects')
                 .set('Authorization', `Bearer ${authToken}`)
                 .send({ currentOrg: '123' });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Internal server error.');
+        });
+
+        it('should successfully return projects associated with user', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with projects
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [
+                  { user_id: '123', proj_id: '456', org_id: '789' },
+                  { user_id: '123', proj_id: '789', org_id: '789' }
+                ],
+                error: null
+              })
+            }));
+          
+            // Mock project query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockResolvedValue({
+                data: [
+                  { 
+                    proj_id: 456, 
+                    address: '123 Main St',
+                    admin_users_count: 3,
+                    hub_users_count: 5,
+                    pending_tickets_count: 2
+                  },
+                  { 
+                    proj_id: 789, 
+                    address: '456 Elm St',
+                    admin_users_count: 2,
+                    hub_users_count: 4,
+                    pending_tickets_count: 1
+                  }
+                ],
+                error: null
+              })
+            }));
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/get-org-projects')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('orgProjects');
+            expect(response.body.orgProjects).toBeInstanceOf(Array);
+            expect(response.body.orgProjects).toHaveLength(2);
+            expect(response.body.orgProjects[0]).toEqual({
+              projectId: '456',
+              address: '123 Main St',
+              adminUsersCount: 3,
+              hubUsersCount: 5,
+              pendingTicketsCount: 2
+            });
+            expect(response.body.orgProjects[1]).toEqual({
+              projectId: '789',
+              address: '456 Elm St',
+              adminUsersCount: 2,
+              hubUsersCount: 4,
+              pendingTicketsCount: 1
+            });
+          });
+          
+          it('should return 500 if projects query fails', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with projects
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [
+                  { user_id: '123', proj_id: '456', org_id: '789' }
+                ],
+                error: null
+              })
+            }));
+          
+            // Mock project query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              in: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Database query failed' }
+              })
+            }));
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/get-org-projects')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch projects.');
+          });
+          
+          it('should return empty projects array when user has no associated projects', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { user_id: '123' },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with no projects (all null proj_id)
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: [
+                  { user_id: '123', proj_id: null, org_id: '789' }
+                ],
+                error: null
+              })
+            }));
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/get-org-projects')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('orgProjects');
+            expect(response.body.orgProjects).toBeInstanceOf(Array);
+            expect(response.body.orgProjects).toHaveLength(0);
+          });
+          
+          it('should return 500 if user data fetch fails with specific error', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock org_user query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Failed to fetch current user data.' }
+              })
+            }));
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/get-org-projects')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
+        });
+
+        it('should return 500 if fetching current user data fails', async () => {
+            mockAuthUser();
+          
+            const fromSpy = jest.spyOn(supabase, 'from');
+          
+            // Mock user query - success
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockReturnThis(),
+              single: jest.fn().mockResolvedValue({
+                data: { 
+                  user_id: '123',
+                  email: 'test@example.com',
+                  first_name: 'John',
+                  last_name: 'Doe',
+                  phone_number: '555-1234',
+                  profile_picture_url: 'http://example.com/photo.jpg'
+                },
+                error: null
+              })
+            }));
+          
+            // Mock org_user query with error
+            fromSpy.mockImplementationOnce(() => ({
+              select: jest.fn().mockReturnThis(),
+              eq: jest.fn().mockResolvedValue({
+                data: null,
+                error: { message: 'Failed to fetch current user data' }
+              })
+            }));
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/get-org-projects')
+              .set('Authorization', `Bearer ${authToken}`);
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch current user data.');
+        });
+
+        
+    });
+
+    describe('Assign Org User To Project', () => {
+        commonAuthTests('/api/manage-accounts/assign-org-user-to-project', 'post');
+    
+        it('should return 400 if required parameters are missing', async () => {
+            mockAuthUser();
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/assign-org-user-to-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ user_id: '123', org_id: '456' }); // Missing proj_ids and org_user_type
+            
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('error', 'user_id, org_id, proj_ids (array), and org_user_type are required.');
+        });
+    
+        it('should handle internal server error', async () => {
+            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/assign-org-user-to-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ 
+                    user_id: '123', 
+                    org_id: '456', 
+                    proj_ids: ['789'], 
+                    org_user_type: 'admin' 
+                });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Internal server error.');
+        });
+
+        it('should return 400 if required parameters are missing', async () => {
+            mockAuthUser();
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/assign-org-user-to-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ user_id: '123', org_id: '456' }); // Missing proj_ids and org_user_type
+            
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('error', 'user_id, org_id, proj_ids (array), and org_user_type are required.');
+        });
+    
+        it('should handle internal server error', async () => {
+            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/assign-org-user-to-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ 
+                    user_id: '123', 
+                    org_id: '456', 
+                    proj_ids: ['789'], 
+                    org_user_type: 'admin' 
+                });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Internal server error.');
+        });
+
+        it('should return 500 if fetching org_user data fails', async () => {
+            mockAuthUser();
+          
+            // Create a more complex mock that handles the chained methods correctly
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+              const mockChain = {
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockImplementation(function(field, value) {
+                  return this; // Return the chain for the first eq
+                })
+              };
+              
+              // Override the second eq to return the error result
+              const originalEq = mockChain.eq;
+              let eqCallCount = 0;
+              
+              mockChain.eq = jest.fn().mockImplementation(function(field, value) {
+                eqCallCount++;
+                if (eqCallCount === 2) {
+                  return Promise.resolve({
+                    data: null,
+                    error: { message: 'Database query failed' }
+                  });
+                }
+                return originalEq.call(this, field, value);
+              });
+              
+              return mockChain;
+            });
+          
+            const response = await request(app)
+              .post('/api/manage-accounts/assign-org-user-to-project')
+              .set('Authorization', `Bearer ${authToken}`)
+              .send({ 
+                user_id: '123', 
+                org_id: '456', 
+                proj_ids: ['789'], 
+                org_user_type: 'admin' 
+              });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch org_user data.');
+        });
+    });
+
+    describe('Remove Org User From Project', () => {
+        commonAuthTests('/api/manage-accounts/remove-org-user-from-project', 'post');
+    
+        it('should return 400 if required parameters are missing', async () => {
+            mockAuthUser();
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/remove-org-user-from-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ user_id: '123', org_id: '456' }); // Missing proj_ids
+            
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('error', 'user_id, org_id, and proj_ids (array) are required.');
+        });
+    
+        it('should return 500 if fetching user type fails', async () => {
+            mockAuthUser();
+    
+            jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+                select: jest.fn().mockReturnThis(),
+                eq: jest.fn().mockReturnThis(),
+                single: jest.fn().mockResolvedValue({
+                    data: null,
+                    error: { message: 'Failed to fetch user type' }
+                })
+            }));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/remove-org-user-from-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ 
+                    user_id: '123', 
+                    org_id: '456', 
+                    proj_ids: ['789'] 
+                });
+            
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('error', 'Failed to fetch user type.');
+        });
+
+        it('should handle internal server error', async () => {
+            jest.spyOn(supabase.auth, 'getUser').mockRejectedValueOnce(new Error('Unexpected error'));
+    
+            const response = await request(app)
+                .post('/api/manage-accounts/remove-org-user-from-project')
+                .set('Authorization', `Bearer ${authToken}`)
+                .send({ 
+                    user_id: '123', 
+                    org_id: '456', 
+                    proj_ids: ['789'] 
+                });
             
             expect(response.status).toBe(500);
             expect(response.body).toHaveProperty('error', 'Internal server error.');
@@ -1625,6 +2361,6 @@ describe('Manage Accounts Controller Tests', () => {
             expect(response.body).toHaveProperty('error', 'Failed to create access token.');
         });
 
-        
+
     });
 });
