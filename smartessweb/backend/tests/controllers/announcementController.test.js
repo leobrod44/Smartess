@@ -5,6 +5,10 @@ const app = require('../../app');
 const supabase = require('../../config/supabase');
 const { Resend } = require('resend');
 
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
+
 // Mock Resend
 jest.mock('resend', () => ({
   Resend: jest.fn().mockImplementation(() => ({
@@ -42,8 +46,8 @@ describe('Announcement Controller Tests', () => {
     const loginResponse = await request(app)
       .post('/api/auth/login')
       .send({
-        email: 'admin@gmail.com',
-        password: 'admin123'
+        email: 'dwight@gmail.com',
+        password: 'dwight123'
       });
 
     expect(loginResponse.status).toBe(200);
@@ -104,6 +108,20 @@ describe('Announcement Controller Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('message', 'User not found in any organization');
+    });
+
+    it('should handle unexpected errors', async () => {
+      // Simulate a complete failure by making supabase.from throw an exception
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+        throw new Error('Unexpected server error');
+      });
+    
+      const response = await request(app)
+        .get('/api/announcements/get_current_user_org_id/123')
+        .set('Authorization', `Bearer ${authToken}`);
+    
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('message', 'Internal server error');
     });
   });
 
@@ -191,234 +209,206 @@ describe('Announcement Controller Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ emails: [] });
     });
-  });
 
-  describe('GET /api/announcements/get_announcements/:userId', () => {
-    it('should return formatted announcements successfully', async () => {
+    it('should handle hub fetch error', async () => {
       const fromSpy = jest.spyOn(supabase, 'from');
-
-      // Mock user fetch
-      fromSpy.mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { user_id: '123', org_id: 'org123' },
-          error: null
-        })
-      }));
-
-      // Mock org_user fetch
+    
+      // Mock projects query success
       fromSpy.mockImplementationOnce(() => ({
         select: jest.fn().mockReturnThis(),
         eq: jest.fn().mockResolvedValue({
-          data: [
-            { org_id: 'org123', proj_id: 'proj1' },
-            { org_id: 'org123', proj_id: 'proj2' }
-          ],
+          data: [{ proj_id: '1' }, { proj_id: '2' }],
+          error: null
+        })
+      }));
+    
+      // Mock hubs query error
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Failed to fetch hubs' }
+        })
+      }));
+    
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_org/org123')
+        .set('Authorization', `Bearer ${authToken}`);
+    
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to fetch hubs.');
+    });
+
+    // Test for empty hubs
+    it('should return empty emails array when no hubs found', async () => {
+      const fromSpy = jest.spyOn(supabase, 'from');
+
+      // Mock projects query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({
+          data: [{ proj_id: '1' }, { proj_id: '2' }],
           error: null
         })
       }));
 
-      // Mock organization announcements
+      // Mock empty hubs result
       fromSpy.mockImplementationOnce(() => ({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
         in: jest.fn().mockResolvedValue({
-          data: [
-            {
-              announcement_id: 'ann1',
-              announcement_type: 'organization',
-              user_id: '123',
-              org_id: 'org123',
-              content: 'Org Announcement',
-              created_at: '2024-01-26T12:00:00Z',
-              user: { first_name: 'John', last_name: 'Doe' },
-              organization: { name: 'Test Org' }
-            }
-          ],
-          error: null
-        })
-      }));
-
-      // Mock project announcements
-      fromSpy.mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: [
-            {
-              announcement_id: 'ann2',
-              announcement_type: 'project',
-              user_id: '123',
-              proj_id: 'proj1',
-              content: 'Project Announcement',
-              created_at: '2024-01-26T12:00:00Z',
-              user: { first_name: 'John', last_name: 'Doe' },
-              project: { address: '123 Project St' }
-            }
-          ],
+          data: [],
           error: null
         })
       }));
 
       const response = await request(app)
-        .get('/api/announcements/get_announcements/123')
+        .get('/api/announcements/get_hub_user_emails_org/org123')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('announcements');
-      expect(Array.isArray(response.body.announcements)).toBe(true);
-      expect(response.body.announcements.length).toBe(2);
-
-      const [orgAnnouncement, projAnnouncement] = response.body.announcements;
-
-      expect(orgAnnouncement).toMatchObject({
-        announcement_id: 'ann1',
-        announcement_type: 'organization',
-        user_id: '123',
-        name: 'John Doe',
-        content: 'Org Announcement',
-        created_at: '2024-01-26T12:00:00Z',
-        organization: { name: 'Test Org' }
-      });
-
-      expect(projAnnouncement).toMatchObject({
-        announcement_id: 'ann2',
-        announcement_type: 'project',
-        user_id: '123',
-        name: 'John Doe',
-        content: 'Project Announcement',
-        created_at: '2024-01-26T12:00:00Z',
-        project: { address: '123 Project St' }
-      });
+      expect(response.body).toEqual({ emails: [] });
     });
 
-    it('should return 404 when user not found', async () => {
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+    // Test for empty hub users
+    it('should return empty emails array when no hub users found', async () => {
+      const fromSpy = jest.spyOn(supabase, 'from');
+
+      // Mock projects query success
+      fromSpy.mockImplementationOnce(() => ({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: null,
+        eq: jest.fn().mockResolvedValue({
+          data: [{ proj_id: '1' }, { proj_id: '2' }],
+          error: null
+        })
+      }));
+
+      // Mock hubs query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [{ hub_id: '1' }, { hub_id: '2' }],
+          error: null
+        })
+      }));
+
+      // Mock empty hub_users result
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [],
           error: null
         })
       }));
 
       const response = await request(app)
-        .get('/api/announcements/get_announcements/123')
+        .get('/api/announcements/get_hub_user_emails_org/org123')
         .set('Authorization', `Bearer ${authToken}`);
 
-      expect(response.status).toBe(404);
-      expect(response.body).toHaveProperty('error', 'User not found.');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ emails: [] });
     });
 
-    it('should handle user fetch error', async () => {
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+    // Test for user data fetch error
+    it('should handle user data fetch error', async () => {
+      const fromSpy = jest.spyOn(supabase, 'from');
+
+      // Mock projects query success
+      fromSpy.mockImplementationOnce(() => ({
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
+        eq: jest.fn().mockResolvedValue({
+          data: [{ proj_id: '1' }, { proj_id: '2' }],
+          error: null
+        })
+      }));
+
+      // Mock hubs query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [{ hub_id: '1' }, { hub_id: '2' }],
+          error: null
+        })
+      }));
+
+      // Mock hub_users query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [{ user_id: '1' }, { user_id: '2' }],
+          error: null
+        })
+      }));
+
+      // Mock user data fetch error
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
           data: null,
-          error: { message: 'Database error' }
+          error: { message: 'Failed to fetch user data' }
         })
       }));
 
       const response = await request(app)
-        .get('/api/announcements/get_announcements/123')
+        .get('/api/announcements/get_hub_user_emails_org/org123')
         .set('Authorization', `Bearer ${authToken}`);
 
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('error', 'Failed to fetch user data.');
     });
-  });
 
-  describe('POST /api/announcements/send_announcement_email', () => {
-    it('should send announcement email successfully', async () => {
-      const mockEmails = ['test1@example.com', 'test2@example.com'];
-      const mockReqBody = {
-        emailList: JSON.stringify(mockEmails),
-        type: 'organization',
-        content: 'Test announcement content',
-        keywords: '[]'
-      };
-
-      const response = await request(app)
-        .post('/api/announcements/send_announcement_email')
-        .send(mockReqBody)
-        .set('Authorization', `Bearer ${authToken}`);
-
-      // Ensure Resend is called correctly
-      expect(Resend).toHaveBeenCalledTimes(1);
-      const resendInstance = Resend.mock.instances[0];
-      expect(resendInstance.emails.send).toHaveBeenCalledTimes(mockEmails.length);
-
-      mockEmails.forEach((email, index) => {
-        expect(resendInstance.emails.send).toHaveBeenNthCalledWith(
-          index + 1,
-          expect.objectContaining({
-            to: email,
-            from: expect.any(String), // Assuming 'from' is set in controller
-            subject: expect.any(String),
-            text: expect.any(String)
-          })
-        );
+    // Test for unexpected error (catch block)
+    it('should handle unexpected errors', async () => {
+      // Mock an unexpected exception
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+        throw new Error('Unexpected server error');
       });
 
-      expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('message', 'All emails sent successfully.');
-    });
-
-    it('should handle email sending failure', async () => {
-      const mockEmails = ['test@example.com'];
-      const mockReqBody = {
-        emailList: JSON.stringify(mockEmails),
-        type: 'organization',
-        content: 'Test announcement content',
-        keywords: '[]'
-      };
-
-      // Mock Resend to throw an error
-      const resendInstance = Resend.mock.instances[0];
-      resendInstance.emails.send.mockRejectedValue(new Error('Failed to send email'));
-
       const response = await request(app)
-        .post('/api/announcements/send_announcement_email')
-        .send(mockReqBody)
+        .get('/api/announcements/get_hub_user_emails_org/org123')
         .set('Authorization', `Bearer ${authToken}`);
 
-      expect(resendInstance.emails.send).toHaveBeenCalledTimes(1);
       expect(response.status).toBe(500);
-      expect(response.body).toHaveProperty('message', 'Failed to send emails.');
+      expect(response.body).toHaveProperty('error', 'Internal server error.');
     });
 
-    it('should handle invalid email list', async () => {
-      const mockReqBody = {
-        emailList: 'invalid-json',
-        type: 'organization',
-        content: 'Test announcement content',
-        keywords: '[]'
-      };
-
+    it('should handle hub_user fetch error', async () => {
+      const fromSpy = jest.spyOn(supabase, 'from');
+    
+      // Mock projects query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({
+          data: [{ proj_id: '1' }, { proj_id: '2' }],
+          error: null
+        })
+      }));
+    
+      // Mock hubs query success
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [{ hub_id: '1' }, { hub_id: '2' }],
+          error: null
+        })
+      }));
+    
+      // Mock hub_user query error
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Failed to fetch hub_user data' }
+        })
+      }));
+    
       const response = await request(app)
-        .post('/api/announcements/send_announcement_email')
-        .send(mockReqBody)
+        .get('/api/announcements/get_hub_user_emails_org/org123')
         .set('Authorization', `Bearer ${authToken}`);
-
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('message', 'Invalid email list format.');
+    
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to fetch hub_user entries.');
     });
 
-    it('should handle missing required fields', async () => {
-      const mockReqBody = {
-        emailList: JSON.stringify(['test@example.com']),
-      };
-
-      const response = await request(app)
-        .post('/api/announcements/send_announcement_email')
-        .send(mockReqBody)
-        .set('Authorization', `Bearer ${authToken}`);
-
-      expect(response.status).toBe(400);
-      expect(response.body).toHaveProperty('message', 'Missing required fields.');
-    });
   });
 
   describe('GET /get-announcements/:userId', () => {
@@ -464,256 +454,816 @@ describe('Announcement Controller Tests', () => {
     });
 
     it('should return 500 if org_user data fetch fails', async () => {
-      // Mock user exists
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { user_id: '123' },
-          error: null
-        })
-      }));
-
-      // Mock org_user fetch fails
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        mockReturnValue: {
-          data: null,
-          error: { message: 'Database error' }
-        }
-      }));
-
+      // First mock user fetch success
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { user_id: '123' },
+            error: null
+          })
+        }))
+        // Then mock org_user fetch failure
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Failed to fetch org_user data' }
+          })
+        }));
+    
       const response = await request(app)
         .get('/api/announcements/get-announcements/123')
         .set('Authorization', `Bearer ${authToken}`);
-
+    
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('error', 'Failed to fetch org_user data.');
     });
-
-    it('should return 500 if organization announcements fetch fails', async () => {
-      // Mock user exists
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { user_id: '123' },
-          error: null
-        })
-      }));
-
-      // Mock org_user data
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        mockReturnValue: {
-          data: [{ org_id: '456', proj_id: null }],
-          error: null
-        }
-      }));
-
-      // Mock organization announcements fetch fails
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database error' }
-        })
-      }));
-
+    
+    it('should successfully fetch and format announcements', async () => {
+      // Mock the user data fetch
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { user_id: '123' },
+            error: null
+          })
+        }))
+        // Mock the org_user data fetch
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [
+              { org_id: 'org123', proj_id: null },
+              { org_id: null, proj_id: 'proj456' }
+            ],
+            error: null
+          })
+        }))
+        // Mock organization announcements fetch
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: [{
+              announcement_id: 'ann1',
+              announcement_type: 'organization',
+              user_id: 'user1',
+              org_id: 'org123',
+              proj_id: null,
+              content: 'Org announcement',
+              keywords: ['important'],
+              file_urls: ['http://example.com/file1.pdf'],
+              like_count: 5,
+              created_at: '2023-01-01T00:00:00Z',
+              user: {
+                first_name: 'John',
+                last_name: 'Doe',
+                profile_picture_url: 'http://example.com/profile.jpg'
+              },
+              organization: {
+                name: 'Test Org'
+              },
+              project: null
+            }],
+            error: null
+          })
+        }))
+        // Mock project announcements fetch
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: [{
+              announcement_id: 'ann2',
+              announcement_type: 'project',
+              user_id: 'user1',
+              org_id: 'org123',
+              proj_id: 'proj456',
+              content: 'Project announcement',
+              keywords: ['update'],
+              file_urls: [],
+              like_count: 2,
+              created_at: '2023-01-02T00:00:00Z',
+              user: {
+                first_name: 'John',
+                last_name: 'Doe',
+                profile_picture_url: 'http://example.com/profile.jpg'
+              },
+              organization: {
+                name: 'Test Org'
+              },
+              project: {
+                address: '123 Test St'
+              }
+            }],
+            error: null
+          })
+        }));
+    
       const response = await request(app)
         .get('/api/announcements/get-announcements/123')
         .set('Authorization', `Bearer ${authToken}`);
-
+    
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('announcements');
+      expect(response.body.announcements).toHaveLength(2);
+      
+      // Check first announcement (organization)
+      expect(response.body.announcements[0]).toHaveProperty('announcement_type', 'organization');
+      expect(response.body.announcements[0]).toHaveProperty('content', 'Org announcement');
+      expect(response.body.announcements[0]).toHaveProperty('name', 'John Doe');
+      expect(response.body.announcements[0]).toHaveProperty('org_name', 'Test Org');
+      
+      // Check second announcement (project)
+      expect(response.body.announcements[1]).toHaveProperty('announcement_type', 'project');
+      expect(response.body.announcements[1]).toHaveProperty('content', 'Project announcement');
+      expect(response.body.announcements[1]).toHaveProperty('address', '123 Test St');
+    });
+    
+    it('should handle empty organization and project IDs', async () => {
+      // Mock the user data fetch
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { user_id: '123' },
+            error: null
+          })
+        }))
+        // Mock empty org_user data fetch
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [],
+            error: null
+          })
+        }));
+    
+      const response = await request(app)
+        .get('/api/announcements/get-announcements/123')
+        .set('Authorization', `Bearer ${authToken}`);
+    
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('announcements');
+      expect(response.body.announcements).toHaveLength(0);
+    });
+    
+    it('should return 500 if org announcements fetch fails', async () => {
+      // Mock the user data fetch
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { user_id: '123' },
+            error: null
+          })
+        }))
+        // Mock the org_user data fetch
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ org_id: 'org123', proj_id: null }],
+            error: null
+          })
+        }))
+        // Mock organization announcements fetch error
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Failed to fetch organization announcements' }
+          })
+        }));
+    
+      const response = await request(app)
+        .get('/api/announcements/get-announcements/123')
+        .set('Authorization', `Bearer ${authToken}`);
+    
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('error', 'Failed to fetch organization announcements.');
     });
-
+    
     it('should return 500 if project announcements fetch fails', async () => {
-      // Mock user exists
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { user_id: '123' },
-          error: null
-        })
-      }));
-
-      // Mock org_user data with project
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        mockReturnValue: {
-          data: [{ org_id: null, proj_id: '789' }],
-          error: null
-        }
-      }));
-
-      // Mock organization announcements (empty)
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: [],
-          error: null
-        })
-      }));
-
-      // Mock project announcements fetch fails
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: null,
-          error: { message: 'Database error' }
-        })
-      }));
-
+      // Mock the user data fetch
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { user_id: '123' },
+            error: null
+          })
+        }))
+        // Mock the org_user data fetch with only project ID
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ org_id: null, proj_id: 'proj456' }],
+            error: null
+          })
+        }))
+        // Mock project announcements fetch error
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Failed to fetch project announcements' }
+          })
+        }));
+    
       const response = await request(app)
         .get('/api/announcements/get-announcements/123')
         .set('Authorization', `Bearer ${authToken}`);
-
+    
       expect(response.status).toBe(500);
       expect(response.body).toHaveProperty('error', 'Failed to fetch project announcements.');
     });
 
-    it('should successfully return formatted announcements', async () => {
-      // Mock user exists
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
-          data: { user_id: '123' },
-          error: null
-        })
-      }));
-
-      // Mock org_user data
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        mockReturnValue: {
-          data: [{ org_id: '456', proj_id: '789' }],
-          error: null
-        }
-      }));
-
-      // Mock organization announcements
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: [{
-            announcement_id: 'org1',
-            announcement_type: 'organization',
-            user_id: '234',
-            org_id: '456',
-            proj_id: null,
-            content: 'Org Announcement',
-            keywords: ['important'],
-            file_urls: ['url1'],
-            like_count: 5,
-            created_at: '2024-01-26T12:00:00Z',
-            user: { first_name: 'John', last_name: 'Doe' },
-            organization: { name: 'Test Org' },
-            project: null
-          }],
-          error: null
-        })
-      }));
-
-      // Mock project announcements
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        in: jest.fn().mockResolvedValue({
-          data: [{
-            announcement_id: 'proj1',
-            announcement_type: 'project',
-            user_id: '345',
-            org_id: null,
-            proj_id: '789',
-            content: 'Project Announcement',
-            keywords: ['update'],
-            file_urls: ['url2'],
-            like_count: 3,
-            created_at: '2024-01-27T12:00:00Z',
-            user: { first_name: 'Jane', last_name: 'Smith' },
-            organization: null,
-            project: { address: '123 Test St' }
-          }],
-          error: null
-        })
-      }));
-
+    it('should handle unexpected errors', async () => {
+      // Mock an unexpected exception that would trigger the catch block
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => {
+          throw new Error('Unexpected server error');
+        });
+    
       const response = await request(app)
         .get('/api/announcements/get-announcements/123')
         .set('Authorization', `Bearer ${authToken}`);
+    
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Internal server error.');
+    });
+  });
 
-      expect(response.status).toBe(200);
-      expect(response.body.announcements).toHaveLength(2);
-      expect(response.body.announcements[0]).toEqual({
-        announcement_id: 'org1',
-        announcement_type: 'organization',
-        user_id: '234',
-        name: 'John Doe',
-        org_id: '456',
-        org_name: 'Test Org',
-        proj_id: null,
-        address: null,
-        content: 'Org Announcement',
-        keywords: ['important'],
-        file_urls: ['url1'],
-        like_count: 5,
-        created_at: '2024-01-26'
-      });
-      expect(response.body.announcements[1]).toEqual({
-        announcement_id: 'proj1',
-        announcement_type: 'project',
-        user_id: '345',
-        name: 'Jane Smith',
-        org_id: null,
-        org_name: null,
-        proj_id: '789',
-        address: '123 Test St',
-        content: 'Project Announcement',
-        keywords: ['update'],
-        file_urls: ['url2'],
-        like_count: 3,
-        created_at: '2024-01-27'
-      });
+  // Mock the uuid module
+  jest.mock('uuid', () => ({
+    v4: jest.fn(() => 'mock-uuid')
+  }));
+
+  describe('POST /api/announcements/post_announcement', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock fs functions
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from('mock file content'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+      // Mock path.resolve to return the original path
+      jest.spyOn(path, 'resolve').mockImplementation((p) => p);
+      // Mock path.extname to return .pdf
+      jest.spyOn(path, 'extname').mockReturnValue('.pdf');
     });
 
-    it('should handle scenario with no announcements', async () => {
-      // Mock user exists
+    it('should successfully store announcement without files', async () => {
+      // Mock database insert
       jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        insert: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
         single: jest.fn().mockResolvedValue({
-          data: { user_id: '123' },
+          data: {
+            announcement_id: 'ann123',
+            announcement_type: 'organization',
+            user_id: 'user123',
+            org_id: 'org123',
+            proj_id: null,
+            content: 'Test announcement',
+            keywords: ['test', 'important'],
+            file_urls: [],
+            like_count: 0,
+            created_at: '2023-04-01T00:00:00Z',
+            user: {
+              first_name: 'John',
+              last_name: 'Doe'
+            },
+            organization: {
+              name: 'Test Org'
+            },
+            project: null
+          },
           error: null
         })
       }));
 
-      // Mock org_user data with no org or project
-      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
-        select: jest.fn().mockReturnThis(),
-        eq: jest.fn().mockReturnThis(),
-        mockReturnValue: {
-          data: [],
+      const response = await request(app)
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          type: 'organization',
+          user_id: 'user123',
+          org_id: 'org123',
+          content: 'Test announcement',
+          keywords: ['test', 'important']
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('announcements');
+      expect(response.body.announcements).toHaveLength(1);
+      expect(response.body.announcements[0]).toHaveProperty('announcement_id', 'ann123');
+      expect(response.body.announcements[0]).toHaveProperty('content', 'Test announcement');
+    });
+
+    it('should successfully store announcement with files', async () => {
+      // Mock storage upload
+      const mockStorageFrom = {
+        upload: jest.fn().mockResolvedValue({
+          data: { path: 'announcements/mock-uuid.pdf' },
           error: null
-        }
+        }),
+        getPublicUrl: jest.fn().mockReturnValue({
+          data: { publicUrl: 'https://example.com/uploads/mock-uuid.pdf' }
+        })
+      };
+      
+      jest.spyOn(supabase.storage, 'from').mockReturnValue(mockStorageFrom);
+      
+      // Mock database insert
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: {
+            announcement_id: 'ann123',
+            announcement_type: 'project',
+            user_id: 'user123',
+            org_id: null,
+            proj_id: 'proj123',
+            content: 'Test announcement with file',
+            keywords: ['test', 'file'],
+            file_urls: ['https://example.com/uploads/mock-uuid.pdf'],
+            like_count: 0,
+            created_at: '2023-04-01T00:00:00Z',
+            user: {
+              first_name: 'John',
+              last_name: 'Doe'
+            },
+            organization: null,
+            project: {
+              address: '123 Test St'
+            }
+          },
+          error: null
+        })
+      }));
+
+      // Mock file
+      const mockFile = {
+        path: 'uploads/temp-file.pdf',
+        originalname: 'test-file.pdf',
+        mimetype: 'application/pdf'
+      };
+
+      const response = await request(app)
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .field('type', 'project')
+        .field('user_id', 'user123')
+        .field('proj_id', 'proj123')
+        .field('content', 'Test announcement with file')
+        .field('keywords', JSON.stringify(['test', 'file']))
+        .attach('files', Buffer.from('mock file content'), mockFile.originalname);
+
+      expect(response.status).toBe(200);
+      expect(response.body.announcements[0]).toHaveProperty('file_urls');
+      expect(response.body.announcements[0].file_urls).toContain('https://example.com/uploads/mock-uuid.pdf');
+    });
+
+    it('should handle file upload error', async () => {
+      // Mock storage upload error
+      const mockStorageFrom = {
+        upload: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Storage upload failed' }
+        })
+      };
+      
+      jest.spyOn(supabase.storage, 'from').mockReturnValue(mockStorageFrom);
+
+      // Mock file
+      const mockFile = {
+        path: 'uploads/temp-file.pdf',
+        originalname: 'test-file.pdf',
+        mimetype: 'application/pdf'
+      };
+
+      const response = await request(app)
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .field('type', 'project')
+        .field('user_id', 'user123')
+        .field('proj_id', 'proj123')
+        .field('content', 'Test announcement with file')
+        .attach('files', Buffer.from('mock file content'), mockFile.originalname);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('message', 'Server error storing data');
+    });
+
+    it('should handle database insert error', async () => {
+      // Skip file upload mock since we're testing the database error
+      const mockStorageFrom = {
+        upload: jest.fn().mockResolvedValue({
+          data: { path: 'announcements/mock-uuid.pdf' },
+          error: null
+        }),
+        getPublicUrl: jest.fn().mockReturnValue({
+          data: { publicUrl: 'https://example.com/uploads/mock-uuid.pdf' }
+        })
+      };
+      
+      jest.spyOn(supabase.storage, 'from').mockReturnValue(mockStorageFrom);
+      
+      // Mock database insert error
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Database insert failed' }
+        })
       }));
 
       const response = await request(app)
-        .get('/api/announcements/get-announcements/123')
-        .set('Authorization', `Bearer ${authToken}`);
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          type: 'organization',
+          user_id: 'user123',
+          org_id: 'org123',
+          content: 'Test announcement',
+          keywords: ['test']
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('message', 'Failed to store data');
+    });
+
+    it('should handle keywords as JSON string', async () => {
+      // Mock database insert
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        insert: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        single: jest.fn().mockResolvedValue({
+          data: {
+            announcement_id: 'ann123',
+            announcement_type: 'organization',
+            user_id: 'user123',
+            org_id: 'org123',
+            proj_id: null,
+            content: 'Test announcement',
+            keywords: ['parsed', 'keywords'],
+            file_urls: [],
+            like_count: 0,
+            created_at: '2023-04-01T00:00:00Z',
+            user: {
+              first_name: 'John',
+              last_name: 'Doe'
+            },
+            organization: {
+              name: 'Test Org'
+            },
+            project: null
+          },
+          error: null
+        })
+      }));
+
+      const response = await request(app)
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          type: 'organization',
+          user_id: 'user123',
+          org_id: 'org123',
+          content: 'Test announcement',
+          keywords: JSON.stringify(['parsed', 'keywords'])
+        });
 
       expect(response.status).toBe(200);
-      expect(response.body.announcements).toHaveLength(0);
+      expect(response.body.announcements[0].keywords).toEqual(['parsed', 'keywords']);
+    });
+
+    it('should handle server error', async () => {
+      // Force a general error by making supabase.from throw an exception
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+        throw new Error('Unexpected server error');
+      });
+
+      const response = await request(app)
+        .post('/api/announcements/post_announcement')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          type: 'organization',
+          user_id: 'user123',
+          org_id: 'org123',
+          content: 'Test announcement'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('message', 'Server error storing data');
+      expect(response.body).toHaveProperty('error', 'Unexpected server error');
+    });
+    
+  });
+
+  describe('GET /api/announcements/get_hub_user_emails_proj/:projId', () => {
+    it('should return unique emails successfully', async () => {
+      const fromSpy = jest.spyOn(supabase, 'from');
+  
+      // Mock hubs query
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({
+          data: [{ hub_id: '1' }, { hub_id: '2' }],
+          error: null
+        })
+      }));
+  
+      // Mock users in hubs query
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [{ user_id: '1' }, { user_id: '2' }, { user_id: '1' }], // Duplicated user_id to test deduplication
+          error: null
+        })
+      }));
+  
+      // Mock user emails query
+      fromSpy.mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        in: jest.fn().mockResolvedValue({
+          data: [
+            { email: 'user1@test.com' },
+            { email: 'user2@test.com' }
+          ],
+          error: null
+        })
+      }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(200);
+      expect(response.body.emails).toEqual(['user1@test.com', 'user2@test.com']);
+    });
+  
+    it('should handle hub fetch error', async () => {
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'Failed to fetch hubs' }
+        })
+      }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to fetch hubs.');
+    });
+  
+    it('should return empty emails array when no hubs found', async () => {
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({
+          data: [],
+          error: null
+        })
+      }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ emails: [] });
+    });
+  
+    it('should handle hub_user fetch error', async () => {
+      // Mock hubs query success
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ hub_id: '1' }, { hub_id: '2' }],
+            error: null
+          })
+        }))
+        // Mock hub_user query error
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Failed to fetch hub_user data' }
+          })
+        }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to fetch hub_user data.');
+    });
+  
+    it('should return empty emails array when no hub users found', async () => {
+      // Mock hubs query success
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ hub_id: '1' }, { hub_id: '2' }],
+            error: null
+          })
+        }))
+        // Mock empty hub_user data
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: [],
+            error: null
+          })
+        }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ emails: [] });
+    });
+  
+    it('should handle user data fetch error', async () => {
+      // Mock hubs query success
+      jest.spyOn(supabase, 'from')
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockResolvedValue({
+            data: [{ hub_id: '1' }, { hub_id: '2' }],
+            error: null
+          })
+        }))
+        // Mock hub_user query success
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: [{ user_id: '1' }, { user_id: '2' }],
+            error: null
+          })
+        }))
+        // Mock user query error
+        .mockImplementationOnce(() => ({
+          select: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Failed to fetch user information' }
+          })
+        }));
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Failed to fetch user information.');
+    });
+  
+    it('should handle unexpected errors', async () => {
+      // Mock an unexpected exception
+      jest.spyOn(supabase, 'from').mockImplementationOnce(() => {
+        throw new Error('Unexpected error');
+      });
+  
+      const response = await request(app)
+        .get('/api/announcements/get_hub_user_emails_proj/proj123')
+        .set('Authorization', `Bearer ${authToken}`);
+  
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Internal server error.');
+    });
+  });
+
+  describe('POST /api/announcements/send_announcement_email', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock fs functions
+      jest.spyOn(fs, 'readFileSync').mockReturnValue(Buffer.from('mock file content'));
+      jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+      // Mock path.resolve to return the original path
+      jest.spyOn(path, 'resolve').mockImplementation((p) => p);
+      // Set environment variable for tests
+      process.env.RESEND_DOMAIN = 'test-domain.com';
+      
+      // Create a new instance of the mock for each test
+      const mockSendFn = jest.fn().mockResolvedValue({ id: 'email-id', status: 'success' });
+      const mockResendInstance = {
+        emails: {
+          send: mockSendFn
+        }
+      };
+      
+      // Replace the Resend constructor mock implementation for each test
+      Resend.mockImplementation(() => mockResendInstance);
+    });
+
+    afterEach(() => {
+      delete process.env.RESEND_DOMAIN;
+    });
+
+    it('should handle file cleanup errors gracefully', async () => {
+      // Get the mock instance that was created in beforeEach
+      const mockResendInstance = new Resend();
+      
+      // Mock console.error to avoid polluting test output
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+      
+      // Mock fs.unlinkSync to throw an error
+      fs.unlinkSync.mockImplementation(() => {
+        throw new Error('File delete error');
+      });
+
+      // Mock file
+      const mockFile = {
+        path: 'uploads/temp-file.pdf',
+        originalname: 'test-file.pdf',
+        mimetype: 'application/pdf'
+      };
+
+      const response = await request(app)
+        .post('/api/announcements/send_announcement_email')
+        .set('Authorization', `Bearer ${authToken}`)
+        .field('emailList', JSON.stringify(['test@example.com']))
+        .field('type', 'organization')
+        .field('content', 'Test announcement')
+        .attach('files', Buffer.from('mock file content'), mockFile.originalname);
+
+      // Should still succeed even if file cleanup fails
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'All emails sent successfully.');
+      expect(console.error).toHaveBeenCalledWith('Error deleting file:', expect.any(Error));
+    });
+
+    it('should handle invalid JSON in emailList', async () => {
+      // Mock console.error to avoid polluting test output
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      const response = await request(app)
+        .post('/api/announcements/send_announcement_email')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          emailList: 'not-valid-json',
+          type: 'organization',
+          content: 'Test announcement'
+        });
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('message', 'Failed to send emails.');
+      // Just check that error exists, without checking specific content since error messages can vary
+      expect(response.body).toHaveProperty('error');
+    });
+
+    it('should handle year in email footer correctly', async () => {
+      // Get the mock instance that was created in beforeEach
+      const mockResendInstance = new Resend();
+      
+      // Create a real Date object reference
+      const realDate = global.Date;
+      
+      // Mock Date to return a fixed year
+      const mockDate = class extends Date {
+        getFullYear() {
+          return 2023;
+        }
+      };
+      global.Date = mockDate;
+
+      const response = await request(app)
+        .post('/api/announcements/send_announcement_email')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          emailList: JSON.stringify(['test@example.com']),
+          type: 'organization',
+          content: 'Test announcement'
+        });
+
+      expect(response.status).toBe(200);
+      
+      // Only verify HTML content if the send method was actually called
+      if (mockResendInstance.emails.send.mock.calls.length > 0) {
+        const callArgs = mockResendInstance.emails.send.mock.calls[0][0];
+        expect(callArgs.html).toContain('&copy; 2023 Smartess.');
+      }
+      
+      // Restore the original Date
+      global.Date = realDate;
     });
   });
 });

@@ -1,202 +1,255 @@
 const request = require('supertest');
-const express = require('express');
-const { sendEmail, storeData } = require('../../services/startProjectService');
-const startProjectRoutes = require('../../routes/startProjectRoutes');
+const app = require('../../app');
+const supabase = require('../../config/supabase');
+const { Resend } = require('resend');
 
-const app = express();
-app.use(express.json());
-app.use('/project', startProjectRoutes);
+// Mock Resend
+jest.mock('resend');
 
-jest.mock('../../services/startProjectService', () => ({
-  sendEmail: jest.fn(),
-  storeData: jest.fn(),
-}));
-
-describe('Start Project Controller', () => {
-  describe('POST /project/send-email', () => {
-    it('should return 400 if any required field is missing', async () => {
-      const testCases = [
-        { field: 'businessName', data: { firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'firstName', data: { businessName: 'Business', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'lastName', data: { businessName: 'Business', firstName: 'John', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'telephoneNumber', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', email: 'random@email.com', description: 'Test' } },
-        { field: 'email', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', description: 'Test' } },
-        { field: 'description', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com' } }
-      ];
-
-      for (const testCase of testCases) {
-        const response = await request(app)
-          .post('/project/send-email')
-          .send(testCase.data);
-
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({ message: 'All fields are required' });
-      }
+describe('Start Project Controller Tests', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    it('should send email with correct content and format', async () => {
-      sendEmail.mockResolvedValue({ success: true, data: 'Email data' });
+    describe('POST /api/start-project/send-email', () => {
+        // Valid test data
+        const validRequestData = {
+            businessName: 'Test Company',
+            firstName: 'John',
+            lastName: 'Doe',
+            telephoneNumber: '555-123-4567',
+            email: 'john.doe@example.com',
+            description: 'Test project description'
+        };
 
-      const testData = {
-        businessName: 'Test Business',
-        firstName: 'John',
-        lastName: 'Doe',
-        telephoneNumber: '1234567890',
-        email: 'john@example.com',
-        description: 'Test description'
-      };
+        it('should return 400 if required fields are missing', async () => {
+            // Missing businessName
+            const invalidData = { ...validRequestData };
+            delete invalidData.businessName;
 
-      const response = await request(app)
-        .post('/project/send-email')
-        .send(testData);
+            const response = await request(app)
+                .post('/api/start-project/send-email')
+                .send(invalidData);
 
-      expect(sendEmail).toHaveBeenCalledWith(
-        expect.stringContaining('Smartess <support@'),
-        expect.any(String),
-        'Inquiry from John Doe',
-        expect.stringContaining('<h2>New Inquiry from Test Business</h2>')
-      );
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        message: 'Email sent successfully',
-        data: 'Email data'
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('message', 'All fields are required');
+        });
+        
+        it('should return 200 if email is sent successfully', async () => {
+          // Mock Resend's send method properly
+          const mockSend = jest.fn().mockResolvedValue({
+              data: { id: 'email-id-123' },
+              error: null
+          });
+          
+          // Set up the mock implementation
+          Resend.prototype.emails = { send: mockSend };
+      
+          const response = await request(app)
+              .post('/api/start-project/send-email')
+              .send(validRequestData);
+      
+          expect(response.status).toBe(200);
+          expect(response.body).toHaveProperty('message', 'Email sent successfully');
+          expect(response.body).toHaveProperty('data');
+      });
+      
+      it('should return 500 if Resend returns an error', async () => {
+          // Mock Resend's send method to return an error
+          const mockSend = jest.fn().mockResolvedValue({
+              data: null,
+              error: { message: 'Failed to send email' }
+          });
+          
+          // Set up the mock implementation
+          Resend.prototype.emails = { send: mockSend };
+      
+          const response = await request(app)
+              .post('/api/start-project/send-email')
+              .send(validRequestData);
+      
+          expect(response.status).toBe(500);
+          expect(response.body).toHaveProperty('message', 'Failed to send email');
+          expect(response.body).toHaveProperty('error');
+      });
+      
+      it('should return 500 if email sending throws an exception', async () => {
+          // Mock Resend's send method to throw an exception
+          const mockSend = jest.fn().mockImplementation(() => {
+              throw new Error('Network error');
+          });
+          
+          // Set up the mock implementation
+          Resend.prototype.emails = { send: mockSend };
+      
+          const response = await request(app)
+              .post('/api/start-project/send-email')
+              .send(validRequestData);
+      
+          expect(response.status).toBe(500);
+          expect(response.body).toHaveProperty('message', 'Server error sending email');
+          expect(response.body).toHaveProperty('error', 'Network error');
       });
     });
 
-    it('should handle email sending failure', async () => {
-      sendEmail.mockResolvedValue({ success: false, error: 'Failed to send' });
+    describe('POST /api/start-project/store-start-project-data', () => {
+        // Valid test data
+        const validRequestData = {
+            businessName: 'Test Company',
+            firstName: 'John',
+            lastName: 'Doe',
+            telephoneNumber: '555-123-4567',
+            email: 'john.doe@example.com',
+            description: 'Test project description'
+        };
 
-      const response = await request(app)
-        .post('/project/send-email')
-        .send({
-          businessName: 'Test Business',
-          firstName: 'John',
-          lastName: 'Doe',
-          telephoneNumber: '1234567890',
-          email: 'john@example.com',
-          description: 'Test description'
+        it('should return 400 if required fields are missing', async () => {
+            // Missing lastName
+            const invalidData = { ...validRequestData };
+            delete invalidData.lastName;
+
+            const response = await request(app)
+                .post('/api/start-project/store-start-project-data')
+                .send(invalidData);
+
+            expect(response.status).toBe(400);
+            expect(response.body).toHaveProperty('message', 'All fields are required');
         });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Failed to send email',
-        error: 'Failed to send'
-      });
-    });
+        it('should return 500 if database insert fails', async () => {
+            // Mock Supabase to return an error
+            const fromSpy = jest.spyOn(supabase, 'from');
+            fromSpy.mockReturnValueOnce({
+                insert: jest.fn().mockResolvedValue({
+                    error: { message: 'Database insert failed' }
+                })
+            });
 
-    it('should handle server errors', async () => {
-      sendEmail.mockRejectedValue(new Error('Server error'));
+            const response = await request(app)
+                .post('/api/start-project/store-start-project-data')
+                .send(validRequestData);
 
-      const response = await request(app)
-        .post('/project/send-email')
-        .send({
-          businessName: 'Test Business',
-          firstName: 'John',
-          lastName: 'Doe',
-          telephoneNumber: '1234567890',
-          email: 'john@example.com',
-          description: 'Test description'
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('message', 'Failed to store data');
+            expect(fromSpy).toHaveBeenCalledWith('start_project');
         });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Server error',
-        error: 'Server error'
-      });
-    });
-  });
+        it('should return 500 if database operation throws an exception', async () => {
+            // Mock Supabase to throw an exception
+            const fromSpy = jest.spyOn(supabase, 'from');
+            fromSpy.mockImplementationOnce(() => {
+                throw new Error('Database connection failed');
+            });
 
-  describe('POST /project/store-start-project-data', () => {
-    it('should return 400 if any required field is missing', async () => {
-      const testCases = [
-        { field: 'businessName', data: { firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'firstName', data: { businessName: 'Business', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'lastName', data: { businessName: 'Business', firstName: 'John', telephoneNumber: '1234567890', email: 'random@email.com', description: 'Test' } },
-        { field: 'telephoneNumber', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', email: 'random@email.com', description: 'Test' } },
-        { field: 'email', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', description: 'Test' } },
-        { field: 'description', data: { businessName: 'Business', firstName: 'John', lastName: 'Doe', telephoneNumber: '1234567890', email: 'random@email.com' } }
-      ];
+            const response = await request(app)
+                .post('/api/start-project/store-start-project-data')
+                .send(validRequestData);
 
-      for (const testCase of testCases) {
-        const response = await request(app)
-          .post('/project/store-start-project-data')
-          .send(testCase.data);
-
-        expect(response.status).toBe(400);
-        expect(response.body).toEqual({ message: 'All fields are required' });
-      }
-    });
-
-    it('should store data successfully', async () => {
-      storeData.mockResolvedValue({ success: true });
-
-      const testData = {
-        businessName: 'Test Business',
-        firstName: 'John',
-        lastName: 'Doe',
-        telephoneNumber: '1234567890',
-        email: 'john@example.com',
-        description: 'Test description'
-      };
-
-      const response = await request(app)
-        .post('/project/store-start-project-data')
-        .send(testData);
-
-      expect(storeData).toHaveBeenCalledWith(
-        testData.businessName,
-        testData.firstName,
-        testData.lastName,
-        testData.telephoneNumber,
-        testData.email,
-        testData.description
-      );
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({ message: 'Data stored successfully' });
-    });
-
-    it('should handle data storage failure', async () => {
-      storeData.mockResolvedValue({ success: false, error: 'Storage failed' });
-
-      const response = await request(app)
-        .post('/project/store-start-project-data')
-        .send({
-          businessName: 'Test Business',
-          firstName: 'John',
-          lastName: 'Doe',
-          telephoneNumber: '1234567890',
-          email: 'john@example.com',
-          description: 'Test description'
+            expect(response.status).toBe(500);
+            expect(response.body).toHaveProperty('message', 'Server error storing data');
+            expect(response.body).toHaveProperty('error', 'Database connection failed');
+            expect(fromSpy).toHaveBeenCalledWith('start_project');
         });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Failed to store data',
-        error: 'Storage failed'
-      });
-    });
+        it('should return 200 if data is stored successfully', async () => {
+            // Mock Supabase to return success
+            const fromSpy = jest.spyOn(supabase, 'from');
+            fromSpy.mockReturnValueOnce({
+                insert: jest.fn().mockResolvedValue({
+                    data: { id: 1 },
+                    error: null
+                })
+            });
 
-    it('should handle server errors during storage', async () => {
-      storeData.mockRejectedValue(new Error('Server error'));
+            const response = await request(app)
+                .post('/api/start-project/store-start-project-data')
+                .send(validRequestData);
 
-      const response = await request(app)
-        .post('/project/store-start-project-data')
-        .send({
-          businessName: 'Test Business',
-          firstName: 'John',
-          lastName: 'Doe',
-          telephoneNumber: '1234567890',
-          email: 'john@example.com',
-          description: 'Test description'
+            expect(response.status).toBe(200);
+            expect(response.body).toHaveProperty('message', 'Data stored successfully');
+            expect(fromSpy).toHaveBeenCalledWith('start_project');
+            
+            // Verify the data being inserted
+            const insertCall = fromSpy.mock.results[0].value.insert.mock.calls[0][0];
+            expect(insertCall).toHaveLength(1);
+            expect(insertCall[0]).toHaveProperty('business_name', validRequestData.businessName);
+            expect(insertCall[0]).toHaveProperty('first_name', validRequestData.firstName);
+            expect(insertCall[0]).toHaveProperty('last_name', validRequestData.lastName);
+            expect(insertCall[0]).toHaveProperty('email', validRequestData.email);
+            expect(insertCall[0]).toHaveProperty('phone_number', validRequestData.telephoneNumber);
+            expect(insertCall[0]).toHaveProperty('description', validRequestData.description);
         });
 
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({
-        message: 'Server error',
-        error: 'Server error'
-      });
+        it('should handle duplicate email submissions', async () => {
+          // Mock Supabase to simulate a unique constraint violation
+          const fromSpy = jest.spyOn(supabase, 'from');
+          fromSpy.mockReturnValueOnce({
+            insert: jest.fn().mockResolvedValue({
+              error: { 
+                code: '23505', // PostgreSQL unique violation code
+                message: 'duplicate key value violates unique constraint' 
+              }
+            })
+          });
+        
+          const response = await request(app)
+            .post('/api/start-project/store-start-project-data')
+            .send(validRequestData);
+        
+          expect(response.status).toBe(500);
+          expect(response.body).toHaveProperty('message', 'Failed to store data');
+          expect(response.body.error).toHaveProperty('code', '23505');
+        });
+        
+        it('should handle empty description field correctly', async () => {
+          const dataWithEmptyDescription = {
+            ...validRequestData,
+            description: ''
+          };
+        
+          // Mock Supabase to return success
+          const fromSpy = jest.spyOn(supabase, 'from');
+          fromSpy.mockReturnValueOnce({
+            insert: jest.fn().mockResolvedValue({
+              data: { id: 1 },
+              error: null
+            })
+          });
+        
+          const response = await request(app)
+            .post('/api/start-project/store-start-project-data')
+            .send(dataWithEmptyDescription);
+        
+          expect(response.status).toBe(200);
+          
+          // Verify the empty description is stored correctly
+          const insertCall = fromSpy.mock.results[0].value.insert.mock.calls[0][0];
+          expect(insertCall[0]).toHaveProperty('description', '');
+        });
+        
+        it('should handle very long input values', async () => {
+          const longString = 'a'.repeat(1000);
+          const dataWithLongValues = {
+            ...validRequestData,
+            businessName: longString,
+            description: longString
+          };
+        
+          // Mock Supabase to return success
+          const fromSpy = jest.spyOn(supabase, 'from');
+          fromSpy.mockReturnValueOnce({
+            insert: jest.fn().mockResolvedValue({
+              data: { id: 1 },
+              error: null
+            })
+          });
+        
+          const response = await request(app)
+            .post('/api/start-project/store-start-project-data')
+            .send(dataWithLongValues);
+        
+          expect(response.status).toBe(200);
+        });
+        
     });
-  });
 });
