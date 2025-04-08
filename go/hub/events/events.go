@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	logs "Smartess/go/hub/logger"
 
@@ -90,7 +91,7 @@ func (r *EventHandler) checkEvent(message *ha.WebhookMessage) (bool, error) {
 		// TODO WHAT IS THE MESSAGE?
 		Message:   *conciseEvent.Attributes.FriendlyName,
 		State:     message.Event.Data.NewState.State,
-		TimeStamp: message.Event.Data.NewState.LastChanged,
+		TimeStamp: time.Now().Local(),
 		Type:      alertType,
 	}
 	r.Logger.Info(fmt.Sprintf("%v", alert))
