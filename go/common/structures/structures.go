@@ -39,39 +39,39 @@ type Announcement struct {
 }
 
 type StateEvent struct {
-	HubID     int       `json:"id"`         // ID of the sender
-	DeviceID  string    `json:"device"`     // ID of the device
-	State     State     `json:"state"`      // The message content
-	TimeStamp time.Time `json:"time_fired"` // Timestamp for when the message was created
+	HubID     int       `json:"id" yaml:"id"`                 // ID of the sender
+	DeviceID  string    `json:"device" yaml:"device"`         // ID of the device
+	State     State     `json:"state" yaml:"state"`           // The message content
+	TimeStamp time.Time `json:"time_fired" yaml:"time_fired"` // Timestamp for when the message was created
 }
 
 type HubLog struct {
-	HubID     string    `json:"id"`
-	Message   string    `json:"message"`
-	TimeStamp time.Time `json:"time_fired"`
+	HubID     string    `json:"id" yaml:"id"`
+	Message   string    `json:"message" yaml:"message"`
+	TimeStamp time.Time `json:"time_fired" yaml:"time_fired"`
 }
 
 type EventDetails struct {
-	EventType string       `json:"event_type"`
-	Data      EventData    `json:"data"`
-	Origin    string       `json:"origin"`
-	TimeFired string       `json:"time_fired"`
-	Context   EventContext `json:"context"`
+	EventType string       `json:"event_type" yaml:"event_type"`
+	Data      EventData    `json:"data" yaml:"data"`
+	Origin    string       `json:"origin" yaml:"origin"`
+	TimeFired string       `json:"time_fired" yaml:"time_fired"`
+	Context   EventContext `json:"context" yaml:"context"`
 }
 
 type EventData struct {
-	EntityID string `json:"entity_id"`
-	OldState State  `json:"old_state"`
-	NewState State  `json:"new_state"`
+	EntityID string `json:"entity_id" yaml:"entity_id"`
+	OldState State  `json:"old_state" yaml:"old_state"`
+	NewState State  `json:"new_state" yaml:"new_state"`
 }
 
 type State struct {
-	EntityID    string                 `json:"entity_id"`
-	State       string                 `json:"state"`
-	Attributes  map[string]interface{} `json:"attributes"`   // Added to capture dynamic attributes
-	LastChanged time.Time              `json:"last_changed"` // Added to capture last changed time
-	LastUpdated time.Time              `json:"last_updated"` // Added to capture last updated time
-	Context     EventContext           `json:"context"`      // Added to include context information
+	EntityID    string                 `json:"entity_id" yaml:"entity_id"`
+	State       string                 `json:"state" yaml:"state"`
+	Attributes  map[string]interface{} `json:"attributes" yaml:"attributes"`     // Added to capture dynamic attributes
+	LastChanged time.Time              `json:"last_changed" yaml:"last_changed"` // Added to capture last changed time
+	LastUpdated time.Time              `json:"last_updated" yaml:"last_updated"` // Added to capture last updated time
+	Context     EventContext           `json:"context" yaml:"context"`           // Added to include context information
 }
 
 // TODO: SHOULD MAKE A GENERIC "EVENT" HA ENTITY STRUCT, SIMILAR TO "State" BUT NOT THE SAME
@@ -79,15 +79,15 @@ type State struct {
 // https://developers.home-assistant.io/docs/dev_101_states/
 // https://developers.home-assistant.io/docs/core/entity/
 type EventContext struct {
-	ID       string `json:"id"`
-	ParentID string `json:"parent_id"`
-	UserID   string `json:"user_id"`
+	ID       string `json:"id" yaml:"id"`
+	ParentID string `json:"parent_id" yaml:"parent_id"`
+	UserID   string `json:"user_id" yaml:"user_id"`
 }
 type Service struct {
-	ServiceID   string                 `json:"service_id"` // Important for service calls
-	Domain      string                 `json:"domain"`
-	Description string                 `json:"description"`
-	ServiceData map[string]interface{} `json:"service_data"`
+	ServiceID   string                 `json:"service_id" yaml:"service_id"` // Important for service calls
+	Domain      string                 `json:"domain" yaml:"domain"`
+	Description string                 `json:"description" yaml:"description"`
+	ServiceData map[string]interface{} `json:"service_data" yaml:"service_data"`
 }
 
 // Automation represents an automation in Home Assistant.
@@ -105,12 +105,12 @@ type HARegistry interface {
 }
 
 type Alert struct {
-	Type      string    `json:"type"`
-	HubIP     string    `json:"hub_ip"`
-	DeviceID  string    `json:"device"`
-	State     string    `json:"state"`
-	Message   string    `json:"message"`
-	TimeStamp time.Time `json:"time_fired"`
+	Type      string    `json:"type" yaml:"type"`
+	HubIP     string    `json:"hub_ip" yaml:"hub_ip"`
+	DeviceID  string    `json:"device" yaml:"device"`
+	State     string    `json:"state" yaml:"state"`
+	Message   string    `json:"message" yaml:"message"`
+	TimeStamp time.Time `json:"time_fired" yaml:"time_fired"`
 }
 
 type TestMongoMessage struct {
