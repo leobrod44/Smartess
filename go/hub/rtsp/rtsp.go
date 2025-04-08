@@ -2,9 +2,14 @@ package rtsp
 
 import (
 	common_rabbitmq "Smartess/go/common/rabbitmq"
+	"Smartess/go/hub/events"
 	logs "Smartess/go/hub/logger"
+	"bufio"
 	"bytes"
+	"context"
 	"fmt"
+	"log"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -427,5 +432,78 @@ func (rtsp *RtspProcessor) sendData(ctx *StreamContext, producer *stream.Produce
 		case err := <-ctx.errChan:
 			rtsp.Logger.Error(fmt.Sprintf("Error streaming RTSP: %v", err))
 		}
+	}
+}
+
+func (rtsp *RtspProcessor) StartMotionDetection(event_handler *events.EventHandler) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for _, camera := range rtsp.cameras.CameraConfigs {
+		cameraName := camera.Name
+
+		cmd := exec.CommandContext(ctx, "ffmpeg",
+			"-fflags", "nobuffer", // Disable input buffering
+			"-flags", "low_delay", // Reduce delay
+			"-i", camera.StreamURL,
+			"-filter:v", "select='gt(scene,0.0)',metadata=print:file=-", // Select all frames with motion
+			"-f", "null", "-",
+			"-progress", "pipe:1", // Force FFmpeg to flush logs to stdout
+		)
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			log.Fatalf("Error creating stdout pipe: %v", err)
+		}
+
+		log.Printf("Starting motion detection: %v", cmd.String())
+
+		if err := cmd.Start(); err != nil {
+			log.Fatalf("Error starting FFmpeg: %v", err)
+		}
+
+		// Use a goroutine to process stderr output
+		go func() {
+			var lastMotionTime time.Time // Tracks the last time motion was detected
+			cooldown := 30 * time.Second // Cooldown period
+
+			scanner := bufio.NewScanner(stdout)
+			for scanner.Scan() {
+				line := scanner.Text()
+				if strings.Contains(line, "lavfi.scene_score") {
+					parts := strings.Split(line, "=")
+					if len(parts) == 2 {
+						score, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+						if err == nil && score > 0.02 {
+							// Check if the cooldown period has passed
+							if time.Since(lastMotionTime) >= cooldown {
+								lastMotionTime = time.Now() // Update the last motion time
+								handleMotionDetectedEvent(event_handler, cameraName)
+							}
+						}
+					}
+				}
+			}
+
+			if err := scanner.Err(); err != nil {
+				log.Printf("Error reading FFmpeg stdout: %v", err)
+			}
+		}()
+
+		if err := cmd.Wait(); err != nil {
+			log.Printf("FFmpeg exited with error: %v", err)
+		}
+	}
+
+}
+
+func handleMotionDetectedEvent(event_handler *events.EventHandler, cameraName string) {
+	fmt.Println("Motion event handled")
+	currentTime := time.Now()
+	err := event_handler.PublishMotionAlert(cameraName, "Motion detected", "ON", currentTime)
+
+	if err != nil {
+		// Handle the error, e.g., log it or return it
+		log.Printf("Failed to publish motion alert for camera %s: %v", cameraName, err)
 	}
 }

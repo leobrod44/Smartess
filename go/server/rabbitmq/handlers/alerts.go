@@ -8,22 +8,21 @@ import (
 
 	"github.com/nedpals/supabase-go"
 	"github.com/streadway/amqp"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
 )
 
 type AlertHandler struct {
-	MongoClient *mongo.Client
-	r           *common_rabbitmq.RabbitMQInstance
-	supabase    *supabase.Client
+	//MongoClient *mongo.Client
+	r        *common_rabbitmq.RabbitMQInstance
+	supabase *supabase.Client
 }
 
-func NewAlertHandler(mongoClient *mongo.Client, instance *common_rabbitmq.RabbitMQInstance) *AlertHandler {
+func NewAlertHandler(instance *common_rabbitmq.RabbitMQInstance) *AlertHandler {
 	supabaseUrl := os.Getenv("SUPABASE_URL")
 	supabaseKey := os.Getenv("SUPABASE_ANON_KEY")
 	supabaseClient := supabase.CreateClient(supabaseUrl, supabaseKey)
 
-	return &AlertHandler{MongoClient: mongoClient, r: instance, supabase: supabaseClient}
+	return &AlertHandler{r: instance, supabase: supabaseClient}
 }
 
 func (h *AlertHandler) Handle(msg amqp.Delivery, logger *zap.Logger) {
