@@ -84,7 +84,6 @@ Methods to: Marshall into configStructs from yaml-config , then from configstruc
 ### common/structures
 Common data structures, Entities, Contexts, States, EntityFormats structs \
 Also lot of HA specific structs and interfaces, as well as relevant enums for go codebase \
-[WIP] TODO: Eventually have proper models/structs distinguishable between 'server' and 'hub'
 
 ## hub/
 Any scripts, configs, utilities specifically related to the Hub service \
@@ -95,7 +94,7 @@ Any scripts, configs, utilities specifically related to the Hub service \
    . RabbitMQ Publishers and publisher-side exchanges \
    . WebSocket... hub app ports, hub IP; Networking, phys con, virtual chans, hosts, RabbitMQ Dialer \
    . Different Connection setups and webhooks: production or dev Hub is RPI/HA, dev or test Hub is mockups \
-   . [WIP] Token, Authentification, security, data/connection integrity, 
+   . [Open to scale] Token, Authentification, security, data/connection integrity, 
 
    . Hardware installation scripts and docs \
    . RTSP video streaming feature (core networking and logic) \
@@ -106,9 +105,9 @@ Any scripts, configs, utilities specifically related to the Hub service \
 Any scripts, configs, utilities specifically related to the Backend service \
   .RabbitMQServer (RabbitMQInstance, logger, consumers, exchanges, bindings) Init() and Start() \
   .RabbitMQ Consumers and Consumer-side Exchanges setup \
-  . [WIP] Microservices and Managers \
-  . [WIP] Model & Orchestrator logic to manage and containrize microservices \
-  . [WIP] Data,Persistence, Microservice, Managers and Business logic to service frontend-apis/views \
+  . [Open to scale] Microservices and Managers \
+  . [Open to scale] Model & Orchestrator logic to manage and containerize microservices \
+  . Data,Persistence, Managers and Business logic to service frontend-apis/views \
 
 # Dependencies and Design from Wikis
 For Go, RabbitMQ, Docker, and other dependencies, see the Architecture wiki and Infrastructure and Tools wikis. \
@@ -170,7 +169,7 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
 |           enums.go
 |
 +---hub
-|   |   hub_daemon.go  (Formerly hub.go)
+|   |   hub_daemon.go  (Formerly hub.go, Main producer driver)
 |   |
 |   +---config
 |   |       config.yaml
@@ -194,8 +193,10 @@ Docker-composes and Dockerfiles should be commented and clear enough to understa
   +--- README.md
   |
   \--- rabbitmq
-        consumer.go
-        rabbitmq.go
+     \--handlers/ (Consumer handlers and middlewars before website/smartess APIs: Events, alerts, logging, Video controller/muxer/segmenter)
+     \--static/ (Server side version of pages for scripts and to see alerts or video only)
+       |
+        rabbitmq.go (main consumer driver)
         ....
   ....
 ```
