@@ -7,8 +7,15 @@ https://smartess.vercel.app/
 
 ## Release 3 Presentation/Demo
 
+Given the size of our project and that we have two teams (hub and website) our full presentation is 8 minutes over limit but only covers essential and fundemental parts of the project
+
+https://drive.google.com/file/d/1w1BCWQPlqrisWkyoj2oj-TvpI7K_VQ4S/view?usp=sharing
+
+
 
 ## Release 3 full powerpoint slides
+
+[_Smartess Release 3  Presentation.pdf](https://github.com/user-attachments/files/19696745/_Smartess.Release.3.Presentation.pdf)
 
 ## Important files
 ### Top 5 files
@@ -24,7 +31,7 @@ https://smartess.vercel.app/
 | File path with clickable link | Purpose (1 line description) |
 |------|------------|
 |[go/tests/rtsp_test.go](go/tests/rtsp_test.go)|Integration test for hub rtsp stream interception and publish to RabbitMQ|
-|[smartessweb/backend/tests/controllers/authController.test.js](smartessweb/backend/tests/controllers/authController.test.js)|Tests behavior of web authorization system|
+|[smartessweb/backend/tests/controllers/manageAccountsController.test.js](smartessweb/backend/tests/controllers/manageAccountsController.test.js)|Tests behavior for account manager controllers|
 |[smartessweb/backend/tests/controllers/projectController.test.js](smartessweb/backend/tests/controllers/projectController.test.js)|Tests behavior of projects data retrieval for web|
 |[smartessweb/backend/tests/controllers/ticketsController.test.js](smartessweb/backend/tests/controllers/ticketsController.test.js)|Tests controllers to retrieve tickets related functionalities.|
 |[smartessweb/frontend/__tests__/ProjectComponent.test.tsx](https://github.com/leobrod44/Smartess/blob/main/smartessweb/frontend/__tests__/ProjectComponent.test.tsx)|Test the frontend Project component’s behavior|
