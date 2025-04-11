@@ -7,7 +7,7 @@ https://smartess.vercel.app/
 
 ## Release 3 Presentation/Demo
 
-Given the size of our project and that we have two teams (hub and website) our full presentation is 8 minutes over limit but only covers essential and fundemental parts of the project
+Given the size of our project and that we have two teams (hub and website) our full presentation is 8 minutes over limit but only covers essential and fundemental parts of the project.
 
 https://drive.google.com/file/d/1w1BCWQPlqrisWkyoj2oj-TvpI7K_VQ4S/view?usp=sharing
 
@@ -15,7 +15,7 @@ https://drive.google.com/file/d/1w1BCWQPlqrisWkyoj2oj-TvpI7K_VQ4S/view?usp=shari
 
 ## Release 3 full powerpoint slides
 
-[_Smartess Release 3  Presentation.pdf](https://github.com/user-attachments/files/19696745/_Smartess.Release.3.Presentation.pdf)
+[Smartess Release 3 Presentation Slides](https://github.com/user-attachments/files/19696745/_Smartess.Release.3.Presentation.pdf)
 
 ## Important files
 ### Top 5 files
@@ -66,7 +66,7 @@ https://drive.google.com/file/d/1MvIh3tUW6fsqQBHBUWBLqvQHEsESYOVF/view?usp=shari
 
 # RELEASE 1
 
-## Release 1 Presentaiton/Demo
+## Release 1 Presentation/Demo
 https://drive.google.com/file/d/1VhbKIfahZcb6RqXoC6UfZoBpeX1w_sCs/view?usp=sharing
 
 ## Important files (Release 1)
