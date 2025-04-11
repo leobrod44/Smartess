@@ -108,3 +108,7 @@
      ```
 ### Smartess HUB installation
 ## Proper simplified bash scripts and HA settings pulled sirectly from repo to come
+
+## Screenshot Video Surveillance
+![image](https://github.com/user-attachments/assets/d5c126f8-e09b-4aa2-a4c8-bb0c805bf7c5)
+
