@@ -17,6 +17,7 @@ type RabbitMQServer struct {
 	instance  *common_rabbitmq.RabbitMQInstance
 	Logger    *zap.Logger
 	consumers []handlers.QueueConsumer
+	env       *stream.Environment
 }
 
 func Init() (RabbitMQServer, error) {
@@ -113,12 +114,16 @@ func Init() (RabbitMQServer, error) {
 		instance:  instance,
 		Logger:    logger,
 		consumers: consumers,
+		env:       env,
 	}, nil
 
 }
 
 // Start starts the RabbitMQ server and begins processing messages from the queues.
 func (r *RabbitMQServer) Start() {
+	videoHandler := handlers.NewControllerHandler(r.instance, r.env) // Assuming env is stored or passed
+	go videoHandler.StartWebSocketServer()                           // Start WebSocket server once
+
 	for _, smartessQueue := range r.consumers {
 		go func(queueConsumer handlers.QueueConsumer) {
 			r.Logger.Info("Starting consumer", zap.String("queue", queueConsumer.RabbitmqQueue.Name))
@@ -137,7 +142,7 @@ func (r *RabbitMQServer) Start() {
 			}
 			for msg := range msgs {
 				r.Logger.Info("Received message", zap.String("routing_key", msg.RoutingKey), zap.String("message_body", string(msg.Body)))
-				queueConsumer.MessageHandler.Handle(msg, r.Logger)
+				queueConsumer.MessageHandler.Handle(msg, r.Logger) //todo run in goroutine to avoid blocking?
 
 			}
 		}(smartessQueue)

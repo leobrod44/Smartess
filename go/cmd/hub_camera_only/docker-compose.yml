@@ -68,7 +68,7 @@ services:
       - consumer
     networks:
       - smartess_network  # Use the existing network
-  # Mock camera rtsp stream for testing purposes
+#   Mock camera rtsp stream for testing purposes
   mock_camera:
     container_name: mock_camera
     build:
