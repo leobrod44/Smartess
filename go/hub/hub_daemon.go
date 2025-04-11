@@ -81,7 +81,7 @@ func Init(selectedHub structures.HubTypeEnum) (SmartessHub, error) {
 
 func (hub *SmartessHub) Start(selectedHub structures.HubTypeEnum) {
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(2) //todo: Temporarily removed events
 	go func() {
 		defer wg.Done()
 		hub.event_handler.Start(selectedHub)

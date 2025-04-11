@@ -1,44 +1,44 @@
 services:
-  loki:
-    container_name: loki
-    image: grafana/loki:latest
-    ports:
-      - "3100:3100"
-    volumes:
-      - ./observability/loki/config:/etc/loki
-      - ./observability/loki/data:/loki
-      - ./observability/loki/wal:/wal
-    command: -config.file=/etc/loki/loki-config.yaml
-    networks:
-      - smartess_network
-
-  promtail:
-    container_name: promtail
-    image: grafana/promtail:latest
-    volumes:
-      - ./observability/promtail/config:/etc/promtail
-      - ./go/cmd/server/logs:/app/logs
-    command: -config.file=/etc/promtail/promtail-config.yaml
-    networks:
-      - smartess_network
-
-  grafana:
-    container_name: grafana
-    image: grafana/grafana:latest
-    ports:
-      - "4000:4000"
-    volumes:
-      - ./observability/grafana/data:/var/lib/grafana
-      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards # For dashboards
-      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/datasources # For data sources
-
-    environment:
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    depends_on:
-      - loki
-    networks:
-      - smartess_network
+#  loki:
+#    container_name: loki
+#    image: grafana/loki:latest
+#    ports:
+#      - "3100:3100"
+#    volumes:
+#      - ./observability/loki/config:/etc/loki
+#      - ./observability/loki/data:/loki
+#      - ./observability/loki/wal:/wal
+#    command: -config.file=/etc/loki/loki-config.yaml
+#    networks:
+#      - smartess_network
+#
+#  promtail:
+#    container_name: promtail
+#    image: grafana/promtail:latest
+#    volumes:
+#      - ./observability/promtail/config:/etc/promtail
+#      - ./go/cmd/server/logs:/app/logs
+#    command: -config.file=/etc/promtail/promtail-config.yaml
+#    networks:
+#      - smartess_network
+#
+#  grafana:
+#    container_name: grafana
+#    image: grafana/grafana:latest
+#    ports:
+#      - "4000:4000"
+#    volumes:
+#      - ./observability/grafana/data:/var/lib/grafana
+#      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/dashboards # For dashboards
+#      - ./observability/grafana/init-scripts:/etc/grafana/provisioning/datasources # For data sources
+#
+#    environment:
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#    depends_on:
+#      - loki
+#    networks:
+#      - smartess_network
   server:
     container_name: server
     build:
@@ -49,6 +49,8 @@ services:
     volumes:
       - ./go/cmd/server/logs:/app/logs
       - ./go/common/configs:/app/config
+      - ./go/server/static:/app/static
+      - ./go/cmd/hub/data:/tmp/data  # Map actual directory to /tmp/data in container
     depends_on:
       rabbitmq:
         condition: service_healthy # Correct placement of health condition
@@ -106,7 +108,7 @@ services:
 #      - /app/frontend/.next
 #    networks:
 #      - smartess_network
-#
+
 #  smartessweb_prod_backend:
 #    container_name: smartessweb_prod_backend
 #    build:

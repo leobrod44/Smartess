@@ -219,42 +219,7 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 	reader := bufio.NewReaderSize(stdout, config.bufferReaderSize) //1024*1024)
 
 	buf := make([]byte, config.bufferReaderSize) //512*1024)
-	//errorChan := make(chan error, 1)
-	//
-	//go func() {
-	//	for {
-	//		n, err := stdout.Read(buf)
-	//		if err != nil {
-	//			errorChan <- fmt.Errorf("error reading from RTSP stream: %v", err)
-	//			return
-	//		}
-	//		if n == 0 {
-	//			continue
-	//		}
-	//
-	//		videoChunk := buf[:n]
-	//		if err := producer.Send(amqp.NewMessage(videoChunk)); err != nil {
-	//			errorChan <- fmt.Errorf("failed to publish message: %v", err)
-	//			return
-	//		}
-	//		log.Printf("Sent video chunk (%d bytes) to stream", n)
-	//		time.Sleep(50 * time.Millisecond)
-	//	}
-	//}()
-	//
-	//// Wait for either an error or the command to finish
-	//select {
-	//case err := <-errorChan:
-	//	cmd.Process.Kill()
-	//	cmd.Wait()
-	//	return err
-	//case err := <-func() chan error {
-	//	c := make(chan error, 1)
-	//	go func() { c <- cmd.Wait() }()
-	//	return c
-	//}():
-	//	return err
-	//}
+
 	for {
 		n, err := reader.Read(buf)
 		if err != nil {
@@ -284,9 +249,48 @@ func streamRTSP(config *FFmpegConfig, producer *stream.Producer) error {
 	return nil
 }
 
+// errorChan := make(chan error, 1)
+//
+//	go func() {
+//		for {
+//			n, err := stdout.Read(buf)
+//			if err != nil {
+//				errorChan <- fmt.Errorf("error reading from RTSP stream: %v", err)
+//				return
+//			}
+//			if n == 0 {
+//				continue
+//			}
+//
+//			videoChunk := buf[:n]
+//			if err := producer.Send(amqp.NewMessage(videoChunk)); err != nil {
+//				errorChan <- fmt.Errorf("failed to publish message: %v", err)
+//				return
+//			}
+//			log.Printf("Sent video chunk (%d bytes) to stream", n)
+//			time.Sleep(50 * time.Millisecond)
+//		}
+//	}()
+//
+// // Wait for either an error or the command to finish
+// select {
+// case err := <-errorChan:
+//
+//	cmd.Process.Kill()
+//	cmd.Wait()
+//	return err
+//
+//	case err := <-func() chan error {
+//		c := make(chan error, 1)
+//		go func() { c <- cmd.Wait() }()
+//		return c
+//	}():
+//
+//		return err
+//	}
 func main() {
-	SELECTED_CAMERA_ENUM := ANT_CAMERA // MOCK_CAMERA
-	SELECTED_CAMERA := int(SELECTED_CAMERA_ENUM)
+	SELECTED_CAMERA_ENUM := MOCK_CAMERA // MOCK_CAMERA
+	//SELECTED_CAMERA := int(SELECTED_CAMERA_ENUM)
 
 	// Read camera configuration
 	dir := "/app/config/cameras.yaml"
@@ -300,11 +304,12 @@ func main() {
 		log.Fatalf("failed to unmarshal yaml: %v", err)
 	}
 
-	if len(cameras["cameras"]) <= SELECTED_CAMERA {
-		log.Fatalf("Invalid camera selection: %d", SELECTED_CAMERA)
-	}
+	//if len(cameras["cameras"]) <= SELECTED_CAMERA {
+	//	log.Fatalf("Invalid camera selection: %d", SELECTED_CAMERA)
+	//}
 
-	RTSP_STREAM_URL := cameras["cameras"][SELECTED_CAMERA]["streamURL"]
+	//RTSP_STREAM_URL := cameras["cameras"][SELECTED_CAMERA]["streamURL"]
+	RTSP_STREAM_URL := "rtsp://mock_camera:8554/live"
 	log.Printf("RTSP Stream URL: %s", RTSP_STREAM_URL)
 
 	// Validate RTSP stream before proceeding
