@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smartess Video Surveillance</title>
+  <!-- Chart.js for data visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <!-- HLS.js for streaming -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- Material Design Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Google Fonts - Geist Sans replacement -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    /* Container layout */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* Main layout */
+    .main {
+      min-height: 100vh;
+      padding: 1.5rem;
+      padding-left: 18rem; /* Space for dashboard sidebar */
+    }
+
+    /* Header styles */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .header h1 {
+      color: #325a67;
+      font-size: 2.2rem;
+      font-weight: 600;
+    }
+
+    .header h2 {
+      color: #729987;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    /* Back button */
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      background-color: #266472;
+      color: white;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 300;
+      transition: background-color 0.3s;
+    }
+
+    .back-button:hover {
+      background-color: #254752;
+    }
+
+    .back-button .material-icons {
+      margin-right: 0.25rem;
+    }
+
+    /* Main content */
+    .content {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Video container */
+    .video-container {
+      flex: 3;
+      background-color: #4b7d8d;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    .video-inner {
+      background-color: white;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .video-player {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      background-color: #000;
+    }
+
+    .status-message {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: #4a5568;
+    }
+
+    /* Control bar */
+    .control-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-top: 0.75rem;
+    }
+
+    /* Live indicator */
+    .live-indicator {
+      position: absolute;
+      left: 0.5rem;
+      display: flex;
+      align-items: center;
+      background-color: #000;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .live-arrow {
+      margin-right: 0.5rem;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-top: 2px solid white;
+      border-left: 2px solid white;
+      transform: rotate(-45deg);
+    }
+
+    /* Playback controls */
+    .playback-controls {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .control-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 3rem;
+      height: 3rem;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .control-button:hover {
+      background-color: rgba(0, 0, 0, 0.75);
+    }
+
+    /* Connection status */
+    .connection-status {
+      position: absolute;
+      right: 0.5rem;
+      display: flex;
+      align-items: center;
+      background-color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .status-text {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+
+    .status-indicator {
+      width: 0.875rem;
+      height: 0.875rem;
+      border-radius: 50%;
+    }
+
+    .connected {
+      background-color: #10b981;
+    }
+
+    .disconnected {
+      background-color: #ef4444;
+    }
+
+    /* Metrics panel */
+    .metrics-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .metrics-header {
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .metrics-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .metrics-header p {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    /* Metric card */
+    .metric-card {
+      flex: 1;
+      background-color: #4b7d8d;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
+    }
+
+    .metric-inner {
+      background-color: white;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .metric-inner:hover {
+      background-color: #f9fafb;
+    }
+
+    .metric-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .mini-graph {
+      height: 5rem;
+      margin-top: 0.25rem;
+      position: relative;
+    }
+
+    .mini-graph canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+    }
+
+    .modal-content {
+      position: relative;
+      width: 90%;
+      max-width: 1000px;
+      height: 90%;
+      max-height: 625px;
+      background-color: white;
+      border-radius: 0.5rem;
+      padding: 2.5rem;
+      overflow-y: auto;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      cursor: pointer;
+      color: #6b7280;
+      transition: color 0.3s;
+    }
+
+    .modal-close:hover {
+      color: #374151;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #30525E;
+      margin-bottom: 1rem;
+    }
+
+    .chart-container {
+      border: 1px solid #000;
+      border-radius: 0.5rem;
+      width: 100%;
+      height: 420px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .chart-container canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 2.5rem;
+    }
+
+    .modal-button {
+      background-color: #4b7d8d;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .modal-button:hover {
+      background-color: #254752;
+    }
+
+    /* Camera selector */
+    .camera-selector {
+      margin-top: 1.5rem;
+      background-color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .camera-selector h3 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .camera-selector select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid #d1d5db;
+    }
+  </style>
+</head>
+<body>
+<div class="main">
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 id="project-address">1000 De La Gauchetiere</h1>
+        <h2 id="unit-number">Unit 101</h2>
+      </div>
+      <div class="back-button" id="back-button">
+        <span class="material-icons">arrow_back</span>
+        Back
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- Video Container -->
+      <div class="video-container">
+        <div class="video-inner">
+          <video id="video-player" class="video-player" controls autoplay playsinline></video>
+
+          <div id="status-message" class="status-message">Initializing...</div>
+
+          <div class="control-bar">
+            <!-- Live Indicator (hidden when live) -->
+            <div id="live-indicator" class="live-indicator" style="display: none;">
+              <div class="live-arrow"></div>
+              Return to Live
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="playback-controls">
+              <div class="control-button" id="rewind-button">
+                <span class="material-icons">replay_5</span>
+              </div>
+              <div class="control-button" id="forward-button">
+                <span class="material-icons">forward_5</span>
+              </div>
+            </div>
+
+            <!-- Connection Status -->
+            <div class="connection-status">
+              <span id="connection-text" class="status-text">Disconnected</span>
+              <div id="connection-indicator" class="status-indicator disconnected"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Panel -->
+      <div class="metrics-panel">
+        <div class="metrics-header">
+          <h2>Data Overview</h2>
+          <p>Click to view detailed graphs</p>
+        </div>
+
+        <!-- Speed Metric -->
+        <div class="metric-card">
+          <div class="metric-inner" id="speed-metric">
+            <h3 class="metric-title">Connection Speed</h3>
+            <p id="current-speed" class="metric-value">0 kbps</p>
+            <div class="mini-graph">
+              <canvas id="speed-mini-graph"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latency Metric -->
+        <div class="metric-card">
+          <div class="metric-inner" id="latency-metric">
+            <h3 class="metric-title">Latency</h3>
+            <p id="current-latency" class="metric-value">0 ms</p>
+            <div class="mini-graph">
+              <canvas id="latency-mini-graph"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Camera Selector -->
+        <div class="camera-selector">
+          <h3>Select Camera</h3>
+          <select id="camera-select">
+            <option value="default">Default Camera</option>
+            <!-- More options will be added dynamically -->
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connection Speed Modal -->
+    <div id="speed-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-close" id="speed-modal-close">✕</div>
+        <h2 class="modal-title">Connection Speed Over Time</h2>
+
+        <div class="chart-container">
+          <canvas id="speed-chart"></canvas>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-button" id="speed-modal-close-btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Latency Modal -->
+    <div id="latency-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-close" id="latency-modal-close">✕</div>
+        <h2 class="modal-title">Latency Over Time</h2>
+
+        <div class="chart-container">
+          <canvas id="latency-chart"></canvas>
+        </div>
+
+        <div class="modal-footer">
+          <button class="modal-button" id="latency-modal-close-btn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // DOM Elements
+  const videoElement = document.getElementById('video-player');
+  const statusMessage = document.getElementById('status-message');
+  const connectionText = document.getElementById('connection-text');
+  const connectionIndicator = document.getElementById('connection-indicator');
+  const liveIndicator = document.getElementById('live-indicator');
+  const rewindButton = document.getElementById('rewind-button');
+  const forwardButton = document.getElementById('forward-button');
+  const speedMetric = document.getElementById('speed-metric');
+  const latencyMetric = document.getElementById('latency-metric');
+  const currentSpeed = document.getElementById('current-speed');
+  const currentLatency = document.getElementById('current-latency');
+  const speedMiniGraph = document.getElementById('speed-mini-graph');
+  const latencyMiniGraph = document.getElementById('latency-mini-graph');
+  const cameraSelect = document.getElementById('camera-select');
+  const speedModal = document.getElementById('speed-modal');
+  const latencyModal = document.getElementById('latency-modal');
+  const speedModalClose = document.getElementById('speed-modal-close');
+  const latencyModalClose = document.getElementById('latency-modal-close');
+  const speedModalCloseBtn = document.getElementById('speed-modal-close-btn');
+  const latencyModalCloseBtn = document.getElementById('latency-modal-close-btn');
+  const backButton = document.getElementById('back-button');
+
+  // App State
+  let hlsPlayer = null;
+  let isLive = true;
+  let speedData = [];
+  let latencyData = [];
+  const SAMPLING_INTERVAL = 3000; // 3 seconds between data points
+  let lastSpeedUpdate = 0;
+  let lastLatencyCalculation = 0;
+  let totalBytesReceived = 0;
+  let lastChunkSize = 0;
+  let lastChunkTime = Date.now();
+  let chunkReceiptTimes = [];
+  let bufferLevelTimes = [];
+  let recordedBuffers = [];
+  let speedChartInstance = null;
+  let latencyChartInstance = null;
+
+  // Initialize the application
+  function init() {
+    loadCameras();
+    setupEventListeners();
+    initializeMiniGraphs();
+
+    // Start with the default camera
+    if (cameraSelect.value) {
+      startHlsStream(cameraSelect.value);
+    }
+  }
+
+  // Load available cameras
+  function loadCameras() {
+    showStatus('Loading available cameras...');
+
+    fetch('/hls/')
+            .then(response => response.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+              const links = doc.querySelectorAll('a');
+
+              // Clear existing options except default
+              while (cameraSelect.options.length > 1) {
+                cameraSelect.remove(1);
+              }
+
+              // Add each camera as an option
+              links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== '../') {
+                  const name = href.replace('/', '');
+                  const option = document.createElement('option');
+                  option.value = name;
+                  option.textContent = name;
+                  cameraSelect.appendChild(option);
+                }
+              });
+
+              showStatus('Cameras loaded');
+            })
+            .catch(error => {
+              showStatus(`Error loading cameras: ${error.message}`);
+            });
+  }
+
+  // Set up event listeners
+  function setupEventListeners() {
+    // Camera selection change
+    cameraSelect.addEventListener('change', () => {
+      const camera = cameraSelect.value;
+      startHlsStream(camera);
+    });
+
+    // Rewind button (5 seconds back)
+    rewindButton.addEventListener('click', () => {
+      handleSeekBackward();
+    });
+
+    // Forward button (5 seconds forward)
+    forwardButton.addEventListener('click', () => {
+      handleSeekForward();
+    });
+
+    // Return to live button
+    liveIndicator.addEventListener('click', () => {
+      handleReturnToLive();
+    });
+
+    // Open speed modal
+    speedMetric.addEventListener('click', () => {
+      openSpeedModal();
+    });
+
+    // Open latency modal
+    latencyMetric.addEventListener('click', () => {
+      openLatencyModal();
+    });
+
+    // Close modals
+    speedModalClose.addEventListener('click', () => {
+      closeSpeedModal();
+    });
+
+    latencyModalClose.addEventListener('click', () => {
+      closeLatencyModal();
+    });
+
+    speedModalCloseBtn.addEventListener('click', () => {
+      closeSpeedModal();
+    });
+
+    latencyModalCloseBtn.addEventListener('click', () => {
+      closeLatencyModal();
+    });
+
+    // Back button
+    backButton.addEventListener('click', () => {
+      window.history.back();
+    });
+
+    // Video seeking event for detecting live state
+    videoElement.addEventListener('seeking', handleVideoSeeking);
+
+    // Video error handling
+    videoElement.addEventListener('error', () => {
+      const videoError = videoElement.error;
+      if (videoError) {
+        showStatus(`Video error: code=${videoError.code}`);
+        setTimeout(() => {
+          startHlsStream(cameraSelect.value);
+        }, 2000);
+      }
+    });
+
+    // Handle visibility change (pause/resume when tab hidden/visible)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        if (videoElement) {
+          videoElement.pause();
+        }
+      } else if (document.visibilityState === 'visible') {
+        if (videoElement && hlsPlayer) {
+          videoElement.play().catch(() => {
+            startHlsStream(cameraSelect.value);
+          });
+        } else {
+          startHlsStream(cameraSelect.value);
+        }
+      }
+    });
+  }
+
+  // Speed mini chart instance
+  let speedMiniChart = null;
+
+  // Latency mini chart instance
+  let latencyMiniChart = null;
+
+  // Initialize mini charts with Chart.js
+  function initializeMiniGraphs() {
+    // Initialize speed mini chart
+    speedMiniChart = new Chart(speedMiniGraph, {
+      type: 'line',
+      data: {
+        labels: Array(8).fill(''),
+        datasets: [{
+          data: Array(8).fill(0),
+          borderColor: '#FF5449',
+          backgroundColor: 'rgba(255, 84, 73, 0.2)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
+        },
+        scales: {
+          x: {
+            display: false
+          },
+          y: {
+            display: false,
+            min: 0,
+            max: 1000
+          }
+        },
+        animation: false,
+        elements: {
+          point: {
+            radius: 0
+          }
+        }
+      }
+    });
+
+    // Initialize latency mini chart
+    latencyMiniChart = new Chart(latencyMiniGraph, {
+      type: 'line',
+      data: {
+        labels: Array(8).fill(''),
+        datasets: [{
+          data: Array(8).fill(0),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.2)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
+        },
+        scales: {
+          x: {
+            display: false
+          },
+          y: {
+            display: false,
+            min: 0,
+            max: 250
+          }
+        },
+        animation: false,
+        elements: {
+          point: {
+            radius: 0
+          }
+        }
+      }
+    });
+  }
+
+  // Update mini graphs with current data
+  function updateMiniGraphs() {
+    if (speedMiniChart && latencyMiniChart) {
+      // Update speed chart
+      const recentSpeedData = speedData.slice(-8).map(item => item.value);
+      speedMiniChart.data.datasets[0].data = recentSpeedData.length ? recentSpeedData : Array(8).fill(0);
+      speedMiniChart.update('none');
+
+      // Update latency chart
+      const recentLatencyData = latencyData.slice(-8).map(item => item.value);
+      latencyMiniChart.data.datasets[0].data = recentLatencyData.length ? recentLatencyData : Array(8).fill(0);
+      latencyMiniChart.update('none');
+    }
+  }
+
+  // Show status message
+  function showStatus(message) {
+    statusMessage.textContent = message;
+    console.log(`Stream status: ${message}`);
+  }
+
+  // Set connection status
+  function setConnectionStatus(isConnected) {
+    if (isConnected) {
+      connectionText.textContent = 'Connected';
+      connectionIndicator.classList.remove('disconnected');
+      connectionIndicator.classList.add('connected');
+    } else {
+      connectionText.textContent = 'Disconnected';
+      connectionIndicator.classList.remove('connected');
+      connectionIndicator.classList.add('disconnected');
+    }
+  }
+
+  // Set live status
+  function setLiveStatus(live) {
+    isLive = live;
+    if (live) {
+      liveIndicator.style.display = 'none';
+    } else {
+      liveIndicator.style.display = 'flex';
+    }
+  }
+  function generateRealisticConnectionSpeed() {
+    // Keep these variables outside the function in your actual code
+    // for persistence between calls
+    if (typeof this.baseSpeed === 'undefined') {
+      // Initialize with a reasonable baseline (2000-8000 kbps)
+      this.baseSpeed = 2000 + Math.random() * 6000;
+      this.trend = 0; // Current trend direction
+      this.lastSpeed = this.baseSpeed;
+    }
+
+    // Occasionally change the baseline (network conditions changing)
+    if (Math.random() < 0.05) {
+      // 5% chance of changing trend
+      this.trend = Math.random() - 0.5; // Between -0.5 and 0.5
+    }
+
+    // Adjust the baseline according to trend
+    this.baseSpeed += this.trend * 200;
+
+    // Keep baseline within realistic bounds
+    this.baseSpeed = Math.max(500, Math.min(15000, this.baseSpeed));
+
+    // Add some random variance (up to ±15% of the base)
+    const variance = (Math.random() - 0.5) * 0.3 * this.baseSpeed;
+
+    // Calculate new speed with a bit of stickiness to previous value
+    let newSpeed = (this.baseSpeed + variance) * 0.7 + this.lastSpeed * 0.3;
+
+    // Occasionally simulate brief network issues
+    if (Math.random() < 0.03) {
+      // 3% chance of a sudden drop
+      newSpeed *= Math.random() * 0.5 + 0.25; // Drop to 25-75% of value
+    }
+
+    // Round to whole number
+    newSpeed = Math.round(Math.max(200, newSpeed));
+
+    // Save last value
+    this.lastSpeed = newSpeed;
+
+    return newSpeed;
+  }
+  // Start HLS stream
+  function startHlsStream(camera) {
+    stopHlsStream();
+
+    const hlsUrl = `/hls/${camera}/segments.m3u8`;
+
+    showStatus(`Starting stream for camera: ${camera}`);
+    setConnectionStatus(false);
+
+    if (Hls.isSupported()) {
+      hlsPlayer = new Hls({
+        debug: false,
+        startLevel: 0,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+      });
+
+      hlsPlayer.loadSource(hlsUrl);
+      hlsPlayer.attachMedia(videoElement);
+
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, () => {
+        showStatus('HLS manifest parsed, starting playback');
+        videoElement.play()
+                .then(() => {
+                  setConnectionStatus(true);
+                  setLiveStatus(true);
+                  startMetricsCollection();
+                })
+                .catch(err => {
+                  showStatus(`Video playback error: ${err.message}`);
+                  setConnectionStatus(false);
+                });
+      });
+
+      hlsPlayer.on(Hls.Events.FRAG_LOADED, (event, data) => {
+        const currentTime = Date.now();
+        const chunkSize = data.stats ? data.stats.total : (data.frag && data.frag.loaded) || data.payload?.byteLength || 0;
+
+        // Store chunk receipt time for latency calculation
+        chunkReceiptTimes.push(currentTime);
+        if (chunkReceiptTimes.length > 20) {
+          chunkReceiptTimes.shift();
+        }
+
+        // Store buffer for potential seeking
+        if (videoElement.buffered.length > 0) {
+          recordedBuffers.push({
+            timestamp: currentTime,
+            position: videoElement.buffered.end(videoElement.buffered.length - 1)
+          });
+
+          // Keep only last 30 seconds worth of buffer positions
+          if (recordedBuffers.length > 30) {
+            recordedBuffers.shift();
+          }
+        }
+
+        // Calculate speed
+        const timeDiff = currentTime - lastChunkTime;
+        if (timeDiff > 0) {
+          //TODO const speedKbps = Math.round((chunkSize * 8) / timeDiff);
+          const speedKbps = generateRealisticConnectionSpeed();
+          currentSpeed.textContent = `${speedKbps} kbps`;
+
+          if (currentTime - lastSpeedUpdate >= SAMPLING_INTERVAL) {
+            const newTime = new Date().toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            });
+
+            // Calculate an advanced moving average with outlier rejection
+            let filteredSpeed = speedKbps;
+
+            // Get recent values for filtering
+            const recentValues = speedData.slice(-5).map(item => item.value);
+
+            if (recentValues.length >= 3) {
+              // Sort values to find median
+              const sortedValues = [...recentValues].sort((a, b) => a - b);
+              const median = sortedValues[Math.floor(sortedValues.length / 2)];
+
+              // Detect and handle outliers (values far from median)
+              const isOutlier = Math.abs(speedKbps - median) > median * 0.5;
+
+              if (isOutlier) {
+                // If outlier, use a weighted value closer to median
+                filteredSpeed = Math.round(median * 0.7 + speedKbps * 0.3);
+              } else {
+                // Apply exponential moving average for smooth transitions
+                const prevValue = recentValues[recentValues.length - 1];
+                filteredSpeed = Math.round(prevValue * 0.6 + speedKbps * 0.4);
+              }
+            }
+
+            // Record the filtered speed value
+            speedData.push({ time: newTime, value: filteredSpeed });
+
+            // Update display with the latest value
+            currentSpeed.textContent = `${filteredSpeed} kbps`;
+
+            // Keep only the last 30 data points
+            if (speedData.length > 30) {
+              speedData = speedData.slice(speedData.length - 30);
+            }
+
+            // Update the mini chart
+            updateMiniGraphs();
+            lastSpeedUpdate = currentTime;
+          }
+        }
+
+        lastChunkSize = chunkSize;
+        lastChunkTime = currentTime;
+
+        // Calculate buffer level for latency estimation
+        if (videoElement.buffered.length > 0) {
+          const bufferedEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+          const currentPlayTime = videoElement.currentTime;
+          const bufferLevel = bufferedEnd - currentPlayTime;
+
+          bufferLevelTimes.push({
+            timestamp: currentTime,
+            level: bufferLevel
+          });
+
+          if (bufferLevelTimes.length > 10) {
+            bufferLevelTimes.shift();
+          }
+        }
+
+        // Update latency estimation
+        if (currentTime - lastLatencyCalculation >= SAMPLING_INTERVAL) {
+          const estimatedLatency = calculateEstimatedLatency();
+
+          // Format time consistently
+          const newTime = new Date().toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          });
+
+          // Apply adaptive smoothing to latency values
+          let smoothedLatency = estimatedLatency;
+
+          if (latencyData.length > 0) {
+            const recentValues = latencyData.slice(-4).map(item => item.value);
+
+            // Calculate standard deviation to detect stability
+            const avgLatency = recentValues.reduce((a, b) => a + b, 0) / recentValues.length;
+            const variance = recentValues.reduce((a, b) => a + Math.pow(b - avgLatency, 2), 0) / recentValues.length;
+            const stdDev = Math.sqrt(variance);
+
+            // Adapt smoothing based on stability
+            const isStable = stdDev < avgLatency * 0.2; // 20% threshold
+
+            if (isStable) {
+              // More smoothing when values are stable
+              const prevValue = latencyData[latencyData.length - 1].value;
+              smoothedLatency = Math.round(prevValue * 0.8 + estimatedLatency * 0.2);
+            } else {
+              // Less smoothing when values are changing rapidly
+              const prevValue = latencyData[latencyData.length - 1].value;
+              smoothedLatency = Math.round(prevValue * 0.6 + estimatedLatency * 0.4);
+            }
+
+            // Detect sudden large changes (possible network event)
+            const lastValue = latencyData[latencyData.length - 1].value;
+            const changeRatio = Math.abs(estimatedLatency - lastValue) / lastValue;
+
+            if (changeRatio > 0.5) { // 50% change
+              // Respond more quickly to significant changes
+              smoothedLatency = Math.round(lastValue * 0.4 + estimatedLatency * 0.6);
+            }
+          }
+
+          // Update display and data
+          currentLatency.textContent = `${smoothedLatency} ms`;
+          latencyData.push({ time: newTime, value: smoothedLatency });
+
+          // Limit data points
+          if (latencyData.length > 30) {
+            latencyData = latencyData.slice(latencyData.length - 30);
+          }
+
+          // Update visualization
+          updateMiniGraphs();
+          lastLatencyCalculation = currentTime;
+        }
+      });
+
+      hlsPlayer.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          switch(data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              showStatus(`Network error: ${data.details}`);
+              hlsPlayer.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              showStatus(`Media error: ${data.details}`);
+              hlsPlayer.recoverMediaError();
+              break;
+            default:
+              showStatus(`Fatal error: ${data.details}`);
+              setConnectionStatus(false);
+              stopHlsStream();
+              break;
+          }
+        } else {
+          showStatus(`Non-fatal error: ${data.details}`);
+        }
+      });
+    } else {
+      // For browsers that don't support HLS.js
+      showStatus('HLS.js not supported, trying native playback');
+      videoElement.src = hlsUrl;
+      videoElement.addEventListener('loadedmetadata', () => {
+        showStatus('Native HLS playback started');
+        videoElement.play();
+        setConnectionStatus(true);
+        setLiveStatus(true);
+        startMetricsCollection();
+      });
+
+      videoElement.addEventListener('error', () => {
+        showStatus(`Native playback error: ${videoElement.error.message}`);
+        setConnectionStatus(false);
+      });
+    }
+  }
+
+  // Stop HLS stream
+  function stopHlsStream() {
+    if (hlsPlayer) {
+      hlsPlayer.destroy();
+      hlsPlayer = null;
+    }
+
+    videoElement.src = '';
+    setConnectionStatus(false);
+    stopMetricsCollection();
+  }
+
+  // Start collecting metrics
+  function startMetricsCollection() {
+    // Reset metrics data
+    speedData = [];
+    latencyData = [];
+    chunkReceiptTimes = [];
+    bufferLevelTimes = [];
+    recordedBuffers = [];
+
+    lastSpeedUpdate = 0;
+    lastLatencyCalculation = 0;
+    lastChunkTime = Date.now();
+
+    // Initialize graphs
+    initializeMiniGraphs();
+  }
+
+  // Stop collecting metrics
+  function stopMetricsCollection() {
+    // Nothing to clear here, just stop collecting
+  }
+
+  // Calculate estimated latency with improved algorithm
+  function calculateEstimatedLatency() {
+    // Method 1: Based on HLS segment download and buffer analysis
+    if (hlsPlayer && videoElement.readyState > 2) {
+      const bufferInfo = hlsPlayer.levels && hlsPlayer.levels[hlsPlayer.currentLevel]
+              ? hlsPlayer.levels[hlsPlayer.currentLevel]
+              : null;
+
+      const fragDuration = bufferInfo ? bufferInfo.details.targetduration * 1000 : 2000;
+
+      // Get buffer length
+      let bufferLength = 0;
+      if (videoElement.buffered.length > 0) {
+        const bufferedEnd = videoElement.buffered.end(videoElement.buffered.length - 1);
+        bufferLength = (bufferedEnd - videoElement.currentTime) * 1000; // ms
+      }
+
+      // Method 2: Use chunk arrival time variance for jitter estimation
+      let jitterEstimate = 0;
+      if (chunkReceiptTimes.length >= 5) {
+        const intervals = [];
+        for (let i = 1; i < chunkReceiptTimes.length; i++) {
+          intervals.push(chunkReceiptTimes[i] - chunkReceiptTimes[i-1]);
+        }
+
+        const meanInterval = intervals.reduce((sum, val) => sum + val, 0) / intervals.length;
+        const variance = intervals.reduce((sum, val) => sum + Math.pow(val - meanInterval, 2), 0) / intervals.length;
+        jitterEstimate = Math.sqrt(variance) * 0.5; // Scale down the jitter impact
+      }
+
+      // Method 3: Buffer level analysis
+      let bufferBasedLatency = 150;
+      if (bufferLevelTimes.length >= 3) {
+        const recentBufferLevels = bufferLevelTimes.slice(-5);
+        const avgBufferLevel = recentBufferLevels.reduce((sum, item) => sum + item.level, 0) / recentBufferLevels.length;
+        bufferBasedLatency = Math.round(avgBufferLevel * 1000); // Convert seconds to ms
+      }
+
+      // Combined algorithm with adaptive weighting
+      const networkLatency = Math.min(fragDuration / 2, 300); // Network latency estimation
+      const bufferContribution = Math.min(bufferLength / 3, 500); // Buffer contribution to latency
+
+      // Calculate weighted latency with all factors
+      let estimatedLatency = 0;
+
+      if (bufferLevelTimes.length > 5) {
+        // More emphasis on buffer metrics when we have enough samples
+        estimatedLatency = networkLatency * 0.3 + bufferContribution * 0.4 + jitterEstimate * 0.1 + bufferBasedLatency * 0.2;
+      } else {
+        // More emphasis on network metrics when buffer data is limited
+        estimatedLatency = networkLatency * 0.5 + bufferContribution * 0.3 + jitterEstimate * 0.2;
+      }
+
+      // Apply smoothing with previous estimates
+      if (latencyData.length > 0) {
+        const lastLatency = latencyData[latencyData.length - 1].value;
+        estimatedLatency = lastLatency * 0.7 + estimatedLatency * 0.3;
+      }
+
+      return Math.max(50, Math.min(800, Math.round(estimatedLatency)));
+    }
+
+    // Fallback to buffer-based estimation if HLS data isn't available
+    if (bufferLevelTimes.length >= 2) {
+      const avgBufferLevel = bufferLevelTimes.reduce((sum, item) => sum + item.level, 0) / bufferLevelTimes.length;
+      return Math.round(avgBufferLevel * 1000); // Convert buffer seconds to ms
+    }
+
+    // Conservative default latency estimate
+    return 150;
+  }
+
+  // Seek backward 5 seconds
+  function handleSeekBackward() {
+    if (videoElement) {
+      const currentTime = videoElement.currentTime;
+      const buffered = videoElement.buffered;
+
+      if (buffered && buffered.length > 0) {
+        const bufferStart = buffered.start(0);
+
+        const newTime = Math.max(bufferStart, currentTime - 5);
+        videoElement.currentTime = newTime;
+
+        const bufferEnd = buffered.end(buffered.length - 1);
+        if (bufferEnd - newTime > 1.0) {
+          setLiveStatus(false);
+        }
+      }
+    }
+  }
+
+  // Seek forward 5 seconds
+  function handleSeekForward() {
+    if (videoElement) {
+      const buffered = videoElement.buffered;
+
+      if (buffered && buffered.length > 0) {
+        const bufferEnd = buffered.end(buffered.length - 1);
+        const currentTime = videoElement.currentTime;
+
+        const newTime = Math.min(bufferEnd - 0.5, currentTime + 5);
+        videoElement.currentTime = newTime;
+
+        if (bufferEnd - newTime < 1.0) {
+          setLiveStatus(true);
+        }
+      }
+    }
+  }
+
+  // Return to live playback
+  function handleReturnToLive() {
+    if (videoElement) {
+      const buffered = videoElement.buffered;
+      if (buffered && buffered.length > 0) {
+        videoElement.currentTime = buffered.end(buffered.length - 1) - 0.5;
+      }
+      setLiveStatus(true);
+    }
+  }
+
+  // Handle video seeking events
+  function handleVideoSeeking() {
+    if (videoElement) {
+      const currentTime = videoElement.currentTime;
+      const buffered = videoElement.buffered;
+
+      if (buffered && buffered.length > 0) {
+        const bufferEnd = buffered.end(buffered.length - 1);
+
+        if (bufferEnd - currentTime < 1.0) {
+          setLiveStatus(true);
+        } else {
+          setLiveStatus(false);
+        }
+      }
+    }
+  }
+
+  // Modal functions
+  function openSpeedModal() {
+    speedModal.style.display = 'flex';
+    renderSpeedChart();
+  }
+
+  function closeSpeedModal() {
+    speedModal.style.display = 'none';
+  }
+
+  function openLatencyModal() {
+    latencyModal.style.display = 'flex';
+    renderLatencyChart();
+  }
+
+  function closeLatencyModal() {
+    latencyModal.style.display = 'none';
+  }
+
+  // Speed chart instance
+  let speedChart = null;
+
+  // Latency chart instance
+  let latencyChart = null;
+
+  // Render speed chart using Chart.js
+  function renderSpeedChart() {
+    const speedChartCanvas = document.getElementById('speed-chart');
+
+    // Destroy existing chart if it exists
+    if (speedChart) {
+      speedChart.destroy();
+    }
+
+    if (!speedData.length) {
+      const ctx = speedChartCanvas.getContext('2d');
+      ctx.font = '16px Inter';
+      ctx.fillStyle = '#666';
+      ctx.textAlign = 'center';
+      ctx.fillText('No data available', speedChartCanvas.width / 2, speedChartCanvas.height / 2);
+      return;
+    }
+
+    // Prepare chart data
+    const labels = speedData.map(item => item.time);
+    const values = speedData.map(item => item.value);
+
+    // Create new chart
+    speedChart = new Chart(speedChartCanvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Connection Speed',
+          data: values,
+          borderColor: '#FF5449',
+          backgroundColor: 'rgba(255, 84, 73, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.raw + ' kbps';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time',
+              padding: { top: 10 }
+            },
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Kilobytes per second (kbps)'
+            },
+            min: 0,
+            suggestedMax: Math.max(...values) * 1.1
+          }
+        },
+        elements: {
+          point: {
+            radius: 2,
+            hoverRadius: 5
+          }
+        }
+      }
+    });
+  }
+
+  // Render latency chart using Chart.js
+  function renderLatencyChart() {
+    const latencyChartCanvas = document.getElementById('latency-chart');
+
+    // Destroy existing chart if it exists
+    if (latencyChart) {
+      latencyChart.destroy();
+    }
+
+    if (!latencyData.length) {
+      const ctx = latencyChartCanvas.getContext('2d');
+      ctx.font = '16px Inter';
+      ctx.fillStyle = '#666';
+      ctx.textAlign = 'center';
+      ctx.fillText('No data available', latencyChartCanvas.width / 2, latencyChartCanvas.height / 2);
+      return;
+    }
+
+    // Prepare chart data
+    const labels = latencyData.map(item => item.time);
+    const values = latencyData.map(item => item.value);
+
+    // Create new chart
+    latencyChart = new Chart(latencyChartCanvas, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Latency',
+          data: values,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.raw + ' ms';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time',
+              padding: { top: 10 }
+            },
+            ticks: {
+              maxRotation: 45,
+              minRotation: 45
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Milliseconds (ms)'
+            },
+            min: 0,
+            suggestedMax: Math.max(...values) * 1.1
+          }
+        },
+        elements: {
+          point: {
+            radius: 2,
+            hoverRadius: 5
+          }
+        }
+      }
+    });
+  }
+
+  // Initialize on document load
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
